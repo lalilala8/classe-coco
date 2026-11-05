@@ -265,6 +265,246 @@
     else if (a === "c-rejouer") H = null;
   }
 
+  /* ---------- Orthographe : les mots invariables (module « Mes mots invariables » du v0, repris : D-58 à D-60) ----------
+     Partie commune en orange, lettre muette en jaune (affiches 2026). Voix seulement dans « Écoute et écris » et la dictée (D-31). */
+  var MO = window.COCO_MOTS;
+  var MI = { sel: lire("mots-sel", null), nb: lire("mots-nb", 10) };
+  if (!MI.sel || typeof MI.sel !== "object") { MI.sel = {}; MO.FAMS.forEach(function (f) { MI.sel[f.id] = true; }); }
+  Object.keys(MI.sel).forEach(function (k) { if (!MO.FAM[k]) delete MI.sel[k]; });
+  if ([0, 10, 20].indexOf(MI.nb) < 0) MI.nb = 10;
+  function miSauver() { ecrire("mots-sel", MI.sel); ecrire("mots-nb", MI.nb); }
+  var JEUX_MOTS = {
+    rappel: { perso: "sari", etape: 1, fr: "Je me rappelle", en: "I remember", dfr: "Je retrouve les mots-outils du CP-CE1.", den: "I find the key words from CP-CE1." },
+    look: { perso: "nina", etape: 1, fr: "Regarde, cache, écris", en: "Look, cover, write", dfr: "J'observe le mot, je le cache, puis je l'écris de mémoire.", den: "I look at the word, cover it, then write it from memory." },
+    hidden: { perso: "vaka", etape: 1, fr: "Lettres cachées", en: "Hidden letters", dfr: "Je retrouve les lettres qui manquent.", den: "I find the missing letters." },
+    choose: { perso: "waeko", etape: 2, fr: "Le mot manquant", en: "The missing word", dfr: "Je complète la phrase avec le bon mot.", den: "I complete the sentence with the right word." },
+    sort: { perso: "dylan", etape: 2, fr: "Le tri des familles", en: "Sorting into families", dfr: "Je range chaque mot dans sa famille.", den: "I put each word into its family." },
+    listen: { perso: "tehani", etape: 2, fr: "Écoute et écris", en: "Listen and write", dfr: "J'écoute le mot et je l'écris sans le voir.", den: "I listen to the word and write it without seeing it." },
+    dict: { perso: "adi", etape: 3, fr: "La dictée sans erreur", en: "The no-mistake dictation", dfr: "Je prépare les mots, puis j'écris les phrases dictées.", den: "I get the words ready, then write the dictated sentences." }
+  };
+  var ETAPES_MOTS = { 1: "decouvre", 2: "entraine", 3: "reinvestis" };
+  function motHTML(m, petit) { return '<span class="mi-mot' + (petit ? " mi-mot--petit" : "") + '">' + MO.html(m) + "</span>"; }
+  function miPool(jeu) {
+    if (jeu === "rappel") { var g0 = {}; MO.FAMS.forEach(function (f) { if (f.group.id === "g0") g0[f.id] = true; }); return MO.shuffle(MO.gapPool(g0)).slice(0, 3); }
+    var qs = jeu === "sort" ? MO.pool(MI.sel, true) : jeu === "choose" || jeu === "dict" ? MO.gapPool(MI.sel) : MO.pool(MI.sel);
+    qs = MO.shuffle(qs);
+    if (jeu === "dict") return qs.slice(0, 5);
+    return MI.nb ? qs.slice(0, MI.nb) : qs;
+  }
+  function miVide(jeu) {
+    var en = langue === "en";
+    if (!MO.pool(MI.sel).length) return en ? "Choose at least one list or family of words on the unit page." : "Choisis au moins une liste ou une famille de mots sur la page de la séquence.";
+    if (jeu === "sort" && !MO.pool(MI.sel, true).length) return en ? "Sorting uses the word families (not the CP-CE1 lists): choose at least one family." : "Le tri utilise les familles de mots (pas les listes du CP-CE1) : choisis-en au moins une.";
+    if ((jeu === "choose" || jeu === "dict") && !MO.gapPool(MI.sel).length) return en ? "The sentences of this game use other words: choose other lists or families." : "Les phrases de ce jeu portent sur d'autres mots : choisis d'autres listes ou familles.";
+    return "";
+  }
+  /* préparation d'une question : tirages au sort faits une seule fois */
+  function miPreparer() {
+    var q = G.qs[G.i]; G.rep = false; G.ok = false; G.choix = null; G.typed = ""; G.phase = G.jeu === "look" ? "voir" : ""; G.outil = false; G.msg = "";
+    if (G.jeu === "hidden") { G.h = MO.hiddenPart(q.m); G.opts = MO.shuffle([G.h.seg].concat(MO.segOptions(G.h))); }
+    else if (G.jeu === "choose" || G.jeu === "rappel") G.opts = MO.shuffle([q.p].concat(q.opts));
+    else if (G.jeu === "sort") G.opts = MO.shuffle([MO.FAM[q.fam]].concat(MO.intrus(q, MI.sel)));
+    if (G.jeu === "listen") MO.direAvecPhrase(q.p);
+    if (G.jeu === "dict" && G.phase !== "prep") MO.dire([MO.sayText(MO.gapFull(q, q.p))]);
+  }
+  var G = null;
+  function miDemarrer(jeu, liste) {
+    G = { jeu: jeu, qs: liste || miPool(jeu), i: 0, score: 0, res: [], vus: 0, outils: 0, fin: false };
+    if (jeu === "dict" && !liste) G.prep = true;
+    if (G.qs.length && !G.prep) miPreparer();
+  }
+  function miFamillesHTML(seulementChoisies) {
+    return MO.GROUPS.map(function (g) {
+      var fams = g.fams.filter(function (f) { return !seulementChoisies || MI.sel[f.id]; }); if (!fams.length) return "";
+      return '<section class="mi-groupe"><h3>' + esc(tr(g.nom)) + '</h3><div class="mi-familles">' + fams.map(function (f) {
+        if (g.kind === "list") return '<div class="mi-famille mi-famille--liste"><span class="mi-num">★ ' + f.key + '</span><div class="mi-mots">' + f.words.map(function (w) { return motHTML(w, true); }).join("") + "</div></div>";
+        return '<div class="mi-famille"><span class="mi-racine">' + MO.html(f.key) + '</span><div class="mi-mots">' + f.words.map(function (w) { return motHTML(w, true); }).join("") + "</div></div>";
+      }).join("") + "</div></section>";
+    }).join("");
+  }
+  function miChoixMots() {
+    var en = langue === "en", n = MO.pool(MI.sel).length;
+    var groupes = MO.GROUPS.map(function (g) {
+      var nSel = g.fams.filter(function (f) { return MI.sel[f.id]; }).length;
+      var puces = g.fams.map(function (f) {
+        var lib = g.kind === "list" ? "<b>" + f.key + "</b> " + esc(f.words.map(MO.plain).join(", ")) : MO.html(f.key);
+        return '<button class="mi-puce" type="button" data-action="m-fam" data-v="' + f.id + '" aria-pressed="' + !!MI.sel[f.id] + '" aria-label="' + esc(tr(f.hint)) + '"><span class="po-case">' + (MI.sel[f.id] ? "✓" : "") + "</span><span>" + lib + "</span></button>";
+      }).join("");
+      return '<div class="mi-sel-groupe"><div class="mi-sel-haut"><h3>' + esc(tr(g.nom)) + "</h3><span>" + nSel + " / " + g.fams.length + '</span><button class="coco-btn coco-btn--secondaire" type="button" data-action="m-gtout" data-v="' + g.id + '">' + (en ? "All" : "Tout") + '</button><button class="coco-btn coco-btn--secondaire" type="button" data-action="m-gaucun" data-v="' + g.id + '">' + (en ? "None" : "Aucun") + '</button></div><div class="mi-puces">' + puces + "</div></div>";
+    }).join("");
+    var nb = [[10, "10"], [20, "20"], [0, en ? "All" : "Tous"]].map(function (x) { return '<button class="coco-btn coco-btn--secondaire" type="button" data-action="m-nb" data-v="' + x[0] + '" aria-pressed="' + (MI.nb === x[0]) + '">' + x[1] + "</button>"; }).join("");
+    return '<details class="mi-selection"' + (MI.ouvert ? " open" : "") + '><summary data-action="m-ouvrir"><span><b>' + (en ? "My words to revise" : "Mes mots à réviser") + "</b> · " + n + (en ? " word" + (n > 1 ? "s" : "") + " chosen" : " mot" + (n > 1 ? "s" : "") + " choisi" + (n > 1 ? "s" : "")) + "</span><i>" + (en ? "Change" : "Changer") + "</i></summary>" +
+      '<p class="po-note">' + (en ? "Tick the lists and families you are learning this week." : "Coche les listes et les familles que tu apprends cette semaine.") + "</p>" + groupes +
+      '<div class="mi-sel-haut"><h3>' + (en ? "Questions per game" : "Questions par jeu") + "</h3>" + nb + '<span class="mi-espace"></span><button class="coco-btn coco-btn--secondaire" type="button" data-action="m-tout">' + (en ? "Choose everything" : "Tout choisir") + '</button><button class="coco-btn coco-btn--secondaire" type="button" data-action="m-aucun">' + (en ? "Clear" : "Tout enlever") + "</button></div></details>";
+  }
+  function pageSequenceMots() {
+    var s = C.mots, m = MATIERE.francais, en = langue === "en";
+    var cartes = Object.keys(JEUX_MOTS).map(function (id) {
+      var J = JEUX_MOTS[id];
+      return carte("francais", J.etape + " · " + t(ETAPES_MOTS[J.etape]), en ? J.en : J.fr, en ? J.den : J.dfr, J.perso, "mots-" + id);
+    }).join("");
+    return barre("francais") + '<section class="entete m-francais"><img src="' + IMG(m.perso) + '" alt=""><div><h1>' + esc(tr(s.titre)) + "</h1><p>" + esc(tr(m.nom)) + " · " + (en ? "Spelling" : "Orthographe") + "</p></div></section>" +
+      '<p class="objectif m-francais">' + t("objectif") + " <b>" + esc(tr(s.objectif)) + "</b></p>" +
+      (en ? '<p class="apercu">' + t("noteFr") + "</p>" : "") +
+      '<a class="coco-btn coco-btn--secondaire" href="#lecon-mots" style="justify-self:start"><img src="' + PICTO("ampoule") + '" alt="">' + t("lecon") + "</a>" +
+      miChoixMots() + '<section class="etapes">' + cartes + "</section>";
+  }
+  function pageLeconMots() {
+    var m = MATIERE.francais, en = langue === "en";
+    return barre("francais") + hautJeu(m, "seq-mots", { sous: tr(C.mots.titre), titre: t("lecon") }) + (en ? '<p class="apercu">' + t("noteFr") + "</p>" : "") +
+      bulle("coralie", en ? "Look at the <b>common part</b>, in orange, and the <b>silent or final letter</b>, in yellow." : "Observe la <b>partie commune</b>, en orange, et la <b>lettre muette</b> ou finale, en jaune.") +
+      '<div class="mi-lecon">' + miFamillesHTML(false) + "</div>" +
+      '<section class="retiens"><img src="' + IMG("coralie") + '" alt=""><div><h3>' + (en ? "I remember" : "Je retiens") + "</h3><p>" + (en ? "Invariable words never change: we learn them by heart!" : "Les mots invariables ne changent jamais : on les apprend par cœur !") + "</p></div></section>" +
+      '<div class="coco-row"><a class="coco-btn" href="#seq-mots">' + t("versSequence") + "</a></div>";
+  }
+  function miEcrire(dis) {
+    var acc = ["é", "è", "ê", "à", "â", "ù", "ç", "’", "-"];
+    return '<div class="mi-ecrire"><input id="mi-reponse" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done" aria-label="' + (langue === "en" ? "Write here" : "Écris ici") + '" value="' + esc(G.typed) + '"' + (dis ? " disabled" : "") + '>' +
+      '<div class="mi-accents">' + acc.map(function (a) { return '<button type="button" data-mi-acc="' + a + '" aria-label="' + a + '"' + (dis ? " disabled" : "") + ">" + a + "</button>"; }).join("") + "</div></div>";
+  }
+  function miEcoute(texte, action) {
+    return '<button class="coco-btn coco-btn--secondaire" type="button" data-action="' + action + '"><img src="' + PICTO("haut-parleur") + '" alt="">' + texte + "</button>";
+  }
+  function jeuMots(jeu) {
+    var J = JEUX_MOTS[jeu], m = MATIERE.francais, en = langue === "en";
+    if (!G || G.jeu !== jeu) { var vide = jeu === "rappel" ? "" : miVide(jeu); if (vide) { G = null; return barre("francais") + hautJeu(m, "seq-mots", { sous: tr(C.mots.titre), titre: en ? J.en : J.fr }) + bulle(J.perso, vide) + '<div class="coco-row"><a class="coco-btn" href="#seq-mots">' + t("versSequence") + "</a></div>"; } miDemarrer(jeu); }
+    var n = G.qs.length, titre = { sous: tr(C.mots.titre) + " · " + J.etape + " · " + t(ETAPES_MOTS[J.etape]), titre: en ? J.en : J.fr };
+    var prog = n <= 20 ? galets(n, G.fin ? n : G.i) : '<span class="mi-compteur">' + Math.min(G.i + 1, n) + " / " + n + "</span>";
+    var haut = barre("francais") + hautJeu(m, "seq-mots", titre, prog) + (en ? '<p class="apercu">' + t("noteFr") + "</p>" : "");
+    if (G.fin) return haut + miBilan(J);
+    if (G.prep) {
+      var cartes = G.qs.map(function (q, k) { var f = MO.FAM[q.fam], sib = f.words.map(MO.plain).filter(function (w) { return MO.norm(w) !== MO.norm(q.p); }).slice(0, 3);
+        return '<button class="mi-prep" type="button" data-action="m-dire" data-k="' + k + '">' + motHTML(q.m) + "<small>" + esc(tr(f.hint)) + (sib.length ? (en ? " · like " : " · comme ") + esc(sib.join(", ")) : "") + "</small></button>"; }).join("");
+      return haut + bulle(J.perso, en ? "I get ready: I read each word, I say it, I spot the <b>part to remember</b>. Tap a word to hear it." : "Je me prépare : je lis chaque mot, je le dis, je repère la <b>partie à retenir</b>. Touche un mot pour l'entendre.") +
+        '<section class="zone m-francais"><div class="mi-preps">' + cartes + "</div></section>" + '<footer class="jeu-bas"><span></span><button class="coco-btn coco-btn--grand" type="button" data-action="m-pret">' + (en ? "I'm ready!" : "Je suis prêt(e) !") + "</button></footer>";
+    }
+    var q = G.qs[G.i], indice = '<p class="mi-indice">' + esc(tr(MO.FAM[q.fam].hint)) + "</p>", consigne = "", zone = "", bas = "";
+    var valider = '<button class="coco-btn coco-btn--grand" type="button" data-action="m-valider">' + t("valider") + "</button>";
+    var choix = function (lib) {
+      return '<div class="coco-row">' + G.opts.map(function (o, k) {
+        var juste = jeu === "sort" ? MO.famillesDe(q.p).indexOf(o.id) >= 0 : jeu === "hidden" ? o === G.h.seg : o === q.p;
+        var cls = "coco-etiquette mi-choix" + (G.rep && juste ? " est-juste" : G.rep && k === G.choix ? " est-revoir" : "");
+        return '<button class="' + cls + '" type="button" data-action="m-choix" data-v="' + k + '"' + (G.rep ? " disabled" : "") + ">" + lib(o) + "</button>";
+      }).join("") + "</div>";
+    };
+    if (jeu === "look") {
+      consigne = G.phase === "voir" ? (en ? "Look carefully at the word. When you have it in your head, cover it." : "Regarde bien le mot. Quand tu l'as en tête, cache-le.") : (en ? "The word is covered. Write it from memory." : "Le mot est caché. Écris-le de mémoire.");
+      zone = indice + (G.phase === "voir" ? motHTML(q.m) : miEcrire(G.rep));
+      bas = G.phase === "voir" ? '<button class="coco-btn coco-btn--grand" type="button" data-action="m-cacher">' + (en ? "I've looked, cover it" : "J'ai bien regardé, je cache") + "</button>" : (G.rep ? "" : valider);
+    } else if (jeu === "hidden") {
+      consigne = en ? "Which letters are missing?" : "Quelles lettres manquent ?";
+      zone = indice + '<span class="mi-mot">' + G.h.beforeH + '<span class="mi-trou' + (G.rep ? " est-rempli" : "") + '">' + (G.rep ? G.h.segH : "?") + "</span>" + G.h.afterH + "</span>" +
+        choix(function (o) { return o === "" ? "<i>" + (en ? "nothing" : "rien") + "</i>" : esc(o); });
+    } else if (jeu === "choose" || jeu === "rappel") {
+      var cap = q.sent.indexOf("___") === 0;
+      consigne = jeu === "rappel" ? (en ? "I remember the <b>key words</b> from CP-CE1. Complete the sentence." : "Je me rappelle les <b>mots-outils</b> du CP-CE1. Complète la phrase.") : (en ? "Complete the sentence with the right word." : "Complète la phrase avec le mot qui convient.");
+      zone = '<p class="phrase">' + esc(q.sent).replace("___", '<span class="mi-trou' + (G.rep ? " est-rempli" : "") + '">' + (G.rep ? MO.htmlCap(q.m, cap) : "&nbsp;") + "</span>") + "</p>" +
+        choix(function (o) { return esc(cap ? MO.capFirst(o) : o); });
+    } else if (jeu === "sort") {
+      consigne = en ? "Which family does this word go in?" : "Dans quelle famille ranges-tu ce mot ?";
+      zone = '<span class="mi-mot">' + esc(q.p) + "</span>" + choix(function (f) { return MO.html(f.key); });
+    } else if (jeu === "listen") {
+      consigne = en ? "Listen to the word, then write it." : "Écoute le mot, puis écris-le.";
+      zone = indice + '<div class="coco-row">' + (MO.peutParler ? miEcoute(en ? "Listen to the word" : "Écouter le mot", "m-dire-mot") + (MO.SENT[q.p] ? miEcoute(en ? "In a sentence" : "Dans une phrase", "m-dire-phrase") : "") : '<p class="po-note">' + (en ? "This device cannot read aloud." : "Cet appareil ne sait pas lire à voix haute.") + "</p>") + "</div>" + miEcrire(G.rep) +
+        (G.outil ? '<div class="mi-outil">' + miFamillesHTML(true) + "</div>" : "");
+      bas = G.rep ? "" : '<button class="coco-btn coco-btn--secondaire" type="button" data-action="m-outil" aria-expanded="' + G.outil + '">' + (en ? "My toolbox" : "Mon outil") + "</button>" + valider;
+    } else if (jeu === "dict") {
+      consigne = en ? "Listen to the sentence, then write it." : "Écoute la phrase, puis écris-la.";
+      zone = '<p class="mi-indice">' + (en ? "Sentence " + (G.i + 1) + " of " + n : "Phrase " + (G.i + 1) + " sur " + n) + '</p><div class="coco-row">' + (MO.peutParler ? miEcoute(en ? "Listen to the sentence" : "Écouter la phrase", "m-dire-dictee") : "") +
+        (G.rep ? "" : '<button class="coco-btn coco-btn--secondaire" type="button" data-action="m-modele">' + (en ? "Look at the model" : "Regarder le modèle") + "</button>") + "</div>" +
+        '<p class="phrase mi-modele" id="mi-modele"' + (G.modele ? "" : " hidden") + ">" + esc(MO.gapFull(q, q.p)) + "</p>" + miEcrire(G.rep);
+      bas = G.rep ? "" : valider;
+    }
+    return haut + bulle(J.perso, consigne) + '<section class="zone m-francais mi-zone">' + zone + "</section>" +
+      '<div class="retour-zone">' + G.msg + "</div>" + (bas ? '<footer class="jeu-bas"><span></span><span class="coco-row">' + bas + "</span></footer>" : "");
+  }
+  function miBilan(J) {
+    var en = langue === "en", n = G.qs.length, sc = G.score, r = n ? sc / n : 0;
+    marquerFait("mots-" + G.jeu);
+    if (G.jeu === "rappel") return '<section class="bilan"><img src="' + IMG("kakou") + '" alt=""><h2>' + t("fini") + "</h2><p>" + (en ? "You remembered " + sc + " key word" + (sc > 1 ? "s" : "") + " out of " + n + ". Now, let's discover new words!" : "Tu t'es rappelé " + sc + " mot" + (sc > 1 ? "s" : "") + "-outil" + (sc > 1 ? "s" : "") + " sur " + n + ". Maintenant, découvrons de nouveaux mots !") + '</p><div class="coco-row"><a class="coco-btn" href="#mots-look">' + (en ? "Look, cover, write" : "Regarde, cache, écris") + '</a><a class="coco-btn coco-btn--secondaire" href="#seq-mots">' + t("versSequence") + "</a></div></section>";
+    var msg = r === 1 ? (en ? "Perfect: you know all these words!" : "Parfait, tu connais tous ces mots !") : r >= 0.6 ? (en ? "Good work! A little more effort on a few words." : "Beau travail ! Encore un petit effort sur quelques mots.") : (en ? "Keep practising: you will get there!" : "Continue de t'entraîner, tu vas y arriver !");
+    var erreurs = G.res.filter(function (x) { return !x.ok; });
+    var plus = G.jeu === "dict" ? "<p>" + (G.vus ? (en ? "You looked at the model " + G.vus + " time" + (G.vus > 1 ? "s" : "") + ". Try to look a little less next time!" : "Tu as regardé le modèle " + G.vus + " fois. Essaie de le regarder un peu moins la prochaine fois !") : (en ? "Well done: you did not look at the model!" : "Bravo : tu n'as pas regardé le modèle !")) + "</p>"
+      : G.jeu === "listen" && G.outils ? "<p>" + (en ? "You used your toolbox " + G.outils + " time" + (G.outils > 1 ? "s" : "") + ": that is a good strategy!" : "Tu as utilisé ton outil " + G.outils + " fois : c'est une bonne stratégie !") + "</p>" : "";
+    return '<section class="bilan"><img src="' + IMG("kakou") + '" alt=""><h2>' + t("fini") + '</h2><p class="mi-score">' + sc + " / " + n + "</p><p>" + msg + "</p>" + plus +
+      (erreurs.length ? "<p><b>" + (en ? "Words to look at again:" : "Les mots à revoir :") + '</b></p><div class="coco-row">' + erreurs.map(function (x) { return motHTML(x.m, true); }).join("") + "</div>" : "") +
+      '<div class="coco-row">' + (erreurs.length ? '<button class="coco-btn" type="button" data-action="m-erreurs">' + (en ? "Replay my mistakes" : "Rejouer mes erreurs") + "</button>" : "") +
+      '<button class="coco-btn coco-btn--secondaire" type="button" data-action="m-rejouer">' + t("rejouer") + '</button><a class="coco-btn coco-btn--secondaire" href="#seq-mots">' + t("versSequence") + "</a></div></section>";
+  }
+  function miFinir(ok, plus) {
+    var en = langue === "en", q = G.qs[G.i], dernier = G.i === G.qs.length - 1;
+    G.rep = true; G.ok = ok; if (ok) G.score++;
+    G.res.push({ m: q.m, p: q.p, fam: q.fam, sent: q.sent, opts: q.opts, ok: ok });
+    var suite = '<button class="coco-btn coco-btn--grand" type="button" data-action="m-suite">' + (dernier ? (en ? "See my score" : "Voir mon score") : t("suivant")) + "</button>";
+    if (ok) G.msg = retour("bravo", t("bravo"), (plus || "") + motHTML(q.m, true), suite);
+    else {
+      var rappel = G.jeu === "rappel" ? (en ? "Remember list " : "Rappelle-toi la liste ") + MO.FAM[q.fam].key + " : " + MO.FAM[q.fam].words.map(function (w) { return motHTML(w, true); }).join(" ") : (en ? "Look carefully at the part in orange and the letter in yellow: " : "Regarde bien la partie en orange et la lettre en jaune : ") + motHTML(q.m, true);
+      G.msg = retour("revoir", t("pasEncore"), (plus || "") + rappel, suite);
+      if (G.jeu === "listen") MO.direMot(q.p);
+      if (G.jeu === "dict") MO.dire([MO.sayText(MO.gapFull(q, q.p))]);
+    }
+  }
+  function actionMots(a, el) {
+    var en = langue === "en";
+    if (a === "m-fam") { MI.sel[el.dataset.v] = !MI.sel[el.dataset.v]; if (!MI.sel[el.dataset.v]) delete MI.sel[el.dataset.v]; miSauver(); return; }
+    if (a === "m-gtout" || a === "m-gaucun") { MO.FAMS.forEach(function (f) { if (f.group.id === el.dataset.v) { if (a === "m-gtout") MI.sel[f.id] = true; else delete MI.sel[f.id]; } }); miSauver(); return; }
+    if (a === "m-tout") { MO.FAMS.forEach(function (f) { MI.sel[f.id] = true; }); miSauver(); return; }
+    if (a === "m-aucun") { MI.sel = {}; miSauver(); return; }
+    if (a === "m-nb") { MI.nb = +el.dataset.v; miSauver(); return; }
+    if (a === "m-ouvrir") { MI.ouvert = !MI.ouvert; return; }
+    if (!G) return;
+    var q = G.qs[G.i];
+    if (a === "m-dire") { var x = G.qs[+el.dataset.k]; if (x) MO.direMot(x.p); }
+    else if (a === "m-pret") { G.prep = false; miPreparer(); }
+    else if (a === "m-cacher") G.phase = "ecrire";
+    else if (a === "m-dire-mot") MO.direMot(q.p);
+    else if (a === "m-dire-phrase") MO.direAvecPhrase(q.p);
+    else if (a === "m-dire-dictee") MO.dire([MO.sayText(MO.gapFull(q, q.p))]);
+    else if (a === "m-outil") { G.outil = !G.outil; if (G.outil && !G.outilVu) { G.outils++; G.outilVu = G.i + 1; } }
+    else if (a === "m-modele" && !G.rep) {
+      G.vus++; G.modele = true;
+      clearTimeout(G.minuteModele); G.minuteModele = setTimeout(function () { if (G) G.modele = false; var e = document.getElementById("mi-modele"); if (e) e.hidden = true; }, 4000);
+    }
+    else if (a === "m-choix" && !G.rep) {
+      var k = +el.dataset.v, o = G.opts[k]; G.choix = k;
+      var ok = G.jeu === "sort" ? MO.famillesDe(q.p).indexOf(o.id) >= 0 : G.jeu === "hidden" ? o === G.h.seg : o === q.p;
+      miFinir(ok, G.jeu === "sort" ? "<span>" + (en ? "Its family: " : "Sa famille : ") + esc(tr(MO.FAM[q.fam].hint)) + ". </span>" : "");
+    }
+    else if (a === "m-valider" && !G.rep) {
+      var champ = document.getElementById("mi-reponse"), val = champ ? champ.value : G.typed; G.typed = val;
+      if (!val.trim()) return;
+      if (G.jeu === "dict") {
+        var r = MO.phraseJuste(val, q), modele = '<span class="mi-modele-final">' + esc(r.full) + "</span>";
+        miFinir(r.mot, r.phrase ? (en ? "Your sentence has no mistakes! " : "Ta phrase est sans erreur ! ") : r.mot ? (en ? "The invariable word is right. Compare the rest of your sentence with the model: " : "Le mot invariable est juste. Compare le reste de ta phrase avec le modèle : ") + modele + " " : (en ? "Here is the dictated sentence: " : "Voici la phrase dictée : ") + modele + " ");
+      } else {
+        var bon = MO.accepte(val, q.p);
+        miFinir(bon, bon && G.jeu === "listen" && G.outilVu === G.i + 1 ? (en ? "You looked in your toolbox: that is a good strategy! " : "Tu as cherché dans ton outil : c'est une bonne stratégie ! ") : "");
+      }
+    }
+    else if (a === "m-suite" && G.rep) { if (G.i < G.qs.length - 1) { G.i++; miPreparer(); } else G.fin = true; }
+    else if (a === "m-erreurs") { var err = G.res.filter(function (x) { return !x.ok; }).map(function (x) { return { m: x.m, p: x.p, fam: x.fam, sent: x.sent, opts: x.opts }; }); miDemarrer(G.jeu, MO.shuffle(err)); }
+    else if (a === "m-rejouer") miDemarrer(G.jeu);
+  }
+  function ficheMots() {
+    var li = function (a) { return a.map(function (x) { return "<li>" + x + "</li>"; }).join(""); };
+    return '<div class="no-print coco-row"><a class="coco-btn coco-btn--secondaire" href="#enseignante">← Espace enseignante</a><a class="coco-btn" href="#seq-mots">Voir la séquence</a><button class="coco-btn coco-btn--secondaire" type="button" data-action="imprimer">Imprimer la fiche</button></div>' +
+      '<article class="fiche m-francais"><small>Français · Étude de la langue · Orthographe lexicale · CE2</small><h1>Les mots invariables</h1>' +
+      '<p class="f-source">Module « Mes mots invariables » du premier site de la classe, repris dans le nouveau site. Listes et familles : affiches « Mots-outils du CP-CE1 et mots invariables » (2026).</p>' +
+      '<div class="f-deux"><section><h2>Compétence et attendu</h2><ul>' + li(["Compétence travaillée : s'initier à l'orthographe lexicale (cycle 2, CE2, niveau de maîtrise 3).", "Attendu de fin de cycle : orthographier les mots les plus fréquents (notamment en situation scolaire) et les mots invariables mémorisés.", "Connaissances et compétences associées : mémoriser les principaux mots invariables ; regrouper des mots par séries (familles de mots, mots reliés par des analogies morphologiques)."]) + "</ul></section>" +
+      "<section><h2>Repères de progressivité (niveau 3)</h2><ul>" + li(["Mémoriser et restituer, grâce à des pratiques variées (épellation, copie, mise en mémoire), un corpus organisé de mots invariables : listes analogiques, listes thématiques.", "Reconnaître la partie commune de certains mots."]) + "</ul></section></div>" +
+      '<section><h2>La séquence sur le site</h2><table class="f-table"><tbody>' +
+      [["Revoir la leçon", "Revoir les familles : repérer la partie commune (orange) et la lettre muette ou finale (jaune) d'un groupe de mots, comme sur les affiches."],
+       ["1 · Je me rappelle", "Trois phrases à compléter avec les mots-outils du CP-CE1. En cas d'erreur, l'élève revoit la liste concernée."],
+       ["1 · Regarde, cache, écris", "Écrire de mémoire un mot invariable après l'avoir observé."],
+       ["1 · Lettres cachées", "Retrouver la partie commune ou la lettre muette d'un mot. Seul jeu qui propose des lettres à choisir."],
+       ["2 · Le mot manquant", "Choisir, parmi des mots correctement écrits, celui qui convient pour compléter une phrase."],
+       ["2 · Le tri des familles", "Associer un mot invariable à sa famille orthographique."],
+       ["2 · Écoute et écris", "Écrire sous la dictée un mot invariable, en cherchant si besoin dans « Mon outil » (je connais le mot, je le cherche, ou je demande)."],
+       ["3 · La dictée sans erreur", "Se préparer (réseau de mots, partie à retenir), puis écrire cinq phrases dictées en regardant le modèle le moins possible."]].map(function (r) { return "<tr><th>" + r[0] + "</th><td>" + r[1] + "</td></tr>"; }).join("") + "</tbody></table></section>" +
+      "<section><h2>Conseils d'utilisation</h2><ul>" + li(["L'élève choisit les listes et les familles qu'il révise, sur la page de la séquence. Le choix est gardé sur l'iPad d'une fois sur l'autre.", "Les jeux d'écriture refusent les fautes d'accent : la barre de lettres accentuées aide les élèves sur iPad.", "L'écoute utilise la voix française de l'appareil : penser à monter le son et à désactiver le mode silencieux. La voix n'est utilisée que dans « Écoute et écris » et dans la dictée (décision D-31).", "En fin de partie, « Rejouer mes erreurs » relance uniquement les mots ratés.", "« Le mot manquant » ne montre que des mots bien écrits, et les productions erronées des élèves ne sont pas réaffichées : l'orthographe lexicale se mémorise en limitant les occasions de produire ou de rencontrer des graphies fautives.", "La dictée sans erreur comporte cinq phrases : le nombre de fois où l'élève regarde le modèle est donné en fin de partie, l'objectif étant de le diminuer d'une fois à l'autre."]) + "</ul></section>" +
+      "<section><h2>Ressources pédagogiques</h2><ul>" + li(["A. Ouzoulias, « La mémorisation de l'orthographe lexicale, un enjeu décisif ».", "Éduscol : « Installer les bases de l'orthographe lexicale au cycle 2 » ; « Différentes formes de dictées » (dictée sans erreur) ; « La copie » ; « Lecture et orthographe : un renforcement mutuel »."]) + "</ul></section></article>";
+  }
+
   /* ---------- problèmes ouverts (Sullivan) : briques communes ---------- */
   var PO = window.COCO_PO;
   function po(id) { return PO.problemes[id]; }
@@ -528,6 +768,7 @@
         return '<div class="ens-pb"><img src="' + IMG(p.perso) + '" alt=""><div><b>' + esc(p.titre.fr) + "</b><small>« " + esc(p.question.fr) + ' »</small></div><div class="coco-row"><a class="coco-btn" href="#classe-' + id + '">Projeter en classe</a><a class="coco-btn coco-btn--secondaire" href="#fiche-' + id + '">La fiche</a><a class="coco-btn coco-btn--secondaire" href="#feuille-' + id + '">Feuille de recherche</a></div></div>';
       }).join("") + "</div></section>";
     }).join("");
+    seqs = '<section class="domaine"><h2>Français · Les mots invariables</h2><div class="ens-liste"><div class="ens-pb ens-pb--francais"><img src="' + IMG("coralie") + '" alt=""><div><b>Les mots invariables</b><small>7 activités, de « Je me rappelle » à la dictée sans erreur</small></div><div class="coco-row"><a class="coco-btn" href="#fiche-mots">La fiche</a><a class="coco-btn coco-btn--secondaire" href="#seq-mots">Voir la séquence</a></div></div></div></section>' + seqs;
     return barre("") + '<section class="entete m-maths"><img src="' + IMG("coralie") + '" alt=""><div><h1>Espace enseignante</h1><p>Les problèmes ouverts : fiche, feuille de recherche et projection en classe.</p></div></section>' +
       '<details class="ens-sullivan"><summary>La démarche de Peter Sullivan, en bref</summary><p><b>Une « bonne » question</b> demande plus qu\'un rappel, fait apprendre l\'élève (et renseigne l\'enseignant), et accepte plusieurs réponses.</p><p><b>4 temps :</b> poser la question (sans donner de méthode) · chercher par 2 ou 3 (coup de pouce si on bloque, relance si on a fini) · mettre en commun (la classe donne son avis avant la vérification) · faire un résumé.</p><p><b>Évaluer sans note :</b> 5 niveaux de compréhension et une liste de comportements à observer.</p><p class="f-source">Sullivan & Lilburn, « Activités ouvertes en mathématiques », Chenelière, 2010, chapitres 1 à 4.</p></details>' +
       seqs + '<p class="apercu">Période 5 : la séquence 3 (division) est intégrée. Les 12 autres problèmes de l\'outil partagé avec votre collègue suivront, deux par séquence.</p>';
@@ -664,10 +905,11 @@
 
   /* ---------- routeur ---------- */
   var ROUTES = {
-    accueil: pageAccueil, "seq-verbe": function () { return pageSequence("verbe"); },
+    accueil: pageAccueil, "seq-verbe": function () { return pageSequence("verbe"); }, "seq-mots": pageSequenceMots, "lecon-mots": pageLeconMots, "fiche-mots": ficheMots,
     "lecon-verbe": pageLecon, "jeu-verbe-decouvre": jeuDecouvre, "jeu-verbe-chasse": jeuChasse, enseignante: pageEnseignante, banque: pageBanque
   };
   C.matieres.forEach(function (m) { ROUTES[m.id] = function () { return pageMatiere(m.id); }; });
+  Object.keys(JEUX_MOTS).forEach(function (j) { ROUTES["mots-" + j] = function () { return jeuMots(j); }; });
   Object.keys(PO.sequences).forEach(function (sid) { ROUTES["seq-" + sid] = function () { return pageSequence(sid); }; });
   Object.keys(PO.problemes).forEach(function (id) {
     ROUTES["po-" + id] = function () { return poAutonome(id); };
@@ -679,7 +921,7 @@
   var derniere = "";
   function rendre() {
     var r = route();
-    if (r !== derniere) { if (r === "jeu-verbe-decouvre") D = null; if (r === "jeu-verbe-chasse") H = null; if (/^po-/.test(r)) A = null; if (/^classe-/.test(r)) { K = null; clearInterval(minuteur); } if (r === "lecon-verbe") L = { carte: {}, moment: "present", machine: 0, phrase: 0 }; window.scrollTo(0, 0); derniere = r; }
+    if (r !== derniere) { if (r === "jeu-verbe-decouvre") D = null; if (r === "jeu-verbe-chasse") H = null; if (/^po-/.test(r)) A = null; if (/^mots-/.test(r)) G = null; try { if (MO.peutParler) speechSynthesis.cancel(); } catch (x) {} if (/^classe-/.test(r)) { K = null; clearInterval(minuteur); } if (r === "lecon-verbe") L = { carte: {}, moment: "present", machine: 0, phrase: 0 }; window.scrollTo(0, 0); derniere = r; }
     document.documentElement.lang = langue;
     document.body.classList.toggle("mode-classe", /^classe-/.test(r));
     document.body.classList.toggle("mode-papier", /^(fiche|feuille)-/.test(r));
@@ -695,15 +937,18 @@
     else if (/^c-/.test(a)) actionChasse(a, el);
     else if (/^a-/.test(a)) actionAutonome(a, el);
     else if (/^k-/.test(a)) actionClasse(a, el);
+    else if (/^m-/.test(a)) actionMots(a, el);
     else if (/^bq-/.test(a)) { if (a === "bq-reglages") e.preventDefault(); actionBanque(a, el); }
     else if (a === "imprimer") { try { window.print(); } catch (x) {} return; }
     else if (/^l-/.test(a)) actionLecon(a, el);
     rendre();
     var focus = a === "a-verifier" && A && A.etape === "ecrit" ? document.querySelector("[data-ecrit]")
+      : /^m-(cacher|suite|pret|erreurs|rejouer|dire-mot|dire-phrase|dire-dictee|modele|outil)$/.test(a) && document.getElementById("mi-reponse") && !document.getElementById("mi-reponse").disabled ? document.getElementById("mi-reponse")
+      : /^m-(choix|valider)$/.test(a) ? document.querySelector('[data-action="m-suite"]')
       : document.querySelector('[data-action="' + a + '"]' + (el.dataset.k && el.dataset.d ? '[data-k="' + el.dataset.k + '"][data-d="' + el.dataset.d + '"]' : "")); if (focus && a !== "langue" && focus.focus) try { focus.focus({ preventScroll: true }); } catch (x) {}
   });
   document.addEventListener("input", function (e) {
-    var el = e.target; if (!el.dataset) return;
+    var el = e.target; if (!el.dataset || (el.dataset.poChamp === undefined && el.dataset.ecrit === undefined)) return;
     var v = String(el.value).replace(/\D/g, "").slice(0, 3); if (v !== el.value) el.value = v;
     if (el.dataset.poChamp !== undefined) {
       var S = el.dataset.mode === "k" ? K : A; if (!S) return;
@@ -712,8 +957,17 @@
       if (S === A && A.msg) { A.msg = ""; var rz = document.querySelector(".retour-zone"); if (rz) rz.innerHTML = ""; }
     } else if (el.dataset.ecrit !== undefined && A) A.ecrit[el.dataset.ecrit] = v;
   });
+  document.addEventListener("input", function (e) { if (e.target.id === "mi-reponse" && G) G.typed = e.target.value; });
+  document.addEventListener("pointerdown", function (e) { if (e.target.closest && e.target.closest("[data-mi-acc]")) e.preventDefault(); });
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest && e.target.closest("[data-mi-acc]"); if (!b || !G) return;
+    var i = document.getElementById("mi-reponse"); if (!i || i.disabled) return;
+    var s = i.selectionStart == null ? i.value.length : i.selectionStart, f = i.selectionEnd == null ? s : i.selectionEnd, c = b.dataset.miAcc;
+    i.value = i.value.slice(0, s) + c + i.value.slice(f); G.typed = i.value; i.focus(); i.setSelectionRange(s + c.length, s + c.length);
+  });
   document.addEventListener("keydown", function (e) {
     var el = e.target; if (e.key !== "Enter" || !el.dataset) return;
+    if (el.id === "mi-reponse") { var bm = document.querySelector('[data-action="m-valider"]') || document.querySelector('[data-action="m-suite"]'); if (bm) { e.preventDefault(); bm.click(); } return; }
     var cible = el.dataset.ecrit !== undefined ? "a-ecrit-ok" : el.dataset.poChamp !== undefined ? (el.dataset.mode === "k" ? "k-tableau" : "a-proposer") : "";
     var b = cible && document.querySelector('[data-action="' + cible + '"]'); if (b && !b.disabled) { e.preventDefault(); b.click(); }
   });

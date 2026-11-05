@@ -18,7 +18,7 @@ window.COCO_CONTENU = {
           ["L'imparfait : être, avoir et 1er groupe"], ["L'imparfait : verbes irréguliers"]
         ] },
         { nom: { fr: "Orthographe", en: "Spelling" }, sequences: [
-          ["Les mots invariables", "ancien"], ["Les correspondances graphèmes-phonèmes"], ["Les accords particuliers"]
+          ["Les mots invariables", "demo", "mots"], ["Les correspondances graphèmes-phonèmes"], ["Les accords particuliers"]
         ] },
         { nom: { fr: "Lexique", en: "Vocabulary" }, sequences: [
           ["Enrichir son lexique"], ["L'ordre alphabétique"], ["Le dictionnaire"]
@@ -114,6 +114,13 @@ window.COCO_CONTENU = {
     objectif: { fr: "Je sais payer un prix avec les pièces et les billets du pays.", en: "I can pay a price with the coins and notes we use here." },
     pieces: [1, 2, 5, 10, 20, 50, 100],
     prix: 100, minPieces: 2, defiPieces: 6
+  },
+
+  /* ---------- Orthographe : les mots invariables (module du site v0, repris) ---------- */
+  mots: {
+    matiere: "francais",
+    titre: { fr: "Les mots invariables", en: "Invariable words" },
+    objectif: { fr: "Je sais écrire sans erreur les mots invariables de mes listes.", en: "I can spell the invariable words on my lists without mistakes." }
   },
 
   /* ---------- Période 5 · séquence 3 : la division en ligne (problèmes ouverts de la collègue, adaptés) ---------- */

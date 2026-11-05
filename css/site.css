@@ -334,3 +334,57 @@ body.mode-classe .site { max-width: none; padding-block: 12px 24px; }
 .f-grille th.large { width: 38%; }
 .f-bas p { margin: 0 0 6px; }
 .f-lignes { height: 84px; background: repeating-linear-gradient(transparent 0 40px, var(--trait) 40px 42px); }
+
+/* ---------- Orthographe : les mots invariables (codes des affiches 2026, D-58) ---------- */
+:root { --mot-commun: #c2521f; --mot-muette: #9a7b00; --mot-etiquette: #fff6dc; --mot-bord: #c9a227; }
+.mi-mot { display: inline-block; font: 700 40px/1.15 var(--font-lecture); color: var(--encre); background: var(--mot-etiquette); border: var(--bord) solid var(--encre); border-right: 10px solid var(--mot-bord); border-radius: 22px 30px 30px 22px; padding: 10px 26px; }
+.mi-mot--petit { font-size: 24px; padding: 4px 14px; border-width: 2px 6px 2px 2px; border-radius: 14px 18px 18px 14px; }
+.mi-c { color: var(--mot-commun); }
+.mi-m { color: var(--mot-muette); }
+.mi-indice { margin: 0; font-size: 18px; color: var(--encre-douce); }
+.mi-trou { display: inline-block; min-width: 1.6em; border-bottom: 4px solid var(--lagon); color: var(--encre-douce); text-align: center; }
+.mi-trou.est-rempli { border-bottom-color: var(--reussite); }
+.phrase .mi-trou { min-width: 3em; font-weight: 700; }
+.mi-choix { font: 700 30px/1 var(--font-lecture); min-width: 72px; justify-content: center; }
+.mi-choix i { font: 500 20px/1 var(--font-texte); color: var(--encre-douce); }
+.coco-etiquette.est-revoir { border-color: var(--soutien-fonce); background: var(--soutien-clair); }
+.mi-ecrire { display: grid; gap: 12px; justify-items: center; width: 100%; }
+.mi-ecrire input { width: min(100%, 560px); height: 72px; border: var(--bord) solid var(--trait); border-radius: var(--arrondi); background: var(--carte); color: var(--encre); font: 700 34px/1 var(--font-lecture); text-align: center; padding: 0 12px; }
+.mi-ecrire input:focus { border-color: var(--lagon); outline: none; box-shadow: 0 0 0 3px var(--lagon-clair); }
+.mi-accents { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.mi-accents button { min-width: var(--cible-min); height: var(--cible-min); border: 2px solid var(--trait); border-radius: var(--arrondi-petit); background: var(--carte); font: 700 24px/1 var(--font-lecture); color: var(--encre); cursor: pointer; }
+.mi-accents button:disabled { opacity: .5; cursor: default; }
+.mi-outil { width: 100%; text-align: left; background: var(--francais-clair); border-radius: var(--arrondi); padding: 12px 16px; }
+.mi-modele { background: var(--soutien-clair); border-radius: var(--arrondi-petit); padding: 8px 16px; }
+.mi-modele-final { display: block; font: 400 22px/32px var(--font-lecture); margin: 6px 0; }
+.mi-compteur { font: 600 18px/1 var(--font-texte); color: var(--encre-douce); }
+.mi-score { font: 700 48px/1 var(--font-texte); color: var(--reussite); margin: 0; }
+.mi-preps { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; width: 100%; }
+.mi-prep { display: grid; gap: 8px; justify-items: center; background: var(--carte); border: 2px solid var(--trait); border-radius: var(--arrondi); padding: 12px; cursor: pointer; font: inherit; }
+.mi-prep .mi-mot { font-size: 30px; }
+.mi-prep small { font-size: 16px; color: var(--encre-douce); }
+.mi-lecon, .mi-outil { display: grid; gap: var(--espace-6); }
+.mi-groupe h3 { font: 400 28px/32px var(--font-titre); color: var(--francais); margin: 0 0 12px; }
+.mi-familles { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+.mi-famille { display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: center; background: var(--carte); border: 2px solid var(--trait); border-radius: var(--arrondi); padding: 12px 14px; }
+.mi-racine { font: 700 30px/1 var(--font-lecture); background: var(--mot-etiquette); border: 2px solid var(--encre); border-right: 6px solid var(--mot-bord); border-radius: 14px; padding: 8px 12px; white-space: nowrap; }
+.mi-num { font: 700 20px/1 var(--font-texte); color: var(--francais); white-space: nowrap; }
+.mi-mots { display: flex; flex-wrap: wrap; gap: 6px; }
+.mi-outil .mi-famille { padding: 8px 10px; }
+.mi-selection { background: var(--carte); border: var(--bord) solid var(--francais); border-radius: var(--arrondi-grand); padding: 14px 20px; display: grid; gap: 14px; }
+.mi-selection summary { display: flex; justify-content: space-between; align-items: center; gap: 12px; cursor: pointer; font-size: 20px; min-height: var(--cible-min); }
+.mi-selection summary i { font-style: normal; font-weight: 600; color: var(--francais); }
+.mi-sel-groupe { display: grid; gap: 10px; border-top: 2px dashed var(--trait); padding-top: 12px; }
+.mi-sel-haut { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.mi-sel-haut h3 { margin: 0; font: 600 20px/26px var(--font-texte); }
+.mi-sel-haut > span { color: var(--encre-douce); font-weight: 600; }
+.mi-sel-haut .coco-btn { min-height: 44px; padding: 0 14px; font-size: 17px; }
+.mi-sel-haut .coco-btn[aria-pressed="true"] { border-color: var(--francais); background: var(--francais-clair); }
+.mi-espace { flex: 1; }
+.mi-puces { display: flex; flex-wrap: wrap; gap: 8px; }
+.mi-puce { display: inline-flex; align-items: center; gap: 8px; min-height: var(--cible-min); padding: 6px 12px; border: 2px solid var(--trait); border-radius: var(--arrondi-pilule); background: var(--carte); font: 500 18px/1.2 var(--font-lecture); color: var(--encre); cursor: pointer; text-align: left; }
+.mi-puce[aria-pressed="true"] { border-color: var(--francais); background: var(--francais-clair); }
+.mi-puce .po-case { width: 24px; height: 24px; border-width: 2px; font-size: 16px; }
+.ens-pb--francais { border-color: var(--francais); }
+.ens-pb--francais b { color: var(--francais); }
+@media (max-width: 600px) { .mi-mot { font-size: 32px; padding: 8px 18px; } .mi-famille { grid-template-columns: 1fr; } }
