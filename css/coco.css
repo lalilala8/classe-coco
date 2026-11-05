@@ -1,0 +1,197 @@
+@import url("https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Chewy&family=Fredoka:wght@400;500;600;700&display=swap");
+@font-face { font-family: "KGRed Hands"; src: url("../fonts/KGRedHands.ttf") format("truetype"); font-display: swap; }
+/* Classe Coco — jetons de la charte graphique (tokens.json) */
+:root {
+  color-scheme: light;
+  --papier: #f2f9f7;
+  --papier-grille: #d6ece7;
+  --carte: #ffffff;
+  --encre: #1d2744;
+  --encre-douce: #4a5573;
+  --trait: #73849c;
+  --turquoise-blue: #0f8e9f;
+  --lagon: var(--turquoise-blue);
+  --lagon-texte: #0a6b78;
+  --lagon-fonce: #095c67;
+  --lagon-clair: #d5f1f4;
+  --sur-couleur: #ffffff;
+  --francais: #2456a6;
+  --francais-fonce: #1a3f7d;
+  --francais-clair: #e3ecfb;
+  --anglais: #6a3d9a;
+  --anglais-fonce: #4c2a70;
+  --anglais-clair: #efe7f8;
+  --maths: #c0262d;
+  --maths-fonce: #8f1c22;
+  --maths-clair: #fde7e8;
+  --qlm: #3a7419;
+  --qlm-fonce: #2a5512;
+  --qlm-clair: #e5f3dc;
+  --reussite: #0f6b63;
+  --reussite-clair: #d9f2ee;
+  --soutien: #f6c343;
+  --soutien-fonce: #8a5a00;
+  --soutien-clair: #fff3cd;
+  --gram-verbe: #d62828;
+  --gram-terminaison: var(--gram-verbe);
+  --gram-determinant: #1a72c2;
+  --gram-nom: #c93a80;
+  --gram-adjectif: #2b8035;
+  --gram-pronom: #7438a0;
+  --gram-sujet: #6b7486;
+  --gram-auxiliaire-etre: #ffe94d;
+  --focus: var(--encre);
+  --espace-1: 4px;
+  --espace-2: 8px;
+  --espace-3: 12px;
+  --espace-4: 16px;
+  --espace-6: 24px;
+  --espace-8: 32px;
+  --espace-12: 48px;
+  --arrondi-petit: 10px;
+  --arrondi: 18px;
+  --arrondi-grand: 28px;
+  --arrondi-pilule: 999px;
+  --ombre-carte: 0 4px 0 rgba(29, 39, 68, 0.10);
+  --ombre-flottante: 0 12px 28px rgba(29, 39, 68, 0.18);
+  --ombre-titre: 2px 2px 0 rgba(29, 39, 68, 0.18);
+  --cible-min: 48px;
+  --cible: 56px;
+  --cible-grande: 72px;
+  --bord: 3px;
+  --socle: 5px;
+  --font-titre: "KGRed Hands", "Chewy", "Comic Sans MS", cursive;
+  --font-texte: "Fredoka", "Trebuchet MS", system-ui, sans-serif;
+  --font-lecture: "Andika", "Fredoka", system-ui, sans-serif;
+}
+
+/* ---------- page : le cahier quadrillé ---------- */
+body { margin: 0; font-family: var(--font-texte, "Fredoka", "Trebuchet MS", system-ui, sans-serif); color: var(--encre, #1d2744); background: var(--papier, #f2f9f7); font-size: 20px; line-height: 1.5; }
+.coco-page {
+  background-color: var(--papier, #f2f9f7);
+  background-image: linear-gradient(var(--papier-grille, #d6ece7) 1px, transparent 1px), linear-gradient(90deg, var(--papier-grille, #d6ece7) 1px, transparent 1px);
+  background-size: 24px 24px;
+  color: var(--encre, #1d2744);
+}
+.coco-pad { padding: var(--espace-6, 24px); }
+.coco-row { display: flex; flex-wrap: wrap; gap: var(--espace-4, 16px); align-items: center; }
+.coco-titre { text-shadow: var(--ombre-titre, 2px 2px 0 rgba(29, 39, 68, 0.18)); font-family: var(--font-titre, "KGRed Hands", "Chewy", "Comic Sans MS", cursive); font-weight: 400; margin: 0; text-wrap: balance; }
+:where(button, a, [tabindex]):focus-visible { outline: 3px solid var(--focus, #1d2744); outline-offset: 3px; }
+
+/* ---------- boutons : un socle 3D = « je peux appuyer » ---------- */
+.coco-btn {
+  --c: var(--lagon, #0f8e9f); --c-fonce: var(--lagon-fonce, #095c67); --c-texte: var(--sur-couleur, #ffffff);
+  font: 600 20px/24px var(--font-texte, "Fredoka", "Trebuchet MS", system-ui, sans-serif); min-height: var(--cible, 56px); padding: 0 var(--espace-6, 24px);
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--espace-2, 8px);
+  border: var(--bord, 3px) solid var(--c-fonce); border-radius: var(--arrondi, 18px);
+  background: var(--c); color: var(--c-texte);
+  box-shadow: 0 var(--socle, 5px) 0 var(--c-fonce); margin-bottom: var(--socle, 5px);
+  cursor: pointer; transition: transform .12s ease, box-shadow .12s ease;
+}
+.coco-btn:active, .coco-btn.is-appui { transform: translateY(var(--socle, 5px)); box-shadow: 0 0 0 var(--c-fonce); }
+.coco-btn img { width: 28px; height: 28px; }
+.coco-btn--grand { min-height: var(--cible-grande, 72px); font-size: 24px; padding: 0 var(--espace-8, 32px); }
+.coco-btn--secondaire { --c: var(--carte, #ffffff); --c-fonce: var(--lagon, #0f8e9f); --c-texte: var(--lagon-fonce, #095c67); }
+.coco-btn--soutien { --c: var(--soutien, #f6c343); --c-fonce: var(--soutien-fonce, #8a5a00); --c-texte: var(--encre, #1d2744); }
+.coco-btn--icone { width: var(--cible, 56px); padding: 0; }
+.coco-btn[disabled] { --c: var(--carte, #ffffff); --c-fonce: var(--trait, #73849c); --c-texte: var(--encre-douce, #4a5573); cursor: not-allowed; box-shadow: none; transform: none; }
+
+/* ---------- cartes d'activité ---------- */
+.coco-carte {
+  text-decoration: none; --c: var(--lagon, #0f8e9f); --c-fonce: var(--lagon-fonce, #095c67); --c-clair: var(--lagon-clair, #d5f1f4);
+  display: grid; grid-template-columns: auto 1fr; gap: var(--espace-4, 16px); align-items: center;
+  text-align: left; font: inherit; color: var(--encre, #1d2744);
+  background: var(--carte, #ffffff); border: var(--bord, 3px) solid var(--c); border-radius: var(--arrondi, 18px);
+  padding: var(--espace-6, 24px); box-shadow: 0 var(--socle, 5px) 0 var(--c-fonce); cursor: pointer;
+}
+.coco-carte .coco-carte-vignette { width: 88px; height: 88px; border-radius: 50%; background: var(--c-clair); display: grid; place-items: center; overflow: hidden; }
+.coco-carte .coco-carte-vignette img { width: 100%; height: 100%; object-fit: contain; }
+.coco-carte .coco-carte-etape { font: 500 16px/22px var(--font-texte, "Fredoka", "Trebuchet MS", system-ui, sans-serif); color: var(--encre-douce, #4a5573); }
+.coco-carte h3 { font: 400 26px/30px var(--font-titre, "KGRed Hands", "Chewy", "Comic Sans MS", cursive); color: var(--c); margin: 2px 0 4px; }
+.coco-carte p { margin: 0; font-size: 18px; line-height: 26px; color: var(--encre-douce, #4a5573); }
+.coco-carte--francais { --c: var(--francais, #2456a6); --c-fonce: var(--francais-fonce, #1a3f7d); --c-clair: var(--francais-clair, #e3ecfb); }
+.coco-carte--anglais { --c: var(--anglais, #6a3d9a); --c-fonce: var(--anglais-fonce, #4c2a70); --c-clair: var(--anglais-clair, #efe7f8); }
+.coco-carte--maths { --c: var(--maths, #c0262d); --c-fonce: var(--maths-fonce, #8f1c22); --c-clair: var(--maths-clair, #fde7e8); }
+.coco-carte--qlm { --c: var(--qlm, #3a7419); --c-fonce: var(--qlm-fonce, #2a5512); --c-clair: var(--qlm-clair, #e5f3dc); }
+.coco-carte.is-fait .coco-carte-etape::after { content: " · fait ✓"; color: var(--reussite, #0f6b63); font-weight: 600; }
+
+/* ---------- bulle de consigne ---------- */
+.coco-bulle { display: flex; align-items: flex-end; gap: var(--espace-3, 12px); }
+.coco-bulle-perso { width: 112px; flex: none; }
+.coco-bulle-perso img { width: 100%; height: auto; display: block; }
+.coco-bulle-texte {
+  position: relative; flex: 1; min-width: 0; background: var(--carte, #ffffff); border: var(--bord, 3px) solid var(--lagon, #0f8e9f);
+  border-radius: var(--arrondi, 18px); padding: var(--espace-4, 16px) var(--espace-6, 24px); display: flex; gap: var(--espace-4, 16px); align-items: center;
+}
+.coco-bulle-texte::before { content: ""; position: absolute; left: -14px; bottom: 22px; width: 22px; height: 22px; background: var(--carte, #ffffff); border-left: var(--bord, 3px) solid var(--lagon, #0f8e9f); border-bottom: var(--bord, 3px) solid var(--lagon, #0f8e9f); transform: rotate(45deg); }
+.coco-bulle-texte b { font-weight: 700; }
+.coco-bulle-texte p { margin: 0; flex: 1; font: 400 22px/30px var(--font-texte, "Fredoka", "Trebuchet MS", system-ui, sans-serif); }
+.coco-ecouter { flex: none; width: var(--cible, 56px); height: var(--cible, 56px); border-radius: 50%; border: var(--bord, 3px) solid var(--lagon, #0f8e9f); background: var(--lagon-clair, #d5f1f4); display: grid; place-items: center; cursor: pointer; padding: 0; }
+.coco-ecouter img { width: 30px; height: 30px; }
+
+/* ---------- retours ---------- */
+.coco-retour { display: flex; gap: var(--espace-4, 16px); align-items: center; border-radius: var(--arrondi-grand, 28px); border: var(--bord, 3px) solid; padding: var(--espace-4, 16px) var(--espace-6, 24px); box-shadow: var(--ombre-flottante, 0 12px 28px rgba(29, 39, 68, 0.18)); }
+.coco-retour img.coco-retour-perso { width: 96px; height: auto; flex: none; }
+.coco-retour h4 { margin: 0 0 4px; font: 400 28px/32px var(--font-titre, "KGRed Hands", "Chewy", "Comic Sans MS", cursive); display: flex; align-items: center; gap: var(--espace-2, 8px); }
+.coco-retour p { margin: 0; font-size: 20px; line-height: 28px; }
+.coco-retour .coco-retour-actions { margin-left: auto; display: flex; gap: var(--espace-3, 12px); flex-wrap: wrap; }
+.coco-retour--bravo { background: var(--reussite-clair, #d9f2ee); border-color: var(--reussite, #0f6b63); }
+.coco-retour--bravo h4 { color: var(--reussite, #0f6b63); }
+.coco-retour--revoir { background: var(--soutien-clair, #fff3cd); border-color: var(--soutien-fonce, #8a5a00); }
+.coco-retour--revoir h4 { color: var(--soutien-fonce, #8a5a00); }
+.coco-retour--astuce { background: var(--soutien-clair, #fff3cd); border-color: var(--soutien, #f6c343); box-shadow: none; }
+.coco-retour--astuce h4 { color: var(--encre, #1d2744); font-family: var(--font-texte, "Fredoka", "Trebuchet MS", system-ui, sans-serif); font-weight: 600; font-size: 20px; }
+.coco-pastille-icone { width: 36px; height: 36px; border-radius: 50%; display: inline-grid; place-items: center; color: var(--sur-couleur, #ffffff); font: 700 22px/1 var(--font-texte, "Fredoka", "Trebuchet MS", system-ui, sans-serif); }
+.coco-retour--bravo .coco-pastille-icone { background: var(--reussite, #0f6b63); }
+.coco-retour--revoir .coco-pastille-icone { background: var(--soutien, #f6c343); color: var(--encre, #1d2744); }
+
+/* ---------- langue ---------- */
+.coco-langue { display: inline-flex; border: var(--bord, 3px) solid var(--encre, #1d2744); border-radius: var(--arrondi-pilule, 999px); overflow: hidden; background: var(--carte, #ffffff); }
+.coco-langue button { font: 700 18px/1 var(--font-texte, "Fredoka", "Trebuchet MS", system-ui, sans-serif); min-height: var(--cible-min, 48px); min-width: 72px; border: 0; background: transparent; color: var(--encre, #1d2744); display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; padding: 0 var(--espace-4, 16px); }
+.coco-langue button .coco-drapeau { width: 22px; height: 14px; border-radius: 3px; display: inline-block; box-shadow: 0 0 0 1.5px var(--encre, #1d2744); }
+.coco-langue button[aria-pressed="true"][data-langue="fr"] { background: var(--francais, #2456a6); color: var(--sur-couleur, #ffffff); }
+.coco-langue button[aria-pressed="true"][data-langue="en"] { background: var(--anglais, #6a3d9a); color: var(--sur-couleur, #ffffff); }
+.coco-drapeau--fr { background: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 3 2%22 preserveAspectRatio=%22none%22%3E%3Cpath fill=%22%23002654%22 d=%22M0 0h1v2H0z%22/%3E%3Cpath fill=%22%23fff%22 d=%22M1 0h1v2H1z%22/%3E%3Cpath fill=%22%23CE1126%22 d=%22M2 0h1v2H2z%22/%3E%3C/svg%3E") center / 100% 100% no-repeat; }
+.coco-drapeau--en { background: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 60 30%22 preserveAspectRatio=%22none%22%3E%3CclipPath id=%22t%22%3E%3Cpath d=%22M30,15h30v15zv15h-30zh-30v-15zv-15h30z%22/%3E%3C/clipPath%3E%3Cpath d=%22M0,0v30h60v-30z%22 fill=%22%23012169%22/%3E%3Cpath d=%22M0,0L60,30M60,0L0,30%22 stroke=%22%23fff%22 stroke-width=%226%22/%3E%3Cpath d=%22M0,0L60,30M60,0L0,30%22 clip-path=%22url%28%23t%29%22 stroke=%22%23C8102E%22 stroke-width=%224%22/%3E%3Cpath d=%22M30,0v30M0,15h60%22 stroke=%22%23fff%22 stroke-width=%2210%22/%3E%3Cpath d=%22M30,0v30M0,15h60%22 stroke=%22%23C8102E%22 stroke-width=%226%22/%3E%3C/svg%3E") center / 100% 100% no-repeat; }
+.coco-badge-langue { font: 700 14px/1 var(--font-texte, "Fredoka", "Trebuchet MS", system-ui, sans-serif); letter-spacing: .04em; padding: 5px 8px; border-radius: var(--arrondi-petit, 10px); color: var(--sur-couleur, #ffffff); }
+.coco-badge-langue--fr { background: var(--francais, #2456a6); }
+.coco-badge-langue--en { background: var(--anglais, #6a3d9a); }
+
+/* ---------- étiquettes de grammaire (code des leçons) ---------- */
+.coco-etiquette {
+  --g: var(--encre, #1d2744);
+  font: 700 34px/42px var(--font-lecture, "Andika", "Fredoka", system-ui, sans-serif); color: var(--encre, #1d2744); background: var(--carte, #ffffff);
+  border: var(--bord, 3px) solid var(--trait, #73849c); border-radius: var(--arrondi-petit, 10px);
+  min-height: var(--cible, 56px); padding: 4px var(--espace-3, 12px); display: inline-flex; align-items: center; gap: var(--espace-2, 8px); cursor: pointer;
+}
+.coco-etiquette.is-choisi { border-color: var(--lagon, #0f8e9f); box-shadow: 0 0 0 3px var(--lagon-clair, #d5f1f4); }
+.coco-etiquette[data-nature] { border-color: var(--g); }
+.coco-etiquette[data-nature] .coco-nature { font: 700 15px/1 var(--font-texte, "Fredoka", "Trebuchet MS", system-ui, sans-serif); color: var(--sur-couleur, #ffffff); background: var(--g); border-radius: 8px; padding: 6px 7px; }
+.coco-etiquette[data-nature="verbe"] { --g: var(--gram-verbe, #d62828); }
+.coco-etiquette[data-nature="determinant"] { --g: var(--gram-determinant, #1a72c2); }
+.coco-etiquette[data-nature="nom"] { --g: var(--gram-nom, #c93a80); }
+.coco-etiquette[data-nature="adjectif"] { --g: var(--gram-adjectif, #2b8035); }
+.coco-etiquette[data-nature="pronom"] { --g: var(--gram-pronom, #7438a0); }
+.coco-term { color: var(--gram-terminaison, #d62828); }
+.coco-aux-etre { background: var(--gram-auxiliaire-etre, #ffe94d); padding: 0 4px; border-radius: 4px; }
+.coco-sujet { font: 700 14px/1 var(--font-texte, "Fredoka", "Trebuchet MS", system-ui, sans-serif); letter-spacing: .06em; color: var(--sur-couleur, #ffffff); background: var(--gram-sujet, #6b7486); padding: 5px 8px; border-radius: 6px; }
+.coco-negation { color: var(--gram-verbe, #d62828); border: 2.5px solid var(--gram-verbe, #d62828); border-radius: 999px; padding: 0 8px; font-weight: 700; }
+
+/* ---------- progression : des galets, pas un score ---------- */
+.coco-progression { display: inline-flex; gap: 8px; align-items: center; list-style: none; margin: 0; padding: 0; }
+.coco-progression li { width: 22px; height: 18px; border-radius: 50%; border: 2.5px solid var(--lagon, #0f8e9f); background: var(--carte, #ffffff); }
+.coco-progression li.is-fait { background: var(--lagon, #0f8e9f); }
+.coco-progression li.is-encours { background: var(--lagon-clair, #d5f1f4); transform: scale(1.25); }
+
+/* ---------- navigation ---------- */
+.coco-onglets { display: flex; flex-wrap: wrap; gap: var(--espace-2, 8px); }
+.coco-onglet { text-decoration: none; --c: var(--lagon, #0f8e9f); --c-clair: var(--lagon-clair, #d5f1f4); font: 400 24px/1 var(--font-titre, "KGRed Hands", "Chewy", "Comic Sans MS", cursive); min-height: var(--cible-min, 48px); padding: 0 var(--espace-4, 16px); border: var(--bord, 3px) solid var(--c); border-radius: var(--arrondi, 18px) var(--arrondi, 18px) var(--arrondi-petit, 10px) var(--arrondi-petit, 10px); background: var(--carte, #ffffff); color: var(--c); display: inline-flex; align-items: center; gap: var(--espace-2, 8px); cursor: pointer; }
+.coco-onglet[aria-current="page"] { background: var(--c); color: var(--sur-couleur, #ffffff); }
+.coco-onglet--francais { --c: var(--francais, #2456a6); } .coco-onglet--anglais { --c: var(--anglais, #6a3d9a); } .coco-onglet--maths { --c: var(--maths, #c0262d); } .coco-onglet--qlm { --c: var(--qlm, #3a7419); }
+
+/* ---------- mouvement ---------- */
+@keyframes coco-pop { 0% { transform: scale(.92); } 60% { transform: scale(1.04); } 100% { transform: scale(1); } }
+@keyframes coco-hesite { 0%, 100% { transform: translateX(0); } 30% { transform: translateX(-4px); } 60% { transform: translateX(4px); } }
+.coco-anim-pop { animation: coco-pop .25s ease-out; }
+.coco-anim-hesite { animation: coco-hesite .3s ease-in-out; }
+@media (prefers-reduced-motion: reduce) { .coco-anim-pop, .coco-anim-hesite { animation: none; } .coco-btn { transition: none; } }
