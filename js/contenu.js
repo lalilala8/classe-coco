@@ -57,7 +57,8 @@ window.COCO_CONTENU = {
         { nom: { fr: "Grandeurs et mesures", en: "Measures" }, sequences: [
           [{ fr: "Mesurer des longueurs", en: "Measuring length" }],
           [{ fr: "La monnaie et les prix", en: "Money and prices" }, "demo", "monnaie"],
-          [{ fr: "Mesurer des durées · lire l'heure", en: "Time · telling the time" }, "ancien"],
+          [{ fr: "Mesurer des durées · l'heure digitale", en: "Time · digital clocks" }],
+          [{ fr: "Mesurer des durées · l'heure à aiguilles", en: "Time · telling the time" }, "demo", "heure"],
           [{ fr: "Mesurer des masses", en: "Measuring mass" }], [{ fr: "Mesurer des capacités", en: "Measuring capacity" }]
         ] },
         { nom: { fr: "Espace et géométrie", en: "Geometry" }, sequences: [
@@ -114,6 +115,13 @@ window.COCO_CONTENU = {
     objectif: { fr: "Je sais payer un prix avec les pièces et les billets du pays.", en: "I can pay a price with the coins and notes we use here." },
     pieces: [1, 2, 5, 10, 20, 50, 100],
     prix: 100, minPieces: 2, defiPieces: 6
+  },
+
+  /* ---------- Maths · P5 séquence 2 : lire l'heure à aiguilles (module du site v0, repris et bilingue) ---------- */
+  heure: {
+    matiere: "maths",
+    titre: { fr: "Lire l'heure à aiguilles", en: "Telling the time" },
+    objectif: { fr: "Je sais lire l'heure sur une horloge à aiguilles.", en: "I can tell the time on a clock with hands." }
   },
 
   /* ---------- Orthographe : les mots invariables (module du site v0, repris) ---------- */

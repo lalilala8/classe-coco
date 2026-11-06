@@ -388,3 +388,75 @@ body.mode-classe .site { max-width: none; padding-block: 12px 24px; }
 .ens-pb--francais { border-color: var(--francais); }
 .ens-pb--francais b { color: var(--francais); }
 @media (max-width: 600px) { .mi-mot { font-size: 32px; padding: 8px 18px; } .mi-famille { grid-template-columns: 1fr; } }
+
+/* ---------- Maths : lire l'heure à aiguilles (code des leçons GM6-GM7 : heures en rouge, minutes en bleu, D-65) ---------- */
+:root { --heure-h: #c4301f; --heure-m: #1a5fa8; }
+.hr-h { color: var(--heure-h); }
+.hr-m { color: var(--heure-m); }
+.hr-clk { display: block; width: 100%; max-width: 300px; margin: 0 auto; }
+.hr-clk.out { max-width: 440px; }
+.hr-clk[data-drag] { cursor: grab; touch-action: none; }
+.hr-cf { fill: #fff; stroke: var(--lagon); stroke-width: 4; }
+.hr-tk { stroke: var(--encre); stroke-width: 1.2; }
+.hr-tb { stroke-width: 3; }
+.hr-cn, .hr-cm { pointer-events: none; text-anchor: middle; }
+.hr-cn { font: 700 17px var(--font-texte); fill: var(--encre); }
+.hr-cm { font: 600 9px var(--font-texte); fill: var(--heure-m); }
+.hr-cn.hl, .hr-cm.hl { fill: #fff; stroke: #fff; stroke-width: 4.5px; stroke-linejoin: round; }
+.hr-hhl { stroke: var(--heure-h); stroke-linecap: round; }
+.hr-mhl { stroke: var(--heure-m); stroke-linecap: round; }
+.hr-cc { fill: var(--encre); }
+.hr-clk [data-action] { cursor: pointer; }
+.hr-clk [data-action]:hover .hr-hhl, .hr-clk [data-action]:hover .hr-mhl { filter: drop-shadow(0 0 3px rgba(29, 39, 68, .45)); }
+.hr-clk.montre-hh .hr-hhl, .hr-clk.montre-mh .hr-mhl, .hl-hh .hr-hhl, .hl-mh .hr-mhl { stroke-width: 12px; filter: drop-shadow(0 0 4px rgba(246, 195, 67, .9)); }
+.hr-lb rect { fill: #fff; stroke: var(--heure-m); stroke-width: 1.6; }
+.hr-lb text { font: 600 11.5px var(--font-texte); text-anchor: middle; fill: var(--heure-m); }
+.hr-lb.on rect { fill: var(--heure-m); }
+.hr-lb.on text { fill: #fff; }
+.hr-wg.el { fill: rgba(26, 95, 168, .16); }
+.hr-wg.left { fill: rgba(246, 195, 67, .38); }
+.hr-lecon { justify-items: stretch; text-align: left; }
+.hr-code p { margin: 0 0 4px; font-size: 20px; }
+.hr-rec { display: grid; grid-template-columns: minmax(260px, 440px) 1fr; gap: 24px; align-items: center; }
+.hr-dig { font: 700 56px/1 var(--font-texte); margin: 0; font-variant-numeric: tabular-nums; }
+.hr-dire { font: 600 24px/32px var(--font-texte); margin: 8px 0; }
+.hr-rem { margin: 4px 0; color: var(--encre-douce); font-size: 18px; }
+.hr-boutons { justify-content: flex-start; margin-top: 10px; }
+.hr-boutons .coco-btn, .hr-reglages .coco-btn--secondaire { min-height: 44px; padding: 0 14px; font-size: 17px; }
+.hr-boutons .coco-btn[aria-pressed="true"], .hr-reglages .coco-btn[aria-pressed="true"] { border-color: var(--maths); background: var(--maths-clair); }
+.retiens.m-maths { background: var(--maths-clair); border-color: var(--maths); }
+.retiens.m-maths h3 { color: var(--maths); }
+.hr-cartes { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.hr-cartes > div { background: var(--carte); border-radius: var(--arrondi-petit); padding: 10px 14px; }
+.hr-cartes p { font-size: 18px; line-height: 26px; margin: 4px 0 0; }
+.hr-choix { font: 700 24px/1.2 var(--font-lecture); }
+.hr-saisie { display: grid; gap: 10px; }
+.hr-saisie p { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; margin: 0; font-size: 20px; }
+.hr-saisie span { min-width: 210px; text-align: right; color: var(--encre-douce); }
+.hr-saisie b { font: 700 30px/1 var(--font-texte); }
+.hr-saisie input { width: 72px; height: var(--cible); border: var(--bord) solid var(--trait); border-radius: var(--arrondi-petit); font: 700 30px/1 var(--font-lecture); text-align: center; color: var(--encre); background: var(--carte); }
+.hr-saisie input:focus { border-color: var(--lagon); outline: none; }
+.hr-mem { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; max-width: 560px; }
+.hr-carte { aspect-ratio: 1; display: grid; place-items: center; padding: 6px; border: var(--bord) solid var(--lagon); border-radius: var(--arrondi); background: var(--lagon); color: #fff; font: 400 34px/1 var(--font-titre); cursor: pointer; box-shadow: 0 var(--socle) 0 var(--lagon-fonce); }
+.hr-carte.up { background: var(--carte); color: var(--encre); font: 600 16px/1.2 var(--font-texte); box-shadow: none; cursor: default; }
+.hr-carte.got { border-color: var(--reussite); background: var(--reussite-clair); }
+.hr-carte .hr-clk { max-width: 100%; }
+.hr-tbi { display: grid; gap: 20px; }
+.hr-tbi-titre { font: 400 34px/38px var(--font-titre); color: var(--maths); margin: 0; }
+.hr-tbi-carte { font: inherit; text-align: left; cursor: pointer; }
+.hr-tbi-carte .coco-carte-vignette .hr-clk { width: 100%; }
+.hr-tbi-dec { display: grid; grid-template-columns: minmax(280px, 520px) 1fr; gap: 24px; align-items: center; }
+.hr-tbi-dec .coco-bulle-texte p { font-size: 28px; line-height: 38px; }
+.hr-tclk .hr-clk { max-width: 520px; }
+.hr-tclk .hr-clk.out { max-width: 620px; }
+.hr-tbi-nav { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between; }
+.hr-tbi-run { display: grid; grid-template-columns: minmax(280px, 520px) 1fr; gap: 28px; align-items: center; }
+.hr-tbi-q { font: 400 40px/46px var(--font-titre); color: var(--maths); margin: 0 0 12px; }
+.hr-tbi-rep { font: 700 34px/42px var(--font-texte); margin: 0 0 8px; }
+.hr-tbi-barre { height: 18px; border-radius: var(--arrondi-pilule); background: var(--lagon-clair); overflow: hidden; margin: 12px 0 6px; }
+.hr-tbi-barre i { display: block; height: 100%; background: var(--lagon); transition: width .25s linear; }
+.hr-tbi-temps { font: 700 40px/1 var(--font-texte); margin: 0 0 16px; }
+.hr-reglages { justify-items: start; text-align: left; }
+.hr-reglages h3 { margin: 0; font: 600 20px/26px var(--font-texte); }
+@media (max-width: 860px) { .hr-rec, .hr-tbi-dec, .hr-tbi-run { grid-template-columns: 1fr; } .hr-saisie span { min-width: 0; text-align: center; width: 100%; } }
+@media (prefers-reduced-motion: reduce) { .hr-tbi-barre i { transition: none; } }

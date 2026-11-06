@@ -505,6 +505,316 @@
       "<section><h2>Ressources pédagogiques</h2><ul>" + li(["A. Ouzoulias, « La mémorisation de l'orthographe lexicale, un enjeu décisif ».", "Éduscol : « Installer les bases de l'orthographe lexicale au cycle 2 » ; « Différentes formes de dictées » (dictée sans erreur) ; « La copie » ; « Lecture et orthographe : un renforcement mutuel »."]) + "</ul></section></article>";
   }
 
+  /* ---------- Maths : lire l'heure à aiguilles (module du v0 repris et rendu bilingue : D-64 à D-67) ---------- */
+  var HE = window.COCO_HEURE;
+  var JEUX_HEURE = {
+    rappel: { perso: "adi", etape: 1, fr: "Je me rappelle", en: "I remember", dfr: "Je retrouve ce que je sais sur l'heure digitale et les durées.", den: "I remember what I know about digital time and durations." },
+    aig: { perso: "waeko", etape: 1, fr: "Quelle aiguille ?", en: "Which hand?", dfr: "Je reconnais la petite et la grande aiguille.", den: "I can tell the short hand from the long hand." },
+    lire: { perso: "leo", etape: 1, fr: "Lis l'horloge", en: "Read the clock", dfr: "Je lis les heures piles, les demi-heures et les quarts d'heure.", den: "I read o’clock, half past, quarter past and quarter to.", niv: [1, 2, 3] },
+    lire2: { perso: "leo", etape: 2, fr: "Lis les minutes", en: "Read the minutes", dfr: "Je lis les minutes de 5 en 5, jusqu'à « moins cinq ».", den: "I read the minutes in fives, up to “five to”.", niv: [4, 5] },
+    regle: { perso: "tao", etape: 2, fr: "Règle l'horloge", en: "Set the clock", dfr: "Je place les aiguilles sur l'heure demandée.", den: "I move the hands to show the time." },
+    hr: { perso: "sari", etape: 2, fr: "Quelle heure est-il ?", en: "What time is it?", dfr: "J'écris l'heure du matin et celle de l'après-midi.", den: "I write the time in the morning and in the afternoon." },
+    mem: { perso: "mei", etape: 2, fr: "Memory des heures", en: "Time pairs", dfr: "Je retrouve les paires : une horloge et son heure écrite.", den: "I match each clock with its time in words." },
+    prob: { perso: "dylan", etape: 3, fr: "Problèmes d'horloge", en: "Clock problems", dfr: "Je résous un problème avec l'heure.", den: "I solve a problem about time." }
+  };
+  var ETAPES_HEURE = { 1: "decouvre", 2: "entraine", 3: "reinvestis" };
+  var HG = null, LH = { h: 4, m: 45 };
+  function heDig(h, m) { return '<span class="hr-h">' + HE.H12(h) + '</span>:<span class="hr-m">' + HE.pad(m) + "</span>"; }
+  function heDire(h, m) { return HE.cap(langue === "en" ? HE.direEn(h, m) : HE.direFr(h, m)); }
+  function heDireMin(h, m) { return langue === "en" ? HE.direEn(h, m) : HE.direFr(h, m); }
+  function heEtiq(x, st) { return HE.etiquette(x[0], x[1], st || "moins", langue); }
+  function heSuite(dernier) { return '<button class="coco-btn coco-btn--grand" type="button" data-action="h-suite">' + (dernier ? (langue === "en" ? "See my score" : "Voir mon score") : t("suivant")) + "</button>"; }
+  function heDemarrer(jeu) {
+    var J = JEUX_HEURE[jeu];
+    HG = { jeu: jeu, i: 0, score: 0, rep: false, choix: -1, msg: "", essais: 0, fin: false };
+    if (jeu === "rappel") HG.qs = HE.RAPPEL;
+    else if (jeu === "aig") HG.qs = HE.questionsAiguille();
+    else if (jeu === "lire" || jeu === "lire2") { HG.niv = J.niv.length === 1 ? J.niv[0] : null; HG.n = 6; if (HG.niv) HG.cur = HE.questionLire(HG.niv); }
+    else if (jeu === "regle") { HG.qs = HE.heuresVariees(5); HG.h = 12; HG.m = 0; }
+    else if (jeu === "hr") { HG.qs = HE.heuresVariees(6); HG.v = {}; }
+    else if (jeu === "mem") { HG.cartes = HE.memory(); HG.ouvertes = []; HG.trouvees = []; HG.coups = 0; }
+    else if (jeu === "prob") HG.qs = HE.PROBLEMES;
+  }
+  function heNombre(jeu) { return jeu === "lire" || jeu === "lire2" ? HG.n : jeu === "mem" ? 6 : HG.qs.length; }
+  function pageSequenceHeure() {
+    var s = C.heure, m = MATIERE.maths, en = langue === "en";
+    var cartes = Object.keys(JEUX_HEURE).map(function (id) {
+      var J = JEUX_HEURE[id];
+      return carte("maths", J.etape + " · " + t(ETAPES_HEURE[J.etape]), en ? J.en : J.fr, en ? J.den : J.dfr, J.perso, "heure-" + id);
+    }).join("") + carte("maths", "4 · " + t("ouvert") + " 1", t("bientot"), en ? "Hands on the same number" : "Les aiguilles sur le même nombre", "dylan", "", true) +
+      carte("maths", "4 · " + t("ouvert") + " 2", t("bientot"), en ? "A quarter turn" : "Un quart de tour", "dylan", "", true);
+    return barre("maths") + '<section class="entete m-maths"><img src="' + IMG(m.perso) + '" alt=""><div><h1>' + esc(tr(s.titre)) + "</h1><p>" + esc(tr(m.nom)) + " · " + (en ? "Measures" : "Grandeurs et mesures") + "</p></div></section>" +
+      '<p class="objectif m-maths">' + t("objectif") + " <b>" + esc(tr(s.objectif)) + "</b></p>" +
+      '<a class="coco-btn coco-btn--secondaire" href="#lecon-heure" style="justify-self:start"><img src="' + PICTO("ampoule") + '" alt="">' + t("lecon") + "</a>" +
+      '<section class="etapes">' + cartes + "</section>";
+  }
+  /* ---------- la leçon (récap interactif du v0) ---------- */
+  function heSortie() {
+    var h = LH.h, m = LH.m, en = langue === "en", mo = HE.H12(h) % 12, ap = mo + 12, ex = "";
+    if (!en && m === 45) ex = '<p class="hr-rem">Il reste un quart d’heure (15 min) avant ' + HE.H12(h + 1) + " h.</p>";
+    if (!en && m > 30 && m !== 45) ex = '<p class="hr-rem">En digital, on lit aussi : ' + (HE.H12(h) === 1 ? "une heure" : ["douze", "une", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf", "dix", "onze"][HE.H12(h) % 12] + " heures") + " " + { 35: "trente-cinq", 40: "quarante", 50: "cinquante", 55: "cinquante-cinq" }[m] + ".</p>";
+    var am = en ? "a.m.: " + mo + ":" + HE.pad(m) + " · p.m.: " + ap + ":" + HE.pad(m) + " (add 12 hours)." : "Le matin : " + mo + ":" + HE.pad(m) + ". L’après-midi ou le soir : " + ap + ":" + HE.pad(m) + " (on ajoute 12 h).";
+    return '<p class="hr-dig">' + heDig(h, m) + '</p><p class="hr-dire">' + esc(typo(heDire(h, m))) + "</p>" + ex + '<p class="hr-rem">' + esc(typo(am)) + "</p>";
+  }
+  function pageLeconHeure() {
+    var m = MATIERE.maths, en = langue === "en", B = function (l, v) { return '<button class="coco-btn coco-btn--secondaire" type="button" data-action="h-lec-m" data-v="' + v + '" aria-pressed="' + (LH.m === v) + '">' + l + "</button>"; };
+    var boutons = en ? [["O’clock", 0], ["Quarter past", 15], ["Half past", 30], ["Quarter to", 45], ["Twenty-five to", 35], ["Twenty to", 40], ["Ten to", 50], ["Five to", 55]]
+      : [["Heure pile", 0], ["Et quart", 15], ["Et demie", 30], ["Moins le quart", 45], ["Moins 25", 35], ["Moins 20", 40], ["Moins 10", 50], ["Moins 5", 55]];
+    var cartes = en ? [["In one day, in one hour", "In one day there are 24 hours. In one hour there are 60 minutes."], ["Quarters and halves", "A quarter of an hour = 15 min. Half an hour = 30 min. At “quarter to”, there is a quarter of an hour left before the next hour."], ["a.m. or p.m.?", "12 hours + 12 hours. For p.m., add 12 hours: 4:00 in the afternoon is 16:00."], ["From twenty-five to … to five to", "After half past, we say how many minutes are left before the next hour: twenty-five to, twenty to, ten to, five to."]]
+      : [["Les durées", "Dans une journée, il y a 24 heures. Dans une heure, il y a 60 minutes."], ["Quarts et demies", "Un quart d’heure = 15 min. Une demi-heure = 30 min. Avec « moins le quart », il reste un quart d’heure avant l’heure suivante."], ["Matin ou après-midi ?", "Pour l’après-midi et le soir, on ajoute 12 h : 4:00 de l’après-midi, c’est 16:00."], ["De moins 25 à moins 5", "Après la demie, on dit combien de minutes il manque avant l’heure suivante : « moins vingt-cinq », « moins vingt », « moins dix », « moins cinq »."]];
+    return barre("maths") + hautJeu(m, "seq-heure", { sous: tr(C.heure.titre), titre: t("lecon") }) +
+      bulle("coralie", en ? "Turn the <b>long hand</b> with your finger and see how we say the time!" : "Fais tourner la <b>grande aiguille</b> avec ton doigt et regarde comment on dit l’heure !") +
+      '<section class="zone m-maths hr-lecon"><div class="hr-code">' + (en ? '<p>The <b class="hr-h">short hand</b> shows the <b class="hr-h">hours</b> (the 12 numbers).</p><p>The <b class="hr-m">long hand</b> shows the <b class="hr-m">minutes</b> (the 60 marks).</p>'
+        : '<p>La <b class="hr-h">petite aiguille</b> indique les <b class="hr-h">heures</b> (représentées par les 12 chiffres).</p><p>La <b class="hr-m">grande aiguille</b> indique les <b class="hr-m">minutes</b> (représentées par les 60 graduations).</p>') + "</div>" +
+      '<div class="hr-rec"><div>' + HE.horloge(LH.h, LH.m, { drag: "lecon", out: true, en: en }) + '<p class="mi-indice">' + (en ? "Turn the long hand with your finger." : "Fais tourner la grande aiguille avec ton doigt.") + "</p></div>" +
+      '<div><div id="hr-sortie">' + heSortie() + '</div><div class="coco-row hr-boutons">' + boutons.map(function (b) { return B(b[0], b[1]); }).join("") + '</div><div class="coco-row hr-boutons"><button class="coco-btn coco-btn--secondaire" type="button" data-action="h-lec-h" data-v="-1">' + (en ? "Hour −" : "Heure −") + '</button><button class="coco-btn coco-btn--secondaire" type="button" data-action="h-lec-h" data-v="1">' + (en ? "Hour +" : "Heure +") + "</button></div></div></div></section>" +
+      '<section class="retiens m-maths"><img src="' + IMG("coralie") + '" alt=""><div><h3>' + (en ? "I remember" : "Je retiens") + '</h3><div class="hr-cartes">' + cartes.map(function (c) { return "<div><b>" + esc(typo(c[0])) + "</b><p>" + esc(typo(c[1])) + "</p></div>"; }).join("") + "</div></div></section>" +
+      '<div class="coco-row"><a class="coco-btn" href="#seq-heure">' + t("versSequence") + "</a></div>";
+  }
+  /* ---------- les jeux ---------- */
+  function heChoix(opts, juste, lib) {
+    return '<div class="coco-row">' + opts.map(function (o, k) {
+      var cls = "coco-etiquette hr-choix" + (HG.rep && k === juste ? " est-juste" : HG.rep && k === HG.choix ? " est-revoir" : "");
+      return '<button class="' + cls + '" type="button" data-action="h-choix" data-v="' + k + '"' + (HG.rep ? " disabled" : "") + ">" + esc(typo(lib(o))) + "</button>";
+    }).join("") + "</div>";
+  }
+  function jeuHeure(jeu) {
+    var J = JEUX_HEURE[jeu], m = MATIERE.maths, en = langue === "en";
+    if (!HG || HG.jeu !== jeu) heDemarrer(jeu);
+    var n = heNombre(jeu), titre = { sous: tr(C.heure.titre) + " · " + J.etape + " · " + t(ETAPES_HEURE[J.etape]), titre: en ? J.en : J.fr };
+    var haut = barre("maths") + hautJeu(m, "seq-heure", titre, jeu === "mem" ? "" : galets(n, HG.fin ? n : HG.i));
+    if (HG.fin) return haut + heBilan();
+    var consigne = "", zone = "", bas = "", dernier = HG.i === n - 1;
+    if (jeu === "rappel") {
+      var q = HG.qs[HG.i]; consigne = en ? "I remember what I learnt about <b>digital time</b>." : "Je me rappelle ce que j'ai appris sur l'<b>heure digitale</b>.";
+      zone = '<p class="phrase">' + esc(typo(tr(q))) + "</p>" + heChoix(q.o, q.a, function (o) { return tr(o); });
+    } else if (jeu === "aig") {
+      var qa = HG.qs[HG.i];
+      consigne = en ? "Tap the <b>" + (qa.t === "hh" ? "short hand" : "long hand") + "</b>." : "Touche <b>" + (qa.t === "hh" ? "la petite aiguille" : "la grande aiguille") + "</b>.";
+      zone = HE.horloge(qa.h, qa.m, { act: HG.rep ? "" : "h-aiguille", en: en, cls: HG.rep ? "montre-" + qa.t : "" });
+    } else if (jeu === "lire" || jeu === "lire2") {
+      if (!HG.niv) return haut + bulle(J.perso, en ? "Choose your <b>level</b>." : "Choisis ton <b>niveau</b>.") + '<section class="zone m-maths"><div class="coco-row">' + J.niv.map(function (v) { return '<button class="coco-btn" type="button" data-action="h-niv" data-v="' + v + '">' + (en ? "Level " : "Niveau ") + v + " · " + esc(tr(HE.NIVEAUX[v])) + "</button>"; }).join("") + "</div></section>";
+      var c = HG.cur; consigne = en ? "What time is it?" : "Quelle heure est-il ?";
+      zone = '<p class="mi-indice">' + (en ? "Level " : "Niveau ") + HG.niv + " · " + esc(tr(HE.NIVEAUX[HG.niv])) + "</p>" + HE.horloge(c.h, c.m, { en: en }) + heChoix(c.opts, c.bonne, function (o) { return heEtiq(o, c.s); });
+    } else if (jeu === "regle") {
+      var r = HG.qs[HG.i]; consigne = en ? "Set the clock to <b>" + esc(HE.direEn(r.h, r.m)) + "</b>." : "Règle l’horloge sur <b>" + esc(typo(HE.etiquette(r.h, r.m, "moins", "fr"))) + "</b>.";
+      zone = '<p class="mi-indice">' + (en ? "Turn the long hand with your finger. Change the hour with the buttons." : "Fais tourner la grande aiguille avec ton doigt. Change l’heure avec les boutons.") + "</p>" + HE.horloge(HG.h, HG.m, { drag: HG.rep ? "" : "regle", en: en }) +
+        (HG.rep ? "" : '<div class="coco-row"><button class="coco-btn coco-btn--secondaire" type="button" data-action="h-regle-h" data-v="-1">' + (en ? "Hour −" : "Heure −") + '</button><button class="coco-btn coco-btn--secondaire" type="button" data-action="h-regle-h" data-v="1">' + (en ? "Hour +" : "Heure +") + "</button></div>");
+      bas = HG.rep ? "" : '<button class="coco-btn coco-btn--grand" type="button" data-action="h-regle-ok">' + t("valider") + "</button>";
+    } else if (jeu === "hr") {
+      var x = HG.qs[HG.i], v = HG.v, champ = function (k) { return '<input type="text" inputmode="numeric" maxlength="2" autocomplete="off" data-h-champ="' + k + '" value="' + esc(v[k] || "") + '"' + (HG.rep ? " disabled" : "") + ' aria-label="' + k + '">'; };
+      consigne = en ? "Read the clock. Write the time in the <b>morning</b>, then in the <b>afternoon or evening</b>." : "Lis l’horloge. Écris l’heure du <b>matin</b>, puis celle de l’<b>après-midi ou du soir</b>.";
+      zone = HE.horloge(x.h, x.m, { en: en }) + '<div class="hr-saisie"><p><span>' + (en ? "morning (a.m.)" : "le matin") + "</span>" + champ("mh") + "<b>:</b>" + champ("mm") + "</p><p><span>" + (en ? "afternoon / evening (p.m.)" : "l’après-midi / le soir") + "</span>" + champ("ph") + "<b>:</b>" + champ("pm") + "</p></div>";
+      bas = HG.rep ? "" : '<button class="coco-btn coco-btn--grand" type="button" data-action="h-hr-ok">' + t("valider") + "</button>";
+    } else if (jeu === "mem") {
+      consigne = en ? "Find the pairs: a <b>clock</b> and its <b>time in words</b>." : "Retrouve les paires : une <b>horloge</b> et son <b>heure écrite</b>.";
+      zone = '<p class="mi-indice">' + (en ? "Moves: " : "Coups : ") + HG.coups + '</p><div class="hr-mem">' + HG.cartes.map(function (cd, k) {
+        var vu = HG.ouvertes.indexOf(k) >= 0 || HG.trouvees.indexOf(cd.p) >= 0;
+        return '<button class="hr-carte' + (vu ? " up" : "") + (HG.trouvees.indexOf(cd.p) >= 0 ? " got" : "") + '" type="button" data-action="h-carte" data-v="' + k + '"' + (vu ? " disabled" : "") + ' aria-label="' + (vu ? esc(cd.t === "c" ? (en ? "Clock" : "Horloge") : HE.etiquette(cd.h, cd.m, "moins", langue)) : (en ? "Hidden card" : "Carte cachée")) + '">' +
+          (vu ? (cd.t === "c" ? HE.horloge(cd.h, cd.m, { deco: true }) : esc(typo(HE.etiquette(cd.h, cd.m, "moins", langue)))) : "?") + "</button>";
+      }).join("") + "</div>";
+    } else if (jeu === "prob") {
+      var p = HG.qs[HG.i]; consigne = en ? "Read the problem, look at the clock, then choose the answer." : "Lis le problème, regarde l’horloge, puis choisis la bonne réponse.";
+      zone = '<p class="phrase">' + esc(typo(tr(p))) + "</p>" + HE.horloge(p.h, p.m, { en: en }) + heChoix(p.o, p.a, function (o) { return tr(o); });
+    }
+    return haut + bulle(J.perso, consigne) + '<section class="zone m-maths hr-zone">' + zone + "</section>" + '<div class="retour-zone">' + HG.msg + "</div>" +
+      (bas ? '<footer class="jeu-bas"><span></span>' + bas + "</footer>" : "");
+  }
+  function heBilan() {
+    var en = langue === "en", jeu = HG.jeu, n = heNombre(jeu), sc = HG.score;
+    marquerFait("heure-" + jeu);
+    var txt = jeu === "mem" ? (en ? "You found all the pairs in " + HG.coups + " moves." : "Tu as trouvé toutes les paires en " + HG.coups + " coups.")
+      : jeu === "rappel" ? (en ? "You remembered " + sc + " out of " + n + ". Now, let’s read the clock!" : "Tu t’es rappelé " + sc + " réponse" + (sc > 1 ? "s" : "") + " sur " + n + ". Maintenant, lisons l’horloge !")
+      : (en ? "You got " + sc + " out of " + n + " right first time." : "Tu as réussi " + sc + " sur " + n + " du premier coup.");
+    return '<section class="bilan"><img src="' + IMG("kakou") + '" alt=""><h2>' + t("fini") + "</h2>" + (jeu === "mem" || jeu === "rappel" ? "" : '<p class="mi-score">' + sc + " / " + n + "</p>") + "<p>" + esc(typo(txt)) + "</p>" +
+      '<div class="coco-row">' + (jeu === "rappel" ? '<a class="coco-btn" href="#heure-aig">' + (en ? "Which hand?" : "Quelle aiguille ?") + "</a>" : '<button class="coco-btn" type="button" data-action="h-rejouer">' + t("rejouer") + "</button>") +
+      ((jeu === "lire" || jeu === "lire2") && JEUX_HEURE[jeu].niv.length > 1 ? '<button class="coco-btn coco-btn--secondaire" type="button" data-action="h-niveaux">' + (en ? "Change level" : "Changer de niveau") + "</button>" : "") +
+      '<a class="coco-btn coco-btn--secondaire" href="#seq-heure">' + t("versSequence") + "</a></div></section>";
+  }
+  function heFinir(ok, txt) {
+    var en = langue === "en", dernier = HG.i === heNombre(HG.jeu) - 1;
+    HG.rep = true; if (ok && HG.essais === 0) HG.score++;
+    HG.msg = ok ? retour("bravo", t("bravo"), txt, heSuite(dernier)) : retour("revoir", t("pasEncore"), txt, heSuite(dernier));
+  }
+  function actionHeure(a, el) {
+    var en = langue === "en";
+    if (a === "h-lec-m") { LH.m = +el.dataset.v; return; }
+    if (a === "h-lec-h") { LH.h = ((LH.h + +el.dataset.v) % 12 + 12) % 12 || 12; return; }
+    if (!HG) return;
+    var jeu = HG.jeu;
+    if (a === "h-rejouer") { heDemarrer(jeu); return; }
+    if (a === "h-niveaux") { heDemarrer(jeu); return; }
+    if (a === "h-niv") { HG.niv = +el.dataset.v; HG.i = 0; HG.score = 0; HG.cur = HE.questionLire(HG.niv); return; }
+    if (a === "h-suite" && HG.rep) {
+      if (HG.i >= heNombre(jeu) - 1) { HG.fin = true; return; }
+      HG.i++; HG.rep = false; HG.choix = -1; HG.msg = ""; HG.essais = 0;
+      if (jeu === "lire" || jeu === "lire2") HG.cur = HE.questionLire(HG.niv);
+      if (jeu === "regle") { HG.h = 12; HG.m = 0; }
+      if (jeu === "hr") HG.v = {};
+      return;
+    }
+    if (a === "h-choix" && !HG.rep) {
+      var k = +el.dataset.v; HG.choix = k;
+      if (jeu === "rappel") { var q = HG.qs[HG.i]; heFinir(k === q.a, esc(typo(en ? q.len : q.lfr))); }
+      else if (jeu === "prob") { var p = HG.qs[HG.i]; heFinir(k === p.a, k === p.a ? "" : (en ? "The answer is: " : "La bonne réponse est : ") + "<b>" + esc(typo(tr(p.o[p.a]))) + "</b>."); }
+      else { var c = HG.cur, juste = k === c.bonne; heFinir(juste, "<b>" + esc(typo(juste ? heDire(c.h, c.m) : (en ? "It is " : "Il est ") + heDireMin(c.h, c.m))) + "</b>" + (juste ? "." : ". " + (en ? "Look at the short hand first, then the long hand." : "Regarde d’abord la petite aiguille, puis la grande."))); }
+      return;
+    }
+    if (a === "h-aiguille" && !HG.rep) {
+      var qa = HG.qs[HG.i], ok = el.dataset.v === qa.t;
+      heFinir(ok, ok ? (en ? "That’s the right hand!" : "C’est la bonne aiguille !") : (en ? "This is the " + (qa.t === "hh" ? "long hand, for the minutes. The short hand shows the hours." : "short hand, for the hours. The long hand shows the minutes.") : "Celle-ci, c’est " + (qa.t === "hh" ? "la grande aiguille, celle des minutes. La petite aiguille indique les heures." : "la petite aiguille, celle des heures. La grande aiguille indique les minutes.")));
+      return;
+    }
+    if (a === "h-regle-h" && !HG.rep) { HG.h = ((HG.h + +el.dataset.v) % 12 + 12) % 12 || 12; HG.msg = ""; return; }
+    if (a === "h-regle-ok" && !HG.rep) {
+      var r = HG.qs[HG.i], bon = HG.h % 12 === r.h % 12 && HG.m === r.m;
+      if (bon) heFinir(true, en ? "The clock is set correctly!" : "L’horloge est bien réglée !");
+      else if (HG.essais >= 1) { HG.h = r.h; HG.m = r.m; heFinir(false, (en ? "Look: this is " : "Regarde : voici ") + "<b>" + esc(typo(heDireMin(r.h, r.m))) + "</b>."); }
+      else { HG.essais++; HG.msg = retour("revoir", t("pasEncore"), HG.h % 12 !== r.h % 12 ? (en ? "Look at the <b>short hand</b>: is it on the right hour?" : "Regarde la <b>petite aiguille</b> : est-elle sur la bonne heure ?") : (en ? "Look at the <b>long hand</b>: count the minutes in fives." : "Regarde la <b>grande aiguille</b> : compte les minutes de 5 en 5.")); }
+      return;
+    }
+    if (a === "h-hr-ok" && !HG.rep) {
+      var x = HG.qs[HG.i], mo = x.h % 12, v = HG.v, nb = function (s) { var d = String(s || "").replace(/\D/g, ""); return d === "" ? NaN : +d; };
+      var ok2 = nb(v.mh) === mo && nb(v.mm) === x.m && nb(v.ph) === mo + 12 && nb(v.pm) === x.m, sol = mo + ":" + HE.pad(x.m) + " · " + (mo + 12) + ":" + HE.pad(x.m);
+      if (ok2) heFinir(true, (en ? "Morning: " : "Le matin : ") + mo + ":" + HE.pad(x.m) + ". " + (en ? "Afternoon or evening: " : "L’après-midi ou le soir : ") + (mo + 12) + ":" + HE.pad(x.m) + ".");
+      else if (HG.essais >= 1) heFinir(false, (en ? "The answer is " : "La réponse est ") + "<b>" + sol + "</b>.");
+      else { HG.essais++; HG.msg = retour("revoir", t("pasEncore"), en ? "Look carefully at the hands. For p.m., don’t forget to add 12 hours." : "Regarde bien les aiguilles. Pour l’après-midi, n’oublie pas d’ajouter 12 h."); }
+      return;
+    }
+    if (a === "h-carte") {
+      var i = +el.dataset.v, cd = HG.cartes[i];
+      if (HG.verrou || HG.ouvertes.indexOf(i) >= 0 || HG.trouvees.indexOf(cd.p) >= 0) return;
+      HG.ouvertes.push(i);
+      if (HG.ouvertes.length === 2) {
+        HG.coups++; var A = HG.cartes[HG.ouvertes[0]], B2 = HG.cartes[HG.ouvertes[1]];
+        if (A.p === B2.p && A.t !== B2.t) { HG.trouvees.push(A.p); HG.ouvertes = []; if (HG.trouvees.length === 6) HG.fin = true; }
+        else { HG.verrou = true; setTimeout(function () { if (HG && HG.jeu === "mem") { HG.ouvertes = []; HG.verrou = false; rendre(); } }, 1200); }
+      }
+    }
+  }
+  /* glisser la grande aiguille (leçon et « Règle l'horloge ») : de 5 en 5 minutes, l'heure suit */
+  var heGlisse = null;
+  function heGlisser(e) {
+    var r = heGlisse.s.getBoundingClientRect(), vb = heGlisse.s.viewBox.baseVal, sx = r.width / vb.width, cx = r.left + (100 - vb.x) * sx, cy = r.top + (100 - vb.y) * sx;
+    var ang = Math.atan2(e.clientX - cx, -(e.clientY - cy)) * 180 / Math.PI; if (ang < 0) ang += 360;
+    var m = Math.round(ang / 30) * 5 % 60, st = heGlisse.k === "lecon" ? LH : HG; if (!st || m === st.m) return;
+    if (st.m >= 45 && m <= 15) st.h = st.h % 12 + 1; else if (st.m <= 15 && m >= 45) st.h = (st.h + 10) % 12 + 1;
+    st.m = m;
+    heGlisse.s.querySelector(".hr-hh").setAttribute("transform", "rotate(" + ((st.h % 12) * 30 + m / 2) + " 100 100)");
+    heGlisse.s.querySelector(".hr-mh").setAttribute("transform", "rotate(" + m * 6 + " 100 100)");
+    if (heGlisse.k === "lecon") { var o = document.getElementById("hr-sortie"); if (o) o.innerHTML = heSortie(); document.querySelectorAll('[data-action="h-lec-m"]').forEach(function (b) { b.setAttribute("aria-pressed", String(+b.dataset.v === m)); }); }
+    if (heGlisse.k === "regle" && HG && HG.msg) { HG.msg = ""; var z = document.querySelector(".retour-zone"); if (z) z.innerHTML = ""; }
+  }
+  document.addEventListener("pointerdown", function (e) { var s = e.target.closest && e.target.closest("svg[data-drag]"); if (!s || !s.dataset.drag) return; heGlisse = { s: s, k: s.dataset.drag }; try { s.setPointerCapture(e.pointerId); } catch (x) {} heGlisser(e); e.preventDefault(); });
+  document.addEventListener("pointermove", function (e) { if (heGlisse) heGlisser(e); });
+  document.addEventListener("pointerup", function () { heGlisse = null; });
+  document.addEventListener("input", function (e) { var el = e.target; if (!el.dataset || el.dataset.hChamp === undefined || !HG) return; var v = el.value.replace(/\D/g, "").slice(0, 2); if (v !== el.value) el.value = v; HG.v[el.dataset.hChamp] = v; });
+
+  /* ---------- au TBI : découverte guidée et ardoises (v0) ---------- */
+  var TB = { part: "menu", step: 0, tot: 180, to: null, cfg: { lvl: 0, n: 8, t: 30 }, run: null, tid: null };
+  function tbAller(d) {
+    var n = Math.max(0, Math.min(HE.DECOUVERTE.length - 1, TB.step + d)); if (n === TB.step) return; TB.step = n;
+    var s = HE.DECOUVERTE[n], cible = (s.h % 12) * 60 + s.m;
+    if (d < 0) { TB.tot = cible; TB.to = null; return; }
+    var cur = ((TB.tot % 720) + 720) % 720, av = ((cible - cur) % 720 + 720) % 720; TB.to = av ? { tot: TB.tot + av } : null;
+  }
+  function tbAnimer() {
+    if (TB.part !== "dec" || !TB.to) return;
+    var s = document.querySelector(".hr-tclk svg"), a = TB.tot, b = TB.to.tot; TB.tot = b; TB.to = null; if (!s) return;
+    var hh = s.querySelector(".hr-hh"), mh = s.querySelector(".hr-mh"), t0 = performance.now(), D = Math.min(2600, 900 + (b - a) * 3);
+    var reduit = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var f = function (now) { var k = reduit ? 1 : Math.min(1, (now - t0) / D), e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2, x = a + (b - a) * e;
+      hh.setAttribute("transform", "rotate(" + x * 0.5 + " 100 100)"); mh.setAttribute("transform", "rotate(" + x * 6 + " 100 100)"); if (k < 1) requestAnimationFrame(f); };
+    requestAnimationFrame(f);
+  }
+  function tbMinuteur() {
+    clearInterval(TB.tid); var r = TB.run; if (!r || !r.t || r.phase !== "ecrit") return;
+    TB.tid = setInterval(function () {
+      var r = TB.run; if (!r || TB.part !== "run" || r.phase !== "ecrit" || r.pause) return;
+      r.reste = Math.max(0, r.reste - 0.25); var el = document.getElementById("tb-temps"), b = document.getElementById("tb-barre");
+      if (el) el.textContent = Math.ceil(r.reste) + " s"; if (b) b.style.width = (r.reste / r.t * 100) + "%";
+      if (r.reste <= 0) { clearInterval(TB.tid); r.phase = "leve"; rendre(); }
+    }, 250);
+  }
+  function tbLancer() {
+    var c = TB.cfg, qs = [];
+    for (var i = 0; i < c.n; i++) { var lv = c.lvl || HE.rint(1, 5); qs.push({ h: HE.rint(1, 12), m: HE.pk(HE.NIVEAUX[lv].m) }); }
+    TB.run = { i: 0, qs: qs, phase: "ecrit", t: c.t, reste: c.t, pause: false }; TB.part = "run"; tbMinuteur();
+  }
+  function tbSuite() {
+    if (TB.part === "dec") { if (TB.step >= HE.DECOUVERTE.length - 1) TB.part = "menu"; else tbAller(1); }
+    else if (TB.part === "run") { var r = TB.run;
+      if (r.phase === "ecrit") { r.phase = "leve"; clearInterval(TB.tid); }
+      else if (r.phase === "leve") r.phase = "voir";
+      else { r.i++; if (r.i >= r.qs.length) { TB.part = "fin"; clearInterval(TB.tid); } else { r.phase = "ecrit"; r.reste = r.t; tbMinuteur(); } } }
+  }
+  function tbRetour() { clearInterval(TB.tid); if (TB.part === "menu") location.hash = "#enseignante"; else TB.part = "menu"; }
+  function pageTbiHeure() {
+    var en = langue === "en", P = TB.part, D = HE.DECOUVERTE;
+    var titres = { menu: en ? "On the whiteboard: the whole class" : "Au TBI : toute la classe", dec: en ? "Discovering the time" : "Découverte de l’heure", setup: en ? "Show me your boards" : "Le jeu des ardoises", run: en ? "Boards up!" : "Ardoises levées !", fin: en ? "Well done, everyone!" : "Bravo la classe !" };
+    var haut = '<header class="k-haut"><div class="coco-row"><button class="coco-btn coco-btn--secondaire" type="button" data-action="t-retour">← ' + (P === "menu" ? (en ? "Teacher area" : "Espace enseignante") : (en ? "Whiteboard menu" : "Menu du TBI")) + '</button><h1 class="hr-tbi-titre">' + titres[P] + '</h1></div><div class="coco-row">' +
+      (P === "run" ? '<button class="coco-btn coco-btn--secondaire" type="button" data-action="t-pause">' + (TB.run && TB.run.pause ? (en ? "Resume" : "Reprendre") : "Pause") + "</button>" : "") +
+      '<button class="coco-btn coco-btn--secondaire" type="button" data-action="t-plein">' + (en ? "Full screen" : "Plein écran") + "</button>" + choixLangue() + "</div></header>";
+    var corps = "";
+    if (P === "menu") corps = bulle("coralie", en ? "We discover the time together, then we practise with our boards!" : "On découvre l’heure ensemble, puis on s’entraîne aux ardoises !") +
+      '<section class="etapes"><button class="coco-carte coco-carte--maths hr-tbi-carte" type="button" data-action="t-dec"><span class="coco-carte-vignette">' + HE.horloge(3, 15, { deco: true }) + '</span><span><span class="coco-carte-etape">1 · ' + (en ? "To start" : "Pour commencer") + "</span><h3>" + titres.dec + "</h3><p>" + (en ? "An interactive lesson, step by step, with moving hands." : "Une leçon interactive, étape par étape, avec les aiguilles qui bougent.") + "</p></span></button>" +
+      '<button class="coco-carte coco-carte--maths hr-tbi-carte" type="button" data-action="t-setup"><span class="coco-carte-vignette">' + HE.horloge(8, 45, { deco: true }) + '</span><span><span class="coco-carte-etape">2 · ' + (en ? "To practise" : "Pour s’entraîner") + "</span><h3>" + titres.setup + "</h3><p>" + (en ? "A clock, a board, a timer: everyone plays, then we correct together." : "Une horloge, une ardoise, un minuteur : toute la classe joue, puis on corrige.") + "</p></span></button></section>" +
+      '<p class="po-note">' + (en ? "Space or right arrow: next. Left arrow: back. P: pause. F: full screen. Esc: back." : "Espace ou flèche droite : suite. Flèche gauche : retour. P : pause. F : plein écran. Échap : retour.") + "</p>";
+    else if (P === "dec") { var s = D[TB.step];
+      corps = '<div class="hr-tbi-dec"><div class="hr-tclk hl-' + (s.hl || "aucune") + '">' + HE.horloge(s.h, s.m, { out: !!s.out, en: en, ha: TB.tot * 0.5, ma: TB.tot * 6, extra: s.wedge ? HE.secteur(s.m, s.wedge) : "" }) + "</div>" + bulle("coralie", esc(typo(tr(s)))) + "</div>" +
+        '<div class="hr-tbi-nav"><button class="coco-btn coco-btn--secondaire" type="button" data-action="t-prec"' + (TB.step === 0 ? " disabled" : "") + ">← " + (en ? "Back" : "Précédent") + '</button><ol class="coco-progression">' + D.map(function (_, k) { return '<li class="' + (k < TB.step ? "is-fait" : k === TB.step ? "is-encours" : "") + '"></li>'; }).join("") + '</ol><button class="coco-btn coco-btn--grand" type="button" data-action="t-suite">' + (TB.step === D.length - 1 ? (en ? "Finish" : "Terminer") : (en ? "Next step →" : "Étape suivante →")) + "</button></div>"; }
+    else if (P === "setup") { var c = TB.cfg, B = function (g, v, l) { return '<button class="coco-btn coco-btn--secondaire" type="button" data-action="t-cfg" data-k="' + g + '" data-v="' + v + '" aria-pressed="' + (c[g] === v) + '">' + l + "</button>"; };
+      var niv = [en ? "All levels" : "Tous les niveaux"].concat([1, 2, 3, 4, 5].map(function (k) { return tr(HE.NIVEAUX[k]); }));
+      corps = bulle("margouille", en ? "Choose the settings, then start the game!" : "Choisis les réglages, puis lance le jeu !") + '<section class="zone m-maths hr-reglages"><h3>' + (en ? "Level" : "Niveau") + '</h3><div class="coco-row">' + niv.map(function (l, k) { return B("lvl", k, esc(l)); }).join("") +
+        "</div><h3>" + (en ? "Number of questions" : "Nombre de questions") + '</h3><div class="coco-row">' + [5, 8, 10].map(function (k) { return B("n", k, k); }).join("") +
+        "</div><h3>" + (en ? "Time to write" : "Temps pour écrire") + '</h3><div class="coco-row">' + [[0, en ? "No timer" : "Sans minuteur"], [15, "15 s"], [30, "30 s"], [45, "45 s"], [60, "1 min"]].map(function (x) { return B("t", x[0], x[1]); }).join("") +
+        '</div><button class="coco-btn coco-btn--grand" type="button" data-action="t-lancer">' + (en ? "Let’s go!" : "C’est parti !") + "</button></section>"; }
+    else if (P === "run") { var r = TB.run, q = r.qs[r.i], mm = q.m, droite;
+      if (r.phase === "ecrit") droite = '<p class="hr-tbi-q">' + (en ? "Write the time on your board." : "Écris l’heure sur ton ardoise.") + "</p>" + (r.t ? '<div class="hr-tbi-barre"><i id="tb-barre" style="width:' + (r.reste / r.t * 100).toFixed(1) + '%"></i></div><p class="hr-tbi-temps" id="tb-temps">' + Math.ceil(r.reste) + " s</p>" : "");
+      else if (r.phase === "leve") droite = '<p class="hr-tbi-q">' + (en ? "Boards up!" : "Ardoises levées !") + "</p>";
+      else droite = '<p class="hr-tbi-rep">' + esc(typo(heDire(q.h, mm))) + '</p><p class="hr-dig">' + heDig(q.h, mm) + '</p><p class="hr-rem">' + (mm === 0 ? (en ? "The long hand is on the 12: it is exactly on the hour." : "La grande aiguille est sur le 12 : c’est l’heure pile.") : (en ? "The long hand is on the " + mm / 5 + ": " + mm / 5 + " × 5 = " + mm + " minutes." : "La grande aiguille est sur le " + mm / 5 + " : " + mm / 5 + " × 5 = " + mm + " minutes.")) + "</p>";
+      corps = '<p class="mi-indice">' + t("question")(r.i + 1, r.qs.length) + '</p><div class="hr-tbi-run"><div class="hr-tclk">' + HE.horloge(q.h, mm, { en: en, extra: r.phase === "voir" && mm > 0 ? HE.secteur(mm, mm > 30 ? "left" : "el") : "" }) + "</div><div>" + droite +
+        '<button class="coco-btn coco-btn--grand" type="button" data-action="t-suite">' + (r.phase === "ecrit" ? (en ? "Boards up" : "Ardoises levées") : r.phase === "leve" ? (en ? "Let’s correct" : "On corrige") : (en ? "Next question" : "Question suivante")) + " →</button></div></div>"; }
+    else corps = '<section class="bilan"><img src="' + IMG("kakou") + '" alt=""><h2>' + titres.fin + '</h2><div class="coco-row"><button class="coco-btn" type="button" data-action="t-lancer">' + t("rejouer") + '</button><button class="coco-btn coco-btn--secondaire" type="button" data-action="t-retour">' + (en ? "Whiteboard menu" : "Menu du TBI") + "</button></div></section>";
+    return '<div class="hr-tbi">' + haut + corps + "</div>";
+  }
+  function actionTbi(a, el) {
+    if (a === "t-dec") { TB.part = "dec"; TB.step = 0; TB.tot = 180; TB.to = null; }
+    else if (a === "t-setup") TB.part = "setup";
+    else if (a === "t-cfg") TB.cfg[el.dataset.k] = +el.dataset.v;
+    else if (a === "t-lancer") tbLancer();
+    else if (a === "t-suite") tbSuite();
+    else if (a === "t-prec") tbAller(-1);
+    else if (a === "t-retour") tbRetour();
+    else if (a === "t-pause") { if (TB.run) TB.run.pause = !TB.run.pause; }
+    else if (a === "t-plein") { try { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen(); } catch (x) {} }
+  }
+  document.addEventListener("keydown", function (e) {
+    if (route() !== "tbi-heure") return; var tg = e.target; if (tg && /INPUT|TEXTAREA/.test(tg.tagName)) return;
+    if (e.key === " " || e.key === "ArrowRight") { e.preventDefault(); tbSuite(); rendre(); }
+    else if (e.key === "ArrowLeft" && TB.part === "dec") { e.preventDefault(); tbAller(-1); rendre(); }
+    else if (e.key === "Escape") { tbRetour(); rendre(); }
+    else if (e.key === "p" || e.key === "P") { if (TB.run) TB.run.pause = !TB.run.pause; rendre(); }
+    else if (e.key === "f" || e.key === "F") actionTbi("t-plein");
+  });
+  function ficheHeure() {
+    var li = function (a) { return a.map(function (x) { return "<li>" + x + "</li>"; }).join(""); };
+    return '<div class="no-print coco-row"><a class="coco-btn coco-btn--secondaire" href="#enseignante">← Espace enseignante</a><a class="coco-btn" href="#tbi-heure">Au TBI</a><a class="coco-btn coco-btn--secondaire" href="#seq-heure">Voir la séquence</a><button class="coco-btn coco-btn--secondaire" type="button" data-action="imprimer">Imprimer la fiche</button></div>' +
+      '<article class="fiche m-maths"><small>Maths · Grandeurs et mesures (durées) · Cycle 2, CE2, niveau de maîtrise 3</small><h1>Lire l’heure à aiguilles</h1>' +
+      '<p class="f-source">Module du premier site de la classe, repris et rendu bilingue. Programmation : période 5, semaine 2 (du 2 au 6 novembre), séquence 2. Leçons : GM5 (lire l’heure digitale), GM6 (lire l’heure sur le cadran), GM7 (Read the time).</p>' +
+      '<div class="f-deux"><section><h2>Attendus de fin de cycle</h2><ul>' + li(["Comparer, estimer, mesurer des longueurs, des masses, des contenances, des durées.", "Utiliser le lexique, les unités, les instruments de mesures spécifiques de ces grandeurs.", "Résoudre des problèmes impliquant des longueurs, des masses, des contenances, des durées, des prix."]) + "</ul><p><b>Compétences travaillées :</b> chercher, modéliser, représenter, raisonner, calculer, communiquer.</p></section>" +
+      "<section><h2>Repères de progressivité (niveau 3)</h2><ul>" + li(["Indiquer l’heure sur un affichage à aiguilles (heure entière, demi-heure, « et quart », « moins le quart », multiples de 5 jusqu’à « vingt-cinq » et de « moins vingt-cinq » à « moins cinq »).", "Connaître et utiliser la relation 1 h = 60 min pour comparer des durées.", "Connaître et utiliser des rapports simples de durée : 1 demi-heure = 30 min ; 1 quart d’heure = 15 min.", "Résoudre des problèmes de mesurage et de comparaison avec les unités usuelles de durée."]) + "</ul></section></div>" +
+      '<section><h2>Les séances et les activités du site</h2><table class="f-table"><tbody>' + [
+        ["Séance 1", "Reconnaître les différentes aiguilles d’une horloge ; lire les heures piles sur le cadran.", "Je me rappelle · Quelle aiguille ? · Lis l’horloge (niveau 1)"],
+        ["Séance 2", "Lire les demi-heures ; lire les quarts d’heure (et quart, moins le quart) sur le cadran.", "Lis l’horloge (niveaux 2 et 3) · Règle l’horloge · Quelle heure est-il ? · Memory des heures"],
+        ["Séance 3", "Lire les minutes multiples de 5 (jusqu’à « vingt-cinq », puis de « moins vingt-cinq » à « moins cinq »). Objectif ajusté aux repères du niveau 3 : la lecture de toutes les minutes n’y figure pas.", "Lis les minutes (niveaux 4 et 5) · Règle l’horloge · Quelle heure est-il ? · Memory des heures"],
+        ["Séances 1 à 3", "Au TBI, en classe entière : découvrir la lecture de l’heure étape par étape, puis s’entraîner collectivement aux ardoises.", "Au TBI"],
+        ["Séance 4", "Résoudre un problème simple sur l’heure à aiguilles.", "Problèmes d’horloge"],
+        ["Séance 5", "Évaluation : objectifs précédents.", "Toutes les activités"]].map(function (r) { return "<tr><th>" + r[0] + "</th><td>" + r[1] + "</td><td>" + r[2] + "</td></tr>"; }).join("") + "</tbody></table></section>" +
+      "<section><h2>Conseils d’utilisation</h2><ul>" + li(["Code des leçons : la petite aiguille et les heures en rouge, la grande aiguille et les minutes en bleu.", "Toutes les activités existent en français et en anglais britannique (o’clock, quarter past, half past, quarter to, twenty-five to…) : la bascule FR / EN est en haut à droite.", "« Je retiens » reprend les cartes « À retenir » du premier site. Les leçons GM5 à GM7 n’ont pas encore été transmises : la leçon sera ajustée à leur réception.", "Au TBI : Espace ou flèche droite = suite, flèche gauche = retour, P = pause du minuteur, F = plein écran, Échap = retour.", "Les deux problèmes ouverts de la séquence (« Les aiguilles sur le même nombre », « Un quart de tour ») seront ajoutés plus tard."]) + "</ul></section>" +
+      '<p class="f-source">Sources : programmation périodique P5 2026, leçons de maths de la classe, programmes de Nouvelle-Calédonie 2021, repères de progressivité de la DENC (cycle 2, mathématiques).</p></article>';
+  }
+
   /* ---------- problèmes ouverts (Sullivan) : briques communes ---------- */
   var PO = window.COCO_PO;
   function po(id) { return PO.problemes[id]; }
@@ -768,6 +1078,7 @@
         return '<div class="ens-pb"><img src="' + IMG(p.perso) + '" alt=""><div><b>' + esc(p.titre.fr) + "</b><small>« " + esc(p.question.fr) + ' »</small></div><div class="coco-row"><a class="coco-btn" href="#classe-' + id + '">Projeter en classe</a><a class="coco-btn coco-btn--secondaire" href="#fiche-' + id + '">La fiche</a><a class="coco-btn coco-btn--secondaire" href="#feuille-' + id + '">Feuille de recherche</a></div></div>';
       }).join("") + "</div></section>";
     }).join("");
+    seqs = '<section class="domaine"><h2>Maths · Lire l’heure à aiguilles</h2><div class="ens-liste"><div class="ens-pb"><img src="' + IMG("coralie") + '" alt=""><div><b>Lire l’heure à aiguilles</b><small>Découverte guidée et jeu des ardoises au TBI ; leçon, 8 activités</small></div><div class="coco-row"><a class="coco-btn" href="#tbi-heure">Au TBI</a><a class="coco-btn coco-btn--secondaire" href="#fiche-heure">La fiche</a><a class="coco-btn coco-btn--secondaire" href="#seq-heure">Voir la séquence</a></div></div></div></section>' + seqs;
     seqs = '<section class="domaine"><h2>Français · Les mots invariables</h2><div class="ens-liste"><div class="ens-pb ens-pb--francais"><img src="' + IMG("coralie") + '" alt=""><div><b>Les mots invariables</b><small>7 activités, de « Je me rappelle » à la dictée sans erreur</small></div><div class="coco-row"><a class="coco-btn" href="#fiche-mots">La fiche</a><a class="coco-btn coco-btn--secondaire" href="#seq-mots">Voir la séquence</a></div></div></div></section>' + seqs;
     return barre("") + '<section class="entete m-maths"><img src="' + IMG("coralie") + '" alt=""><div><h1>Espace enseignante</h1><p>Les problèmes ouverts : fiche, feuille de recherche et projection en classe.</p></div></section>' +
       '<details class="ens-sullivan"><summary>La démarche de Peter Sullivan, en bref</summary><p><b>Une « bonne » question</b> demande plus qu\'un rappel, fait apprendre l\'élève (et renseigne l\'enseignant), et accepte plusieurs réponses.</p><p><b>4 temps :</b> poser la question (sans donner de méthode) · chercher par 2 ou 3 (coup de pouce si on bloque, relance si on a fini) · mettre en commun (la classe donne son avis avant la vérification) · faire un résumé.</p><p><b>Évaluer sans note :</b> 5 niveaux de compréhension et une liste de comportements à observer.</p><p class="f-source">Sullivan & Lilburn, « Activités ouvertes en mathématiques », Chenelière, 2010, chapitres 1 à 4.</p></details>' +
@@ -906,10 +1217,12 @@
   /* ---------- routeur ---------- */
   var ROUTES = {
     accueil: pageAccueil, "seq-verbe": function () { return pageSequence("verbe"); }, "seq-mots": pageSequenceMots, "lecon-mots": pageLeconMots, "fiche-mots": ficheMots,
+    "seq-heure": pageSequenceHeure, "lecon-heure": pageLeconHeure, "fiche-heure": ficheHeure, "tbi-heure": pageTbiHeure,
     "lecon-verbe": pageLecon, "jeu-verbe-decouvre": jeuDecouvre, "jeu-verbe-chasse": jeuChasse, enseignante: pageEnseignante, banque: pageBanque
   };
   C.matieres.forEach(function (m) { ROUTES[m.id] = function () { return pageMatiere(m.id); }; });
   Object.keys(JEUX_MOTS).forEach(function (j) { ROUTES["mots-" + j] = function () { return jeuMots(j); }; });
+  Object.keys(JEUX_HEURE).forEach(function (j) { ROUTES["heure-" + j] = function () { return jeuHeure(j); }; });
   Object.keys(PO.sequences).forEach(function (sid) { ROUTES["seq-" + sid] = function () { return pageSequence(sid); }; });
   Object.keys(PO.problemes).forEach(function (id) {
     ROUTES["po-" + id] = function () { return poAutonome(id); };
@@ -921,11 +1234,12 @@
   var derniere = "";
   function rendre() {
     var r = route();
-    if (r !== derniere) { if (r === "jeu-verbe-decouvre") D = null; if (r === "jeu-verbe-chasse") H = null; if (/^po-/.test(r)) A = null; if (/^mots-/.test(r)) G = null; try { if (MO.peutParler) speechSynthesis.cancel(); } catch (x) {} if (/^classe-/.test(r)) { K = null; clearInterval(minuteur); } if (r === "lecon-verbe") L = { carte: {}, moment: "present", machine: 0, phrase: 0 }; window.scrollTo(0, 0); derniere = r; }
+    if (r !== derniere) { if (r === "jeu-verbe-decouvre") D = null; if (r === "jeu-verbe-chasse") H = null; if (/^po-/.test(r)) A = null; if (/^mots-/.test(r)) G = null; if (/^heure-/.test(r)) HG = null; if (r === "tbi-heure") { clearInterval(TB.tid); TB.part = "menu"; } try { if (MO.peutParler) speechSynthesis.cancel(); } catch (x) {} if (/^classe-/.test(r)) { K = null; clearInterval(minuteur); } if (r === "lecon-verbe") L = { carte: {}, moment: "present", machine: 0, phrase: 0 }; window.scrollTo(0, 0); derniere = r; }
     document.documentElement.lang = langue;
-    document.body.classList.toggle("mode-classe", /^classe-/.test(r));
+    document.body.classList.toggle("mode-classe", /^classe-|^tbi-/.test(r));
     document.body.classList.toggle("mode-papier", /^(fiche|feuille)-/.test(r));
     app.innerHTML = ROUTES[r]();
+    if (r === "tbi-heure") tbAnimer();
     majMinuteur();
   }
   document.addEventListener("click", function (e) {
@@ -938,6 +1252,8 @@
     else if (/^a-/.test(a)) actionAutonome(a, el);
     else if (/^k-/.test(a)) actionClasse(a, el);
     else if (/^m-/.test(a)) actionMots(a, el);
+    else if (/^h-/.test(a)) actionHeure(a, el);
+    else if (/^t-/.test(a)) actionTbi(a, el);
     else if (/^bq-/.test(a)) { if (a === "bq-reglages") e.preventDefault(); actionBanque(a, el); }
     else if (a === "imprimer") { try { window.print(); } catch (x) {} return; }
     else if (/^l-/.test(a)) actionLecon(a, el);
