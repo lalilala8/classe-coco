@@ -101,7 +101,7 @@
     { fr: "Combien d'heures y a-t-il dans une journée ?", en: "How many hours are there in one day?", o: ["12", "24", "60", "10"], a: 1,
       lfr: "Dans une journée, il y a 24 heures.", len: "In one day there are 24 hours." },
     { fr: "Le réveil affiche 16:00. C'est…", en: "The clock shows 16:00. It is…", o: [{ fr: "le matin", en: "in the morning" }, { fr: "l'après-midi", en: "in the afternoon" }], a: 1,
-      lfr: "Pour l'après-midi et le soir, on ajoute 12 h : 4:00 de l'après-midi, c'est 16:00.", len: "For p.m., add 12 hours: 4:00 in the afternoon is 16:00." }
+      lfr: "L'après-midi et le soir : de 12h à 24h. 4:00 de l'après-midi → 16:00 (+12h).", len: "Afternoon and evening: from 12:00 to 24:00. 4:00 in the afternoon → 16:00 (+12 h)." }
   ];
 
   /* ---------- problèmes d'horloge (v0, séance 4) ---------- */

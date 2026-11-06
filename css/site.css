@@ -436,6 +436,7 @@ body.mode-classe .site { max-width: none; padding-block: 12px 24px; }
 .hr-cartes { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
 .hr-cartes > div { background: var(--carte); border-radius: var(--arrondi-petit); padding: 10px 14px; }
 .hr-cartes p { font-size: 18px; line-height: 26px; margin: 4px 0 0; }
+.hr-cartes .hr-complement { border: 2px dashed var(--trait); }
 .hr-choix { font: 700 24px/1.2 var(--font-lecture); }
 .hr-saisie { display: grid; gap: 10px; }
 .hr-saisie p { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; margin: 0; font-size: 20px; }
