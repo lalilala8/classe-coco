@@ -505,6 +505,20 @@
       "<section><h2>Ressources pédagogiques</h2><ul>" + li(["A. Ouzoulias, « La mémorisation de l'orthographe lexicale, un enjeu décisif ».", "Éduscol : « Installer les bases de l'orthographe lexicale au cycle 2 » ; « Différentes formes de dictées » (dictée sans erreur) ; « La copie » ; « Lecture et orthographe : un renforcement mutuel »."]) + "</ul></section></article>";
   }
 
+  /* ---------- Maths : lire l'heure digitale (P5 séquence 1) : pour l'instant, les jeux collectifs au TBI (D-73) ---------- */
+  var JEU_DIGITAL = "jeux/heure-digitale-ardoise.html";
+  function pageSequenceDigitale() {
+    var s = C.digitale, m = MATIERE.maths, en = langue === "en";
+    var tbi = '<a class="coco-carte coco-carte--maths" href="' + JEU_DIGITAL + '"><span class="coco-carte-vignette"><img src="' + IMG("tehani") + '" alt=""></span><span><span class="coco-carte-etape">' + (en ? "On the whiteboard · sessions 1 to 3" : "Au TBI · séances 1 à 3") + "</span><h3>" + (en ? "Boards up!" : "L’heure à l’ardoise") + "</h3><p>" +
+      (en ? "Whole-class games with the teacher: slates, thumbs and fingers. In French." : "Jeux collectifs avec la maîtresse : à l’ardoise, avec les pouces ou avec les doigts.") + "</p></span></a>";
+    var cartes = tbi + carte("maths", "1 · " + t("decouvre"), t("bientot"), en ? "I remember, then I discover." : "Je me rappelle, puis je découvre.", "adi", "", true) +
+      carte("maths", "2 · " + t("entraine"), t("bientot"), "", "tao", "", true) + carte("maths", "3 · " + t("reinvestis"), t("bientot"), "", "nina", "", true) +
+      carte("maths", "4 · " + t("ouvert") + " 1", t("bientot"), en ? "The magic time" : "L’heure magique", "adi", "", true) +
+      carte("maths", "4 · " + t("ouvert") + " 2", t("bientot"), en ? "Half an hour of reading" : "La demi-heure de lecture", "adi", "", true);
+    return barre("maths") + '<section class="entete m-maths"><img src="' + IMG(m.perso) + '" alt=""><div><h1>' + esc(tr(s.titre)) + "</h1><p>" + esc(tr(m.nom)) + " · " + (en ? "Measures" : "Grandeurs et mesures") + "</p></div></section>" +
+      '<p class="objectif m-maths">' + t("objectif") + " <b>" + esc(tr(s.objectif)) + "</b></p>" + '<section class="etapes">' + cartes + "</section>";
+  }
+
   /* ---------- Maths : lire l'heure à aiguilles (module du v0 repris et rendu bilingue : D-64 à D-67) ---------- */
   var HE = window.COCO_HEURE;
   var JEUX_HEURE = {
@@ -1087,6 +1101,7 @@
         return '<div class="ens-pb"><img src="' + IMG(p.perso) + '" alt=""><div><b>' + esc(p.titre.fr) + "</b><small>« " + esc(p.question.fr) + ' »</small></div><div class="coco-row"><a class="coco-btn" href="#classe-' + id + '">Projeter en classe</a><a class="coco-btn coco-btn--secondaire" href="#fiche-' + id + '">La fiche</a><a class="coco-btn coco-btn--secondaire" href="#feuille-' + id + '">Feuille de recherche</a></div></div>';
       }).join("") + "</div></section>";
     }).join("");
+    seqs = '<section class="domaine"><h2>Maths · Lire l’heure digitale</h2><div class="ens-liste"><div class="ens-pb"><img src="' + IMG("tehani") + '" alt=""><div><b>L’heure à l’ardoise</b><small>10 jeux collectifs au TBI pour les séances 1 à 3 (outil de la collègue, adapté)</small></div><div class="coco-row"><a class="coco-btn" href="' + JEU_DIGITAL + '">Au TBI</a><a class="coco-btn coco-btn--secondaire" href="#seq-digitale">Voir la séquence</a></div></div></div></section>' + seqs;
     seqs = '<section class="domaine"><h2>Maths · Lire l’heure à aiguilles</h2><div class="ens-liste"><div class="ens-pb"><img src="' + IMG("coralie") + '" alt=""><div><b>Lire l’heure à aiguilles</b><small>Découverte guidée et jeu des ardoises au TBI ; leçon, 8 activités</small></div><div class="coco-row"><a class="coco-btn" href="#tbi-heure">Au TBI</a><a class="coco-btn coco-btn--secondaire" href="#fiche-heure">La fiche</a><a class="coco-btn coco-btn--secondaire" href="#seq-heure">Voir la séquence</a></div></div></div></section>' + seqs;
     seqs = '<section class="domaine"><h2>Français · Les mots invariables</h2><div class="ens-liste"><div class="ens-pb ens-pb--francais"><img src="' + IMG("coralie") + '" alt=""><div><b>Les mots invariables</b><small>7 activités, de « Je me rappelle » à la dictée sans erreur</small></div><div class="coco-row"><a class="coco-btn" href="#fiche-mots">La fiche</a><a class="coco-btn coco-btn--secondaire" href="#seq-mots">Voir la séquence</a></div></div></div></section>' + seqs;
     return barre("") + '<section class="entete m-maths"><img src="' + IMG("coralie") + '" alt=""><div><h1>Espace enseignante</h1><p>Les problèmes ouverts : fiche, feuille de recherche et projection en classe.</p></div></section>' +
@@ -1226,7 +1241,7 @@
   /* ---------- routeur ---------- */
   var ROUTES = {
     accueil: pageAccueil, "seq-verbe": function () { return pageSequence("verbe"); }, "seq-mots": pageSequenceMots, "lecon-mots": pageLeconMots, "fiche-mots": ficheMots,
-    "seq-heure": pageSequenceHeure, "lecon-heure": pageLeconHeure, "fiche-heure": ficheHeure, "tbi-heure": pageTbiHeure,
+    "seq-heure": pageSequenceHeure, "seq-digitale": pageSequenceDigitale, "lecon-heure": pageLeconHeure, "fiche-heure": ficheHeure, "tbi-heure": pageTbiHeure,
     "lecon-verbe": pageLecon, "jeu-verbe-decouvre": jeuDecouvre, "jeu-verbe-chasse": jeuChasse, enseignante: pageEnseignante, banque: pageBanque
   };
   C.matieres.forEach(function (m) { ROUTES[m.id] = function () { return pageMatiere(m.id); }; });

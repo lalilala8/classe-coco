@@ -12,6 +12,14 @@ body { min-height: 100vh; }
 .barre .coco-onglet--anglais { --c-clair: var(--anglais-clair); }
 .barre .coco-onglet--qlm { --c-clair: var(--qlm-clair); }
 .barre .coco-onglet[aria-current="page"] { background: var(--c); }
+/* relief des onglets : un socle dans la teinte foncée de leur couleur, comme les boutons (demande du 07/11/2026) */
+.barre .coco-onglet { --c-fonce: var(--lagon-fonce); box-shadow: 0 4px 0 var(--c-fonce), 0 6px 10px rgba(29, 39, 68, .12); margin-bottom: 4px; transition: transform .12s ease, box-shadow .12s ease; }
+.barre .coco-onglet--francais { --c-fonce: var(--francais-fonce); }
+.barre .coco-onglet--maths { --c-fonce: var(--maths-fonce); }
+.barre .coco-onglet--anglais { --c-fonce: var(--anglais-fonce); }
+.barre .coco-onglet--qlm { --c-fonce: var(--qlm-fonce); }
+.barre .coco-onglet:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--c-fonce); }
+@media (prefers-reduced-motion: reduce) { .barre .coco-onglet { transition: none; } }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .apercu { font: 500 15px/20px var(--font-texte); color: var(--encre-douce); background: var(--carte); border: 2px dashed var(--trait); border-radius: var(--arrondi-petit); padding: 8px 14px; justify-self: start; }
 
