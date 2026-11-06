@@ -4,7 +4,14 @@ body { min-height: 100vh; }
 .site { max-width: 1100px; margin: 0 auto; padding-block: 20px 56px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: var(--espace-8); }
 .barre { display: flex; justify-content: space-between; align-items: center; gap: var(--espace-4); flex-wrap: wrap; }
 .barre .coco-onglet img { width: 26px; height: 26px; }
-.barre .coco-onglet[aria-current="page"] img { filter: invert(1); }
+.barre .coco-onglet .onglet-maison { width: 26px; height: 26px; flex: none; }
+/* onglets au repos : fond clair de la couleur du texte (demande de l'enseignante, 06/11/2026) */
+.barre .coco-onglet { background: var(--c-clair); }
+.barre .coco-onglet--francais { --c-clair: var(--francais-clair); }
+.barre .coco-onglet--maths { --c-clair: var(--maths-clair); }
+.barre .coco-onglet--anglais { --c-clair: var(--anglais-clair); }
+.barre .coco-onglet--qlm { --c-clair: var(--qlm-clair); }
+.barre .coco-onglet[aria-current="page"] { background: var(--c); }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .apercu { font: 500 15px/20px var(--font-texte); color: var(--encre-douce); background: var(--carte); border: 2px dashed var(--trait); border-radius: var(--arrondi-petit); padding: 8px 14px; justify-self: start; }
 
