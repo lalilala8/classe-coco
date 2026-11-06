@@ -20,6 +20,16 @@ body { min-height: 100vh; }
 .barre .coco-onglet--qlm { --c-fonce: var(--qlm-fonce); }
 .barre .coco-onglet:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--c-fonce); }
 @media (prefers-reduced-motion: reduce) { .barre .coco-onglet { transition: none; } }
+/* sélecteur FR / EN : même police et même relief que les onglets (demande du 07/11/2026) */
+.barre .coco-langue { box-shadow: 0 4px 0 var(--encre), 0 6px 10px rgba(29, 39, 68, .12); margin-bottom: 4px; }
+.barre .coco-langue button { font: 400 22px/1 var(--font-titre); letter-spacing: .02em; }
+/* sous-domaines des pages Français, Maths… : titre dans la couleur de la matière, filet clair (demande du 07/11/2026) */
+.domaine-matiere { --mc: var(--c); --mcf: var(--cf); }
+.domaine.domaine-matiere h2 { display: flex; align-items: center; gap: 12px; color: var(--c); }
+.domaine-matiere h2::before { content: ""; flex: none; width: 14px; height: 14px; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 5px var(--cc); }
+.domaine-matiere h2::after { content: ""; flex: 1; height: 4px; border-radius: 4px; background: var(--cc); }
+.domaine-matiere .seq.est-bientot { border-color: color-mix(in srgb, var(--mc) 35%, var(--carte)); background: color-mix(in srgb, var(--cc) 35%, var(--carte)); }
+.domaine-matiere .seq.est-bientot small { color: var(--mcf); }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .apercu { font: 500 15px/20px var(--font-texte); color: var(--encre-douce); background: var(--carte); border: 2px dashed var(--trait); border-radius: var(--arrondi-petit); padding: 8px 14px; justify-self: start; }
 
@@ -476,3 +486,4 @@ body.mode-classe .site { max-width: none; padding-block: 12px 24px; }
 .hr-reglages h3 { margin: 0; font: 600 20px/26px var(--font-texte); }
 @media (max-width: 860px) { .hr-rec, .hr-tbi-dec, .hr-tbi-run { grid-template-columns: 1fr; } .hr-saisie span { min-width: 0; text-align: center; width: 100%; } }
 @media (prefers-reduced-motion: reduce) { .hr-tbi-barre i { transition: none; } }
+@media (max-width: 520px) { .barre .coco-langue button { font-size: 20px; min-width: 64px; } .domaine.domaine-matiere h2 { font-size: 28px; line-height: 32px; } }

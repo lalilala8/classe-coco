@@ -101,7 +101,7 @@
   function pageMatiere(id) {
     var m = MATIERE[id];
     var corps = m.domaines.length ? m.domaines.map(function (d) {
-      return '<section class="domaine"><h2>' + esc(tr(d.nom)) + '</h2><div class="sequences">' + d.sequences.map(function (s, i) {
+      return '<section class="domaine domaine-matiere ' + m.classe + '"><h2>' + esc(tr(d.nom)) + '</h2><div class="sequences">' + d.sequences.map(function (s, i) {
         var nom = tr(s[0]), statut = s[1] || "bientot";
         if (statut === "demo") return '<a class="seq" href="' + (s[2].charAt(0) === "#" ? s[2] : "#seq-" + s[2]) + '" style="--c:var(--' + id + ');--cf:var(--' + id + '-fonce)"><small>' + (i + 1) + " · " + t("demo") + "</small><b>" + esc(nom) + "</b></a>";
         return '<div class="seq est-bientot"><small>' + (i + 1) + " · " + (statut === "ancien" ? t("ancien") : t("bientot")) + "</small><b>" + esc(nom) + "</b></div>";
