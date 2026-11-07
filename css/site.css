@@ -888,7 +888,6 @@ span.po-billet, span.po-piece { cursor: default; box-shadow: none; }
 .et-etoile { width: 44px; height: 44px; display: block; margin: 0 auto; }
 .et-etoile.et-grande { width: 64px; height: 64px; }
 .et-forme { stroke: #151515; stroke-width: 5; stroke-linejoin: round; }
-.et-points { fill: #1a1a1a; opacity: .7; }
 .et-reflet { fill: none; stroke: #fff; stroke-width: 4; stroke-linecap: round; opacity: .55; }
 .et-visage circle { fill: #151515; } .et-visage .et-sourire { fill: none; stroke: #151515; stroke-width: 2.6; stroke-linecap: round; }
 .et-etoile.et-vide .et-forme { fill-opacity: .16; stroke: #9aa3b5; stroke-width: 3; stroke-dasharray: 6 4; }
