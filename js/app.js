@@ -750,6 +750,37 @@
       "<section><h2>Pour prolonger en classe</h2><ul>" + li(["Construire un graphique avec les données de la classe (sport préféré, transport, anniversaires par mois), en lien avec «\u00a0Questionner le monde\u00a0».", "Comparer un tableau et un graphique : lequel permet de voir plus vite le plus grand ?"]) + "</ul></section></div></article>";
   }
 
+  /* fiche enseignante de la séquence « Mesurer des masses » (D-112) */
+  function ficheMasses() {
+    var li = function (a) { return a.map(function (x) { return "<li>" + x + "</li>"; }).join(""); };
+    return '<div class="no-print coco-row"><a class="coco-btn coco-btn--secondaire" href="#ens-sequences">← Séquences d’apprentissage</a><a class="coco-btn coco-btn--secondaire" href="#lecon-masses">La leçon</a><a class="coco-btn coco-btn--secondaire" href="#exos-masses">Fiche d’exercices</a><a class="coco-btn coco-btn--secondaire" href="#seq-masses">Voir la séquence</a><button class="coco-btn coco-btn--secondaire" type="button" data-action="imprimer">Imprimer la fiche</button></div>' +
+      '<article class="fiche m-maths"><small>Maths · Grandeurs et mesures (masses) · Cycle 2, CE2, niveau de maîtrise 3</small><h1>Mesurer des masses</h1>' +
+      '<p class="f-q">Objectif : « ' + esc(C.masses.objectif.fr) + " »</p>" +
+      '<p class="f-source">Programmation de maths de la collègue (D-40) : période 5, séquence 4, semaine 5 (du 23 au 27 novembre 2026). Leçon de classe : GM8 « Les mesures de masses » (2023). Les deux problèmes ouverts viennent de l’outil de la collègue, adaptés (D-109). Leçon, activités et fiche d’exercices du site : D-110, D-111.</p>' +
+      encadreProgramme("masses") +
+      '<section><h2>Les séances et les activités du site</h2><table class="f-table"><thead><tr><th>Séance</th><th>Objectif</th><th>Sur le site</th></tr></thead><tbody>' + [
+        ["Séance 1", "Instruments et unités : on mesure une masse avec une balance ; le gramme, le kilogramme, la tonne ; choisir l’unité qui convient en s’appuyant sur un repère (trombone 1 g, paquet de sucre 1 kg, petite voiture environ 1 t). [CLASSE : programmation de la collègue]", "Revoir la leçon (blocs 1 et 2) · Je me rappelle · Quelle unité ? · Problème ouvert « L’étiquette effacée »"],
+        ["Séances 2 et 3", "1 kg = 1 000 g et 1 t = 1 000 kg : exprimer une même masse avec différentes unités ; problèmes de masse. [CLASSE : programmation de la collègue]", "Revoir la leçon (bloc 3) · C’est pareil que… · Problème ouvert « Le panier d’un kilo »"],
+        ["Séance 4", "Comparer et ranger des masses écrites avec des unités différentes ; résoudre des problèmes. [PROPOSITION]", "Le plus lourd · Problèmes de masses"],
+        ["Séance 5", "Évaluation des objectifs de la séquence. [PROPOSITION]", "Fiche d’exercices (corrigé à part, correction au TBI)"]
+      ].map(function (r) { return "<tr><th>" + r[0] + "</th><td>" + esc(r[1]) + "</td><td>" + esc(r[2]) + "</td></tr>"; }).join("") + "</tbody></table></section>" +
+      '<div class="f-deux"><section><h2>Les erreurs à guetter</h2><ul>' + li([
+        "Pas de repère pour le gramme ou pour la tonne (« un chat de 5 g », « une voiture de 5 kg ») : revenir au trombone, au paquet de sucre, à la petite voiture.",
+        "Plus c’est gros, plus c’est lourd : la taille confondue avec la masse (un ballon de baudruche, une boule de pétanque).",
+        "1 kg lu comme 1 g dans une addition (« sucre + riz = 501 ») : écrire toutes les masses en grammes avant de calculer.",
+        "Comparer les nombres sans regarder l’unité (« 900 g est plus lourd que 2 kg, car 900 > 2 ») : écrire les deux masses dans la même unité.",
+        "« 1 kg 500 g = 1 005 g » : 1 kg, c’est 1 000 g, puis on ajoute les 500 g."]) + "</ul></section>" +
+      "<section><h2>Conseils d’utilisation</h2><ul>" + li([
+        "Les élèves soupèsent avant de calculer : un paquet de sucre de 1 kg et un trombone circulent dans la classe pendant la séance 1.",
+        "Toutes les activités existent en français et en anglais britannique (grams, kilograms, tonnes). En anglais, « Je retiens » est une traduction de GM8, en attendant une leçon anglaise.",
+        "La fiche d’exercices porte un numéro : le même numéro redonne les mêmes exercices, pour corriger au TBI.",
+        "Le site à la maison reste facultatif : jamais de devoir écrit (art. 34)."]) + "</ul></section></div>" +
+      "<section><h2>Pour prolonger en classe</h2><ul>" + li([
+        "Peser de vrais objets avec la balance de Roberval et des masses marquées, puis avec une balance digitale (repères : « il mesure une masse en kilogrammes et grammes ; utilise un instrument adapté »).",
+        "Encadrer une masse par deux nombres entiers d’unités (« ce cartable pèse entre 2 kg et 3 kg ») : ce repère n’est pas encore travaillé sur le site.",
+        "La moitié de 1 kg, c’est 500 g ; 2 kg = 2 × 1 000 g (repères du niveau 3)."]) + "</ul></section>" +
+      '<p class="f-source">Sources : programmation périodique P5 de la collègue, leçon GM8 de la classe, programmes de Nouvelle-Calédonie 2021, repères de progressivité de la DENC (cycle 2, mathématiques, p. 13 et 15), Sullivan & Lilburn, « La masse », p. 78.</p></article>';
+  }
   function ficheDigitale() {
     return '<div class="no-print coco-row"><a class="coco-btn coco-btn--secondaire" href="#ens-sequences">← Séquences d’apprentissage</a><a class="coco-btn" href="' + JEU_DIGITAL + '">Au TBI</a><a class="coco-btn coco-btn--secondaire" href="#seq-digitale">Voir la séquence</a><button class="coco-btn coco-btn--secondaire" type="button" data-action="imprimer">Imprimer la fiche</button></div>' +
       '<article class="fiche m-maths"><small>Maths · Grandeurs et mesures (durées) · CE2 · période 5, séquence 1</small><h1>Lire l’heure digitale</h1>' +
@@ -2408,7 +2439,7 @@
       ensDomaine("m-maths", "Maths · Grandeurs et mesures", [ensLigne("mei", "La monnaie et les prix", "Deux problèmes ouverts", [["Fiche d’exercices", "#exos-monnaie"], ["Voir la séquence", "#seq-monnaie"]])].concat(PO.sequences.monnaie.map(ensPO)).concat([
         ensLigne("tehani", "Lire l’heure digitale", "« L’heure à l’ardoise » : 10 jeux collectifs au TBI pour les séances 1 à 3 (outil de la collègue, adapté)", [["Au TBI", JEU_DIGITAL], ["La fiche", "#fiche-digitale"], ["Fiche d’exercices", "#exos-digitale"], ["Voir la séquence", "#seq-digitale"]])]).concat(PO.sequences.digitale.map(ensPO)).concat([
         ensLigne("coralie", "Lire l’heure à aiguilles", "Découverte guidée et jeu des ardoises au TBI ; leçon, 8 activités", [["Au TBI", "#tbi-heure"], ["La fiche", "#fiche-heure"], ["Fiche d’exercices", "#exos-heure"], ["Voir la séquence", "#seq-heure"]])]).concat(PO.sequences.heure.map(ensPO)).concat([
-        ensLigne("sari", "Mesurer des masses", "Période 5, séquence 4 · leçon GM8, 5 activités, deux problèmes ouverts (outil de la collègue, adapté)", [["La leçon", "#lecon-masses"], ["Fiche d’exercices", "#exos-masses"], ["Voir la séquence", "#seq-masses"]])]).concat(PO.sequences.masses.map(ensPO))) +
+        ensLigne("sari", "Mesurer des masses", "Période 5, séquence 4 · leçon GM8, 5 activités, deux problèmes ouverts (outil de la collègue, adapté)", [["La fiche", "#fiche-masses"], ["La leçon", "#lecon-masses"], ["Fiche d’exercices", "#exos-masses"], ["Voir la séquence", "#seq-masses"]])]).concat(PO.sequences.masses.map(ensPO))) +
       ensDomaine("m-maths", "Maths · Résolution de problèmes", [
         ensLigne("adi", "Banque de problèmes (Vergnaud)", "217 problèmes classés par type, avec leurs schémas", [["Ouvrir la banque", "#banque"]]),
         ensLigne("waeko", "Lire un graphique en barres", "Leçon (OGD1), 4 jeux et problèmes", [["La fiche", "#fiche-diagrammes"], ["Fiche d’exercices", "#exos-diagrammes"], ["Voir la séquence", "#seq-diagrammes"]])]);
@@ -2732,7 +2763,7 @@
   /* ---------- routeur ---------- */
   var ROUTES = {
     accueil: pageAccueil, "seq-verbe": function () { return pageSequence("verbe"); }, "seq-mots": pageSequenceMots, "lecon-mots": pageLeconMots, "fiche-mots": ficheMots,
-    "seq-heure": pageSequenceHeure, "seq-digitale": pageSequenceDigitale, "ens-suivi": pageEnsSuivi, "ens-etoiles": pageEnsEtoiles, "ens-corriges": pageEnsCorriges, "ens-sequences": pageEnsSequences, "ens-formation": pageEnsFormation, "fiche-digitale": ficheDigitale, "seq-diagrammes": pageSequenceDiagrammes, "lecon-diagrammes": pageLeconDiagrammes, "fiche-diagrammes": ficheDiagrammes, "lecon-heure": function () { return pageLeconHeure(true); }, "maquette-retiens": function () { return pageLeconHeure(true); }, "fiche-heure": ficheHeure, "exos-heure": function () { return pageExos("heure"); }, "lecon-digitale": pageLeconDigitale, "lecon-division": pageLeconDivision, "lecon-monnaie": pageLeconMonnaie, "lecon-masses": pageLeconMasses, "exos-verbe": function () { return pageExos("verbe"); }, "exos-mots": function () { return pageExos("mots"); },
+    "seq-heure": pageSequenceHeure, "seq-digitale": pageSequenceDigitale, "ens-suivi": pageEnsSuivi, "ens-etoiles": pageEnsEtoiles, "ens-corriges": pageEnsCorriges, "ens-sequences": pageEnsSequences, "ens-formation": pageEnsFormation, "fiche-digitale": ficheDigitale, "seq-diagrammes": pageSequenceDiagrammes, "lecon-diagrammes": pageLeconDiagrammes, "fiche-diagrammes": ficheDiagrammes, "fiche-masses": ficheMasses, "lecon-heure": function () { return pageLeconHeure(true); }, "maquette-retiens": function () { return pageLeconHeure(true); }, "fiche-heure": ficheHeure, "exos-heure": function () { return pageExos("heure"); }, "lecon-digitale": pageLeconDigitale, "lecon-division": pageLeconDivision, "lecon-monnaie": pageLeconMonnaie, "lecon-masses": pageLeconMasses, "exos-verbe": function () { return pageExos("verbe"); }, "exos-mots": function () { return pageExos("mots"); },
     "exos-monnaie": function () { return pageExos("monnaie"); }, "exos-division": function () { return pageExos("division"); }, "exos-masses": function () { return pageExos("masses"); }, "exos-digitale": function () { return pageExos("digitale"); }, "exos-diagrammes": function () { return pageExos("diagrammes"); }, "tbi-heure": pageTbiHeure,
     "lecon-verbe": pageLecon, "jeu-verbe-decouvre": jeuDecouvre, "jeu-verbe-chasse": jeuChasse, enseignante: pageEnseignante, banque: pageBanque
   };
