@@ -2133,7 +2133,8 @@
   }
   function actionEtoiles(a, el) {
     var d = etDonnees(); ET.msg = "";
-    if (a === "et-corr") { ET_CORR = +el.dataset.v; return; }
+    if (a === "et-corr") { ET_CORR = +el.dataset.v; ET_POSE = {}; return; }
+    if (a === "et-pose") { ET_POSE[el.dataset.v] = !ET_POSE[el.dataset.v]; return; }
     if (a === "et-etoile") {
       var id = el.dataset.id, k = +el.dataset.k; d.val[id] = d.val[id] || {};
       if (d.val[id][k]) ET.sel = { id: id, k: k };
@@ -2175,7 +2176,67 @@
   /* ---------- Corrigés des évaluations des étoiles de calcul (D-101) : les 3 évaluations de chaque étoile, résultats seulement ;
      divisions écrites comme la leçon CAL8, avec les parenthèses du site : 681 = (9 × 75) + 6 ---------- */
   var ET_EVAL = [[["834 + 46", "62 + 387 + 455", "458 + 793 + 813", "265 + 191 + 84", "210 + 376 + 543"], ["765 + 87", "54 + 292 + 648", "529 + 619 + 443", "618 + 172 + 96", "340 + 485 + 466"], ["915 + 57", "48 + 273 + 541", "357 + 829 + 243", "607 + 391 + 75", "320 + 654 + 198"]], [["346 + 4659 + 79", "6215 + 87 + 863", "1458 + 3479 + 1602", "2165 + 183 + 7037", "2980 + 7653 + 1254"], ["245 + 2178 + 49", "4768 + 32 + 702", "2305 + 1219 + 9014", "4075 + 268 + 7943", "1096 + 6532 + 7630"], ["421 + 7658 + 86", "2350 + 58 + 129", "3256 + 4605 + 2541", "2875 + 528 + 3456", "6129 + 5783 + 2902"]], [["7654 + 54 + 321", "385 - 123", "916 - 145", "605 - 208", "712 - 237"], ["56 + 893 + 2192", "495 - 335", "827 - 153", "801 - 604", "332 - 287"], ["3761 + 496 + 75", "898 - 468", "728 - 346", "502 - 309", "345 - 286"]], [["763 + 1209 + 45", "1546 - 832", "5407 - 1285", "5681 - 2468", "2024 - 1989"], ["85 + 866 + 1653", "4196 - 862", "3551 - 2370", "7283 - 3075", "6162 - 3894"], ["763 + 1209 + 45", "7186 - 546", "4905 - 1633", "7654 - 3419", "9402 - 7658"]], [["7801 - 358", "58 x 6", "569 x 5", "891 x 3", "357 x 9"], ["9632 - 1575", "64 x 7", "667 x 5", "214 x 8", "395 x 4"], ["3141 - 295", "95 x 6", "751 x 9", "908 x 5", "474 x 4"]], [["9365 - 765", "892 x 4", "4518 x 6", "5913 x 3", "2145 x 5"], ["3651 + 479 + 2180", "608 x 5", "3519 x 7", "7168 x 2", "3186 x 3"], ["2903 - 1675", "854 x 8", "3679 x 2", "5983 x 6", "4178 x 5"]], [["2850 - 1749", "2748 x 7", "569 x 36", "195 x 25", "457 x 42"], ["4629 + 563 + 68", "1437 x 8", "352 x 43", "678 x 56", "856 x 27"], ["6561 - 3980", "536 x 6", "452 x 29", "659 x 35", "761 x 47"]], [["1428 - 1279", "587 x 27", "1746 x 39", "3852 x 54", "7150 x 68"], ["5628 + 6201 + 266", "561 x 63", "5789 x 29", "4718 x 75", "1462 x 48"], ["5108 - 4518", "376 x 49", "4619 x 26", "5617 x 38", "6471 x 57"]], [["3659 - 1963", "42 : 7", "681 : 9", "743 : 5", "337 : 6"], ["1740 x 65", "25 : 5", "832 : 8", "865 : 7", "450 : 6"], ["6735 x 34", "18 : 3", "285 : 4", "623 : 7", "966 : 8"]]];
-  var ET_CORR = 0;
+  var ET_CORR = 0, ET_POSE = {};
+  /* calcul posé (D-103), d'après les leçons de la classe : CAL1 addition (couleur par colonne, retenues entourées),
+     CAL2 soustraction par compensation (« 1 » devant le chiffre du haut, « 1+ » devant le chiffre du bas),
+     CAL5 multiplication posée, CAL6 multiplication à deux chiffres (retenues barrées puis nouvelles retenues, 0 en grisé) */
+  var CP_COUL = ["cp-u", "cp-d", "cp-c"];
+  function cpCol(k) { return CP_COUL[k] || "cp-m"; }            // k = rang de la colonne (0 = unités)
+  function cpChiffres(n, L) { var t = String(n), r = []; for (var k = 0; k < L; k++) r.push(k < t.length ? t.charAt(t.length - 1 - k) : ""); return r; }
+  function cpLigne(L, cases, signe, cls) {                        // cases[k] = html de la colonne k (unités à droite)
+    var h = '<tr' + (cls ? ' class="' + cls + '"' : "") + '><td class="cp-signe">' + (signe || "") + "</td>";
+    for (var k = L - 1; k >= 0; k--) h += "<td>" + (cases[k] || "") + "</td>";
+    return h + "</tr>";
+  }
+  function cpC(ch, cls) { return ch === "" ? "" : '<span class="' + cls + '">' + ch + "</span>"; }
+  function etPose(op) {
+    var n = op.match(/\d+/g).map(Number), L, h = "", k, i;
+    if (op.indexOf("x") >= 0) {
+      var a = n[0], b = n[1], tot = a * b, bu = b % 10, bd = Math.floor(b / 10);
+      L = Math.max(String(tot).length, String(a).length + (bd ? 1 : 0), String(b).length);
+      var A = cpChiffres(a, L), ret = function (m) { var r = [], c = 0; for (var k = 0; k < String(a).length - 1; k++) { c = Math.floor((+A[k] * m + c) / 10); r[k + 1] = c; } return r; };
+      if (!bd) {                                                   // CAL5 : couleur par colonne
+        var r1 = ret(bu);
+        h += cpLigne(L, r1.map(function (c, k) { return c ? '<span class="cp-ret ' + cpCol(k) + '">' + c + "</span>" : ""; }), "", "cp-rets");
+        h += cpLigne(L, A.map(function (c, k) { return cpC(c, cpCol(k)); }));
+        h += cpLigne(L, cpChiffres(b, L).map(function (c, k) { return cpC(c, cpCol(k)); }), "×", "cp-trait");
+        h += cpLigne(L, cpChiffres(tot, L).map(function (c, k) { return cpC(c, cpCol(k)); }), "", "cp-res");
+      } else {                                                     // CAL6 : ligne des unités en bleu, ligne des dizaines en rouge
+        var ru = ret(bu), rd = ret(bd), p1 = a * bu, p2 = a * bd * 10;
+        h += cpLigne(L, rd.map(function (c) { return c ? '<span class="cp-ret cp-d">' + c + "</span>" : ""; }), "", "cp-rets");
+        h += cpLigne(L, ru.map(function (c) { return c ? '<span class="cp-barre">' + c + "</span>" : ""; }), "", "cp-rets");
+        h += cpLigne(L, A.map(function (c) { return cpC(c, "cp-n"); }));
+        h += cpLigne(L, cpChiffres(b, L).map(function (c, k) { return cpC(c, k === 0 ? "cp-u" : "cp-d"); }), "×", "cp-trait");
+        h += cpLigne(L, cpChiffres(p1, L).map(function (c) { return cpC(c, "cp-u"); }));
+        h += cpLigne(L, cpChiffres(p2, L).map(function (c, k) { return cpC(c, k === 0 ? "cp-zero" : "cp-d"); }), "+", "cp-trait");
+        h += cpLigne(L, cpChiffres(tot, L).map(function (c) { return cpC(c, "cp-n"); }), "", "cp-res");
+      }
+      return '<table class="cp" aria-label="Calcul posé">' + h + "</table>";
+    }
+    if (op.indexOf("-") >= 0) {                                    // CAL2 : par compensation
+      var x = n[0], y = n[1], X, Y, R = [], haut = [], bas = [], c = 0;
+      L = String(x).length; X = cpChiffres(x, L); Y = cpChiffres(y, L);
+      for (k = 0; k < L; k++) {
+        var hx = +X[k], by = (Y[k] === "" ? 0 : +Y[k]) + c, emprunt = hx < by;
+        haut[k] = (emprunt ? '<sup class="cp-pref ' + cpCol(k + 1) + '">1</sup>' : "") + cpC(X[k], cpCol(k));
+        bas[k] = (c ? '<sup class="cp-pref ' + cpCol(k) + '">1+</sup>' : "") + cpC(Y[k], cpCol(k));
+        R[k] = (emprunt ? hx + 10 : hx) - by; c = emprunt ? 1 : 0;
+      }
+      var res = String(x - y);
+      h += cpLigne(L, haut, "", "cp-haut");
+      h += cpLigne(L, bas, "−", "cp-trait");
+      h += cpLigne(L, R.map(function (d, k) { return k < res.length ? cpC(String(d), cpCol(k)) : ""; }), "", "cp-res");
+      return '<table class="cp cp--sous" aria-label="Calcul posé">' + h + "</table>";
+    }
+    var tot2 = n.reduce(function (p, q) { return p + q; }, 0), rets = [], cc = 0;   // CAL1 : addition
+    L = String(tot2).length;
+    var lignes = n.map(function (v) { return cpChiffres(v, L); });
+    for (k = 0; k < L; k++) { var sm = cc; lignes.forEach(function (l) { sm += l[k] === "" ? 0 : +l[k]; }); cc = Math.floor(sm / 10); rets[k + 1] = cc; }
+    h += cpLigne(L, rets.map(function (c, k) { return c && k < Math.max.apply(null, n.map(function (v) { return String(v).length; })) ? '<span class="cp-ret ' + cpCol(k) + '">' + c + "</span>" : ""; }), "", "cp-rets");
+    for (i = 0; i < lignes.length; i++) h += cpLigne(L, lignes[i].map(function (c, k) { return cpC(c, cpCol(k)); }), i ? "+" : "", i === lignes.length - 1 ? "cp-trait" : "");
+    h += cpLigne(L, cpChiffres(tot2, L).map(function (c, k) { return cpC(c, cpCol(k)); }), "", "cp-res");
+    return '<table class="cp" aria-label="Calcul posé">' + h + "</table>";
+  }
   function etResultat(op) {
     var n = op.match(/\d+/g).map(Number), joli = op.replace(/ x /g, " × ").replace(/ - /g, " − ");
     if (op.indexOf(":") >= 0) { var q = Math.floor(n[0] / n[1]), r = n[0] % n[1];
@@ -2188,8 +2249,8 @@
     return ensEntete("Corrigés des étoiles de calcul") +
       '<div class="coco-row et-outils"><a class="coco-btn coco-btn--secondaire" href="#ens-etoiles">← Suivi des étoiles</a></div>' +
       '<div class="ec-etoiles" role="group" aria-label="Choisir l’étoile">' + ETOILES.map(function (e, i) { return '<button type="button" class="ec-choix" data-action="et-corr" data-v="' + i + '" aria-pressed="' + (i === k) + '">' + etEtoile(e[1]) + "<span>" + e[0] + "</span></button>"; }).join("") + "</div>" +
-      '<div class="ec-tete">' + etEtoile(s[1], false, true) + "<p><b>Étoile " + s[0].toLowerCase() + "</b> · " + s[2] + " · « Pose et calcule »</p></div>" +
-      '<div class="ec-evals">' + ET_EVAL[k].map(function (ops, i) { return '<section class="ec-eval"><h2>Évaluation ' + (i + 1) + "</h2><ol>" + ops.map(function (op) { return "<li>" + etResultat(op) + "</li>"; }).join("") + "</ol></section>"; }).join("") + "</div>";
+      '<div class="ec-tete">' + etEtoile(s[1], false, true) + "<p><b>Étoile " + s[0].toLowerCase() + "</b> · " + s[2] + "</p></div>" +
+      '<div class="ec-evals">' + ET_EVAL[k].map(function (ops, i) { return '<section class="ec-eval"><h2>Évaluation ' + (i + 1) + "</h2><ol>" + ops.map(function (op, j) { var cle = i + "-" + j, ouvert = ET_POSE[cle], div = op.indexOf(":") >= 0; return "<li>" + etResultat(op) + (div ? "" : '<button type="button" class="ec-voir" data-action="et-pose" data-v="' + cle + '" aria-expanded="' + !!ouvert + '">' + (ouvert ? "Cacher le calcul posé" : "Voir le calcul posé") + "</button>" + (ouvert ? etPose(op) : "")) + "</li>"; }).join("") + "</ol></section>"; }).join("") + "</div>";
   }
   function pageEnsSuivi() {
     var d = etDonnees(), n = d.eleves.length, v = 0; d.eleves.forEach(function (e) { v += Object.keys(d.val[e.id] || {}).length; });

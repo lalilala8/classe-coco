@@ -945,3 +945,19 @@ span.po-billet, span.po-piece { cursor: default; box-shadow: none; }
 .ec-eval small { display: block; font: 600 14px/1.3 var(--font-texte); color: var(--encre-douce); }
 .ec-op { white-space: nowrap; } .ec-fl { color: var(--encre-douce); }
 @media (max-width: 860px) { .ec-evals { grid-template-columns: 1fr; } }
+
+/* ---------- calcul posé des corrigés (D-103), couleurs des leçons CAL1, CAL2, CAL5, CAL6 ---------- */
+.ec-voir { display: block; margin: 4px 0 0; padding: 0; border: 0; background: none; color: var(--lagon-texte, #0b6f7c); font: 600 15px/1.3 var(--font-texte); text-decoration: underline; cursor: pointer; }
+.cp { border-collapse: collapse; margin: 8px 0 4px; font: 600 24px/1 var(--font-lecture); }
+.cp td { width: 1.05em; height: 1.35em; padding: 0 1px; text-align: center; vertical-align: bottom; }
+.cp--sous td { width: 1.55em; text-align: right; }
+.cp .cp-signe { width: .9em; text-align: left; color: var(--encre); }
+.cp-trait td { border-bottom: 3px solid var(--encre); padding-bottom: 3px; }
+.cp-res td { padding-top: 4px; }
+.cp-rets td { height: 1.1em; font-size: 15px; vertical-align: middle; }
+.cp-ret { display: inline-grid; place-items: center; width: 1.35em; height: 1.35em; border: 2px solid currentColor; border-radius: 50%; font-weight: 700; }
+.cp-barre { color: var(--encre-douce); text-decoration: line-through 2px; }
+.cp-pref { font-size: 13px; font-weight: 700; vertical-align: top; margin-right: 1px; }
+.cp-u { color: #1a5fa8; } .cp-d { color: #c4301f; } .cp-c { color: #3a7419; } .cp-m, .cp-n { color: var(--encre); }
+.cp-zero { color: var(--encre-douce); opacity: .55; }
+
