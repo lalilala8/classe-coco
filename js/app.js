@@ -1427,6 +1427,62 @@
             r: '<div class="ex-petit-dg">' + fig(d.d3) + "</div>" }
         ];
       }
+    },
+    /* les masses (leçon GM8 « Les mesures de masses ») : D-111 */
+    masses: {
+      seq: "seq-masses", matiere: "maths", titre: function () { return tr(C.masses.titre); },
+      rappel: function (en) { return en ? "The basic unit is the gram (g). 1 gram is the weight of a paper clip! 1 kg = 1,000 g · 1 t = 1,000 kg."
+        : "L’unité de référence est le gramme (g). 1 gramme, c’est le poids d’un trombone ! 1 kg = 1 000 g · 1 t = 1 000 kg."; },
+      tirer: function () {
+        var G = [["une mangue", "a mango", 400], ["un œuf", "an egg", 50], ["une lettre", "a letter", 20], ["un crayon", "a pencil", 5], ["un avocat", "an avocado", 200]],
+          K = [["un chien", "a dog", 15], ["un sac de riz", "a bag of rice", 5], ["une valise", "a suitcase", 20], ["une pastèque", "a watermelon", 6], ["un enfant de 8 ans", "an 8-year-old child", 27]],
+          T = [["un éléphant", "an elephant", 5], ["un bus", "a bus", 12], ["un camion", "a lorry", 10], ["une petite voiture", "a small car", 1]];
+        var unites = HE.shuf(HE.shuf(G).slice(0, 2).map(function (x) { return x.concat(["g"]); }).concat(HE.shuf(K).slice(0, 2).map(function (x) { return x.concat(["kg"]); }), HE.shuf(T).slice(0, 2).map(function (x) { return x.concat(["t"]); })));
+        var n = HE.shuf([2, 3, 4, 5, 6, 7, 8, 9]), g = HE.shuf([100, 200, 250, 300, 400, 500, 600, 750, 800]);
+        var conv = [["kg", n[0]], ["t", n[1]], ["kgg", n[2] % 4 + 1, g[0]], ["g", n[3]], ["kg", n[4]], ["kgg", n[5] % 3 + 1, g[1]]];
+        /* ranger : 4 masses proches de 1 à 2 kg, écrites avec des unités différentes, toutes différentes */
+        var r0 = HE.shuf([[900, "900 g"], [1200, "1 kg 200 g"], [1500, "1 500 g"], [2000, "2 kg"], [1750, "1 kg 750 g"], [800, "800 g"], [1000, "1 kg"]]).slice(0, 4);
+        var a = HE.rint(2, 6), d = HE.pk([100, 200, 300]);
+        var comp = HE.shuf([[a + " kg", a * 1000, (a * 1000 - d), " g"], [HE.rint(2, 5) * 1000, null, null, " g"], ["1 kg 500 g", 1500, 1050, " g"], [(a + 1) + " t", (a + 1) * 1000000, (a + 1) * 1000 + d, " kg"]]);
+        var b = HE.rint(1, 3), p = HE.pk([250, 500, 750]), tot = b * 1000 + p;
+        return { unites: unites, conv: conv, ranger: r0, comp: comp, pb: { b: b, p: p, tot: tot, limite: HE.pk([b, b + 1]) } };
+      },
+      exos: function (d, en) {
+        var M = function (v) { return en ? v.toLocaleString("en-GB") : exMille(v).replace(/ /g, " "); };
+        var lib = function (s) { return en ? s.replace(/(\d)[\s  ](?=\d{3})/g, "$1,") : s; };
+        var U = { g: "g", kg: "kg", t: "t" };
+        var signe = function (A, B) { return A === B ? "=" : A > B ? "&gt;" : "&lt;"; };
+        var comp = d.comp.map(function (c) {
+          if (c[1] === null) { var k = c[0] / 1000; return { a: k + " kg", b: M(c[0]) + " g", A: c[0], B: c[0], ex: k + " kg = " + M(c[0]) + " g" }; }
+          var A = c[1], B = c[3] === " kg" ? c[2] * 1000 : c[2], bLab = M(c[2]) + c[3];
+          return { a: c[0], b: bLab, A: A, B: B, ex: c[0] + " = " + (c[3] === " kg" ? M(A / 1000) + " kg" : M(A) + " g") };
+        });
+        var ordre = d.ranger.slice().sort(function (x, y) { return x[0] - y[0]; });
+        var pb = d.pb;
+        return [
+          { c: en ? "Circle the right unit." : "Entoure l’unité qui convient.",
+            q: '<ul class="ex-conv ex-une-col ex-unites">' + d.unites.map(function (x) { return "<li>" + HE.cap(en ? x[1] : x[0]) + (en ? " weighs about " : " pèse environ ") + x[2] + " " + exG("( " + ["g", "kg", "t"].map(function (u) { return u === x[3] ? exC(u) : u; }).join(" / ") + " )", "cercle") + "</li>"; }).join("") + "</ul>",
+            r: d.unites.map(function (x) { return x[2] + " " + U[x[3]]; }).join(" · ") },
+          { c: en ? "Complete." : "Complète.",
+            q: '<ul class="ex-conv ex-deux-col">' + d.conv.map(function (x) {
+              if (x[0] === "kg") return "<li>" + x[1] + " kg = " + exT(M(x[1] * 1000)) + " g</li>";
+              if (x[0] === "t") return "<li>" + x[1] + " t = " + exT(M(x[1] * 1000)) + " kg</li>";
+              if (x[0] === "g") return "<li>" + M(x[1] * 1000) + " g = " + exT(String(x[1])) + " kg</li>";
+              return "<li>" + x[1] + " kg " + x[2] + " g = " + exT(M(x[1] * 1000 + x[2])) + " g</li>"; }).join("") + "</ul>",
+            r: d.conv.map(function (x) { return x[0] === "kg" ? x[1] + " kg = " + M(x[1] * 1000) + " g" : x[0] === "t" ? x[1] + " t = " + M(x[1] * 1000) + " kg" : x[0] === "g" ? M(x[1] * 1000) + " g = " + x[1] + " kg" : x[1] + " kg " + x[2] + " g = " + M(x[1] * 1000 + x[2]) + " g"; }).join(" · ") },
+          { c: en ? "Compare with &lt;, &gt; or =." : "Compare avec &lt;, &gt; ou =.",
+            q: '<ul class="ex-conv ex-deux-col">' + comp.map(function (c) { return "<li>" + lib(c.a) + " " + exT(signe(c.A, c.B)) + " " + lib(c.b) + "</li>"; }).join("") + "</ul>",
+            r: comp.map(function (c) { return lib(c.a) + " " + signe(c.A, c.B) + " " + lib(c.b) + " (" + lib(c.ex) + ")"; }).join(" · ") },
+          { c: en ? "Put these masses in order, from the lightest to the heaviest." : "Range ces masses de la plus légère à la plus lourde.",
+            q: '<p class="ex-banque">' + d.ranger.map(function (x) { return lib(x[1]); }).join(" · ") + '</p><p class="ex-ordre">' + ordre.map(function (x) { return exT(lib(x[1])); }).join(" &lt; ") + "</p>",
+            r: ordre.map(function (x) { return lib(x[1]); }).join(" < ") + (en ? " (in grams: " : " (en grammes : ") + ordre.map(function (x) { return M(x[0]); }).join(" < ") + ")" },
+          { c: en ? "Solve the problem." : "Résous le problème.",
+            q: "<p>" + (en ? "Sari buys a " + pb.b + " kg bag of rice and a " + pb.p + " g bag of flour. How much does her shopping weigh, in grams? Is it more or less than " + pb.limite + " kg?"
+              : "Sari achète un sac de riz de " + pb.b + " kg et un paquet de farine de " + pb.p + " g. Combien pèsent ses courses, en grammes ? Est-ce plus ou moins que " + pb.limite + " kg ?") + "</p><p>" +
+              (en ? "Her shopping weighs " : "Ses courses pèsent ") + exT(M(pb.tot)) + " g. " + (en ? "It is " : "C’est ") + exT(pb.tot > pb.limite * 1000 ? (en ? "more" : "plus") : (en ? "less" : "moins")) + (en ? " than " : " que ") + pb.limite + " kg.</p>",
+            r: pb.b + " kg = " + M(pb.b * 1000) + " g · " + M(pb.b * 1000) + " g + " + pb.p + " g = " + M(pb.tot) + " g · " + M(pb.tot) + " g " + (pb.tot > pb.limite * 1000 ? "&gt;" : "&lt;") + " " + M(pb.limite * 1000) + " g (" + pb.limite + " kg)" + (en ? ": " : " : ") + (pb.tot > pb.limite * 1000 ? (en ? "more" : "plus") : (en ? "less" : "moins")) }
+        ];
+      }
     }
   };
   Object.keys(EXOS2).forEach(function (k) { EXOS[k] = EXOS2[k]; });
@@ -2352,7 +2408,7 @@
       ensDomaine("m-maths", "Maths · Grandeurs et mesures", [ensLigne("mei", "La monnaie et les prix", "Deux problèmes ouverts", [["Fiche d’exercices", "#exos-monnaie"], ["Voir la séquence", "#seq-monnaie"]])].concat(PO.sequences.monnaie.map(ensPO)).concat([
         ensLigne("tehani", "Lire l’heure digitale", "« L’heure à l’ardoise » : 10 jeux collectifs au TBI pour les séances 1 à 3 (outil de la collègue, adapté)", [["Au TBI", JEU_DIGITAL], ["La fiche", "#fiche-digitale"], ["Fiche d’exercices", "#exos-digitale"], ["Voir la séquence", "#seq-digitale"]])]).concat(PO.sequences.digitale.map(ensPO)).concat([
         ensLigne("coralie", "Lire l’heure à aiguilles", "Découverte guidée et jeu des ardoises au TBI ; leçon, 8 activités", [["Au TBI", "#tbi-heure"], ["La fiche", "#fiche-heure"], ["Fiche d’exercices", "#exos-heure"], ["Voir la séquence", "#seq-heure"]])]).concat(PO.sequences.heure.map(ensPO)).concat([
-        ensLigne("sari", "Mesurer des masses", "Période 5, séquence 4 · leçon GM8, 5 activités, deux problèmes ouverts (outil de la collègue, adapté)", [["La leçon", "#lecon-masses"], ["Voir la séquence", "#seq-masses"]])]).concat(PO.sequences.masses.map(ensPO))) +
+        ensLigne("sari", "Mesurer des masses", "Période 5, séquence 4 · leçon GM8, 5 activités, deux problèmes ouverts (outil de la collègue, adapté)", [["La leçon", "#lecon-masses"], ["Fiche d’exercices", "#exos-masses"], ["Voir la séquence", "#seq-masses"]])]).concat(PO.sequences.masses.map(ensPO))) +
       ensDomaine("m-maths", "Maths · Résolution de problèmes", [
         ensLigne("adi", "Banque de problèmes (Vergnaud)", "217 problèmes classés par type, avec leurs schémas", [["Ouvrir la banque", "#banque"]]),
         ensLigne("waeko", "Lire un graphique en barres", "Leçon (OGD1), 4 jeux et problèmes", [["La fiche", "#fiche-diagrammes"], ["Fiche d’exercices", "#exos-diagrammes"], ["Voir la séquence", "#seq-diagrammes"]])]);
@@ -2677,7 +2733,7 @@
   var ROUTES = {
     accueil: pageAccueil, "seq-verbe": function () { return pageSequence("verbe"); }, "seq-mots": pageSequenceMots, "lecon-mots": pageLeconMots, "fiche-mots": ficheMots,
     "seq-heure": pageSequenceHeure, "seq-digitale": pageSequenceDigitale, "ens-suivi": pageEnsSuivi, "ens-etoiles": pageEnsEtoiles, "ens-corriges": pageEnsCorriges, "ens-sequences": pageEnsSequences, "ens-formation": pageEnsFormation, "fiche-digitale": ficheDigitale, "seq-diagrammes": pageSequenceDiagrammes, "lecon-diagrammes": pageLeconDiagrammes, "fiche-diagrammes": ficheDiagrammes, "lecon-heure": function () { return pageLeconHeure(true); }, "maquette-retiens": function () { return pageLeconHeure(true); }, "fiche-heure": ficheHeure, "exos-heure": function () { return pageExos("heure"); }, "lecon-digitale": pageLeconDigitale, "lecon-division": pageLeconDivision, "lecon-monnaie": pageLeconMonnaie, "lecon-masses": pageLeconMasses, "exos-verbe": function () { return pageExos("verbe"); }, "exos-mots": function () { return pageExos("mots"); },
-    "exos-monnaie": function () { return pageExos("monnaie"); }, "exos-division": function () { return pageExos("division"); }, "exos-digitale": function () { return pageExos("digitale"); }, "exos-diagrammes": function () { return pageExos("diagrammes"); }, "tbi-heure": pageTbiHeure,
+    "exos-monnaie": function () { return pageExos("monnaie"); }, "exos-division": function () { return pageExos("division"); }, "exos-masses": function () { return pageExos("masses"); }, "exos-digitale": function () { return pageExos("digitale"); }, "exos-diagrammes": function () { return pageExos("diagrammes"); }, "tbi-heure": pageTbiHeure,
     "lecon-verbe": pageLecon, "jeu-verbe-decouvre": jeuDecouvre, "jeu-verbe-chasse": jeuChasse, enseignante: pageEnseignante, banque: pageBanque
   };
   C.matieres.forEach(function (m) { ROUTES[m.id] = function () { return pageMatiere(m.id); }; });
