@@ -795,3 +795,91 @@ body.mode-classe .site { max-width: none; padding-block: 12px 24px; }
   .ex-rappel { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .ex h2 span, .hr-hhl, .hr-mhl { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
+
+/* ---------- jeux des séquences complétées (D-96) ---------- */
+.qz-zone { display: grid; gap: 16px; justify-items: center; }
+.qz-reveil { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; justify-content: center; }
+.qz-dig { font: 700 52px/1 var(--font-lecture); letter-spacing: .04em; background: #1d2744; color: #fff; border-radius: 14px; padding: 12px 22px; box-shadow: inset 0 0 0 4px #39456b; }
+.qz-dig .hr-h { color: #ff8f80; } .qz-dig .hr-m { color: #8fc4ff; }
+.qz-dig--vide { color: #9aa3b5; }
+.qz-moment { font: 600 22px/1.2 var(--font-texte); }
+.qz-fleche { font-size: 34px; color: var(--encre-douce); }
+.qz-choix { justify-content: center; }
+.qz-champs { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; margin: 0; font: 700 30px/1.3 var(--font-lecture); }
+.qz-champ { width: 96px; min-height: 60px; font: 700 30px/1 var(--font-lecture); text-align: center; border: var(--bord) solid var(--trait); border-radius: var(--arrondi-petit); background: #fff; color: var(--encre); }
+.qz-champ:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; border-color: var(--lagon); }
+.qz-sep { font-weight: 700; }
+.qz-egal { margin: 0; font: 600 22px/1.3 var(--font-lecture); color: var(--encre-douce); }
+.qz-bourse, .qz-main { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: center; min-height: 84px; padding: 10px 14px; border: 3px solid var(--trait); border-radius: 24px; background: #fff; width: min(100%, 640px); box-sizing: border-box; }
+.qz-main { border-style: dashed; border-color: var(--lagon); }
+.qz-vide, .qz-legende { color: var(--encre-douce); font-size: 17px; margin: 0; }
+.qz-total { margin: 0; font: 700 22px/1.2 var(--font-lecture); }
+.po-billet { min-width: 108px; height: 58px; padding: 0 10px; border-radius: 8px; border: 3px solid #4f6b3a; background: repeating-linear-gradient(135deg, #e8f1dc 0 8px, #d9e8c7 8px 11px); color: var(--encre); font: 700 20px/1 var(--font-lecture); display: inline-grid; place-items: center; align-content: center; cursor: pointer; box-shadow: 0 4px 0 #4f6b3a; }
+.po-billet small { font-size: 12px; }
+span.po-billet, span.po-piece { cursor: default; box-shadow: none; }
+.qz-texte { margin: 0; max-width: 760px; font: 400 26px/2.1 var(--font-lecture); text-align: left; }
+.qz-mot { font: inherit; border: 2px solid transparent; background: none; border-radius: 8px; padding: 0 3px; cursor: pointer; color: var(--encre); }
+.qz-mot:hover { border-color: var(--trait); }
+.qz-mot.est-choisi { border-color: var(--lagon); background: var(--lagon-clair); }
+.qz-mot.est-verbe { color: var(--gram-verbe, #d62828); font-weight: 700; border-color: var(--gram-verbe, #d62828); }
+.qz-mot.est-revoir { background: var(--soutien-clair); border-color: var(--soutien-fonce); }
+@media (max-width: 520px) { .qz-dig { font-size: 40px; padding: 10px 16px; } .qz-champs { font-size: 24px; } .qz-champ { width: 76px; font-size: 26px; } .qz-texte { font-size: 22px; } }
+
+/* ---------- leçons des séquences complétées (D-96) ---------- */
+.jr-pop { display: inline-flex; animation: jr-entre .45s ease-out both; }
+.lx-illu { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; padding: 8px; }
+.lx-illu.lx-col { flex-direction: column; align-items: flex-start; }
+.lx-ecran { font: 700 34px/1 var(--font-lecture); background: #1d2744; color: #fff; border-radius: 10px; padding: 8px 14px; display: inline-block; }
+.lx-ecran .hr-h { color: #ff8f80; } .lx-ecran .hr-m { color: #8fc4ff; }
+.lx-fl { font-size: 28px; } .lx-mots { font: 700 22px/1.2 var(--font-lecture); }
+.lx-pt { width: 14px; height: 14px; border-radius: 50%; background: var(--maths); display: inline-block; }
+.lx-sac { display: inline-flex; flex-wrap: wrap; gap: 4px; width: 66px; min-height: 40px; padding: 6px; border: 2px solid var(--maths-fonce); border-radius: 8px 8px 16px 16px; background: #fff; align-content: center; justify-content: center; }
+.lx-sac.lx-reste { border-style: dashed; border-color: var(--soutien-fonce); }
+.lx-part { display: inline-grid; justify-items: center; gap: 4px; } .lx-part .lx-sac { width: 74px; } .lx-part small { font-weight: 600; }
+.lx-mots-div { display: flex; align-items: flex-start; gap: 6px; flex-wrap: wrap; justify-content: center; font: 700 30px/1.2 var(--font-lecture); margin: 6px 0; }
+.lx-mots-div > span, .lx-mots-div .jr-pop > span, .lx-lab { display: inline-grid; justify-items: center; }
+.lx-mots-div small, .lx-lab small { font: 600 14px/1.2 var(--font-texte); color: var(--maths-fonce); }
+.lx-somme { font: 700 28px/1.2 var(--font-lecture); } .lx-ligne-arg { font: 600 17px/1.4 var(--font-texte); }
+.lx-frise { display: grid; grid-template-columns: repeat(24, minmax(0, 1fr)); gap: 2px; margin-top: 8px; }
+.lx-heure { min-height: 44px; border: 0; font: 700 15px/1 var(--font-lecture); cursor: pointer; color: var(--encre); padding: 0; }
+.lx-matin { background: #fdf0c6; } .lx-apm { background: #d5e4f7; }
+.lx-heure[aria-pressed="true"] { background: var(--lagon); color: #fff; box-shadow: 0 0 0 3px var(--lagon-fonce) inset; }
+.lx-frise-leg { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 15px; color: var(--encre-douce); margin-top: 4px; }
+.lx-frise-leg span:last-child { text-align: right; }
+.lx-info { display: grid; grid-template-columns: 150px 1fr; gap: 20px; align-items: center; margin-top: 14px; }
+.lx-info p { margin: 8px 0 0; }
+.lx-clk { max-width: 150px; }
+.lx-exemples { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; font: 400 20px/1.3 var(--font-lecture); }
+.lx-op { font: 700 15px/1 var(--font-texte); padding: 4px 8px; border-radius: 999px; color: #fff; margin: 0 6px; }
+.lx-plus { background: var(--maths); } .lx-moins { background: var(--francais); }
+.lx-minutes { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; text-align: center; }
+.lx-minutes p { margin: 8px 0 0; font-size: 17px; }
+.lx-note { font-weight: 600; }
+.lx-manip { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 16px; align-items: center; margin: 10px 0; }
+.lx-tas { display: flex; flex-wrap: wrap; gap: 6px; min-height: 40px; padding: 10px; border: 2px dashed var(--trait); border-radius: 14px; }
+.lx-sacs { display: flex; flex-wrap: wrap; gap: 10px; }
+.lx-res { font: 600 19px/1.4 var(--font-texte); background: var(--reussite-clair); border-radius: var(--arrondi-petit); padding: 8px 12px; }
+.lx-caisse { justify-content: center; }
+.lx-somme-ligne { font: 700 26px/1.3 var(--font-lecture); }
+.lx-decomp { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; }
+.lx-decomp > div { display: grid; gap: 6px; justify-items: center; }
+.lx-decomp .qz-bourse { min-height: 60px; }
+@media (max-width: 700px) { .lx-frise { grid-template-columns: repeat(12, minmax(0, 1fr)); } .lx-info, .lx-manip { grid-template-columns: 1fr; } .lx-minutes { grid-template-columns: 1fr 1fr; } .lx-frise-leg { grid-template-columns: 1fr; } .lx-frise-leg span:last-child { text-align: left; } }
+
+/* ---------- problèmes ouverts de l'heure (D-96) ---------- */
+.po-reveil { display: inline-block; font: 700 40px/1 var(--font-lecture); letter-spacing: .04em; background: #1d2744; color: #fff; border-radius: 10px; padding: 10px 16px; }
+.po-clk { width: 150px; max-width: 100%; }
+.po-dessin--centre { justify-content: center; align-items: center; }
+.po-dessin figure { margin: 0; display: grid; justify-items: center; gap: 6px; }
+.po-dessin figcaption { font-weight: 600; color: var(--encre-douce); }
+.po-fl { font-size: 32px; color: var(--encre-douce); }
+.po-grille-heures { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
+.po-heure { display: grid; justify-items: center; gap: 4px; padding: 8px; border: 2px dashed var(--trait); border-radius: var(--arrondi-petit); opacity: .55; }
+.po-heure .po-reveil { font-size: 24px; padding: 6px 10px; }
+.po-heure .po-clk { width: 100px; }
+.po-heure.trouve { opacity: 1; border: 3px solid var(--reussite); background: var(--reussite-clair); }
+.po-deux { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.po-deux h4 { margin: 0 0 6px; }
+.po-deux ul { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
+.po-deux .po-reveil { font-size: 18px; padding: 3px 7px; }
+@media (max-width: 700px) { .po-deux { grid-template-columns: 1fr; } .po-reveil { font-size: 30px; } }

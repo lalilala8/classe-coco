@@ -160,14 +160,12 @@
     if (id === "verbe") {
       cartes = carte("francais", "1 · " + t("decouvre"), langue === "en" ? "The hidden verb" : "Le verbe se cache", langue === "en" ? "I remember, then I find the word that changes." : "Je me rappelle, puis je cherche le mot qui change.", "tehani", "jeu-verbe-decouvre") +
         carte("francais", "2 · " + t("entraine"), langue === "en" ? "Verb hunt" : "Chasse aux verbes", langue === "en" ? "I tap the verb in each sentence." : "Je touche le verbe de chaque phrase.", "vaka", "jeu-verbe-chasse") +
-        carte("francais", "3 · " + t("reinvestis"), t("bientot"), langue === "en" ? "To be designed with the teacher." : "À concevoir avec la maîtresse.", "nina", "", true);
+        cartesQZ("verbe");
     } else {
-      cartes = carte("maths", "1 · " + t("decouvre"), t("bientot"), langue === "en" ? "I remember, then I discover." : "Je me rappelle, puis je découvre.", "adi", "", true) +
-        carte("maths", "2 · " + t("entraine"), t("bientot"), "", "dylan", "", true) +
-        carte("maths", "3 · " + t("reinvestis"), t("bientot"), "", "waeko", "", true) +
+      cartes = (QUIZ[id] ? cartesQZ(id) : "") +
         (PO.sequences[id] || []).map(function (pid, k) { var p = po(pid); return carte("maths", "4 · " + t("ouvert") + " " + (k + 1), tr(p.titre), tr(p.question), p.perso, "po-" + pid); }).join("");
     }
-    var lecon = '<div class="coco-row">' + (id === "verbe" ? '<a class="coco-btn coco-btn--secondaire" href="#lecon-verbe"><img src="' + PICTO("ampoule") + '" alt="">' + t("lecon") + "</a>" : "") + boutonExos(id) + "</div>";
+    var lecon = '<div class="coco-row">' + (ROUTES["lecon-" + id] ? '<a class="coco-btn coco-btn--secondaire" href="#lecon-' + id + '"><img src="' + PICTO("ampoule") + '" alt="">' + t("lecon") + "</a>" : "") + boutonExos(id) + "</div>";
     return barre(s.matiere) + '<section class="entete ' + m.classe + '"><img src="' + IMG(m.perso) + '" alt=""><div><h1>' + esc(tr(s.titre)) + "</h1><p>" + esc(tr(m.nom)) + "</p></div></section>" +
       '<p class="objectif ' + m.classe + '">' + t("objectif") + " <b>" + esc(tr(s.objectif)) + "</b></p>" + lecon + '<section class="etapes">' + cartes + "</section>";
   }
@@ -547,16 +545,14 @@
 
   /* ---------- Maths : lire l'heure digitale (P5 séquence 1) : pour l'instant, les jeux collectifs au TBI (D-73) ---------- */
   var JEU_DIGITAL = "jeux/heure-digitale-ardoise.html";
+  function cartesPO(seq) { return (PO.sequences[seq] || []).map(function (pid, k) { var p = po(pid); return carte("maths", "4 · " + t("ouvert") + " " + (k + 1), tr(p.titre), tr(p.question), p.perso, "po-" + pid); }).join(""); }
   function pageSequenceDigitale() {
     var s = C.digitale, m = MATIERE.maths, en = langue === "en";
     var tbi = '<a class="coco-carte coco-carte--maths" href="' + JEU_DIGITAL + '"><span class="coco-carte-vignette"><img src="' + IMG("tehani") + '" alt=""></span><span><span class="coco-carte-etape">' + (en ? "On the whiteboard · sessions 1 to 3" : "Au TBI · séances 1 à 3") + "</span><h3>" + (en ? "Boards up!" : "L’heure à l’ardoise") + "</h3><p>" +
       (en ? "Whole-class games with the teacher: slates, thumbs and fingers. In French." : "Jeux collectifs avec la maîtresse : à l’ardoise, avec les pouces ou avec les doigts.") + "</p></span></a>";
-    var cartes = tbi + carte("maths", "1 · " + t("decouvre"), t("bientot"), en ? "I remember, then I discover." : "Je me rappelle, puis je découvre.", "adi", "", true) +
-      carte("maths", "2 · " + t("entraine"), t("bientot"), "", "tao", "", true) + carte("maths", "3 · " + t("reinvestis"), t("bientot"), "", "nina", "", true) +
-      carte("maths", "4 · " + t("ouvert") + " 1", t("bientot"), en ? "The magic time" : "L’heure magique", "adi", "", true) +
-      carte("maths", "4 · " + t("ouvert") + " 2", t("bientot"), en ? "Half an hour of reading" : "La demi-heure de lecture", "adi", "", true);
+    var cartes = cartesQZ("digitale") + tbi + cartesPO("digitale");
     return barre("maths") + '<section class="entete m-maths"><img src="' + IMG(m.perso) + '" alt=""><div><h1>' + esc(tr(s.titre)) + "</h1><p>" + esc(tr(m.nom)) + " · " + (en ? "Measures" : "Grandeurs et mesures") + "</p></div></section>" +
-      '<p class="objectif m-maths">' + t("objectif") + " <b>" + esc(tr(s.objectif)) + "</b></p>" + (ensOuvert ? '<div class="coco-row">' + boutonExos("digitale") + "</div>" : "") + '<section class="etapes">' + cartes + "</section>";
+      '<p class="objectif m-maths">' + t("objectif") + " <b>" + esc(tr(s.objectif)) + "</b></p>" + '<div class="coco-row"><a class="coco-btn coco-btn--secondaire" href="#lecon-digitale"><img src="' + PICTO("ampoule") + '" alt="">' + t("lecon") + "</a>" + boutonExos("digitale") + "</div>" + '<section class="etapes">' + cartes + "</section>";
   }
 
   /* ---------- encadré « Programme et repères » des fiches enseignantes (D-77) : citations mot pour mot ---------- */
@@ -798,8 +794,7 @@
     var cartes = Object.keys(JEUX_HEURE).map(function (id) {
       var J = JEUX_HEURE[id];
       return carte("maths", J.etape + " · " + t(ETAPES_HEURE[J.etape]), en ? J.en : J.fr, en ? J.den : J.dfr, J.perso, "heure-" + id);
-    }).join("") + carte("maths", "4 · " + t("ouvert") + " 1", t("bientot"), en ? "Hands on the same number" : "Les aiguilles sur le même nombre", "dylan", "", true) +
-      carte("maths", "4 · " + t("ouvert") + " 2", t("bientot"), en ? "A quarter turn" : "Un quart de tour", "dylan", "", true);
+    }).join("") + cartesPO("heure");
     return barre("maths") + '<section class="entete m-maths"><img src="' + IMG(m.perso) + '" alt=""><div><h1>' + esc(tr(s.titre)) + "</h1><p>" + esc(tr(m.nom)) + " · " + (en ? "Measures" : "Grandeurs et mesures") + "</p></div></section>" +
       '<p class="objectif m-maths">' + t("objectif") + " <b>" + esc(tr(s.objectif)) + "</b></p>" +
       '<div class="coco-row"><a class="coco-btn coco-btn--secondaire" href="#lecon-heure"><img src="' + PICTO("ampoule") + '" alt="">' + t("lecon") + "</a>" + boutonExos("heure") + "</div>" +
@@ -857,8 +852,10 @@
         note: en ? "Year 3 benchmarks (not in the class lesson)." : "Repères du niveau 3 (pas dans la leçon de classe)." }
     ];
   }
-  function jrSection() {
-    var en = langue === "en", C2 = jrCartes(en), n = C2.length, c = C2[JR.i];
+  var JR_SRC = jrCartes;
+  function jrSection(src) {
+    JR_SRC = src || jrCartes;
+    var en = langue === "en", C2 = JR_SRC(en), n = C2.length; if (JR.i >= n) JR.i = 0; var c = C2[JR.i];
     var pastilles = '<ol class="jr-pastilles">' + C2.map(function (x, k) { return '<li><button type="button" data-action="jr-aller" data-v="' + k + '" aria-current="' + (k === JR.i) + '" aria-label="' + esc(x.t) + '">' + (k + 1) + "</button></li>"; }).join("") + "</ol>";
     if (JR.tout) return '<section class="jr m-maths"><header class="jr-haut"><img src="' + POSE("coralie", "idee") + '" alt=""><h3>' + (en ? "I remember" : "Je retiens") + '</h3><button class="coco-btn coco-btn--secondaire" type="button" data-action="jr-tout">' + (en ? "Card by card" : "Carte par carte") + '</button></header><div class="jr-liste">' +
       C2.map(function (x) { return '<div class="jr-mini' + (x.complement ? " jr-complement" : "") + '">' + x.svg + "<div><b>" + esc(x.t) + "</b>" + x.txt.map(function (p) { return "<p>" + typo(p) + "</p>"; }).join("") + "</div></div>"; }).join("") + "</div></section>";
@@ -867,7 +864,7 @@
       '<footer class="jr-bas"><button class="coco-btn coco-btn--secondaire" type="button" data-action="jr-prec"' + (JR.i === 0 ? " disabled" : "") + ">← " + (en ? "Back" : "Précédent") + '</button><button class="jr-lien" type="button" data-action="jr-tout">' + (en ? "See everything" : "Tout voir") + '</button><button class="coco-btn" type="button" data-action="jr-suiv"' + (JR.i === n - 1 ? " disabled" : "") + ">" + (en ? "Next" : "Suivant") + " →</button></footer></section>";
   }
   function actionJr(a, el) {
-    var n = jrCartes(langue === "en").length;
+    var n = JR_SRC(langue === "en").length;
     if (a === "jr-aller") JR.i = +el.dataset.v;
     else if (a === "jr-prec") JR.i = Math.max(0, JR.i - 1);
     else if (a === "jr-suiv") JR.i = Math.min(n - 1, JR.i + 1);
@@ -1401,6 +1398,343 @@
     }
   };
   Object.keys(EXOS2).forEach(function (k) { EXOS[k] = EXOS2[k]; });
+
+  /* ==========================================================================================
+     Jeux des séquences complétées (D-96) : un moteur commun « QZ »
+     Types de question : choix (boutons), champs (nombres, heures, quotient et reste), pieces (payer), mots (toucher les verbes)
+     ========================================================================================== */
+  var QZ = null;
+  var QZ_ETAPE = { 0: "rappelle", 1: "decouvre", 2: "entraine", 3: "reinvestis" };
+  function qzT(x) { return x === undefined || x === null ? "" : typeof x === "string" || typeof x === "number" ? String(x) : tr(x); }
+  function qzDig(h, m) { return '<span class="qz-dig"><span class="hr-h">' + h + '</span>:<span class="hr-m">' + HE.pad(m) + "</span></span>"; }
+  var QZ_BILLETS = [500, 1000];
+  function qzArgent(v, act, k) {
+    var cls = v >= 500 ? "po-billet" : "po-piece" + (v >= 10 ? " po-piece--grande" : "");
+    return '<button class="' + cls + '" type="button" data-action="' + act + '" data-v="' + v + '"' + (k !== undefined ? ' data-k="' + k + '"' : "") + ' aria-label="' + v + ' F">' + exMille(v) + "<small>F</small></button>";
+  }
+  function qzPorteMonnaie(liste) { return '<div class="qz-bourse">' + liste.map(function (v) { return v >= 500 ? '<span class="po-billet">' + exMille(v) + "<small>F</small></span>" : '<span class="po-piece' + (v >= 10 ? " po-piece--grande" : "") + '">' + v + "<small>F</small></span>"; }).join("") + "</div>"; }
+  var QZ_PRENOMS = ["Léo", "Méi", "Tao", "Wadra", "Nina", "Sari", "Adi", "Vaka", "Waeko", "Tehani", "Dylan"];
+
+  var QUIZ = {
+    /* ---------- Lire l'heure digitale (leçon GM5 « Lire l'heure digitale ») ---------- */
+    digitale: { matiere: "maths", jeux: {
+      rappel: { perso: "adi", etape: 0, fr: "Je me rappelle", en: "I remember", dfr: "Compter de 15 en 15, comparer des nombres, les moments de la journée.", den: "Counting in fifteens, comparing numbers, times of day.",
+        gen: function () { return [
+          { t: "choix", c: { fr: "Je compte de 15 en 15 : 0, 15, 30… Quel nombre vient ensuite ?", en: "I count in fifteens: 0, 15, 30… Which number comes next?" }, o: ["40", "45", "35", "60"], a: 1, ex: { fr: "30 + 15 = 45.", en: "30 + 15 = 45." } },
+          { t: "choix", c: { fr: "Quel nombre est le plus grand ?", en: "Which number is the biggest?" }, o: ["9", "16", "12", "6"], a: 1, ex: { fr: "16 a 1 dizaine et 6 unités : c'est le plus grand.", en: "16 has 1 ten and 6 ones: it is the biggest." } },
+          { t: "choix", c: { fr: "Dans la journée, quel moment vient après le matin ?", en: "In the day, what comes after the morning?" }, o: [{ fr: "la nuit", en: "the night" }, { fr: "l'après-midi", en: "the afternoon" }, { fr: "le soir", en: "the evening" }], a: 1, ex: { fr: "Le matin, puis midi, puis l'après-midi, puis le soir.", en: "The morning, then noon, then the afternoon, then the evening." } }
+        ]; } },
+      matin: { perso: "tao", etape: 1, fr: "Matin ou après-midi ?", en: "Morning or afternoon?", dfr: "Je lis l'heure du réveil et je trouve le moment de la journée.", den: "I read the digital clock and find the time of day.",
+        gen: function () { return HE.shuf([1, 3, 6, 8, 10, 11, 12, 13, 14, 16, 19, 22]).slice(0, 8).map(function (h) { var m = HE.pk([0, 15, 30, 45]);
+          return { t: "choix", c: { fr: "Il est <b>" + h + ":" + HE.pad(m) + "</b>. C'est le matin, ou l'après-midi ou le soir ?", en: "It is <b>" + h + ":" + HE.pad(m) + "</b>. Is it the morning, or the afternoon or evening?" },
+            z: function () { return '<div class="qz-reveil">' + qzDig(h, m) + "</div>"; }, o: [{ fr: "le matin", en: "the morning" }, { fr: "l'après-midi ou le soir", en: "the afternoon or evening" }], a: h < 12 ? 0 : 1,
+            ex: h < 12 ? { fr: "Le matin, c'est de 0h à 12h. " + h + " est plus petit que 12.", en: "Morning is from 0:00 to 12:00. " + h + " is less than 12." }
+              : { fr: "L'après-midi et le soir, c'est de 12h à 24h. " + h + ":" + HE.pad(m) + (h > 12 ? ", c'est aussi " + (h - 12) + ":" + HE.pad(m) + (h >= 18 ? " du soir." : " de l'après-midi.") : "."), en: "Afternoon and evening are from 12:00 to 24:00." + (h > 12 ? " " + h + ":" + HE.pad(m) + " is also " + (h - 12) + ":" + HE.pad(m) + " p.m." : "") } }; }); } },
+      lire: { perso: "dylan", etape: 1, fr: "Lis le réveil", en: "Read the clock", dfr: "Je dis l'heure avec pile, et quart, et demie, moins le quart.", den: "I say the time with o'clock, quarter past, half past, quarter to.",
+        gen: function () { return HE.shuf([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]).slice(0, 8).map(function (h, k) { var m = [0, 15, 30, 45, 45, 15, 30, 45][k];
+          var fr = function (hh, mm) { return HE.cap(exDigMots(hh, mm)); };
+          var o = m === 45 ? [[fr(h, 45), HE.cap(HE.direEn(h, 45))], [HE.cap(exNb(h) + (h === 1 ? " heure" : " heures") + " moins le quart"), "Quarter to " + HE.direEn(h, 0).replace(" o’clock", "")], [HE.cap(exNb(h) + (h === 1 ? " heure" : " heures") + " et quart"), HE.cap(HE.direEn(h, 15))]]
+            : m === 30 ? [[fr(h, 30), HE.cap(HE.direEn(h, 30))], [fr(h, 15), HE.cap(HE.direEn(h, 15))], [fr(h, 0), HE.cap(HE.direEn(h, 0))]]
+            : m === 15 ? [[fr(h, 15), HE.cap(HE.direEn(h, 15))], [fr(h, 30), HE.cap(HE.direEn(h, 30))], [fr(h, 45), HE.cap(HE.direEn(h, 45))]]
+            : [[fr(h, 0), HE.cap(HE.direEn(h, 0))], [fr(h, 15), HE.cap(HE.direEn(h, 15))], [fr(h, 30), HE.cap(HE.direEn(h, 30))]];
+          var ordre = HE.shuf([0, 1, 2]);
+          return { t: "choix", c: { fr: "Quelle heure affiche le réveil ?", en: "What time does the clock show?" }, z: function () { return '<div class="qz-reveil">' + qzDig(h, m) + "</div>"; },
+            o: ordre.map(function (i) { return { fr: o[i][0], en: o[i][1] }; }), a: ordre.indexOf(0),
+            ex: m === 45 ? { fr: "45 minutes, c'est moins le quart : il reste un quart d'heure (15 min) avant " + (h + 1) + "h.", en: "45 minutes is quarter to: there is a quarter of an hour (15 min) left before " + (h + 1) + " o'clock." }
+              : { fr: { 0: "0 minute : l'heure pile.", 15: "15 minutes : et quart.", 30: "30 minutes : et demie." }[m], en: { 0: "0 minutes: o'clock.", 15: "15 minutes: quarter past.", 30: "30 minutes: half past." }[m] } }; }); } },
+      facons: { perso: "nina", etape: 2, fr: "Deux façons de dire l'heure", en: "Two ways to say the time", dfr: "Je passe de 4:00 de l'après-midi à 16:00, et de 14:15 à 2:15.", den: "I change 4:00 p.m. into 16:00, and 14:15 into 2:15.",
+        gen: function () { return HE.shuf([13, 14, 15, 16, 17, 18, 19, 20, 21]).slice(0, 8).map(function (h, k) { var m = HE.pk([0, 15, 30, 45]), soir = h >= 18, plus = k % 2 === 0;
+          var nom = { fr: soir ? "du soir" : "de l'après-midi", en: "p.m." };
+          return plus ? { t: "champs", c: { fr: "<b>" + (h - 12) + ":" + HE.pad(m) + " " + nom.fr + "</b>, c'est quelle heure ?", en: "<b>" + (h - 12) + ":" + HE.pad(m) + " p.m.</b>: what is the 24-hour time?" },
+              z: function () { return '<div class="qz-reveil">' + qzDig(h - 12, m) + '<span class="qz-moment">' + qzT(nom) + "</span></div>"; }, champs: [{ k: "h" }, { k: "m", sep: ":" }], r: { h: h, m: m },
+              ex: { fr: (h - 12) + " + 12 = " + h + " : " + (h - 12) + ":" + HE.pad(m) + " " + nom.fr + ", c'est " + h + ":" + HE.pad(m) + ".", en: (h - 12) + " + 12 = " + h + ": " + (h - 12) + ":" + HE.pad(m) + " p.m. is " + h + ":" + HE.pad(m) + "." } }
+            : { t: "champs", c: { fr: "<b>" + h + ":" + HE.pad(m) + "</b>, c'est quelle heure " + nom.fr + " ?", en: "<b>" + h + ":" + HE.pad(m) + "</b>: what time is it p.m.?" },
+              z: function () { return '<div class="qz-reveil">' + qzDig(h, m) + "</div>"; }, champs: [{ k: "h" }, { k: "m", sep: ":", apres: " " + qzT(nom) }], r: { h: h - 12, m: m },
+              ex: { fr: h + " − 12 = " + (h - 12) + " : " + h + ":" + HE.pad(m) + ", c'est " + (h - 12) + ":" + HE.pad(m) + " " + nom.fr + ".", en: h + " − 12 = " + (h - 12) + ": " + h + ":" + HE.pad(m) + " is " + (h - 12) + ":" + HE.pad(m) + " p.m." } }; }); } },
+      durees: { perso: "wadra", etape: 3, fr: "Ma journée", en: "My day", dfr: "Je trouve l'heure de fin quand je connais le début et la durée.", den: "I find the end time when I know the start and how long it lasts.",
+        gen: function () {
+          var C2 = [["La récréation commence à", "Break time starts at", "Elle dure", "It lasts", "À quelle heure finit-elle ?", "What time does it end?"], ["Le film commence à", "The film starts at", "Il dure", "It lasts", "À quelle heure finit-il ?", "What time does it end?"],
+            ["Je commence à lire à", "I start reading at", "Je lis pendant", "I read for", "À quelle heure je m'arrête ?", "What time do I stop?"], ["Le cours de natation commence à", "The swimming lesson starts at", "Il dure", "It lasts", "À quelle heure finit-il ?", "What time does it end?"],
+            ["Le bus part à", "The bus leaves at", "Le trajet dure", "The journey takes", "À quelle heure arrive-t-il ?", "What time does it arrive?"], ["Le marché ouvre à", "The market opens at", "Il reste ouvert", "It stays open for", "À quelle heure ferme-t-il ?", "What time does it close?"]];
+          var D = [[15, "un quart d'heure", "a quarter of an hour"], [30, "une demi-heure", "half an hour"], [60, "une heure", "an hour"]];
+          return HE.shuf(C2).map(function (c, k) { var h = HE.rint(7, 17), m = k < 3 ? HE.pk([0, 15, 30]) : HE.pk([45, 50, 40]), d = k < 3 ? HE.pk(D) : D[1], f = h * 60 + m + d[0];
+            return { t: "champs", c: { fr: c[0] + " <b>" + h + ":" + HE.pad(m) + "</b>. " + c[2] + " <b>" + d[1] + "</b>. " + c[4], en: c[1] + " <b>" + h + ":" + HE.pad(m) + "</b>. " + c[3] + " <b>" + d[2] + "</b>. " + c[5] },
+              z: function () { return '<div class="qz-reveil">' + qzDig(h, m) + '<span class="qz-fleche">→</span><span class="qz-dig qz-dig--vide">?</span></div>'; }, champs: [{ k: "h" }, { k: "m", sep: ":" }], r: { h: Math.floor(f / 60), m: f % 60 },
+              ex: { fr: h + ":" + HE.pad(m) + " + " + d[0] + " min = " + Math.floor(f / 60) + ":" + HE.pad(f % 60) + (m + d[0] >= 60 ? ". Après 59 minutes, on passe à l'heure suivante." : "."), en: h + ":" + HE.pad(m) + " + " + d[0] + " min = " + Math.floor(f / 60) + ":" + HE.pad(f % 60) + (m + d[0] >= 60 ? ". After 59 minutes, we go to the next hour." : ".") } }; }); } }
+    } },
+
+    /* ---------- La division en ligne (leçons CAL7 « Diviser : grouper ou partager » et CAL8 « La division en ligne avec reste ») ---------- */
+    division: { matiere: "maths", jeux: {
+      rappel: { perso: "adi", etape: 0, fr: "Je me rappelle", en: "I remember", dfr: "Mes tables de multiplication.", den: "My times tables.",
+        gen: function () { return [0, 1, 2].map(function () { var a = HE.rint(2, 5), b = HE.rint(3, 9), p = a * b, o = HE.shuf([p, p + a, p - a, a + b]).filter(function (x, i, t2) { return t2.indexOf(x) === i; });
+          return { t: "choix", c: { fr: "Combien font <b>" + a + " × " + b + "</b> ?", en: "What is <b>" + a + " × " + b + "</b>?" }, o: o.map(String), a: o.indexOf(p), ex: { fr: a + " × " + b + " = " + p + ".", en: a + " × " + b + " = " + p + "." } }; }); } },
+      grouper: { perso: "nina", etape: 1, fr: "Grouper ou partager", en: "Grouping or sharing", dfr: "Je cherche combien de groupes, ou combien dans chaque part.", den: "I find how many groups, or how many in each share.",
+        gen: function () {
+          var G = [["Noah a {n} sucres d'orge. Il prépare des sachets de {b}. Combien de sachets pourra-t-il faire ?", "Noah has {n} lollipops. He makes bags of {b}. How many bags can he make?", "sachets", "bags"],
+            ["Tehani a {n} mangues. Elle les range dans des paniers de {b}. Combien de paniers remplit-elle ?", "Tehani has {n} mangoes. She puts them in baskets of {b}. How many baskets does she fill?", "paniers", "baskets"],
+            ["Il y a {n} élèves. On fait des équipes de {b}. Combien d'équipes y a-t-il ?", "There are {n} pupils. We make teams of {b}. How many teams are there?", "équipes", "teams"]];
+          var P = [["Méi a {n} billes. Elle les partage entre {b} amies. Combien de billes aura chacune ?", "Méi has {n} marbles. She shares them between {b} friends. How many marbles will each one get?", "billes", "marbles"],
+            ["Papi Tao partage {n} poissons entre {b} familles. Combien de poissons a chaque famille ?", "Grandad Tao shares {n} fish between {b} families. How many fish does each family get?", "poissons", "fish"],
+            ["La maîtresse partage {n} crayons entre {b} tables. Combien de crayons y a-t-il sur chaque table ?", "The teacher shares {n} pencils between {b} tables. How many pencils are on each table?", "crayons", "pencils"]];
+          return HE.shuf(G).concat(HE.shuf(P)).map(function (x, k) { var b = HE.rint(2, 5), q = HE.rint(3, 9), n = b * q, s = function (z) { return z.replace("{n}", n).replace("{b}", b); }, grp = k < 3;
+            return { t: "champs", c: { fr: s(x[0]), en: s(x[1]) }, champs: [{ k: "q", avant: "", apres: " " + qzT({ fr: x[2], en: x[3] }) }], r: { q: q },
+              z: function (en) { return '<p class="qz-egal">' + n + " = " + b + " × … " + (en ? " or " : " ou ") + n + (en ? " ÷ " : " : ") + b + " = …</p>"; },
+              ex: { fr: (grp ? "Dans " + n + ", combien de fois " + b + " ? " : n + " partagé en " + b + " : ") + n + " = " + b + " × " + q + ", donc " + n + " : " + b + " = " + q + ".", en: n + " = " + b + " × " + q + ", so " + n + " ÷ " + b + " = " + q + "." } }; });
+        } },
+      calcule: { perso: "dylan", etape: 2, fr: "Calcule", en: "Work it out", dfr: "Je trouve le nombre qui manque : 24 = 4 × … ou 24 : 4 = …", den: "I find the missing number: 24 = 4 × … or 24 ÷ 4 = …",
+        gen: function () { var vus = {}, qs = []; while (qs.length < 8) { var b = HE.rint(2, 5), q = HE.rint(2, 10); if (vus[b + "x" + q]) continue; vus[b + "x" + q] = 1; var n = b * q, k = qs.length;
+          qs.push(k % 2 === 0 ? { t: "champs", c: { fr: "Complète.", en: "Fill in the missing number." }, champs: [{ k: "q", avant: n + " = " + b + " × " }], r: { q: q }, ex: { fr: b + " × " + q + " = " + n + ".", en: b + " × " + q + " = " + n + "." } }
+            : { t: "champs", c: { fr: "Calcule.", en: "Work it out." }, champs: [{ k: "q", avant: n + " : " + b + " = ", avantEn: n + " ÷ " + b + " = " }], r: { q: q }, ex: { fr: n + " = " + b + " × " + q + ", donc " + n + " : " + b + " = " + q + ".", en: n + " = " + b + " × " + q + ", so " + n + " ÷ " + b + " = " + q + "." } }); }
+          return qs; } },
+      reste: { perso: "waeko", etape: 3, fr: "Avec un reste", en: "With a remainder", dfr: "J'écris la division en ligne avec le reste : 43 = (5 × 8) + 3.", den: "I write the division with the remainder: 43 = (5 × 8) + 3.",
+        gen: function () {
+          var X = [["Amaury a {n} cupcakes qu'il veut ranger par boîtes de {b}. Combien de boîtes pourra-t-il faire ?", "Amaury has {n} cupcakes to put in boxes of {b}. How many boxes can he make?", "boîtes", "boxes", "cupcakes"],
+            ["Isis a {n} cartes qu'elle veut partager entre ses {b} amis. Combien de cartes aura chacun ?", "Isis has {n} cards to share between her {b} friends. How many cards will each one get?", "cartes chacun", "cards each", "cartes"],
+            ["Nina a {n} coquillages. Elle les range dans des sachets de {b}. Combien de sachets remplit-elle ?", "Nina has {n} shells. She puts them in bags of {b}. How many bags does she fill?", "sachets", "bags", "coquillages"],
+            ["Vaka partage {n} letchis entre {b} amis. Combien de letchis aura chacun ?", "Vaka shares {n} lychees between {b} friends. How many lychees will each one get?", "letchis chacun", "lychees each", "letchis"],
+            ["On range {n} livres sur des étagères de {b} livres. Combien d'étagères sont pleines ?", "We put {n} books on shelves of {b} books. How many shelves are full?", "étagères", "shelves", "livres"],
+            ["Wadra a {n} billes. Il fait des paquets de {b}. Combien de paquets fait-il ?", "Wadra has {n} marbles. He makes packs of {b}. How many packs does he make?", "paquets", "packs", "billes"]];
+          return HE.shuf(X).map(function (x) { var b = HE.rint(3, 6), q = HE.rint(3, 9), r = HE.rint(1, b - 1), n = b * q + r, s = function (z) { return z.replace("{n}", n).replace("{b}", b); };
+            return { t: "champs", c: { fr: s(x[0]) + " Combien en reste-t-il ?", en: s(x[1]) + " How many are left over?" },
+              z: function (en) { return '<p class="qz-egal">' + (en ? "I divide " + n + " by " + b : "Je divise " + n + " par " + b) + "</p>"; },
+              champs: [{ k: "q", avant: n + " = (" + b + " × " }, { k: "r", sep: ") + " }], r: { q: q, r: r },
+              ex: { fr: n + " = (" + b + " × " + q + ") + " + r + " : " + q + " " + x[2] + ", il en reste " + r + ". Le reste (" + r + ") est plus petit que le diviseur (" + b + ").", en: n + " = (" + b + " × " + q + ") + " + r + ": " + q + " " + x[3] + ", " + r + " left over. The remainder (" + r + ") is smaller than the divisor (" + b + ")." } }; });
+        } }
+    } },
+
+    /* ---------- La monnaie (leçon GM1 « La monnaie ») ---------- */
+    monnaie: { matiere: "maths", jeux: {
+      rappel: { perso: "adi", etape: 0, fr: "Je me rappelle", en: "I remember", dfr: "Composer et décomposer un nombre.", den: "Making and splitting numbers.",
+        gen: function () { var c = HE.rint(1, 9), d = HE.rint(1, 9), u = HE.pk([0, 5]), n = c * 100 + d * 10 + u, m = HE.rint(1, 6), n2 = m * 1000 + HE.rint(1, 9) * 100 + 50;
+          var o1 = HE.shuf([n, c * 100 + u * 10 + d, d * 100 + c * 10 + u, n + 100]).filter(function (x, i, t2) { return t2.indexOf(x) === i; });
+          var o2 = HE.shuf([n2, n2 - 1000, n2 + 100, n2 + 1000]);
+          return [
+            { t: "choix", c: { fr: "Quel nombre fait <b>" + c * 100 + " + " + d * 10 + (u ? " + " + u : "") + "</b> ?", en: "Which number is <b>" + c * 100 + " + " + d * 10 + (u ? " + " + u : "") + "</b>?" }, o: o1.map(exMille), a: o1.indexOf(n), ex: { fr: c + " centaines, " + d + " dizaines et " + u + " unités : " + n + ".", en: c + " hundreds, " + d + " tens and " + u + " ones: " + n + "." } },
+            { t: "choix", c: { fr: "Quel nombre fait <b>" + exMille(m * 1000) + " + " + (n2 - m * 1000) + "</b> ?", en: "Which number is <b>" + exMille(m * 1000) + " + " + (n2 - m * 1000) + "</b>?" }, o: o2.map(exMille), a: o2.indexOf(n2), ex: { fr: exMille(m * 1000) + " + " + (n2 - m * 1000) + " = " + exMille(n2) + ".", en: exMille(m * 1000) + " + " + (n2 - m * 1000) + " = " + exMille(n2) + "." } },
+            { t: "choix", c: { fr: "Combien font <b>50 + 20 + 5</b> ?", en: "What is <b>50 + 20 + 5</b>?" }, o: ["75", "70", "65", "57"], a: 0, ex: { fr: "50 + 20 = 70, et 70 + 5 = 75.", en: "50 + 20 = 70, and 70 + 5 = 75." } }
+          ]; } },
+      compter: { perso: "mei", etape: 1, fr: "Combien d'argent ?", en: "How much money?", dfr: "Je compte les pièces et les billets.", den: "I count the coins and notes.",
+        gen: function () { return [3, 3, 4, 4, 5, 5].map(function (n, k) { var b = []; for (var i = 0; i < n; i++) b.push(HE.pk(PO.PIECES)); if (k >= 3) b.push(HE.pk([500, 1000])); b.sort(function (x, y) { return y - x; }); var s = b.reduce(function (x, y) { return x + y; }, 0);
+          return { t: "champs", c: { fr: "Combien d'argent y a-t-il dans le porte-monnaie ?", en: "How much money is in the purse?" }, z: function () { return qzPorteMonnaie(b); }, champs: [{ k: "s", apres: " F" }], r: { s: s },
+            ex: { fr: b.join(" + ") + " = " + exMille(s) + " F. Je commence par les plus gros.", en: b.join(" + ") + " = " + exMille(s) + " F. I start with the biggest." } }; }); } },
+      payer: { perso: "vaka", etape: 2, fr: "Paie le prix exact", en: "Pay the exact price", dfr: "Je choisis les pièces et les billets pour payer juste.", den: "I choose coins and notes to pay the exact amount.",
+        gen: function () { return [HE.pk([35, 45, 65]), HE.pk([75, 85, 95]), HE.pk([120, 160, 180]), HE.pk([235, 275, 340]), HE.pk([480, 650, 720]), HE.pk([1250, 1375, 1600])].map(function (p) {
+          return { t: "pieces", cible: p, c: { fr: "Paie <b>" + exMille(p) + " F</b> avec les pièces et les billets.", en: "Pay <b>" + exMille(p) + " F</b> with the coins and notes." },
+            ex: { fr: "Pour payer, je décompose la somme : je commence par les plus gros billets et les plus grosses pièces.", en: "To pay, I split the amount: I start with the biggest notes and coins." } }; }); } },
+      marche: { perso: "tehani", etape: 3, fr: "Au marché", en: "At the market", dfr: "Je calcule ce que je paie et ce qu'on me rend.", den: "I work out what I pay and my change.",
+        gen: function () { var qs = []; for (var k = 0; k < 6; k++) { var f = HE.shuf(PO.FRUITS).slice(0, 2), tot = f[0].prix + f[1].prix, billet = tot < 500 ? 500 : 1000, qui = HE.pk(QZ_PRENOMS);
+          qs.push(k % 2 === 0 ? { t: "champs", c: { fr: qui + " achète " + f[0].fr + " (" + f[0].prix + " F) et " + f[1].fr + " (" + f[1].prix + " F). Combien paie-t-il ou elle ?", en: qui + " buys " + f[0].en + " (" + f[0].prix + " F) and " + f[1].en + " (" + f[1].prix + " F). How much is it?" }, champs: [{ k: "s", apres: " F" }], r: { s: tot }, ex: { fr: f[0].prix + " F + " + f[1].prix + " F = " + tot + " F.", en: f[0].prix + " F + " + f[1].prix + " F = " + tot + " F." } }
+            : { t: "champs", c: { fr: qui + " achète " + f[0].fr + " et " + f[1].fr + " : " + tot + " F en tout. Il ou elle paie avec un billet de " + exMille(billet) + " F. Combien lui rend-on ?", en: qui + " buys " + f[0].en + " and " + f[1].en + ": " + tot + " F altogether. They pay with a " + exMille(billet) + " F note. How much change do they get?" }, z: function () { return qzPorteMonnaie([billet]); }, champs: [{ k: "s", apres: " F" }], r: { s: billet - tot }, ex: { fr: exMille(billet) + " F − " + tot + " F = " + (billet - tot) + " F. Je peux vérifier : " + tot + " F + " + (billet - tot) + " F = " + exMille(billet) + " F.", en: exMille(billet) + " F − " + tot + " F = " + (billet - tot) + " F. Check: " + tot + " F + " + (billet - tot) + " F = " + exMille(billet) + " F." } }); }
+          return qs; } }
+    } },
+
+    /* ---------- Le verbe : « Je réinvestis » (leçon CONJ2) [PROPOSITION : textes écrits par Claude] ---------- */
+    verbe: { matiere: "francais", jeux: {
+      textes: { perso: "nina", etape: 3, fr: "Les verbes du texte", en: "Verbs in a text", dfr: "Je touche tous les verbes conjugués d'un petit texte.", den: "I tap all the conjugated verbs in a short text.",
+        gen: function () { return HE.shuf([
+          { mots: "Le matin, Tehani prend le bus. Elle arrive à l'école à sept heures et demie. Dans la cour, ses amis jouent au ballon. La cloche sonne. Les élèves entrent en classe.", v: ["prend", "arrive", "jouent", "sonne", "entrent"] },
+          { mots: "Papi Tao part à la pêche. La mer est calme. Il lance sa ligne. Un gros poisson mord à l'hameçon. Papi Tao rentre content.", v: ["part", "est", "lance", "mord", "rentre"] },
+          { mots: "Kakou court dans la forêt. Il cherche des vers de terre. Margouille dort sous une feuille. Le soleil brille. Les oiseaux chantent.", v: ["court", "cherche", "dort", "brille", "chantent"] }
+        ]).map(function (x) { var mots = x.mots.split(" "), vs = [], reste = x.v.slice();
+          mots.forEach(function (w, i) { var p = w.replace(/[.,]/g, ""); var j = reste.indexOf(p); if (j >= 0) { vs.push(i); reste.splice(j, 1); } });
+          return { t: "mots", mots: mots, v: vs, c: { fr: "Touche les <b>" + vs.length + " verbes conjugués</b> du texte, puis valide.", en: "Tap the <b>" + vs.length + " conjugated verbs</b> in the text, then check." },
+            ex: { fr: "Les verbes : " + x.v.join(", ") + ". Pour vérifier, je mets la phrase à la forme négative : le verbe est entre ne et pas.", en: "The verbs: " + x.v.join(", ") + ". To check, I make the sentence negative: the verb is between ne and pas." } }; }); } }
+    } }
+  };
+
+  function qzDemarrer(seq, jeu) { QZ = { seq: seq, jeu: jeu, qs: QUIZ[seq].jeux[jeu].gen(), i: 0, score: 0, rep: false, choix: -1, msg: "", essais: 0, fin: false, val: {}, sel: [] }; }
+  function qzSuite(dernier) { return '<button class="coco-btn coco-btn--grand" type="button" data-action="qz-suite">' + (dernier ? (langue === "en" ? "See my score" : "Voir mon score") : t("suivant")) + "</button>"; }
+  function jeuQZ(seq, jeu) {
+    var S = QUIZ[seq], J = S.jeux[jeu], m = MATIERE[S.matiere], en = langue === "en";
+    if (!QZ || QZ.seq !== seq || QZ.jeu !== jeu) qzDemarrer(seq, jeu);
+    var n = QZ.qs.length;
+    var titre = { sous: tr(C[seq].titre) + " · " + (J.etape ? J.etape + " · " : "1 · ") + t(QZ_ETAPE[J.etape]), titre: en ? J.en : J.fr };
+    var haut = barre(S.matiere) + hautJeu(m, "seq-" + seq, titre, galets(n, QZ.fin ? n : QZ.i));
+    if (QZ.fin) return haut + qzBilan();
+    var q = QZ.qs[QZ.i], zone = q.z ? q.z(en) : "", bas = "";
+    if (q.t === "choix") {
+      zone += '<div class="coco-row qz-choix">' + q.o.map(function (o, k) {
+        var cls = "coco-etiquette hr-choix" + (QZ.rep && k === q.a ? " est-juste" : QZ.rep && k === QZ.choix ? " est-revoir" : "");
+        return '<button class="' + cls + '" type="button" data-action="qz-choix" data-v="' + k + '"' + (QZ.rep ? " disabled" : "") + ">" + esc(typo(qzT(o))) + "</button>"; }).join("") + "</div>";
+    } else if (q.t === "champs") {
+      zone += '<p class="qz-champs">' + q.champs.map(function (f) {
+        var avant = en && f.avantEn !== undefined ? f.avantEn : (f.avant || "");
+        return (f.sep ? '<span class="qz-sep">' + esc(f.sep) + "</span>" : "") + (avant ? "<span>" + esc(avant) + "</span>" : "") +
+          '<input class="qz-champ" type="text" inputmode="numeric" autocomplete="off" data-qz="' + f.k + '" value="' + esc(QZ.val[f.k] || "") + '"' + (QZ.rep ? " disabled" : "") + ' aria-label="' + (en ? "answer" : "réponse") + '">' + (f.apres ? "<span>" + esc(f.apres) + "</span>" : ""); }).join("") + "</p>";
+      bas = QZ.rep ? "" : '<button class="coco-btn coco-btn--grand" type="button" data-action="qz-valider">' + t("valider") + "</button>";
+    } else if (q.t === "pieces") {
+      var somme = QZ.sel.reduce(function (a, v) { return a + v; }, 0);
+      zone += '<p class="qz-legende">' + (en ? "In my hand:" : "Dans ma main :") + "</p>" + '<div class="qz-main">' + (QZ.sel.length ? QZ.sel.map(function (v, k) { return qzArgent(v, QZ.rep ? "" : "qz-retirer", k); }).join("") : '<span class="qz-vide">' + (en ? "Tap the coins and notes below." : "Touche les pièces et les billets en dessous.") + "</span>") + "</div>" +
+        (QZ.rep ? '<p class="qz-total">' + (en ? "Total: " : "Total : ") + exMille(somme) + " F</p>" : '<p class="qz-legende">' + (en ? "Tap a coin in your hand to take it back." : "Touche une pièce dans ta main pour la reprendre.") + "</p>") +
+        (QZ.rep ? "" : '<div class="po-pieces qz-caisse">' + QZ_BILLETS.concat(PO.PIECES.slice().reverse()).map(function (v) { return qzArgent(v, "qz-piece"); }).join("") + "</div>");
+      bas = QZ.rep ? "" : '<button class="coco-btn coco-btn--grand" type="button" data-action="qz-valider"' + (QZ.sel.length ? "" : " disabled") + ">" + t("valider") + "</button>";
+    } else if (q.t === "mots") {
+      zone += '<p class="qz-texte">' + q.mots.map(function (w, k) { var on = QZ.sel.indexOf(k) >= 0, juste = q.v.indexOf(k) >= 0;
+        var cls = "qz-mot" + (on ? " est-choisi" : "") + (QZ.rep && juste ? " est-verbe" : "") + (QZ.rep && on && !juste ? " est-revoir" : "");
+        return '<button class="' + cls + '" type="button" data-action="qz-mot" data-v="' + k + '"' + (QZ.rep ? " disabled" : "") + ">" + esc(w) + "</button>"; }).join(" ") + "</p>";
+      bas = QZ.rep ? "" : '<button class="coco-btn coco-btn--grand" type="button" data-action="qz-valider"' + (QZ.sel.length ? "" : " disabled") + ">" + t("valider") + "</button>";
+    }
+    return haut + bulle(J.perso, qzT(q.c), J.etape === 0 ? "reflechit" : "presente") + '<section class="zone ' + m.classe + ' qz-zone">' + zone + "</section>" + '<div class="retour-zone">' + QZ.msg + "</div>" +
+      (bas ? '<footer class="jeu-bas"><span></span>' + bas + "</footer>" : "");
+  }
+  function qzFinir(ok, txt) {
+    var dernier = QZ.i === QZ.qs.length - 1;
+    QZ.rep = true; if (ok && QZ.essais === 0) QZ.score++;
+    QZ.msg = ok ? retour("bravo", t("bravo"), txt, qzSuite(dernier)) : retour("revoir", t("pasEncore"), txt, qzSuite(dernier));
+  }
+  function actionQZ(a, el) {
+    if (!QZ) return;
+    var q = QZ.qs[QZ.i];
+    if (a === "qz-suite") { if (QZ.i >= QZ.qs.length - 1) QZ.fin = true; else { QZ.i++; QZ.rep = false; QZ.choix = -1; QZ.msg = ""; QZ.essais = 0; QZ.val = {}; QZ.sel = []; } return; }
+    if (a === "qz-rejouer") { qzDemarrer(QZ.seq, QZ.jeu); return; }
+    if (QZ.rep) return;
+    if (a === "qz-choix") { QZ.choix = +el.dataset.v; var ok = QZ.choix === q.a; qzFinir(ok, typo(qzT(q.ex))); return; }
+    if (a === "qz-piece") { if (QZ.sel.length < 20) QZ.sel.push(+el.dataset.v); QZ.sel.sort(function (x, y) { return y - x; }); return; }
+    if (a === "qz-retirer") { QZ.sel.splice(+el.dataset.k, 1); return; }
+    if (a === "qz-mot") { var k = +el.dataset.v, i = QZ.sel.indexOf(k); if (i >= 0) QZ.sel.splice(i, 1); else QZ.sel.push(k); return; }
+    if (a === "qz-valider") {
+      var en = langue === "en";
+      if (q.t === "champs") {
+        var vide = q.champs.some(function (f) { return QZ.val[f.k] === undefined || QZ.val[f.k] === ""; });
+        if (vide) { QZ.msg = retour("astuce", t("astuce"), en ? "Fill in every box before you check." : "Remplis toutes les cases avant de valider."); return; }
+        var juste = q.champs.every(function (f) { return +QZ.val[f.k] === q.r[f.k]; });
+        qzFinir(juste, typo(qzT(q.ex)));
+      } else if (q.t === "pieces") {
+        var s = QZ.sel.reduce(function (x, v) { return x + v; }, 0);
+        if (s === q.cible) qzFinir(true, (en ? "You paid exactly " : "Tu as payé juste ") + exMille(s) + " F" + (en ? ": " : " : ") + QZ.sel.join(" F + ") + " F.");
+        else qzFinir(false, (en ? "Your hand holds " + exMille(s) + " F: that is " + (s < q.cible ? "not enough" : "too much") + ". " : "Dans ta main, il y a " + exMille(s) + " F : c'est " + (s < q.cible ? "trop peu" : "trop") + ". ") + qzT(q.ex));
+      } else if (q.t === "mots") {
+        var bon = QZ.sel.length === q.v.length && q.v.every(function (k) { return QZ.sel.indexOf(k) >= 0; });
+        qzFinir(bon, typo(qzT(q.ex)));
+      }
+    }
+  }
+  function qzBilan() {
+    var S = QUIZ[QZ.seq], J = S.jeux[QZ.jeu], en = langue === "en", n = QZ.qs.length, sc = QZ.score;
+    marquerFait("qz-" + QZ.seq + "-" + QZ.jeu);
+    var cles = Object.keys(S.jeux), suiv = cles[cles.indexOf(QZ.jeu) + 1];
+    var txt = J.etape === 0 ? (en ? "You remembered " + sc + " out of " + n + "." : "Tu t’es rappelé " + sc + " réponse" + (sc > 1 ? "s" : "") + " sur " + n + ".") : (en ? "You got " + sc + " out of " + n + " right first time." : "Tu as réussi " + sc + " sur " + n + " du premier coup.");
+    return '<section class="bilan"><img src="' + POSE_BILAN(J.perso, sc, n) + '" alt=""><h2>' + t("fini") + "</h2>" + (J.etape === 0 ? "" : '<p class="mi-score">' + sc + " / " + n + "</p>") + "<p>" + esc(typo(txt)) + "</p>" +
+      '<div class="coco-row"><button class="coco-btn' + (suiv ? " coco-btn--secondaire" : "") + '" type="button" data-action="qz-rejouer">' + t("rejouer") + "</button>" +
+      (suiv ? '<a class="coco-btn" href="#qz-' + QZ.seq + "-" + suiv + '">' + esc(en ? S.jeux[suiv].en : S.jeux[suiv].fr) + " →</a>" : "") +
+      '<a class="coco-btn coco-btn--secondaire" href="#seq-' + QZ.seq + '">' + t("versSequence") + "</a></div></section>";
+  }
+  /* cartes des jeux sur la page de séquence */
+  function cartesQZ(seq, sauf) {
+    var S = QUIZ[seq], en = langue === "en";
+    return Object.keys(S.jeux).filter(function (k) { return !sauf || sauf.indexOf(k) < 0; }).map(function (k) { var J = S.jeux[k];
+      return carte(S.matiere, (J.etape || 1) + " · " + t(QZ_ETAPE[J.etape]), en ? J.en : J.fr, en ? J.den : J.dfr, J.perso, "qz-" + seq + "-" + k); }).join("");
+  }
+
+  /* ==========================================================================================
+     Leçons des séquences complétées (D-96) : heure digitale (GM5), division (CAL7, CAL8), monnaie (GM1)
+     Phrases des leçons de classe reprises mot pour mot ; « Je retiens » en cartes animées (D-86)
+     ========================================================================================== */
+  var LX = {};
+  function lxPop(html, k) { return '<span class="jr-pop" style="animation-delay:' + (0.2 + k * 0.35) + 's">' + html + "</span>"; }
+  function lxEcran(h, m) { return '<span class="lx-ecran"><span class="hr-h">' + h + '</span>:<span class="hr-m">' + HE.pad(m) + "</span></span>"; }
+  function lxPoints(n, cls) { var s = ""; for (var i = 0; i < n; i++) s += '<span class="lx-pt ' + (cls || "") + '"></span>'; return s; }
+  function lxDecompose(n) { /* 6 875 → [6000, 800, 70, 5] et les billets et pièces de chaque partie */
+    var parts = [Math.floor(n / 1000) * 1000, Math.floor(n % 1000 / 100) * 100, Math.floor(n % 100 / 10) * 10, n % 10].filter(function (x) { return x > 0; });
+    var ARG = [10000, 5000, 1000, 500, 200, 100, 50, 20, 10, 5];
+    return parts.map(function (p) { var r = p, l = []; ARG.forEach(function (v) { if (v <= p) while (r >= v) { l.push(v); r -= v; } }); return { p: p, l: l }; });
+  }
+  function lxArgent(v, k) { return lxPop(v >= 500 ? '<span class="po-billet">' + exMille(v) + "<small>F</small></span>" : '<span class="po-piece' + (v >= 10 ? " po-piece--grande" : "") + '">' + v + "<small>F</small></span>", k); }
+
+  function jrCartesDigitale(en) {
+    var c = jrCartes(en).slice(1, 4);
+    c.push({ t: en ? "Writing the time in words" : "Écrire l’heure en lettres",
+      svg: '<div class="lx-illu">' + lxPop(lxEcran(6, 30), 0) + lxPop('<span class="lx-fl">→</span>', 1) + lxPop('<b class="lx-mots">' + (en ? "half past six" : "six heures et demie") + "</b>", 2) + "</div>",
+      txt: en ? ["I get up at 6:30.", "→ half past six"] : ["Je me lève à 6h30.", "→ six heures et demie"] });
+    return c;
+  }
+  function jrCartesDivision(en) {
+    var sac = function (n, k) { return lxPop('<span class="lx-sac">' + lxPoints(n) + "</span>", k); };
+    return [
+      { t: en ? "Grouping" : "Grouper", svg: '<div class="lx-illu lx-wrap">' + [0, 1, 2, 3, 4, 5].map(function (k) { return sac(4, k); }).join("") + "</div>",
+        txt: en ? ["24 grouped in 4s: how many 4s in 24?", "24 = 4 × 6", "or 24 ÷ 4 = 6"] : ["24 groupé par 4 : dans 24, combien de fois 4 ?", "24 = 4 x 6", "ou 24 : 4 = 6"] },
+      { t: en ? "Sharing" : "Partager", svg: '<div class="lx-illu">' + ["Amy", "Lana", "Evaël"].map(function (p, k) { return lxPop('<span class="lx-part"><span class="lx-sac">' + lxPoints(9) + "</span><small>" + p + "</small></span>", k); }).join("") + "</div>",
+        txt: en ? ["27 shared into 3: 3 times what makes 27?", "27 = 3 × 9", "or 27 ÷ 3 = 9"] : ["27 partagé en 3 : 3 fois combien pour faire 27 ?", "27 = 3 x 9", "ou 27 : 3 = 9"] },
+      { t: en ? "Division with a remainder" : "La division avec reste", svg: '<div class="lx-illu lx-wrap">' + [0, 1, 2, 3, 4, 5, 6, 7].map(function (k) { return sac(5, k); }).join("") + lxPop('<span class="lx-sac lx-reste">' + lxPoints(3) + "</span>", 8) + "</div>",
+        txt: en ? ["I divide 43 by 5.", "43 = (5 × 8) + 3", "Amaury can make 8 boxes; 3 cupcakes will be left over."] : ["Je divise 43 par 5.", "43 = (5 x 8) + 3", "Amaury pourra faire 8 boîtes, il restera 3 cupcakes."] },
+      { t: en ? "The words of division" : "Les mots de la division", svg: '<div class="lx-illu lx-mots-div">' + lxPop('<span><b>43</b><small>' + (en ? "dividend" : "dividende") + "</small></span>", 0) + "<span>= (</span>" + lxPop('<span><b>5</b><small>' + (en ? "divisor" : "diviseur") + "</small></span>", 1) + "<span>×</span>" + lxPop("<span><b>8</b><small>quotient</small></span>", 2) + "<span>) +</span>" + lxPop('<span><b>3</b><small>' + (en ? "remainder" : "reste") + "</small></span>", 3) + "</div>",
+        txt: en ? ["43 is the dividend, 5 the divisor, 8 the quotient and 3 the remainder."] : ["43 est le dividende, 5 le diviseur, 8 le quotient et 3 le reste."] }
+    ];
+  }
+  function jrCartesMonnaie(en) {
+    var d = lxDecompose(6875);
+    return [
+      { t: en ? "The notes" : "Les billets", svg: '<div class="lx-illu lx-wrap">' + [10000, 5000, 1000, 500].map(lxArgent).join("") + "</div>", txt: en ? ["Notes of 10,000 F, 5,000 F, 1,000 F and 500 F."] : ["Les billets de 10 000 F, 5 000 F, 1 000 F et 500 F."] },
+      { t: en ? "The coins" : "Les pièces", svg: '<div class="lx-illu lx-wrap">' + [200, 100, 50, 20, 10, 5].map(lxArgent).join("") + "</div>", txt: en ? ["Coins of 200 F, 100 F, 50 F, 20 F, 10 F and 5 F."] : ["Les pièces de 200 F, 100 F, 50 F, 20 F, 10 F et 5 F."] },
+      { t: en ? "Splitting an amount" : "Décomposer une somme", svg: '<div class="lx-illu lx-col">' + lxPop("<b class=\"lx-somme\">6 875 F</b>", 0) + d.map(function (x, k) { return lxPop('<span class="lx-ligne-arg"><b>' + exMille(x.p) + " F</b> = " + x.l.map(function (v) { return exMille(v) + " F"; }).join(" + ") + "</span>", k + 1); }).join("") + "</div>",
+        txt: en ? ["To make an amount of money, we split it:", "6,875 F = 6,000 + 800 + 70 + 5"] : ["Pour pouvoir constituer une somme d’argent, il faut la décomposer :", "6 875 F = 6 000 + 800 + 70 + 5"] }
+    ];
+  }
+  function lxLecon(seq, sous, blocs, src) {
+    var m = MATIERE.maths, en = langue === "en";
+    return barre("maths") + hautJeu(m, "seq-" + seq, { sous: sous, titre: t("lecon") }) +
+      bulle("coralie", en ? "Let's look at the lesson together. Tap, try and watch!" : "On revoit la leçon ensemble. Touche, essaie et observe !") +
+      blocs.map(function (b, k) { return '<section class="lecon-bloc m-maths"><h3><span class="lecon-num">' + (k + 1) + "</span>" + b[0] + "</h3>" + b[1] + "</section>"; }).join("") +
+      jrSection(src) + '<div class="coco-row"><a class="coco-btn" href="#seq-' + seq + '">' + t("versSequence") + "</a></div>";
+  }
+  function pageLeconDigitale() {
+    var en = langue === "en", h = LX.h === undefined ? 16 : LX.h;
+    var frise = '<div class="lx-frise" role="group" aria-label="' + (en ? "The 24 hours of the day" : "Les 24 heures de la journée") + '">' + [];
+    for (var k = 0; k < 24; k++) frise += '<button type="button" class="lx-heure ' + (k < 12 ? "lx-matin" : "lx-apm") + '" data-action="lx-heure" data-v="' + k + '" aria-pressed="' + (k === h) + '">' + k + "</button>";
+    frise += '</div><div class="lx-frise-leg"><span>' + (en ? "midnight · morning (0:00 → 12:00)" : "minuit · le matin (de 0h à 12h)") + "</span><span>" + (en ? "noon · afternoon and evening (12:00 → 24:00)" : "midi · l’après-midi et le soir (de 12h à 24h)") + "</span></div>";
+    var nom = h === 0 ? (en ? "midnight" : "minuit") : h === 12 ? (en ? "noon" : "midi") : "";
+    var info = '<div class="lx-info">' + HE.horloge(h % 12 || 12, 0, { deco: true, cls: "lx-clk" }) + "<div>" + lxEcran(h, 0) + "<p>" + (h < 12 ? (en ? "It is <b>the morning</b>: the hour hand is on its first turn of the face." : "C’est <b>le matin</b> : l’aiguille des heures fait son premier tour du cadran.")
+      : (en ? "It is <b>the afternoon or evening</b>: the hour hand is on its second turn of the face." : "C’est <b>l’après-midi ou le soir</b> : l’aiguille des heures fait son deuxième tour du cadran.")) + "</p>" +
+      (h > 12 ? "<p>" + (en ? "We can also say " : "On peut aussi dire ") + "<b>" + (h - 12) + ":00 " + (en ? "p.m." : h >= 18 ? "du soir" : "de l’après-midi") + "</b> (" + h + " − 12 = " + (h - 12) + ").</p>" : "") + (nom ? "<p><b>" + HE.cap(nom) + "</b></p>" : "") + "</div></div>";
+    var ex = [["4:00", en ? "p.m." : "de l’après-midi", "16:00", "+12h"], ["7h30", en ? "p.m." : "du soir", "19h30", "+12h"], ["14:15", "", "2:15 " + (en ? "p.m." : "de l’après-midi"), "−12h"], ["18h45", "", "6h45 " + (en ? "p.m." : "du soir"), "−12h"]];
+    var deux = '<p>' + (en ? "We can say afternoon and evening times in <b>two ways</b>:" : "On peut dire les heures de l’après-midi et du soir de <b>deux façons</b> :") + '</p><ul class="lx-exemples">' + ex.map(function (x) { return "<li><b>" + x[0] + "</b> " + x[1] + ' <span class="lx-op ' + (x[3] === "+12h" ? "lx-plus" : "lx-moins") + '">' + x[3] + "</span> <b>" + x[2] + "</b></li>"; }).join("") + "</ul>";
+    var mn = [[8, 0, "Huit heures pile (0 min)", "Eight o’clock (0 min)"], [11, 15, "Onze heures et quart (15min)", "Quarter past eleven (15 min)"], [6, 30, "Six heures et demie (30min)", "Half past six (30 min)"], [9, 45, "Dix heures moins le quart (45min)", "Quarter to ten (45 min)"]];
+    var minutes = "<p>" + (en ? "In one hour there are <b>60 minutes</b>. We can read the minutes in several ways:" : "Dans une heure, il y a <b>60 minutes</b>. On peut lire les minutes de plusieurs façons :") + '</p><div class="lx-minutes">' + mn.map(function (x) { return "<div>" + lxEcran(x[0], x[1]) + "<p>" + (en ? x[3] : x[2]) + "</p></div>"; }).join("") + '</div><p class="lx-note">' + (en ? "9:45: there is a quarter of an hour (15 min) left before 10 o’clock." : "9:45 : il reste un quart d’heure (15min) avant 10h.") + "</p>";
+    return lxLecon("digitale", tr(C.digitale.titre), [[en ? "In one day there are 24 hours" : "Dans une journée, il y a 24 heures", '<p class="mi-indice">' + (en ? "Tap an hour." : "Touche une heure.") + "</p>" + frise + info], [en ? "Two ways to say the time" : "Deux façons de dire l’heure", deux], [en ? "One hour: 60 minutes" : "Une heure : 60 minutes", minutes]], jrCartesDigitale);
+  }
+  function pageLeconDivision() {
+    var en = langue === "en", g = LX.g || 0, p = LX.p || 0, div = en ? " ÷ " : " : ";
+    var sacs = ""; for (var i = 0; i < g; i++) sacs += '<span class="lx-sac apparait">' + lxPoints(4) + "</span>";
+    var grouper = "<p>" + (en ? "Noah has <b>24 lollipops</b>. He makes bags of <b>4 lollipops</b>. How many bags can he make?" : "Noah a <b>24 sucres d’orge</b>. Il prépare des sachets de <b>4 sucres d’orge</b>. Combien de sachets pourra-t-il faire ?") + "</p>" +
+      '<div class="lx-manip"><div class="lx-tas">' + lxPoints(24 - g * 4) + '</div><div class="lx-sacs">' + sacs + "</div></div>" +
+      '<div class="coco-row"><button class="coco-btn" type="button" data-action="lx-grouper"' + (g >= 6 ? " disabled" : "") + ">" + (en ? "I make a bag of 4" : "Je fais un sachet de 4") + '</button><button class="coco-btn coco-btn--secondaire" type="button" data-action="lx-g0">' + (en ? "Start again" : "Recommencer") + "</button></div>" +
+      (g >= 6 ? '<p class="lx-res">' + (en ? "How many 4s in 24? 24 = 4 × 6 or 24 ÷ 4 = 6. He can make <b>6 bags</b>." : "Dans 24, combien de fois 4 ? 24 = 4 x 6 ou 24 : 4 = 6. Il pourra faire <b>6 sachets</b>.") + "</p>" : "");
+    var parts = ["Amy", "Lana", "Evaël"].map(function (nom, k) { var n = Math.floor(p / 3) + (k < p % 3 ? 1 : 0); return '<div class="lx-part"><span class="lx-sac">' + lxPoints(n) + "</span><small>" + nom + "</small></div>"; }).join("");
+    var partager = "<p>" + (en ? "Amy has <b>27 marbles</b>. She shares them with Lana and Evaël. How many marbles will each girl have?" : "Amy a <b>27 billes</b>. Elle les partage avec Lana et Evaël. Combien de billes aura chaque fille ?") + "</p>" +
+      '<div class="lx-manip"><div class="lx-tas">' + lxPoints(27 - p) + '</div><div class="lx-sacs">' + parts + "</div></div>" +
+      '<div class="coco-row"><button class="coco-btn" type="button" data-action="lx-partager"' + (p >= 27 ? " disabled" : "") + ">" + (en ? "One marble each" : "Une bille à chacune") + '</button><button class="coco-btn coco-btn--secondaire" type="button" data-action="lx-p0">' + (en ? "Start again" : "Recommencer") + "</button></div>" +
+      (p >= 27 ? '<p class="lx-res">' + (en ? "3 times what makes 27? 27 = 3 × 9 or 27 ÷ 3 = 9. Each girl will have <b>9 marbles</b>." : "3 fois combien pour faire 27 ? 27 = 3 x 9 ou 27 : 3 = 9. Chacune aura <b>9 billes</b>.") + "</p>" : "");
+    var lab = function (n, l) { return '<span class="lx-lab"><b>' + n + "</b><small>" + l + "</small></span>"; };
+    var egal = function (a, b, q, r) { return '<p class="lx-mots-div">' + lab(a, en ? "dividend" : "dividende") + "<span>= (</span>" + lab(b, en ? "divisor" : "diviseur") + "<span>×</span>" + lab(q, "quotient") + "<span>) +</span>" + lab(r, en ? "remainder" : "reste") + "</p>"; };
+    var reste = "<p>" + (en ? "<b>Grouping.</b> Amaury has 43 cupcakes to put in boxes of 5. How many boxes can he make? I divide 43 by 5:" : "<b>Groupement.</b> Amaury a 43 cupcakes qu’il veut ranger par boîtes de 5. Combien de boîtes Amaury pourra-t-il faire ? Je divise 43 par 5 :") + "</p>" + egal(43, 5, 8, 3) +
+      "<p>" + (en ? "Amaury can make <b>8 boxes</b>; <b>3 cupcakes</b> will be left over." : "Amaury pourra faire <b>8 boîtes</b>, il restera <b>3 cupcakes</b>.") + "</p>" +
+      "<p>" + (en ? "<b>Sharing.</b> Isis has 58 cards to share between her 6 friends. How many cards will each friend get? I divide 58 by 6:" : "<b>Partage.</b> Isis a 58 cartes qu’elle veut partager entre ses 6 amis. Combien de cartes aura chacun de ses amis ? Je divise 58 par 6 :") + "</p>" + egal(58, 6, 9, 4) +
+      "<p>" + (en ? "Each friend will have <b>9 cards</b>; <b>4</b> will be left over." : "Chacun de ses amis aura <b>9 cartes</b>, il en restera <b>4</b>.") + "</p>";
+    return lxLecon("division", tr(C.division.titre), [[en ? "Grouping" : "Grouper", grouper], [en ? "Sharing" : "Partager", partager], [en ? "Division with a remainder" : "La division en ligne avec reste", reste]], jrCartesDivision);
+  }
+  function pageLeconMonnaie() {
+    var en = langue === "en", main = LX.main || [], s = LX.s || 6875, tot = main.reduce(function (a, v) { return a + v; }, 0);
+    var ARG = [10000, 5000, 1000, 500, 200, 100, 50, 20, 10, 5];
+    var bloc1 = "<p>" + (en ? "Here are the notes and coins that make up the money of New Caledonia:" : "Voici les billets et pièces qui composent la monnaie calédonienne :") + '</p><div class="po-pieces lx-caisse">' + ARG.map(function (v) { return qzArgent(v, "lx-arg"); }).join("") + "</div>" +
+      '<p class="qz-legende">' + (en ? "Tap them to put them in your hand." : "Touche-les pour les mettre dans ta main.") + '</p><div class="qz-main lx-main">' + (main.length ? qzPorteMonnaie(main).replace(/^<div class="qz-bourse">|<\/div>$/g, "") : '<span class="qz-vide">' + (en ? "Your hand is empty." : "Ta main est vide.") + "</span>") + "</div>" +
+      '<div class="coco-row"><p class="qz-total">' + (en ? "In my hand: " : "Dans ma main : ") + exMille(tot) + ' F</p><button class="coco-btn coco-btn--secondaire" type="button" data-action="lx-vider">' + (en ? "Empty my hand" : "Vider ma main") + "</button></div>";
+    var d = lxDecompose(s);
+    var bloc2 = "<p>" + (en ? "To make an amount of money, we <b>split</b> it:" : "Pour pouvoir constituer une somme d’argent, il faut la <b>décomposer</b> :") + '</p><p class="lx-somme-ligne"><b>' + exMille(s) + " F</b> = " + d.map(function (x) { return exMille(x.p); }).join(" + ") + "</p>" +
+      '<div class="lx-decomp">' + d.map(function (x) { return '<div><b>' + exMille(x.p) + ' F</b><div class="qz-bourse">' + x.l.map(function (v) { return v >= 500 ? '<span class="po-billet">' + exMille(v) + "<small>F</small></span>" : '<span class="po-piece' + (v >= 10 ? " po-piece--grande" : "") + '">' + v + "<small>F</small></span>"; }).join("") + "</div></div>"; }).join("") + "</div>" +
+      '<div class="coco-row"><button class="coco-btn" type="button" data-action="lx-somme">' + (en ? "Another amount" : "Une autre somme") + "</button>" + (s !== 6875 ? '<button class="coco-btn coco-btn--secondaire" type="button" data-action="lx-somme0">' + (en ? "Back to the lesson example" : "Revenir à l’exemple de la leçon") + "</button>" : "") + "</div>";
+    return lxLecon("monnaie", tr(C.monnaie.titre), [[en ? "The money of New Caledonia" : "La monnaie calédonienne", bloc1], [en ? "Splitting an amount" : "Décomposer une somme", bloc2]], jrCartesMonnaie);
+  }
+  function actionLX(a, el) {
+    if (a === "lx-heure") LX.h = +el.dataset.v;
+    else if (a === "lx-grouper") LX.g = Math.min(6, (LX.g || 0) + 1);
+    else if (a === "lx-g0") LX.g = 0;
+    else if (a === "lx-partager") LX.p = Math.min(27, (LX.p || 0) + 3);
+    else if (a === "lx-p0") LX.p = 0;
+    else if (a === "lx-arg") { LX.main = (LX.main || []).concat([+el.dataset.v]).sort(function (x, y) { return y - x; }).slice(0, 20); }
+    else if (a === "lx-vider") LX.main = [];
+    else if (a === "lx-somme") LX.s = HE.rint(1, 9) * 1000 + HE.rint(0, 9) * 100 + HE.rint(1, 9) * 10 + HE.pk([0, 5]);
+    else if (a === "lx-somme0") LX.s = 6875;
+  }
   function pageExos(seq) {
     var X = EXOS[seq], en = langue === "en";
     if (!EXF || EXF.seq !== seq) EXF = { seq: seq, opt: X.optDefaut || "", corrige: EXF ? EXF.corrige : false };
@@ -1453,7 +1787,7 @@
   function relancer(p, sel) { if (!p.champs) return []; var s = copie(p, sel); p.champs.forEach(function (c) { if (c.saisie) s[c.k] = ""; }); return s; }
   function regler(p, sel, el) {
     var c = p.champs.filter(function (x) { return x.k === el.dataset.k; })[0]; if (!c) return;
-    sel[c.k] = Math.max(c.min, Math.min(c.max, sel[c.k] + (+el.dataset.d)));
+    sel[c.k] = Math.max(c.min, Math.min(c.max, sel[c.k] + (+el.dataset.d) * (c.pas || 1)));
   }
   function reglages(p, sel, pre, actif) {
     var en = langue === "en";
@@ -1463,8 +1797,8 @@
         var ok = actif && (d < 0 ? sel[c.k] > c.min : sel[c.k] < c.max);
         return '<button class="po-pm" type="button" data-action="' + pre + '-champ" data-k="' + c.k + '" data-d="' + d + '" aria-label="' + esc(tr(c)) + (d < 0 ? (en ? ": one less" : " : un de moins") : (en ? ": one more" : " : un de plus")) + '"' + (ok ? "" : " disabled") + ">" + signe + "</button>";
       };
-      return '<div class="po-champ"><span>' + esc(tr(c)) + '</span><div class="po-reglette">' + bouton(-1, "−") + "<b>" + sel[c.k] + "</b>" + bouton(1, "+") + "</div></div>";
-    }).join("") + "</div>" + p.dessin(sel, langue);
+      return '<div class="po-champ"><span>' + esc(tr(c)) + '</span><div class="po-reglette">' + bouton(-1, "−") + "<b>" + (c.deux && sel[c.k] < 10 ? "0" : "") + sel[c.k] + "</b>" + bouton(1, "+") + "</div></div>";
+    }).join("") + "</div>" + '<div class="po-dessin-zone">' + p.dessin(sel, langue) + "</div>";
   }
   function manipulation(p, sel, actAjout, actRetire, actif) {
     if (p.champs) return reglages(p, sel, actAjout.charAt(0), actif !== false);
@@ -1738,8 +2072,8 @@
       ensDomaine("m-francais", "Français · Orthographe", [ensLigne("sari", "Les mots invariables", "7 activités, de « Je me rappelle » à la dictée sans erreur", [["La fiche", "#fiche-mots"], ["Fiche d’exercices", "#exos-mots"], ["Voir la séquence", "#seq-mots"]], F)]) +
       ensDomaine("m-maths", "Maths · Techniques opératoires", [ensLigne("nina", "La division en ligne", "Période 5, séquence 3 · deux problèmes ouverts", [["Fiche d’exercices", "#exos-division"], ["Voir la séquence", "#seq-division"]])].concat(PO.sequences.division.map(ensPO))) +
       ensDomaine("m-maths", "Maths · Grandeurs et mesures", [ensLigne("mei", "La monnaie et les prix", "Deux problèmes ouverts", [["Fiche d’exercices", "#exos-monnaie"], ["Voir la séquence", "#seq-monnaie"]])].concat(PO.sequences.monnaie.map(ensPO)).concat([
-        ensLigne("tehani", "Lire l’heure digitale", "« L’heure à l’ardoise » : 10 jeux collectifs au TBI pour les séances 1 à 3 (outil de la collègue, adapté)", [["Au TBI", JEU_DIGITAL], ["La fiche", "#fiche-digitale"], ["Fiche d’exercices", "#exos-digitale"], ["Voir la séquence", "#seq-digitale"]]),
-        ensLigne("coralie", "Lire l’heure à aiguilles", "Découverte guidée et jeu des ardoises au TBI ; leçon, 8 activités", [["Au TBI", "#tbi-heure"], ["La fiche", "#fiche-heure"], ["Fiche d’exercices", "#exos-heure"], ["Voir la séquence", "#seq-heure"]])])) +
+        ensLigne("tehani", "Lire l’heure digitale", "« L’heure à l’ardoise » : 10 jeux collectifs au TBI pour les séances 1 à 3 (outil de la collègue, adapté)", [["Au TBI", JEU_DIGITAL], ["La fiche", "#fiche-digitale"], ["Fiche d’exercices", "#exos-digitale"], ["Voir la séquence", "#seq-digitale"]])]).concat(PO.sequences.digitale.map(ensPO)).concat([
+        ensLigne("coralie", "Lire l’heure à aiguilles", "Découverte guidée et jeu des ardoises au TBI ; leçon, 8 activités", [["Au TBI", "#tbi-heure"], ["La fiche", "#fiche-heure"], ["Fiche d’exercices", "#exos-heure"], ["Voir la séquence", "#seq-heure"]])]).concat(PO.sequences.heure.map(ensPO))) +
       ensDomaine("m-maths", "Maths · Résolution de problèmes", [
         ensLigne("adi", "Banque de problèmes (Vergnaud)", "217 problèmes classés par type, avec leurs schémas", [["Ouvrir la banque", "#banque"]]),
         ensLigne("waeko", "Lire un graphique en barres", "Leçon (OGD1), 4 jeux et problèmes", [["La fiche", "#fiche-diagrammes"], ["Fiche d’exercices", "#exos-diagrammes"], ["Voir la séquence", "#seq-diagrammes"]])]);
@@ -1887,7 +2221,7 @@
   /* ---------- routeur ---------- */
   var ROUTES = {
     accueil: pageAccueil, "seq-verbe": function () { return pageSequence("verbe"); }, "seq-mots": pageSequenceMots, "lecon-mots": pageLeconMots, "fiche-mots": ficheMots,
-    "seq-heure": pageSequenceHeure, "seq-digitale": pageSequenceDigitale, "ens-suivi": pageEnsSuivi, "ens-sequences": pageEnsSequences, "ens-formation": pageEnsFormation, "fiche-digitale": ficheDigitale, "seq-diagrammes": pageSequenceDiagrammes, "lecon-diagrammes": pageLeconDiagrammes, "fiche-diagrammes": ficheDiagrammes, "lecon-heure": function () { return pageLeconHeure(true); }, "maquette-retiens": function () { return pageLeconHeure(true); }, "fiche-heure": ficheHeure, "exos-heure": function () { return pageExos("heure"); }, "exos-verbe": function () { return pageExos("verbe"); }, "exos-mots": function () { return pageExos("mots"); },
+    "seq-heure": pageSequenceHeure, "seq-digitale": pageSequenceDigitale, "ens-suivi": pageEnsSuivi, "ens-sequences": pageEnsSequences, "ens-formation": pageEnsFormation, "fiche-digitale": ficheDigitale, "seq-diagrammes": pageSequenceDiagrammes, "lecon-diagrammes": pageLeconDiagrammes, "fiche-diagrammes": ficheDiagrammes, "lecon-heure": function () { return pageLeconHeure(true); }, "maquette-retiens": function () { return pageLeconHeure(true); }, "fiche-heure": ficheHeure, "exos-heure": function () { return pageExos("heure"); }, "lecon-digitale": pageLeconDigitale, "lecon-division": pageLeconDivision, "lecon-monnaie": pageLeconMonnaie, "exos-verbe": function () { return pageExos("verbe"); }, "exos-mots": function () { return pageExos("mots"); },
     "exos-monnaie": function () { return pageExos("monnaie"); }, "exos-division": function () { return pageExos("division"); }, "exos-digitale": function () { return pageExos("digitale"); }, "exos-diagrammes": function () { return pageExos("diagrammes"); }, "tbi-heure": pageTbiHeure,
     "lecon-verbe": pageLecon, "jeu-verbe-decouvre": jeuDecouvre, "jeu-verbe-chasse": jeuChasse, enseignante: pageEnseignante, banque: pageBanque
   };
@@ -1902,6 +2236,7 @@
     ROUTES["fiche-" + id] = function () { return poFiche(id); };
     ROUTES["feuille-" + id] = function () { return poFeuille(id); };
   });
+  Object.keys(QUIZ).forEach(function (seq) { Object.keys(QUIZ[seq].jeux).forEach(function (jeu) { ROUTES["qz-" + seq + "-" + jeu] = function () { return jeuQZ(seq, jeu); }; }); });
   function route() { if (UNIQUE) return UNIQUE; var h = (location.hash || "").slice(1); return ROUTES[h] ? h : "accueil"; }
   var derniere = "";
   /* sous-menus des onglets (D-87) */
@@ -1917,7 +2252,7 @@
   document.addEventListener("keydown", function (e) { if (e.key === "Escape") fermerSousMenus(); });
   function rendre() {
     var r = route();
-    if (r !== derniere) { if (r === "jeu-verbe-decouvre") D = null; if (r === "jeu-verbe-chasse") H = null; if (/^po-/.test(r)) A = null; if (/^mots-/.test(r)) G = null; if (/^heure-/.test(r)) HG = null; if (/^diag-/.test(r)) GD = null; if (r === "tbi-heure") { clearInterval(TB.tid); TB.part = "menu"; } try { if (MO.peutParler) speechSynthesis.cancel(); } catch (x) {} if (/^classe-/.test(r)) { K = null; clearInterval(minuteur); } if (r === "lecon-verbe") L = { carte: {}, moment: "present", machine: 0, phrase: 0 }; if (/^exos-/.test(r)) EXF = null; window.scrollTo(0, 0); derniere = r; }
+    if (r !== derniere) { if (r === "jeu-verbe-decouvre") D = null; if (r === "jeu-verbe-chasse") H = null; if (/^po-/.test(r)) A = null; if (/^mots-/.test(r)) G = null; if (/^heure-/.test(r)) HG = null; if (/^diag-/.test(r)) GD = null; if (r === "tbi-heure") { clearInterval(TB.tid); TB.part = "menu"; } try { if (MO.peutParler) speechSynthesis.cancel(); } catch (x) {} if (/^classe-/.test(r)) { K = null; clearInterval(minuteur); } if (r === "lecon-verbe") L = { carte: {}, moment: "present", machine: 0, phrase: 0 }; if (/^exos-/.test(r)) EXF = null; if (/^qz-/.test(r)) QZ = null; if (/^lecon-/.test(r)) { LX = {}; JR = { i: 0, tout: false }; } window.scrollTo(0, 0); derniere = r; }
     document.documentElement.lang = langue;
     var ferme = !ensOuvert && !UNIQUE && ENS_ROUTES.test(r);
     document.body.classList.toggle("mode-classe", !ferme && /^classe-|^tbi-/.test(r));
@@ -1942,6 +2277,8 @@
     else if (/^k-/.test(a)) actionClasse(a, el);
     else if (/^m-/.test(a)) actionMots(a, el);
     else if (/^h-/.test(a)) actionHeure(a, el);
+    else if (/^qz-/.test(a)) actionQZ(a, el);
+    else if (/^lx-/.test(a)) actionLX(a, el);
     else if (/^t-/.test(a)) actionTbi(a, el);
     else if (/^g-/.test(a)) actionDiag(a, el);
     else if (/^jr-/.test(a)) actionJr(a, el);
@@ -1962,11 +2299,14 @@
     if (el.dataset.poChamp !== undefined) {
       var S = el.dataset.mode === "k" ? K : A; if (!S) return;
       S.sel[el.dataset.poChamp] = v;
+      var dz = el.closest(".po-zone, .k-commun, section") && document.querySelector(".po-dessin-zone"); if (dz) dz.innerHTML = po(S.id).dessin(S.sel, langue);
       var b = document.querySelector('[data-action="' + (el.dataset.mode === "k" ? "k-tableau" : "a-proposer") + '"]'); if (b) b.disabled = !pret(po(S.id), S.sel);
       if (S === A && A.msg) { A.msg = ""; var rz = document.querySelector(".retour-zone"); if (rz) rz.innerHTML = ""; }
     } else if (el.dataset.ecrit !== undefined && A) A.ecrit[el.dataset.ecrit] = v;
   });
   document.addEventListener("input", function (e) { if (e.target.id === "mi-reponse" && G) G.typed = e.target.value; });
+  document.addEventListener("input", function (e) { var el = e.target; if (!el.dataset || el.dataset.qz === undefined || !QZ) return; var v = el.value.replace(/[^\d]/g, "").slice(0, 5); if (v !== el.value) el.value = v; QZ.val[el.dataset.qz] = v; });
+  document.addEventListener("keydown", function (e) { if (e.key === "Enter" && e.target.dataset && e.target.dataset.qz !== undefined) { var b = document.querySelector('[data-action="qz-valider"]'); if (b) b.click(); } });
   document.addEventListener("change", function (e) { if (e.target.id === "ex-liste" && EXF) { EXF.opt = e.target.value; EXF.d = EXOS[EXF.seq].tirer(EXF.opt); rendre(); } });
   document.addEventListener("pointerdown", function (e) { if (e.target.closest && e.target.closest("[data-mi-acc]")) e.preventDefault(); });
   document.addEventListener("click", function (e) {

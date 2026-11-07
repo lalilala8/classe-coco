@@ -356,3 +356,298 @@
     }
   };
 })();
+
+/* ==========================================================================================
+   Problèmes ouverts de l'heure (D-96) : repris de l'outil « Problèmes ouverts P5 » de la collègue (séquences 1 et 2),
+   d'après Sullivan & Lilburn, « Activités ouvertes en mathématiques » (Chenelière, 2010), « La mesure du temps ».
+   Personnages : Keitri → Tehani, Aaron → Dylan (comme pour « L'heure à l'ardoise », D-73).
+   ========================================================================================== */
+(function () {
+  var PO = window.COCO_PO, H = function () { return window.COCO_HEURE; };
+  var pad = function (n) { return (n < 10 ? "0" : "") + n; };
+  var reveil = function (h, m) { return '<span class="po-reveil">' + (h === "" || h === undefined ? "--" : pad(+h)) + ":" + (m === "" || m === undefined ? "--" : pad(+m)) + "</span>"; };
+  var horloge = function (h, m) { return H().horloge(h, m, { deco: true, cls: "po-clk" }); };
+  var nb = ["zéro", "une", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf", "dix", "onze", "douze", "treize", "quatorze", "quinze", "seize", "dix-sept", "dix-huit", "dix-neuf", "vingt", "vingt et une", "vingt-deux", "vingt-trois"];
+  var dizaines = { 2: "vingt", 3: "trente", 4: "quarante", 5: "cinquante" };
+  function minutesMots(m) { if (m < 20) return nb[m] === "une" ? "une" : nb[m]; var d = Math.floor(m / 10), u = m % 10; return dizaines[d] + (u === 0 ? "" : u === 1 ? " et une" : "-" + nb[u]); }
+  function heureMots(h, m) { var base = h === 0 ? "minuit" : h === 12 ? "midi" : nb[h] + (h === 1 ? " heure" : " heures"); return base + (m === 0 ? (h === 0 || h === 12 ? "" : " pile") : " " + minutesMots(m)); }
+  function moment(h, en) { return h < 12 ? (en ? "in the morning" : "le matin") : h < 18 ? (en ? "in the afternoon" : "l’après-midi") : (en ? "in the evening" : "le soir"); }
+  var MAGIQUES = ["0000", "0110", "0220", "0330", "0440", "0550", "1001", "1111", "1221", "1331", "1441", "1551", "2002", "2112", "2222", "2332"];
+
+  PO.sequences.digitale = ["magique", "demiheure"];
+  PO.sequences.heure = ["aiguilles", "quart"];
+
+  /* ---------- 1. L'heure magique (heure digitale) ---------- */
+  PO.problemes.magique = {
+    id: "magique", sequence: "digitale", type: "reglages", perso: "tehani",
+    titre: { fr: "L’heure magique", en: "The magic time" },
+    question: { fr: "Quelle heure magique mon réveil peut-il afficher ?", en: "Which magic time can my clock show?" },
+    enonce: { fr: "Mon réveil affiche parfois une <b>heure magique</b> : elle se lit <b>pareil dans les deux sens</b>, comme <b>14:41</b> (1-4-4-1 de gauche à droite, 1-4-4-1 de droite à gauche). Quelle heure magique mon réveil peut-il afficher ? Trouve-en le plus possible !",
+              en: "My clock sometimes shows a <b>magic time</b>: it reads <b>the same both ways</b>, like <b>14:41</b> (1-4-4-1 from left to right, 1-4-4-1 from right to left). Which magic time can my clock show? Find as many as you can!" },
+    champs: [{ k: "h", fr: "Les heures", en: "Hours", saisie: true }, { k: "m", fr: "Les minutes", en: "Minutes", saisie: true }],
+    dessin: function (sol) { return '<div class="po-dessin po-dessin--centre">' + reveil(sol.h, sol.m) + "</div>"; },
+    verifier: function (sol) {
+      var h = +sol.h, m = +sol.m, t = pad(h) + pad(m);
+      if (h > 23) return { ok: false, fr: h + " heures ? Le réveil va de 00 à 23 : après 23:59, il affiche 00:00.", en: h + " hours? The clock goes from 00 to 23: after 23:59 it shows 00:00." };
+      if (m > 59) return { ok: false, fr: m + " minutes ? Après 59 minutes, on passe à l’heure suivante : cette heure n’existe pas.", en: m + " minutes? After 59 minutes we go to the next hour: this time does not exist." };
+      if (!(t[0] === t[3] && t[1] === t[2])) return { ok: false, fr: "À l’envers, on lit " + t.split("").reverse().join("").replace(/^(..)/, "$1:") + " : ce n’est pas la même heure. Lis les 4 chiffres de droite à gauche.", en: "Backwards it reads " + t.split("").reverse().join("").replace(/^(..)/, "$1:") + ": not the same time. Read the 4 digits from right to left." };
+      return { ok: true };
+    },
+    diagnostic: function (sol) { var h = +sol.h, m = +sol.m, t = pad(h) + pad(m); return { existe: h <= 23 && m <= 59, pareil: t[0] === t[3] && t[1] === t[2] }; },
+    cle: function (sol) { return pad(+sol.h) + pad(+sol.m); },
+    ecrire: function (sol, lg) { var h = +sol.h, m = +sol.m, en = lg === "en"; return pad(h) + ":" + pad(m) + (h <= 23 && m <= 59 ? " · " + (en ? window.COCO_HEURE.direEn(h % 12 || 12, m) + " " + moment(h, true) : heureMots(h, m) + ", " + moment(h)) : ""); },
+    ranger: function (x, y) { return (+x.h * 60 + +x.m) - (+y.h * 60 + +y.m); },
+    checklist: [
+      { id: "existe", fr: "Mon réveil peut vraiment l’afficher : heures de 00 à 23, minutes de 00 à 59.", en: "My clock can really show it: hours from 00 to 23, minutes from 00 to 59." },
+      { id: "pareil", fr: "J’ai lu les 4 chiffres de droite à gauche : c’est pareil.", en: "I read the 4 digits from right to left: it is the same." }
+    ],
+    pouce: { fr: "Le réveil affiche 1 3, puis deux chiffres cachés. Que doit-il afficher pour être magique ? Ensuite, trouve une autre heure magique qui commence par 1.", en: "The clock shows 1 3, then two hidden digits. What must it show to be magic? Then find another magic time that starts with 1." },
+    relances: [
+      { fr: "Tu les as toutes trouvées ? Comment en être sûr ?", en: "Have you found them all? How can you be sure?" },
+      { fr: "Quelle est la première heure magique de la journée ? Et la dernière ?", en: "What is the first magic time of the day? And the last?" },
+      { fr: "Le réveil affiche 12:21. Dans combien de temps verra-t-on la prochaine heure magique ?", en: "The clock shows 12:21. How long until the next magic time?" },
+      { fr: "Invente une autre sorte d’heure magique. Quelle est ta règle ?", en: "Make up another kind of magic time. What is your rule?" }
+    ],
+    strategies: [
+      { fr: "J’ai choisi les heures, puis je les ai retournées pour les minutes.", en: "I chose the hours, then turned them round for the minutes." },
+      { fr: "J’ai rangé mes heures par premier chiffre : 0, 1, 2.", en: "I sorted my times by their first digit: 0, 1, 2." },
+      { fr: "J’ai vérifié que les minutes ne dépassent pas 59.", en: "I checked that the minutes do not go past 59." },
+      { fr: "J’ai essayé, puis j’ai corrigé.", en: "I tried, then I corrected it." }
+    ],
+    retenir: { fr: "Sur un réveil, les 2 premiers chiffres sont les heures : de 00 à 23. Les 2 derniers chiffres sont les minutes : de 00 à 59. Après 59 minutes, on passe à l’heure suivante.", en: "On a digital clock, the first 2 digits are the hours: from 00 to 23. The last 2 digits are the minutes: from 00 to 59. After 59 minutes, we go to the next hour." },
+    exemple: "14:41",
+    toutes: null, nbToutes: 16,
+    vueToutes: function (trouves, lg) {
+      var en = lg === "en";
+      return "<h3>" + (en ? "The 16 magic times" : "Les 16 heures magiques") + '</h3><div class="po-grille-heures">' + MAGIQUES.map(function (t) { return '<span class="po-heure' + (trouves[t] ? " trouve" : "") + '">' + reveil(+t.slice(0, 2), +t.slice(2)) + "</span>"; }).join("") + "</div>" +
+        '<p class="po-note">' + (en ? "The 2nd digit of the hours becomes the 1st digit of the minutes: it cannot go past 5. And when the hours start with 2, the 2nd digit stops at 3 (23:00)." : "Le 2e chiffre des heures devient le 1er chiffre des minutes : il ne peut pas dépasser 5. Et quand l’heure commence par 2, le 2e chiffre s’arrête à 3 (23 h).") + "</p>";
+    },
+    feuille: { colonnes: [{ fr: "Le réveil", en: "The clock" }, { fr: "Je le lis à l’envers", en: "I read it backwards" }, { fr: "Magique ?", en: "Magic?" }, { fr: "Je la dis avec des mots", en: "I say it in words", large: true }], lignes: 10,
+      bas: { fr: "Comment sais-tu si tu les as toutes trouvées ?", en: "How do you know you have found them all?" } },
+    fiche: {
+      source: "Problème repris de l’outil « Problèmes ouverts P5 » de la collègue (séquence 1, l’heure digitale). D’après Sullivan & Lilburn, « Activités ouvertes en mathématiques » (Chenelière, 2010), « La mesure du temps », 8-10 ans, p. 99 : « À quelles heures les chiffres sur un cadran numérique forment-ils une régularité ? »",
+      moment: "Après la séance 1 de l’heure digitale (la journée = 24 h)",
+      apprend: ["Un réveil affiche 4 chiffres : 2 pour les heures (de 00 à 23), 2 pour les minutes (de 00 à 59).", "Une heure n’existe pas si les minutes dépassent 59 ou les heures 23.", "Dire une heure digitale avec des mots et la placer dans la journée.", "Chercher toutes les possibilités en s’organisant."],
+      pourquoi: ["Lire l’heure ne suffit pas : il faut comprendre comment le réveil fonctionne.", "16 réponses : chacun en trouve à son niveau, une seule ou toutes.", "Les propositions montrent tout de suite qui sait que les minutes s’arrêtent à 59."],
+      materiel: ["Le mode classe, projeté (les 4 temps).", "Une feuille de recherche par élève ou par groupe.", "Des ardoises, et des étiquettes-chiffres de 0 à 9 pour ceux qui veulent manipuler.", "Les iPad pour le mode autonome."],
+      temps: [
+        ["Poser la question", "5 min", "Projette l’énoncé. Un élève le lit, puis 2 ou 3 autres l’expliquent avec leurs mots. Vérifiez ensemble l’exemple : 1-4-4-1 de gauche à droite, 1-4-4-1 de droite à gauche. Ne donne aucune méthode.", "« Qu’est-ce qu’une heure magique ? Montre-le sur l’exemple. »"],
+        ["Chercher par 2 ou 3", "15 à 20 min", "Lance le minuteur et observe. Un groupe s’arrête après une réponse : « Trouvez-en une autre. » Un groupe en a plusieurs : « Vous les avez toutes ? Comment le savoir ? » Un groupe bloque : le coup de pouce.", ""],
+        ["Mettre en commun", "15 min", "Chaque groupe donne une heure, à tour de rôle : tape-la. Laisse d’abord les élèves donner leur avis, puis vérifie. Accueille les erreurs avec bienveillance et cherchez ensemble pourquoi 06:60 n’existe pas.", "« Le réveil peut-il vraiment afficher cette heure ? » « Dis-la avec des mots. » « Que fais-tu à cette heure-là ? »"],
+        ["Retenir", "5 à 10 min", "La trace écrite, puis les 16 heures magiques : celles de la classe en vert. Chaque ligne s’arrête sur une heure qui n’existe pas.", ""]
+      ],
+      reponses: "16 heures magiques : 00:00, 01:10, 02:20, 03:30, 04:40, 05:50 · 10:01, 11:11, 12:21, 13:31, 14:41, 15:51 · 20:02, 21:12, 22:22, 23:32. Le 2e chiffre des heures devient le 1er chiffre des minutes : il ne peut pas dépasser 5. Quand l’heure commence par 2, le 2e chiffre s’arrête à 3 (23 h).",
+      erreurs: [["06:60, 07:70, 18:81…", "Les minutes dépassent 59.", "« Qu’affiche le réveil une minute après 06:59 ? »"], ["24:42, 33:33, 44:44…", "Les heures dépassent 23.", "« Qu’affiche le réveil une minute après 23:59 ? »"],
+        ["12:12, 10:10…", "Les chiffres sont répétés, pas retournés.", "« Lis-la de droite à gauche. » (21:21, 01:01)"], ["1:01 écrit avec 3 chiffres.", "Le réveil affiche toujours 4 chiffres.", "« Combien de chiffres le réveil affiche-t-il ? » (01:01, qui n’est pas magique)"]],
+      niveaux: ["Écrit des heures au hasard, ou des heures qui ne se lisent pas pareil (12:12).", "Trouve 1 ou 2 heures magiques (souvent 11:11 ou 22:22), mêlées à des heures qui n’existent pas (07:70, 33:33).", "Trouve plusieurs heures magiques, au hasard.", "Trouve la plupart des heures magiques en s’organisant (par premier chiffre).", "Trouve les 16 et explique pourquoi chaque ligne s’arrête (minutes jusqu’à 59, heures jusqu’à 23)."],
+      reinvestir: ["« Quelles heures du réveil n’utilisent que les chiffres 1 et 2 ? »", "« Le réveil affiche 12:21. Dans combien de temps la prochaine heure magique ? » (13:31, donc 1 h 10 min)"]
+    }
+  };
+
+  /* ---------- 2. La demi-heure de lecture (heure digitale, ajouter 30 minutes) ---------- */
+  PO.problemes.demiheure = {
+    id: "demiheure", sequence: "digitale", type: "reglages", perso: "dylan",
+    titre: { fr: "La demi-heure de lecture", en: "Half an hour of reading" },
+    question: { fr: "Qu’affichent les deux réveils ?", en: "What do the two clocks show?" },
+    enonce: { fr: "Ce matin, je lis pendant <b>une demi-heure</b>. Je regarde le réveil quand je commence, puis quand je m’arrête. Qu’affichent les deux réveils ? Trouve plusieurs possibilités !",
+              en: "This morning, I read for <b>half an hour</b>. I look at the clock when I start, then when I stop. What do the two clocks show? Find several possibilities!" },
+    champs: [{ k: "h1", fr: "Je commence : heures", en: "I start: hours", saisie: true }, { k: "m1", fr: "minutes", en: "minutes", saisie: true }, { k: "h2", fr: "Je m’arrête : heures", en: "I stop: hours", saisie: true }, { k: "m2", fr: "minutes", en: "minutes", saisie: true }],
+    dessin: function (sol, lg) { var en = lg === "en"; return '<div class="po-dessin po-dessin--centre"><figure>' + reveil(sol.h1, sol.m1) + "<figcaption>" + (en ? "I start" : "je commence") + '</figcaption></figure><span class="po-fl">→</span><figure>' + reveil(sol.h2, sol.m2) + "<figcaption>" + (en ? "I stop" : "je m’arrête") + "</figcaption></figure></div>"; },
+    verifier: function (sol) {
+      var h1 = +sol.h1, m1 = +sol.m1, h2 = +sol.h2, m2 = +sol.m2;
+      if (m1 > 59 || m2 > 59) return { ok: false, fr: "Après 59 minutes, on passe à l’heure suivante : un réveil n’affiche jamais plus de 59 minutes.", en: "After 59 minutes, we go to the next hour: a clock never shows more than 59 minutes." };
+      if (h1 > 23 || h2 > 23) return { ok: false, fr: "Le réveil va de 00 à 23 heures.", en: "The clock goes from 00 to 23 hours." };
+      var d = h2 * 60 + m2 - (h1 * 60 + m1);
+      if (d !== 30) return { ok: false, fr: "De " + pad(h1) + ":" + pad(m1) + " à " + pad(h2) + ":" + pad(m2) + ", il passe " + (d < 0 ? "un temps négatif" : d + " minutes") + ", pas 30. Une demi-heure, c’est 30 minutes : passe par l’heure pile si besoin.", en: "From " + pad(h1) + ":" + pad(m1) + " to " + pad(h2) + ":" + pad(m2) + " is " + (d < 0 ? "a negative time" : d + " minutes") + ", not 30. Half an hour is 30 minutes: go through the o'clock if you need to." };
+      if (h1 >= 12) return { ok: false, fr: "Ça fait bien 30 minutes, mais à " + pad(h1) + ":" + pad(m1) + ", c’est " + moment(h1) + " : je lis le matin.", en: "That is 30 minutes, but at " + pad(h1) + ":" + pad(m1) + " it is " + moment(h1, true) + ": I read in the morning." };
+      return { ok: true };
+    },
+    diagnostic: function (sol) { var h1 = +sol.h1, m1 = +sol.m1, h2 = +sol.h2, m2 = +sol.m2; return { existe: m1 <= 59 && m2 <= 59 && h1 <= 23 && h2 <= 23, trente: h2 * 60 + m2 - (h1 * 60 + m1) === 30, matin: h1 < 12 }; },
+    cle: function (sol) { return pad(+sol.h1) + pad(+sol.m1); },
+    ecrire: function (sol) { return pad(+sol.h1) + ":" + pad(+sol.m1) + " → " + pad(+sol.h2) + ":" + pad(+sol.m2); },
+    ranger: function (x, y) { return (+x.h1 * 60 + +x.m1) - (+y.h1 * 60 + +y.m1); },
+    checklist: [
+      { id: "existe", fr: "Mes réveils existent : les minutes ne dépassent pas 59.", en: "My clocks exist: the minutes do not go past 59." },
+      { id: "trente", fr: "J’ai compté 30 minutes entre les deux réveils.", en: "I counted 30 minutes between the two clocks." },
+      { id: "matin", fr: "C’est le matin.", en: "It is the morning." }
+    ],
+    pouce: { fr: "Je commence à lire à huit heures pile. Qu’affiche le réveil quand je m’arrête ? Une demi-heure, c’est la moitié d’une heure.", en: "I start reading at eight o'clock. What does the clock show when I stop? Half an hour is half of an hour." },
+    relances: [
+      { fr: "Trouve une paire où le chiffre des heures change.", en: "Find a pair where the hour changes." },
+      { fr: "Je commence à 10:45. Qu’affiche le réveil à la fin ?", en: "I start at 10:45. What does the clock show at the end?" },
+      { fr: "Je m’arrête à 09:10. Qu’affichait le réveil au début ?", en: "I stop at 09:10. What did the clock show at the start?" },
+      { fr: "Et si je lis trois quarts d’heure ?", en: "What if I read for three quarters of an hour?" }
+    ],
+    strategies: [
+      { fr: "J’ai ajouté 30 aux minutes.", en: "I added 30 to the minutes." },
+      { fr: "Je suis passé par l’heure pile : de 10:45 à 11:00, puis de 11:00 à 11:15.", en: "I went through the o'clock: from 10:45 to 11:00, then from 11:00 to 11:15." },
+      { fr: "J’ai utilisé une horloge : un demi-tour de la grande aiguille.", en: "I used a clock: half a turn of the long hand." },
+      { fr: "J’ai essayé, puis j’ai corrigé.", en: "I tried, then I corrected it." }
+    ],
+    retenir: { fr: "Une demi-heure, c’est 30 minutes. Un quart d’heure, c’est 15 minutes. Pour avancer de 30 minutes, on peut passer par l’heure pile : de 10:45 à 11:00, 15 minutes ; de 11:00 à 11:15, encore 15 minutes. Donc 10:45 + 30 minutes = 11:15.", en: "Half an hour is 30 minutes. A quarter of an hour is 15 minutes. To move on 30 minutes, we can go through the o'clock: from 10:45 to 11:00, 15 minutes; from 11:00 to 11:15, another 15 minutes. So 10:45 + 30 minutes = 11:15." },
+    exemple: "10:45 + 30 min = 11:15",
+    toutes: null, nbToutes: null,
+    vueToutes: function (trouves, lg) {
+      var en = lg === "en", cles = Object.keys(trouves).sort(), a = [], b = [];
+      cles.forEach(function (c) { var h = +c.slice(0, 2), m = +c.slice(2), f = h * 60 + m + 30, txt = reveil(h, m) + " → " + reveil(Math.floor(f / 60), f % 60); (m < 30 ? a : b).push("<li>" + txt + "</li>"); });
+      return "<h3>" + (en ? "All the “+ 30 minutes” pairs of the morning" : "Toutes les paires « + 30 minutes » du matin") + '</h3><div class="po-deux"><div><h4>' + (en ? "The hour does not change" : "Le chiffre des heures ne change pas") + "</h4><ul>" + (a.join("") || "<li>…</li>") + "</ul></div><div><h4>" + (en ? "We go to the next hour" : "On passe à l’heure suivante") + "</h4><ul>" + (b.join("") || "<li>…</li>") + "</ul></div></div>" +
+        '<p class="po-note">' + (en ? "If the minutes at the start go from 00 to 29, we add 30 to the minutes. From 30 to 59, we go to the next hour and take 30 away from the minutes. There is a pair for every minute of the morning!" : "Si les minutes du début vont de 00 à 29, on ajoute 30 aux minutes. De 30 à 59, on passe à l’heure suivante et on enlève 30 aux minutes. Il y a une paire pour chaque minute du matin !") + "</p>";
+    },
+    feuille: { colonnes: [{ fr: "Je commence", en: "I start" }, { fr: "Je m’arrête", en: "I stop" }, { fr: "Je vérifie : 30 minutes ?", en: "I check: 30 minutes?" }, { fr: "Je les dis avec des mots", en: "I say them in words", large: true }], lignes: 9,
+      bas: { fr: "Trouve une paire où le chiffre des heures change. Comment as-tu fait ?", en: "Find a pair where the hour changes. How did you do it?" } },
+    fiche: {
+      source: "Problème repris de l’outil « Problèmes ouverts P5 » de la collègue (séquence 1, l’heure digitale et les durées). D’après Sullivan & Lilburn, « La mesure du temps », 8-10 ans, p. 99 (on part de la maison et on arrive à l’école 45 minutes plus tard : à quelle heure ?).",
+      moment: "Séquence 1, après le travail sur les durées",
+      apprend: ["Une demi-heure = 30 minutes ; un quart d’heure = 15 minutes.", "Ajouter 30 minutes à une heure digitale, même quand on passe à l’heure suivante (09:50 → 10:20).", "Après 59 minutes, on passe à l’heure suivante : 09:80 n’existe pas.", "Dire les heures avec des mots, et avec « et quart, et demie, moins le quart »."],
+      pourquoi: ["Il y a une réponse pour chaque minute du matin : chacun commence par une paire facile (08:00 → 08:30).", "Les paires qui changent d’heure montrent qui a compris que 1 h = 60 min.", "Les erreurs (09:50 → 09:80, ou → 10:30 en comptant comme pour 100) se voient tout de suite."],
+      materiel: ["Le mode classe, projeté (les 4 temps).", "Une feuille de recherche par élève ou par groupe.", "Des ardoises, et des horloges pour voir la demi-heure (un demi-tour de la grande aiguille).", "Les iPad pour le mode autonome."],
+      temps: [
+        ["Poser la question", "5 min", "Projette l’énoncé et fais-le reformuler : « Une demi-heure, c’est combien de minutes ? » Ne donne aucune méthode.", ""],
+        ["Chercher par 2 ou 3", "15 à 20 min", "Lance le minuteur et observe. Un groupe n’a que des « pile → et demie » : « Trouvez une paire où le chiffre des heures change. » Un groupe bloque : le coup de pouce.", ""],
+        ["Mettre en commun", "15 min", "Chaque groupe donne une paire : tape le début, puis la fin. Laisse la classe donner son avis, puis vérifie.", "« Ça fait vraiment une demi-heure ? » « Dis les deux heures avec des mots. » « C’est bien le matin ? »"],
+        ["Retenir", "5 à 10 min", "La trace écrite (passer par l’heure pile), puis les paires de la classe rangées en deux colonnes.", ""]
+      ],
+      reponses: "Toutes les paires « + 30 minutes » du matin. Début de :00 à :29 : 08:00 → 08:30 · 09:15 → 09:45 · 10:29 → 10:59… Début de :30 à :59 : 08:30 → 09:00 · 09:50 → 10:20 · 11:45 → 12:15… Il y a une paire pour chaque minute du matin : ce qui compte, c’est de comprendre comment on les fabrique.",
+      erreurs: [["09:50 → 09:80.", "Les minutes dépassent 59.", "« Qu’affiche le réveil une minute après 09:59 ? »"], ["09:50 → 10:30.", "On a compté comme si une heure faisait 100 minutes.", "« Comptons de 09:50 à 10:00, puis de 10:00 à 10:30. Combien de minutes en tout ? »"],
+        ["08:00 → 08:50 ou 08:00 → 09:00.", "La demi-heure confondue avec 50 minutes, ou avec une heure.", "« Combien de minutes dans une heure ? Et dans la moitié d’une heure ? »"], ["08:45 lu « huit heures moins le quart ».", "Le « moins le quart » se dit avant l’heure suivante.", "« 08:45, c’est un quart d’heure avant quelle heure ? »"], ["Des heures de l’après-midi.", "Le matin oublié.", "« C’est le matin ? Que fais-tu à cette heure-là ? »"]],
+      niveaux: ["Écrit deux heures au hasard, ou une seule heure.", "Trouve des paires « pile → et demie » (08:00 → 08:30), mais se trompe dès que l’heure change (09:50 → 09:80).", "Trouve plusieurs paires justes sans changer d’heure, ou se trompe parfois sur les minutes.", "Trouve des paires des deux sortes et explique le passage par l’heure pile.", "Énonce la règle (début avant ou après la demie) ou retrouve le début à partir de la fin."],
+      reinvestir: ["« La récréation dure un quart d’heure. Qu’affichent les réveils au début et à la fin ? »", "« Dylan part à l’école et arrive 45 minutes plus tard. Qu’affichent les réveils au départ et à l’arrivée ? »"]
+    }
+  };
+
+  /* ---------- 3. Les aiguilles sur le même nombre (heure à aiguilles) ---------- */
+  PO.problemes.aiguilles = {
+    id: "aiguilles", sequence: "heure", type: "reglages", perso: "tehani",
+    titre: { fr: "Les aiguilles sur le même nombre", en: "Hands on the same number" },
+    question: { fr: "Quelle heure peut-il être ?", en: "What time can it be?" },
+    enonce: { fr: "Sur mon horloge, l’aiguille des minutes est <b>sur le même nombre</b> que l’aiguille des heures. Par exemple, à <b>4 h 20</b> : l’aiguille des heures montre le 4, et l’aiguille des minutes est sur le 4. Quelle heure peut-il être ? Trouve-en le plus possible !",
+              en: "On my clock, the minute hand is <b>on the same number</b> as the hour hand. For example, at <b>twenty past four</b>: the hour hand shows the 4, and the minute hand is on the 4. What time can it be? Find as many as you can!" },
+    champs: [{ k: "h", fr: "Les heures", en: "Hours", min: 1, max: 12, depart: 1 }, { k: "m", fr: "Les minutes", en: "Minutes", min: 0, max: 55, depart: 0, pas: 5, deux: true }],
+    dessin: function (sol, lg) { var en = lg === "en"; return '<div class="po-dessin po-dessin--centre"><figure>' + horloge(sol.h, sol.m) + "<figcaption>" + H().cap(en ? H().direEn(sol.h, sol.m) : H().direFr(sol.h, sol.m).replace(/ \(\d+ min\)$/, "")) + "</figcaption></figure></div>"; },
+    verifier: function (sol) {
+      var n = sol.m === 0 ? 12 : sol.m / 5;
+      if (n !== sol.h) return { ok: false, fr: "L’aiguille des minutes est sur le " + n + " (" + sol.m + " minutes), et l’aiguille des heures montre le " + sol.h + " : ce n’est pas le même nombre.", en: "The minute hand is on the " + n + " (" + sol.m + " minutes) and the hour hand shows the " + sol.h + ": not the same number." };
+      return { ok: true };
+    },
+    diagnostic: function (sol) { var n = sol.m === 0 ? 12 : sol.m / 5; return { meme: n === sol.h, cinq: true }; },
+    cle: function (sol) { return String(sol.h); },
+    ecrire: function (sol, lg) { return sol.h + " h " + pad(sol.m) + " · " + (lg === "en" ? H().direEn(sol.h, sol.m) : H().direFr(sol.h, sol.m).replace(/ \(\d+ min\)$/, "")); },
+    ranger: function (x, y) { return x.h - y.h; },
+    checklist: [
+      { id: "meme", fr: "Les deux aiguilles montrent le même nombre.", en: "Both hands show the same number." },
+      { id: "cinq", fr: "J’ai compté les minutes de 5 en 5.", en: "I counted the minutes in fives." }
+    ],
+    pouce: { fr: "Quand l’aiguille des minutes est sur le 3, combien de minutes est-il ? Et sur le 6 ? À quelle heure l’aiguille des heures montre-t-elle aussi le 3 ?", en: "When the minute hand is on the 3, how many minutes is it? And on the 6? At what time does the hour hand also show the 3?" },
+    relances: [
+      { fr: "Tu les as toutes trouvées ? Comment en être sûr ?", en: "Have you found them all? How can you be sure?" },
+      { fr: "Dis chaque heure de deux façons : 7 h 40, c’est aussi huit heures moins vingt.", en: "Say each time in two ways: 7:40 is also twenty to eight." },
+      { fr: "À quelle heure les deux aiguilles sont-elles vraiment l’une sur l’autre ?", en: "At what time are the two hands really on top of each other?" },
+      { fr: "Et si l’aiguille des minutes est sur le nombre juste après ?", en: "What if the minute hand is on the next number?" }
+    ],
+    strategies: [
+      { fr: "J’ai multiplié le nombre par 5 pour trouver les minutes.", en: "I multiplied the number by 5 to find the minutes." },
+      { fr: "J’ai essayé chaque nombre de 1 à 12.", en: "I tried each number from 1 to 12." },
+      { fr: "J’ai fait tourner les aiguilles d’une horloge.", en: "I turned the hands of a clock." },
+      { fr: "J’ai essayé, puis j’ai corrigé.", en: "I tried, then I corrected it." }
+    ],
+    retenir: { fr: "Sur l’horloge, l’aiguille des minutes compte de 5 en 5 : sur le 1, 5 minutes ; sur le 3, 15 minutes (et quart) ; sur le 6, 30 minutes (et demie) ; sur le 9, 45 minutes (moins le quart). Après la demie, on dit « moins » : 7 h 40, c’est huit heures moins vingt. L’aiguille des heures avance aussi, petit à petit, vers le nombre suivant.",
+               en: "On the clock, the minute hand counts in fives: on the 1, 5 minutes; on the 3, 15 minutes (quarter past); on the 6, 30 minutes (half past); on the 9, 45 minutes (quarter to). After half past, we say “to”: 7:40 is twenty to eight. The hour hand also moves, little by little, towards the next number." },
+    exemple: "4 h 20",
+    toutes: null, nbToutes: 12,
+    vueToutes: function (trouves, lg) {
+      var en = lg === "en";
+      return "<h3>" + (en ? "The 12 times" : "Les 12 heures") + '</h3><div class="po-grille-heures po-grille-clk">' + [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(function (h) { var m = h === 12 ? 0 : h * 5; return '<span class="po-heure' + (trouves[String(h)] ? " trouve" : "") + '">' + horloge(h, m) + "<small>" + h + " h " + pad(m) + "</small></span>"; }).join("") + "</div>" +
+        '<p class="po-note">' + (en ? "The minutes are 5 times the hour: on the 7, 7 × 5 = 35 minutes. At 12 o'clock, the minute hand is on the 12: 0 minutes." : "Les minutes valent 5 fois le nombre des heures : sur le 7, 7 × 5 = 35 minutes. À 12 h, l’aiguille des minutes est sur le 12 : 0 minute.") + "</p>";
+    },
+    feuille: { colonnes: [{ fr: "Je dessine les aiguilles", en: "I draw the hands", large: true }, { fr: "J’écris l’heure", en: "I write the time" }, { fr: "Je la dis avec des mots", en: "I say it in words", large: true }], lignes: 8,
+      bas: { fr: "Que remarques-tu ?", en: "What do you notice?" } },
+    fiche: {
+      source: "Problème repris de l’outil « Problèmes ouverts P5 » de la collègue (séquence 2, l’heure à aiguilles). D’après Sullivan & Lilburn, « La mesure du temps », 8-10 ans, p. 100 (les aiguilles forment un angle plus petit qu’un quart de tour : quelle heure peut-il être ?).",
+      moment: "Après la séance 3 (les minutes de 5 en 5, « moins 5, moins 10… »)",
+      apprend: ["L’aiguille des minutes compte de 5 en 5 : sur le 3, 15 minutes ; sur le 8, 40 minutes.", "L’aiguille des heures avance entre deux nombres : à 6 h 30, elle est à mi-chemin entre le 6 et le 7.", "Dire l’heure avec « et quart, et demie, moins le quart, moins vingt-cinq, moins dix, moins cinq ».", "Chercher toutes les possibilités en s’organisant (de 1 à 12)."],
+      pourquoi: ["Il faut relier le nombre montré aux minutes (× 5) : lire l’heure ne suffit pas.", "12 réponses : chacun en trouve à son niveau, et la régularité (minutes = 5 × heures) se voit en les rangeant.", "Les réponses font dire toutes les heures « moins » : 7 h 35, c’est huit heures moins vingt-cinq."],
+      materiel: ["Le mode classe, projeté (les 4 temps).", "Une feuille de recherche (cadrans vides) par élève ou par groupe.", "Les horloges individuelles de la classe, pour manipuler.", "Les iPad pour le mode autonome."],
+      temps: [
+        ["Poser la question", "5 min", "Montrez l’exemple sur une horloge de la classe : l’aiguille des heures a dépassé le 4, l’aiguille des minutes est sur le 4.", "« Sur quel nombre est l’aiguille des minutes à 4 h 20 ? Et l’aiguille des heures ? »"],
+        ["Chercher par 2 ou 3", "15 à 20 min", "Observe et note pour l’évaluation. Un groupe hésite sur l’aiguille des heures : « Fais tourner l’aiguille des minutes sur ton horloge : que fait l’aiguille des heures ? »", ""],
+        ["Mettre en commun", "15 min", "Chaque groupe donne une heure : règle-la, l’horloge se dessine. Laisse la classe donner son avis, puis vérifie. Puis : « Comment savoir s’il en manque ? » (une par nombre, de 1 à 12).", "« Sur quel nombre est l’aiguille des minutes ? Combien de minutes ça fait ? » « Dis l’heure de deux façons. »"],
+        ["Retenir", "5 à 10 min", "La trace écrite (les minutes de 5 en 5), puis les 12 heures : celles de la classe en vert.", ""]
+      ],
+      reponses: "12 heures : 1 h 05, 2 h 10, 3 h 15, 4 h 20, 5 h 25, 6 h 30, 7 h 35, 8 h 40, 9 h 45, 10 h 50, 11 h 55, 12 h. Les minutes valent 5 fois le nombre des heures (sauf à 12 h : l’aiguille des minutes est sur le 12, 0 minute).",
+      erreurs: [["3 h 03, 6 h 06…", "Le nombre montré par l’aiguille des minutes est lu comme des minutes.", "« Quand l’aiguille des minutes est sur le 1, combien de minutes est-il ? »"], ["6 h 30 dessinée avec l’aiguille des heures pile sur le 6.", "Pour l’élève, l’aiguille des heures ne bouge pas.", "« Fais faire un demi-tour à l’aiguille des minutes : où est passée l’aiguille des heures ? »"],
+        ["7 h 35 lu « sept heures moins vingt-cinq ».", "Le « moins » se compte avant l’heure suivante.", "« Moins vingt-cinq : il manque 25 minutes pour arriver à quelle heure ? »"], ["Les aiguilles inversées.", "Confusion entre l’aiguille des heures et l’aiguille des minutes.", "« Laquelle est la plus grande ? Laquelle tourne le plus vite ? »"], ["Des heures au hasard, sans ordre.", "", "« Comment être sûrs de les avoir toutes ? Essayez nombre par nombre. »"]],
+      niveaux: ["Dessine des aiguilles au hasard, sans savoir lire l’heure obtenue.", "Trouve 12 h ou 3 h 15, mais écrit 4 h 04 pour « sur le 4 ».", "Trouve plusieurs heures justes, au hasard, et a du mal à les dire avec « moins ».", "Trouve la plupart des heures en allant de 1 à 12 et les dit de deux façons.", "Trouve les 12, énonce la régularité (minutes = 5 × heures) ou explique pourquoi les aiguilles ne sont pas tout à fait l’une sur l’autre."],
+      reinvestir: ["« Les deux aiguilles forment un angle droit. Quelle heure peut-il être ? » (3 h, 9 h… et des heures « presque »)", "« Il est entre 2 h et 3 h, et l’aiguille des minutes est sur un nombre pair. Quelle heure peut-il être ? »"]
+    }
+  };
+
+  /* ---------- 4. Un quart de tour (heure à aiguilles et durées) ---------- */
+  PO.problemes.quart = {
+    id: "quart", sequence: "heure", type: "reglages", perso: "dylan",
+    titre: { fr: "Un quart de tour", en: "A quarter turn" },
+    question: { fr: "Quelle heure était-il avant ? Et après ?", en: "What time was it before? And after?" },
+    enonce: { fr: "Je regarde l’horloge, je joue, puis je la regarde encore : l’aiguille des minutes a fait <b>un quart de tour</b>. Un quart de tour, c’est un quart du cadran. Quelle heure était-il avant ? Et après ? Trouve plusieurs possibilités !",
+              en: "I look at the clock, I play, then I look again: the minute hand has made <b>a quarter turn</b>. A quarter turn is a quarter of the clock face. What time was it before? And after? Find several possibilities!" },
+    champs: [{ k: "h1", fr: "Avant : heures", en: "Before: hours", min: 1, max: 12, depart: 3 }, { k: "m1", fr: "minutes", en: "minutes", min: 0, max: 55, depart: 0, pas: 5, deux: true },
+             { k: "h2", fr: "Après : heures", en: "After: hours", min: 1, max: 12, depart: 3 }, { k: "m2", fr: "minutes", en: "minutes", min: 0, max: 55, depart: 0, pas: 5, deux: true }],
+    dessin: function (sol, lg) { var en = lg === "en"; return '<div class="po-dessin po-dessin--centre"><figure>' + horloge(sol.h1, sol.m1) + "<figcaption>" + (en ? "before" : "avant") + '</figcaption></figure><span class="po-fl">→</span><figure>' + horloge(sol.h2, sol.m2) + "<figcaption>" + (en ? "after" : "après") + "</figcaption></figure></div>"; },
+    verifier: function (sol) {
+      var d = ((sol.h2 % 12) * 60 + sol.m2 - ((sol.h1 % 12) * 60 + sol.m1) + 720) % 720;
+      if (d === 15) return { ok: true };
+      if (sol.m1 >= 45 && sol.m2 === sol.m1 - 45 && sol.h2 === sol.h1) return { ok: false, fr: "L’aiguille des minutes est passée par le 12 : l’aiguille des heures arrive au nombre suivant. Change l’heure !", en: "The minute hand went past the 12: the hour hand moves on to the next number. Change the hour!" };
+      if (d === 30) return { ok: false, fr: "Ça, c’est un demi-tour : 30 minutes. Un quart de tour, c’est 15 minutes.", en: "That is half a turn: 30 minutes. A quarter turn is 15 minutes." };
+      return { ok: false, fr: "Entre les deux horloges, il passe " + (d === 0 ? "0 minute" : d + " minutes") + ". Un quart de tour, c’est un quart du cadran : 3 nombres, 3 × 5 = 15 minutes.", en: "Between the two clocks, " + d + " minutes go by. A quarter turn is a quarter of the face: 3 numbers, 3 × 5 = 15 minutes." };
+    },
+    diagnostic: function (sol) { var d = ((sol.h2 % 12) * 60 + sol.m2 - ((sol.h1 % 12) * 60 + sol.m1) + 720) % 720; return { quinze: (sol.m2 - sol.m1 + 60) % 60 === 15, douze: !(sol.m1 >= 45 && sol.h2 === sol.h1) && d < 60 }; },
+    cle: function (sol) { return sol.h1 + ":" + pad(sol.m1); },
+    ecrire: function (sol) { return sol.h1 + " h " + pad(sol.m1) + " → " + sol.h2 + " h " + pad(sol.m2); },
+    ranger: function (x, y) { return (x.h1 * 60 + x.m1) - (y.h1 * 60 + y.m1); },
+    checklist: [
+      { id: "quinze", fr: "J’ai compté 15 minutes : 3 nombres sur le cadran.", en: "I counted 15 minutes: 3 numbers on the face." },
+      { id: "douze", fr: "Si l’aiguille des minutes passe par le 12, j’ai changé l’heure.", en: "If the minute hand goes past the 12, I changed the hour." }
+    ],
+    pouce: { fr: "Avant, il est 2 h pile : l’aiguille des minutes est sur le 12. Après un quart de tour, sur quel nombre est-elle ? Quelle heure est-il ?", en: "Before, it is 2 o'clock: the minute hand is on the 12. After a quarter turn, which number is it on? What time is it?" },
+    relances: [
+      { fr: "Trouve une paire où l’aiguille des minutes passe par le 12.", en: "Find a pair where the minute hand goes past the 12." },
+      { fr: "Avant, il est dix heures moins dix. Quelle heure est-il après ?", en: "Before, it is ten to ten. What time is it after?" },
+      { fr: "Un quart de tour, c’est combien de minutes ? Et un demi-tour ? Et un tour entier ?", en: "How many minutes is a quarter turn? And half a turn? And a whole turn?" },
+      { fr: "Pendant ce quart de tour, comment bouge l’aiguille des heures ?", en: "During this quarter turn, how does the hour hand move?" }
+    ],
+    strategies: [
+      { fr: "J’ai compté 3 nombres sur le cadran : 15 minutes.", en: "I counted 3 numbers on the face: 15 minutes." },
+      { fr: "J’ai ajouté 15 aux minutes.", en: "I added 15 to the minutes." },
+      { fr: "Je suis passé par l’heure pile, puis j’ai changé l’heure.", en: "I went through the o'clock, then changed the hour." },
+      { fr: "J’ai essayé, puis j’ai corrigé.", en: "I tried, then I corrected it." }
+    ],
+    retenir: { fr: "Quand l’aiguille des minutes fait un quart de tour, il passe un quart d’heure : 15 minutes. Un demi-tour, c’est une demi-heure (30 minutes). Un tour entier, c’est une heure (60 minutes). Quand l’aiguille des minutes passe par le 12, l’aiguille des heures arrive au nombre suivant : de 2 h 50 à 3 h 05, il passe 15 minutes.",
+               en: "When the minute hand makes a quarter turn, a quarter of an hour goes by: 15 minutes. Half a turn is half an hour (30 minutes). A whole turn is an hour (60 minutes). When the minute hand goes past the 12, the hour hand reaches the next number: from 2:50 to 3:05, 15 minutes go by." },
+    exemple: "2 h 50 → 3 h 05",
+    toutes: null, nbToutes: null,
+    vueToutes: function (trouves, lg) {
+      var en = lg === "en", a = [], b = [];
+      Object.keys(trouves).forEach(function (c) { var h = +c.split(":")[0], m = +c.split(":")[1], f = h * 60 + m + 15, h2 = Math.floor(f / 60) % 12 || 12; (m < 45 ? a : b).push("<li>" + h + " h " + pad(m) + " → " + h2 + " h " + pad(f % 60) + "</li>"); });
+      return "<h3>" + (en ? "All the “+ 15 minutes” pairs" : "Toutes les paires « + 15 minutes »") + '</h3><div class="po-deux"><div><h4>' + (en ? "Without going past the 12" : "Sans passer par le 12") + "</h4><ul>" + (a.join("") || "<li>…</li>") + "</ul></div><div><h4>" + (en ? "Going past the 12" : "En passant par le 12") + "</h4><ul>" + (b.join("") || "<li>…</li>") + "</ul></div></div>" +
+        '<p class="po-note">' + (en ? "There is a pair for every starting time. If the starting minutes go from 00 to 44, we add 15 to the minutes; from 45 to 59, the minute hand reaches or passes the 12: we go to the next hour." : "Il y a une paire pour chaque heure de départ. Si les minutes du départ vont de 00 à 44, on ajoute 15 aux minutes ; de 45 à 59, l’aiguille des minutes arrive au 12 ou le dépasse : on passe à l’heure suivante.") + "</p>";
+    },
+    feuille: { colonnes: [{ fr: "Avant (dessine les aiguilles)", en: "Before (draw the hands)", large: true }, { fr: "Après (dessine les aiguilles)", en: "After (draw the hands)", large: true }, { fr: "J’écris les deux heures", en: "I write both times" }], lignes: 7,
+      bas: { fr: "Trouve une paire où l’aiguille des minutes passe par le 12. Que fait l’aiguille des heures ?", en: "Find a pair where the minute hand goes past the 12. What does the hour hand do?" } },
+    fiche: {
+      source: "Problème repris de l’outil « Problèmes ouverts P5 » de la collègue (séquence 2, l’heure à aiguilles et les durées). D’après Sullivan & Lilburn, p. 125 (à quelles heures les aiguilles forment un quart de tour) et « La mesure du temps », 8-10 ans, p. 99.",
+      moment: "Séquence 2, après les quarts d’heure",
+      apprend: ["Un quart de tour de l’aiguille des minutes = un quart d’heure = 15 minutes (un demi-tour = 30 min, un tour = 1 h).", "Avancer de 15 minutes sur l’horloge, même en passant par le 12 : 2 h 50 → 3 h 05.", "Quand l’aiguille des minutes passe par le 12, l’aiguille des heures arrive au nombre suivant.", "Dire les heures avec « et quart, et demie, moins le quart, moins dix… »."],
+      pourquoi: ["Il faut relier une part de tour à une durée : c’est plus que lire l’heure.", "Beaucoup de réponses : 3 h → 3 h 15 pour commencer, 2 h 50 → 3 h 05 pour aller plus loin.", "Les paires qui passent par le 12 montrent qui sait que l’heure change à ce moment-là."],
+      materiel: ["Le mode classe, projeté (les 4 temps).", "Une feuille de recherche (cadrans vides) par élève ou par groupe.", "Les horloges individuelles de la classe.", "Les iPad pour le mode autonome."],
+      temps: [
+        ["Poser la question", "5 min", "Faites montrer un quart de tour sur une horloge de la classe. Ne donne aucune méthode.", "« Un quart de tour, c’est quelle part du cadran ? »"],
+        ["Chercher par 2 ou 3", "15 à 20 min", "Observe et note. Un groupe ne part que d’heures piles : « Trouvez une paire où l’aiguille des minutes passe par le 12. » Un groupe bloque : le coup de pouce.", ""],
+        ["Mettre en commun", "15 min", "Chaque groupe donne une paire : règle les deux horloges. Laisse la classe donner son avis, puis vérifie.", "« C’est vraiment un quart de tour ? » « Ça fait combien de minutes ? » « Dis les deux heures avec des mots. »"],
+        ["Retenir", "5 à 10 min", "La trace écrite (quart, demi, tour entier), puis les paires de la classe : sans passer par le 12, en passant par le 12.", ""]
+      ],
+      reponses: "Toutes les paires « + 15 minutes ». Sans passer par le 12 : 3 h → 3 h 15 · 8 h 20 → 8 h 35 · 6 h 30 → 6 h 45… En passant par le 12 : 6 h 45 → 7 h · 2 h 50 → 3 h 05 · 11 h 55 → 12 h 10… Il y a une paire pour chaque heure de départ.",
+      erreurs: [["2 h 50 → 2 h 05.", "L’aiguille des minutes passe par le 12, mais l’heure ne change pas.", "« Fais-le sur l’horloge : où est l’aiguille des heures à la fin ? »"], ["3 h → 3 h 30.", "Le quart de tour confondu avec le demi-tour.", "« Combien de quarts de tour dans un tour entier ? Montre-les. »"],
+        ["3 h → 3 h 25.", "Le quart de tour estimé « à vue ».", "« Un quart du cadran, ça fait combien de nombres ? » (3 nombres : 3 × 5 = 15 minutes)"], ["3 h → 4 h.", "C’est l’aiguille des heures qui a tourné.", "« Quelle aiguille a fait le quart de tour ? »"]],
+      niveaux: ["Dessine deux heures sans lien entre elles.", "Trouve 12 h → 12 h 15 ou 3 h → 3 h 15, mais se trompe dès qu’on ne part pas d’une heure pile.", "Trouve plusieurs paires justes sans passer par le 12, ou oublie de changer l’heure.", "Trouve des paires des deux sortes et explique ce qui arrive à l’aiguille des heures.", "Énonce une règle (on ajoute 15 minutes ; à partir de 45, on passe à l’heure suivante) ou relie quart, demi et tour entier aux minutes."],
+      reinvestir: ["« L’aiguille des minutes a fait un demi-tour. Quelle heure était-il avant ? Et après ? »", "« Le dessin animé dure trois quarts d’heure et finit à midi moins dix. À quelle heure commence-t-il ? »"]
+    }
+  };
+})();

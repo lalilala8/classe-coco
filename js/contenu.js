@@ -102,8 +102,26 @@ window.COCO_CONTENU = {
         { nom: { fr: "P4 - Physical description", en: "P4 - Physical description" }, sequences: [] },
         { nom: { fr: "P5 - The house", en: "P5 - The house" }, sequences: [] }
       ] },
+    /* QLM : programmations périodiques 2026 (D23, échanges de service en DNL, séquences des collègues comprises) ; sous-domaines des programmations (D-96) */
     { id: "qlm", classe: "m-qlm", perso: "wadra", nom: { fr: "Questionner le monde", en: "Discovering the world" },
-      sous: { fr: "Bientôt", en: "Coming soon" }, domaines: [] }
+      sous: { fr: "Temps · Espace · Vivant", en: "Time · Space · Living things" }, domaines: [
+        { nom: { fr: "Se situer dans le temps", en: "Time" }, sequences: [
+          [{ fr: "P1 · Les unités de temps et le calendrier", en: "P1 · Units of time and the calendar" }, "bientot"],
+          [{ fr: "P2 · La frise chronologique", en: "P2 · The timeline" }, "bientot"],
+          [{ fr: "P3 · La frise de l’histoire de la Nouvelle-Calédonie", en: "P3 · The history timeline of New Caledonia" }, "bientot"] ] },
+        { nom: { fr: "Se situer dans l’espace", en: "Space" }, sequences: [
+          [{ fr: "P1 et P2 · De l’espace connu à l’espace lointain", en: "P1 and P2 · From nearby to faraway places" }, "bientot"],
+          [{ fr: "P2 · L’organisation de l’espace urbain proche", en: "P2 · How a nearby town is organised" }, "bientot"],
+          [{ fr: "P3 · Les paysages de la Nouvelle-Calédonie et du monde, et leur évolution", en: "P3 · Landscapes of New Caledonia and the world, and how they change" }, "bientot"] ] },
+        { nom: { fr: "Le vivant, la matière et les objets", en: "Living things, materials and objects" }, sequences: [
+          [{ fr: "P1 · Le monde vivant : les interactions", en: "P1 · Living things: how they interact" }, "bientot"],
+          [{ fr: "P2 · La lutte contre les maladies vectorielles", en: "P2 · Fighting mosquito-borne diseases" }, "bientot"],
+          [{ fr: "P2 · Le corps humain : muscles et mouvements", en: "P2 · The human body: muscles and movement" }, "bientot"],
+          [{ fr: "P3 · La pollution de l’eau et la gestion des déchets", en: "P3 · Water pollution and waste" }, "bientot"],
+          [{ fr: "P3 · Le cycle de l’eau", en: "P3 · The water cycle" }, "bientot"],
+          [{ fr: "P4 · Les objets techniques : l’électricité", en: "P4 · Technical objects: electricity" }, "bientot"],
+          [{ fr: "P5 · Projet technique : le phare Amédée", en: "P5 · Technical project: the Amédée lighthouse" }, "bientot"] ] }
+      ] }
   ],
 
   /* ---------- séquence de démonstration : Le verbe (leçon CONJ2) ---------- */
