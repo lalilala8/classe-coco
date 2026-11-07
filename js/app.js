@@ -2078,9 +2078,99 @@
         ensLigne("adi", "Banque de problèmes (Vergnaud)", "217 problèmes classés par type, avec leurs schémas", [["Ouvrir la banque", "#banque"]]),
         ensLigne("waeko", "Lire un graphique en barres", "Leçon (OGD1), 4 jeux et problèmes", [["La fiche", "#fiche-diagrammes"], ["Fiche d’exercices", "#exos-diagrammes"], ["Voir la séquence", "#seq-diagrammes"]])]);
   }
+
+  /* ==========================================================================================
+     Suivi des étoiles de calcul (D-97) : Espace enseignante › Suivi des élèves
+     Les 9 étoiles du fichier de la classe ; une date par étoile ; données sur l'appareil (localStorage « coco-etoiles »),
+     jamais en ligne ; sauvegarde et restauration par fichier. À transférer dans la base en ligne quand elle existera.
+     ========================================================================================== */
+  var ETOILES = [["Blanche", "#ffffff", "Addition posée"], ["Jaune", "#f7e94a", "Addition posée"], ["Orange", "#f6a46c", "Soustraction posée"], ["Rouge", "#ef5b5b", "Soustraction posée"],
+    ["Verte", "#8fe08f", "Multiplication à 1 chiffre"], ["Bleue", "#5fd0f2", "Multiplication à 1 chiffre"], ["Mauve", "#b79cf0", "Multiplication à 2 chiffres"], ["Rose", "#f25aa8", "Multiplication à 2 chiffres"], ["Noire", "#8d8d8d", "Division"]];
+  var ET = { sel: null, liste: false, msg: "" };
+  function etDonnees() { var d = lire("etoiles", null); if (!d || !d.eleves) d = { eleves: [], val: {}, sauve: "" }; d.val = d.val || {}; return d; }
+  function etEcrire(d) { ecrire("etoiles", d); }
+  function etAujourdhui() { var j = new Date(); return j.getFullYear() + "-" + HE.pad(j.getMonth() + 1) + "-" + HE.pad(j.getDate()); }
+  function etCourt(iso) { var p = iso.split("-"); return p[2] + "/" + p[1]; }
+  function etLong(iso) { var p = iso.split("-"), M = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"]; return (+p[2]) + " " + M[+p[1] - 1] + " " + p[0]; }
+  function etEtoile(c, vide, grande) {
+    return '<svg class="et-etoile' + (vide ? " et-vide" : "") + (grande ? " et-grande" : "") + '" viewBox="0 0 40 40" aria-hidden="true"><path d="M20 3l5.3 10.8 11.9 1.7-8.6 8.4 2 11.8L20 30.1 9.4 35.7l2-11.8-8.6-8.4 11.9-1.7z" style="fill:' + c + '"/>' +
+      (vide ? "" : '<path d="M15 21q5 5 10 0" class="et-sourire"/><circle cx="16" cy="17" r="1.3"/><circle cx="24" cy="17" r="1.3"/>') + "</svg>";
+  }
+  function etNiveau(d, id) { var v = d.val[id] || {}; for (var k = 0; k < ETOILES.length; k++) if (!v[k]) return k; return ETOILES.length; }
+  function pageEnsEtoiles() {
+    var d = etDonnees(), n = d.eleves.length;
+    var outils = '<div class="coco-row no-print et-outils"><a class="coco-btn coco-btn--secondaire" href="#ens-suivi">← Suivi des élèves</a>' +
+      '<button class="coco-btn coco-btn--secondaire" type="button" data-action="et-liste" aria-pressed="' + ET.liste + '">' + (ET.liste ? "Fermer la liste" : "Gérer la liste des élèves") + "</button>" +
+      '<button class="coco-btn coco-btn--secondaire" type="button" data-action="imprimer"' + (n ? "" : " disabled") + ">Imprimer le tableau</button>" +
+      '<button class="coco-btn coco-btn--secondaire" type="button" data-action="et-sauver"' + (n ? "" : " disabled") + ">Sauvegarder</button>" +
+      '<label class="coco-btn coco-btn--secondaire et-restaurer">Restaurer<input type="file" accept=".json,application/json" id="et-fichier" hidden></label></div>' +
+      '<p class="no-print et-note">Ces informations restent <b>sur cet appareil</b> (rien n’est envoyé en ligne). Pensez à <b>sauvegarder</b> de temps en temps : le fichier permet aussi de retrouver le tableau sur un autre appareil. ' +
+      (d.sauve ? "Dernière sauvegarde : " + etLong(d.sauve) + "." : "<b>Aucune sauvegarde pour l’instant.</b>") + "</p>" + (ET.msg ? '<div class="no-print">' + ET.msg + "</div>" : "");
+    var liste = "";
+    if (ET.liste || !n) liste = '<section class="et-liste no-print"><h2>La liste des élèves</h2>' +
+      (n ? '<ol class="et-noms">' + d.eleves.map(function (e) { return '<li><input type="text" value="' + esc(e.nom) + '" data-et-nom="' + e.id + '" aria-label="Prénom" maxlength="30"><button class="coco-btn coco-btn--secondaire" type="button" data-action="et-suppr" data-v="' + e.id + '">Retirer</button></li>'; }).join("") + "</ol>" : "<p>La liste est vide. Collez ou tapez les prénoms de vos élèves, un par ligne :</p>") +
+      '<label class="et-ajout"><span>' + (n ? "Ajouter des élèves (un prénom par ligne) :" : "Prénoms :") + '</span><textarea id="et-nouveaux" rows="' + (n ? 3 : 8) + '" placeholder="Léa&#10;Noa&#10;…"></textarea></label>' +
+      '<div class="coco-row"><button class="coco-btn" type="button" data-action="et-ajouter">Ajouter à la liste</button>' + (n ? '<button class="coco-btn coco-btn--secondaire" type="button" data-action="et-trier">Ranger par ordre alphabétique</button>' : "") + "</div>" +
+      '<p class="et-note">Les prénoms se modifient directement dans les cases. Retirer un élève efface aussi ses étoiles.</p></section>';
+    var tableau = "";
+    if (n) {
+      tableau = '<div class="et-cadre"><table class="et-tab"><thead><tr><th scope="col">Élève</th>' + ETOILES.map(function (e) { return '<th scope="col">' + etEtoile(e[1]) + "<b>" + e[0] + "</b><span>" + e[2].replace("Multiplication", "Multipl.") + "</span></th>"; }).join("") + "</tr></thead><tbody>" +
+        d.eleves.map(function (e) { var v = d.val[e.id] || {}, niv = etNiveau(d, e.id);
+          return '<tr><th scope="row">' + esc(e.nom) + "</th>" + ETOILES.map(function (s, k) { var date = v[k], sel = ET.sel && ET.sel.id === e.id && ET.sel.k === k;
+            return '<td class="' + (k === niv ? "et-niveau" : "") + (sel ? " et-sel" : "") + '"><button type="button" class="et-case" data-action="et-etoile" data-id="' + e.id + '" data-k="' + k + '" aria-label="' + esc(e.nom) + " · étoile " + s[0].toLowerCase() + (date ? " · validée le " + etLong(date) : " · non validée") + '">' + etEtoile(s[1], !date) +
+              (date ? "<small>" + etCourt(date) + "</small>" : k === niv ? '<small class="et-a-valider">à valider</small>' : "<small></small>") + "</button></td>"; }).join("") + "</tr>"; }).join("") +
+        '<tr class="et-total"><th scope="row">Classe</th>' + ETOILES.map(function (s, k) { var c = d.eleves.filter(function (e) { return (d.val[e.id] || {})[k]; }).length; return "<td>" + c + " / " + n + "</td>"; }).join("") + "</tr></tbody></table></div>";
+    }
+    var panneau = "";
+    if (ET.sel) { var el = d.eleves.filter(function (x) { return x.id === ET.sel.id; })[0], s = ETOILES[ET.sel.k], dt = el && (d.val[el.id] || {})[ET.sel.k];
+      if (el && dt) panneau = '<div class="et-panneau no-print" role="dialog" aria-label="Étoile validée"><div>' + etEtoile(s[1], false, true) + "<p><b>" + esc(el.nom) + " · étoile " + s[0].toLowerCase() + "</b> (" + s[2].toLowerCase() + ")<br>Validée le " + etLong(dt) + ".</p></div>" +
+        '<label>Changer la date : <input type="date" id="et-date" value="' + dt + '" max="' + etAujourdhui() + '"></label><div class="coco-row"><button class="coco-btn" type="button" data-action="et-date-ok">Enregistrer la date</button><button class="coco-btn coco-btn--secondaire" type="button" data-action="et-retirer">Retirer la validation</button><button class="coco-btn coco-btn--secondaire" type="button" data-action="et-fermer">Fermer</button></div></div>'; }
+    return ensEntete("Étoiles de calcul") + '<p class="no-print et-intro">Je touche l’étoile de l’élève : elle se colore et la date du jour s’écrit dessous. L’étoile à travailler est surlignée en jaune. Je touche une étoile déjà validée pour changer sa date ou la retirer.</p>' +
+      outils + liste + '<h2 class="et-titre-impr">Suivi des étoiles de calcul · ' + etLong(etAujourdhui()) + "</h2>" + tableau + panneau;
+  }
+  function actionEtoiles(a, el) {
+    var d = etDonnees(); ET.msg = "";
+    if (a === "et-etoile") {
+      var id = el.dataset.id, k = +el.dataset.k; d.val[id] = d.val[id] || {};
+      if (d.val[id][k]) ET.sel = { id: id, k: k };
+      else { d.val[id][k] = etAujourdhui(); ET.sel = null; etEcrire(d); }
+    } else if (a === "et-fermer") ET.sel = null;
+    else if (a === "et-retirer" && ET.sel) { if (window.confirm("Retirer cette étoile validée ?")) { delete (d.val[ET.sel.id] || {})[ET.sel.k]; etEcrire(d); ET.sel = null; } }
+    else if (a === "et-date-ok" && ET.sel) { var v = (document.getElementById("et-date") || {}).value; if (/^\d{4}-\d{2}-\d{2}$/.test(v || "")) { d.val[ET.sel.id][ET.sel.k] = v; etEcrire(d); ET.sel = null; } }
+    else if (a === "et-liste") ET.liste = !ET.liste;
+    else if (a === "et-ajouter") {
+      var noms = ((document.getElementById("et-nouveaux") || {}).value || "").split(/\n|,|;/).map(function (x) { return x.trim(); }).filter(Boolean);
+      noms.forEach(function (nom) { d.eleves.push({ id: "e" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), nom: nom.slice(0, 30) }); });
+      if (noms.length) { etEcrire(d); ET.liste = false; ET.msg = retour("bravo", "C’est fait", noms.length + " élève" + (noms.length > 1 ? "s ajoutés" : " ajouté") + " à la liste."); }
+    }
+    else if (a === "et-trier") { d.eleves.sort(function (x, y) { return x.nom.localeCompare(y.nom, "fr"); }); etEcrire(d); }
+    else if (a === "et-suppr") { var e = d.eleves.filter(function (x) { return x.id === el.dataset.v; })[0]; if (e && window.confirm("Retirer " + e.nom + " de la liste ? Ses étoiles seront effacées.")) { d.eleves = d.eleves.filter(function (x) { return x !== e; }); delete d.val[e.id]; etEcrire(d); } }
+    else if (a === "et-sauver") {
+      d.sauve = etAujourdhui(); etEcrire(d);
+      try { var blob = new Blob([JSON.stringify({ type: "coco-etoiles", version: 1, eleves: d.eleves, val: d.val, sauve: d.sauve }, null, 1)], { type: "application/json" }), url = URL.createObjectURL(blob), lien = document.createElement("a");
+        lien.href = url; lien.download = "etoiles-de-calcul-" + d.sauve + ".json"; document.body.appendChild(lien); lien.click(); setTimeout(function () { URL.revokeObjectURL(url); lien.remove(); }, 500);
+        ET.msg = retour("bravo", "Sauvegardé", "Le fichier « etoiles-de-calcul-" + d.sauve + ".json » est dans vos téléchargements. Gardez-le précieusement."); }
+      catch (x) { ET.msg = retour("revoir", "Pas encore…", "Cet appareil n’a pas permis le téléchargement. Essayez depuis le site en ligne, dans Safari ou Chrome."); }
+    }
+  }
+  /* prénoms modifiés, fichier de restauration */
+  document.addEventListener("change", function (e) {
+    var el = e.target;
+    if (el.dataset && el.dataset.etNom !== undefined) { var d = etDonnees(), x = d.eleves.filter(function (y) { return y.id === el.dataset.etNom; })[0], nom = el.value.trim().slice(0, 30); if (x && nom) { x.nom = nom; etEcrire(d); } return; }
+    if (el.id === "et-fichier" && el.files && el.files[0]) {
+      var r = new FileReader();
+      r.onload = function () {
+        try { var j = JSON.parse(r.result); if (j.type !== "coco-etoiles" || !Array.isArray(j.eleves)) throw 0;
+          if (window.confirm("Remplacer le tableau de cet appareil par celui du fichier (" + j.eleves.length + " élèves, sauvegardé le " + (j.sauve ? etLong(j.sauve) : "?") + ") ?")) { etEcrire({ eleves: j.eleves, val: j.val || {}, sauve: j.sauve || "" }); ET.msg = retour("bravo", "Restauré", "Le tableau du fichier est maintenant sur cet appareil."); ET.sel = null; rendre(); } }
+        catch (x) { ET.msg = retour("revoir", "Pas encore…", "Ce fichier n’est pas une sauvegarde des étoiles de calcul."); rendre(); }
+      };
+      r.readAsText(el.files[0]);
+    }
+  });
   function pageEnsSuivi() {
-    return ensEntete("Suivi des élèves") + '<section class="ens-vide">' + DOSSIER_SVG + "<h2>Ce dossier est encore vide</h2><p>Il accueillera le suivi des résultats de vos élèves : réussites par activité, bilans par séquence, repères pour le livret scolaire unique.</p>" +
-      "<p><b>À décider avant la mise en ligne :</b> un suivi sans serveur (chaque élève garde un code bilan pseudonyme qu’il vous transmet) ou une base de données en ligne.</p></section>";
+    var d = etDonnees(), n = d.eleves.length, v = 0; d.eleves.forEach(function (e) { v += Object.keys(d.val[e.id] || {}).length; });
+    return ensEntete("Suivi des élèves") + '<section class="ens-dossiers ens-suivi-liste"><a class="ens-dossier et-dossier" href="#ens-etoiles">' + etEtoile("#f7e94a", false, true) + "<h2>Étoiles de calcul</h2><p>" + (n ? n + " élève" + (n > 1 ? "s" : "") + " · " + v + " étoile" + (v > 1 ? "s validées" : " validée") : "Les 9 étoiles, de la blanche à la noire : à remplir") + "</p></a></section>" +
+      '<section class="ens-vide ens-vide--petit"><p>Le suivi des résultats des activités du site viendra avec la <b>base en ligne</b> (D-93) : réussites par activité, bilans par séquence, repères pour le livret scolaire unique.</p></section>';
   }
   function pageEnsFormation() {
     return ensEntete("Formation") +
@@ -2221,7 +2311,7 @@
   /* ---------- routeur ---------- */
   var ROUTES = {
     accueil: pageAccueil, "seq-verbe": function () { return pageSequence("verbe"); }, "seq-mots": pageSequenceMots, "lecon-mots": pageLeconMots, "fiche-mots": ficheMots,
-    "seq-heure": pageSequenceHeure, "seq-digitale": pageSequenceDigitale, "ens-suivi": pageEnsSuivi, "ens-sequences": pageEnsSequences, "ens-formation": pageEnsFormation, "fiche-digitale": ficheDigitale, "seq-diagrammes": pageSequenceDiagrammes, "lecon-diagrammes": pageLeconDiagrammes, "fiche-diagrammes": ficheDiagrammes, "lecon-heure": function () { return pageLeconHeure(true); }, "maquette-retiens": function () { return pageLeconHeure(true); }, "fiche-heure": ficheHeure, "exos-heure": function () { return pageExos("heure"); }, "lecon-digitale": pageLeconDigitale, "lecon-division": pageLeconDivision, "lecon-monnaie": pageLeconMonnaie, "exos-verbe": function () { return pageExos("verbe"); }, "exos-mots": function () { return pageExos("mots"); },
+    "seq-heure": pageSequenceHeure, "seq-digitale": pageSequenceDigitale, "ens-suivi": pageEnsSuivi, "ens-etoiles": pageEnsEtoiles, "ens-sequences": pageEnsSequences, "ens-formation": pageEnsFormation, "fiche-digitale": ficheDigitale, "seq-diagrammes": pageSequenceDiagrammes, "lecon-diagrammes": pageLeconDiagrammes, "fiche-diagrammes": ficheDiagrammes, "lecon-heure": function () { return pageLeconHeure(true); }, "maquette-retiens": function () { return pageLeconHeure(true); }, "fiche-heure": ficheHeure, "exos-heure": function () { return pageExos("heure"); }, "lecon-digitale": pageLeconDigitale, "lecon-division": pageLeconDivision, "lecon-monnaie": pageLeconMonnaie, "exos-verbe": function () { return pageExos("verbe"); }, "exos-mots": function () { return pageExos("mots"); },
     "exos-monnaie": function () { return pageExos("monnaie"); }, "exos-division": function () { return pageExos("division"); }, "exos-digitale": function () { return pageExos("digitale"); }, "exos-diagrammes": function () { return pageExos("diagrammes"); }, "tbi-heure": pageTbiHeure,
     "lecon-verbe": pageLecon, "jeu-verbe-decouvre": jeuDecouvre, "jeu-verbe-chasse": jeuChasse, enseignante: pageEnseignante, banque: pageBanque
   };
@@ -2252,11 +2342,12 @@
   document.addEventListener("keydown", function (e) { if (e.key === "Escape") fermerSousMenus(); });
   function rendre() {
     var r = route();
-    if (r !== derniere) { if (r === "jeu-verbe-decouvre") D = null; if (r === "jeu-verbe-chasse") H = null; if (/^po-/.test(r)) A = null; if (/^mots-/.test(r)) G = null; if (/^heure-/.test(r)) HG = null; if (/^diag-/.test(r)) GD = null; if (r === "tbi-heure") { clearInterval(TB.tid); TB.part = "menu"; } try { if (MO.peutParler) speechSynthesis.cancel(); } catch (x) {} if (/^classe-/.test(r)) { K = null; clearInterval(minuteur); } if (r === "lecon-verbe") L = { carte: {}, moment: "present", machine: 0, phrase: 0 }; if (/^exos-/.test(r)) EXF = null; if (/^qz-/.test(r)) QZ = null; if (/^lecon-/.test(r)) { LX = {}; JR = { i: 0, tout: false }; } window.scrollTo(0, 0); derniere = r; }
+    if (r !== derniere) { if (r === "jeu-verbe-decouvre") D = null; if (r === "jeu-verbe-chasse") H = null; if (/^po-/.test(r)) A = null; if (/^mots-/.test(r)) G = null; if (/^heure-/.test(r)) HG = null; if (/^diag-/.test(r)) GD = null; if (r === "tbi-heure") { clearInterval(TB.tid); TB.part = "menu"; } try { if (MO.peutParler) speechSynthesis.cancel(); } catch (x) {} if (/^classe-/.test(r)) { K = null; clearInterval(minuteur); } if (r === "lecon-verbe") L = { carte: {}, moment: "present", machine: 0, phrase: 0 }; if (/^exos-/.test(r)) EXF = null; if (/^qz-/.test(r)) QZ = null; if (r === "ens-etoiles") ET = { sel: null, liste: false, msg: "" }; if (/^lecon-/.test(r)) { LX = {}; JR = { i: 0, tout: false }; } window.scrollTo(0, 0); derniere = r; }
     document.documentElement.lang = langue;
     var ferme = !ensOuvert && !UNIQUE && ENS_ROUTES.test(r);
     document.body.classList.toggle("mode-classe", !ferme && /^classe-|^tbi-/.test(r));
     document.body.classList.toggle("mode-papier", !ferme && /^(fiche|feuille|exos)-/.test(r));
+    document.body.classList.toggle("mode-etoiles", !ferme && r === "ens-etoiles");
     app.innerHTML = ferme ? pageCode() : ROUTES[r]();
     if (ferme) { var ch = document.getElementById("ens-code"); if (ch) ch.focus(); }
     allerCible();
@@ -2279,6 +2370,7 @@
     else if (/^h-/.test(a)) actionHeure(a, el);
     else if (/^qz-/.test(a)) actionQZ(a, el);
     else if (/^lx-/.test(a)) actionLX(a, el);
+    else if (/^et-/.test(a)) actionEtoiles(a, el);
     else if (/^t-/.test(a)) actionTbi(a, el);
     else if (/^g-/.test(a)) actionDiag(a, el);
     else if (/^jr-/.test(a)) actionJr(a, el);

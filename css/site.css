@@ -883,3 +883,50 @@ span.po-billet, span.po-piece { cursor: default; box-shadow: none; }
 .po-deux ul { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
 .po-deux .po-reveil { font-size: 18px; padding: 3px 7px; }
 @media (max-width: 700px) { .po-deux { grid-template-columns: 1fr; } .po-reveil { font-size: 30px; } }
+
+/* ---------- suivi des étoiles de calcul (D-97) ---------- */
+.et-etoile { width: 34px; height: 34px; display: block; margin: 0 auto; }
+.et-etoile.et-grande { width: 56px; height: 56px; }
+.et-etoile path { stroke: #1d2744; stroke-width: 1.6; stroke-linejoin: round; }
+.et-etoile .et-sourire { fill: none; stroke-width: 1.6; stroke-linecap: round; }
+.et-etoile circle { fill: #1d2744; }
+.et-etoile.et-vide path { fill-opacity: .16; stroke: #9aa3b5; stroke-dasharray: 3 2; }
+.et-intro, .et-note { margin: 0; color: var(--encre-douce); font-size: 17px; }
+.et-outils { align-items: center; }
+.et-restaurer { cursor: pointer; }
+.et-liste { background: #fff; border: 3px solid var(--lagon); border-radius: var(--arrondi-grand); padding: 18px 22px; display: grid; gap: 12px; }
+.et-liste h2 { margin: 0; font: 400 26px/1.2 var(--font-titre); }
+.et-noms { margin: 0; padding-left: 28px; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 8px 18px; }
+.et-noms li { display: flex; gap: 8px; align-items: center; }
+.et-noms input { flex: 1; min-width: 0; min-height: 44px; font: 600 18px/1 var(--font-texte); border: 2px solid var(--trait); border-radius: var(--arrondi-petit); padding: 0 10px; }
+.et-noms .coco-btn { min-height: 44px; font-size: 15px; padding: 0 12px; }
+.et-ajout { display: grid; gap: 6px; font-weight: 600; }
+.et-ajout textarea { font: 500 18px/1.5 var(--font-texte); border: 2px solid var(--trait); border-radius: var(--arrondi-petit); padding: 8px 12px; resize: vertical; }
+.et-cadre { overflow-x: auto; background: #fff; border: 3px solid var(--trait); border-radius: 18px; }
+.et-tab { border-collapse: collapse; width: 100%; font: 500 16px/1.2 var(--font-texte); }
+.et-tab th, .et-tab td { border-right: 1px solid #e3e7ee; border-bottom: 1px solid #e3e7ee; padding: 4px; text-align: center; }
+.et-tab thead th { background: #f4f6f9; font-size: 13px; vertical-align: bottom; padding: 8px 4px; min-width: 74px; }
+.et-tab thead th b { display: block; font-size: 14px; } .et-tab thead th span { display: block; font-weight: 500; color: var(--encre-douce); }
+.et-tab tbody th { text-align: left; padding: 6px 12px; font-weight: 700; white-space: nowrap; position: sticky; left: 0; background: #fff; z-index: 1; }
+.et-case { border: 0; background: none; width: 100%; min-height: 64px; padding: 4px 2px; display: grid; justify-items: center; gap: 2px; cursor: pointer; border-radius: 10px; }
+.et-case:hover { background: var(--lagon-clair); }
+.et-case small { font: 700 13px/1 var(--font-texte); color: var(--reussite); min-height: 13px; }
+.et-case .et-a-valider { color: var(--soutien-fonce); font-weight: 600; }
+.et-niveau { background: var(--soutien-clair); box-shadow: inset 0 0 0 3px var(--soutien); }
+.et-sel { box-shadow: inset 0 0 0 3px var(--lagon); }
+.et-total th, .et-total td { color: var(--encre-douce); font-size: 13px; }
+.et-panneau { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); width: min(560px, calc(100% - 32px)); box-sizing: border-box; background: #fff; border: 3px solid var(--lagon); border-radius: 20px; padding: 14px 18px; box-shadow: var(--ombre-flottante); display: grid; gap: 10px; z-index: 30; }
+.et-panneau > div:first-child { display: flex; gap: 12px; align-items: center; } .et-panneau p { margin: 0; }
+.et-panneau input[type="date"] { font: 600 17px/1 var(--font-texte); min-height: 44px; border: 2px solid var(--trait); border-radius: var(--arrondi-petit); padding: 0 8px; margin-left: 6px; }
+.et-titre-impr { display: none; }
+.et-dossier .et-etoile { margin: 0; }
+@media (max-width: 520px) { .et-noms { grid-template-columns: 1fr; } }
+@media print {
+  @page { size: A4 landscape; margin: 10mm; }
+  .mode-etoiles .ens-entete, .mode-etoiles .et-intro { display: none !important; }
+  .mode-etoiles .et-titre-impr { display: block; font: 400 18pt/1.2 var(--font-titre); margin: 0 0 6px; }
+  .mode-etoiles .et-cadre { border: 1px solid #999; border-radius: 0; overflow: visible; }
+  .mode-etoiles .et-tab { font-size: 10pt; } .mode-etoiles .et-case { min-height: 0; } .mode-etoiles .et-etoile { width: 22px; height: 22px; }
+  .mode-etoiles .et-niveau { background: none; box-shadow: none; } .mode-etoiles .et-a-valider { visibility: hidden; }
+  .mode-etoiles .et-tab, .mode-etoiles .et-etoile path { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
