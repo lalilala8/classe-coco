@@ -850,15 +850,18 @@
     ];
   }
   var JR_SRC = jrCartes;
+  /* Personnages des cartes « Je retiens » (D-108) : un compagnon des jeux de la séquence par carte, à côté du texte ;
+     posture selon l'idée de la carte : présente (la notion arrive), réfléchit (observer), idée (méthode, astuce), content ou victoire (conclusion). */
+  function jrPerso(k) { return (JR_SRC.persos || [])[k]; }
   function jrSection(src, mat) {
     JR_SRC = src || jrCartes;
     var cls = "jr m-" + (mat || "maths");
-    var en = langue === "en", C2 = JR_SRC(en), n = C2.length; if (JR.i >= n) JR.i = 0; var c = C2[JR.i];
+    var en = langue === "en", C2 = JR_SRC(en), n = C2.length; if (JR.i >= n) JR.i = 0; var c = C2[JR.i], P = jrPerso(JR.i);
     var pastilles = '<ol class="jr-pastilles">' + C2.map(function (x, k) { return '<li><button type="button" data-action="jr-aller" data-v="' + k + '" aria-current="' + (k === JR.i) + '" aria-label="' + esc(x.t) + '">' + (k + 1) + "</button></li>"; }).join("") + "</ol>";
     if (JR.tout) return '<section class="' + cls + '"><header class="jr-haut"><img src="' + POSE("coralie", "idee") + '" alt=""><h3>' + (en ? "I remember" : "Je retiens") + '</h3><button class="coco-btn coco-btn--secondaire" type="button" data-action="jr-tout">' + (en ? "Card by card" : "Carte par carte") + '</button></header><div class="jr-liste">' +
-      C2.map(function (x) { return '<div class="jr-mini' + (x.complement ? " jr-complement" : "") + '">' + x.svg + "<div><b>" + esc(x.t) + "</b>" + x.txt.map(function (p) { return "<p>" + typo(p) + "</p>"; }).join("") + "</div></div>"; }).join("") + "</div></section>";
+      C2.map(function (x, k) { var P = jrPerso(k); return '<div class="jr-mini' + (x.complement ? " jr-complement" : "") + '">' + x.svg + "<div>" + (P ? '<img class="jr-mini-perso" src="' + POSE(P[0], P[1]) + '" alt="">' : "") + "<b>" + esc(x.t) + "</b>" + x.txt.map(function (p) { return "<p>" + typo(p) + "</p>"; }).join("") + "</div></div>"; }).join("") + "</div></section>";
     return '<section class="' + cls + '"><header class="jr-haut"><img src="' + POSE("coralie", "idee") + '" alt=""><h3>' + (en ? "I remember" : "Je retiens") + "</h3>" + pastilles + "</header>" +
-      '<div class="jr-carte' + (c.complement ? " jr-complement" : "") + '" key="' + JR.i + '"><div class="jr-illu">' + c.svg + '</div><div class="jr-texte"><h4>' + esc(typo(c.t)) + "</h4>" + c.txt.map(function (p, k) { return '<p class="jr-p" style="animation-delay:' + (0.3 + k * 0.5) + 's">' + typo(p) + "</p>"; }).join("") + (c.note ? '<p class="jr-note">' + esc(typo(c.note)) + "</p>" : "") + "</div></div>" +
+      '<div class="jr-carte' + (c.complement ? " jr-complement" : "") + '" key="' + JR.i + '"><div class="jr-illu">' + c.svg + '</div><div class="jr-texte' + (P ? " jr-avec-perso" : "") + '">' + (P ? '<img class="jr-perso" src="' + POSE(P[0], P[1]) + '" alt="">' : "") + "<div><h4>" + esc(typo(c.t)) + "</h4>" + c.txt.map(function (p, k) { return '<p class="jr-p" style="animation-delay:' + (0.3 + k * 0.5) + 's">' + typo(p) + "</p>"; }).join("") + (c.note ? '<p class="jr-note">' + esc(typo(c.note)) + "</p>" : "") + "</div></div></div>" +
       '<footer class="jr-bas"><button class="coco-btn coco-btn--secondaire" type="button" data-action="jr-prec"' + (JR.i === 0 ? " disabled" : "") + ">← " + (en ? "Back" : "Précédent") + '</button><button class="jr-lien" type="button" data-action="jr-tout">' + (en ? "See everything" : "Tout voir") + '</button><button class="coco-btn" type="button" data-action="jr-suiv"' + (JR.i === n - 1 ? " disabled" : "") + ">" + (en ? "Next" : "Suivant") + " →</button></footer></section>";
   }
   function actionJr(a, el) {
@@ -1758,6 +1761,13 @@
         txt: en ? ["<b>The bar chart</b>: one bar for each fruit. The taller the bar, the bigger the number.", "We name the two axes: <b>" + esc(tr(d.ctx.axeX)) + "</b> and <b>Number of " + esc(d.ctx.axe.en) + "</b>."] : ["<b>Le graphique en barres</b> : une barre pour chaque fruit. Plus la barre est haute, plus le nombre est grand.", "On nomme les deux axes : <b>" + esc(tr(d.ctx.axeX)) + "</b> et <b>Nombre " + esc(d.ctx.axe.de) + "</b>."] }
     ];
   }
+  jrCartes.persos = [["waeko", "presente"], ["sari", "reflechit"], ["dylan", "idee"], ["leo", "content"], ["tao", "victoire"]]; /* heure à aiguilles */
+  jrCartesDigitale.persos = [["tao", "reflechit"], ["nina", "idee"], ["dylan", "presente"], ["wadra", "content"]];
+  jrCartesDivision.persos = [["nina", "presente"], ["dylan", "reflechit"], ["waeko", "idee"], ["adi", "content"]];
+  jrCartesMonnaie.persos = [["mei", "presente"], ["vaka", "content"], ["tehani", "idee"]];
+  jrCartesVerbe.persos = [["tehani", "presente"], ["vaka", "reflechit"], ["nina", "idee"]];
+  jrCartesMots.persos = [["waeko", "presente"], ["dylan", "reflechit"], ["nina", "victoire"]];
+  jrCartesDiagrammes.persos = [["waeko", "presente"], ["nina", "reflechit"], ["tao", "idee"]];
   function lxLecon(seq, sous, blocs, src) {
     var m = MATIERE.maths, en = langue === "en";
     return barre("maths") + hautJeu(m, "seq-" + seq, { sous: sous, titre: t("lecon") }) +

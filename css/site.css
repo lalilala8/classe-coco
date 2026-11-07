@@ -562,7 +562,7 @@ body.mode-classe .site { max-width: none; padding-block: 12px 24px; }
 .jr-mini { display: grid; grid-template-columns: 110px 1fr; gap: 12px; align-items: start; background: var(--maths-clair); border-radius: var(--arrondi); padding: 12px; }
 .jr-mini.jr-complement { background: var(--lagon-clair); }
 .jr-mini .jr-svg { max-width: 110px; }
-.jr-mini > div > b:first-child { font: 400 21px/25px var(--font-titre); color: var(--maths); display: block; margin-bottom: 4px; }
+.jr-mini > div > b:first-of-type { font: 400 21px/25px var(--font-titre); color: var(--maths); display: block; margin-bottom: 4px; }
 .jr-mini p { margin: 0 0 4px; font-size: 17px; line-height: 24px; }
 /* dessins */
 .jr-cadran { fill: #fff; stroke: var(--encre); stroke-width: 3; }
@@ -1007,7 +1007,7 @@ span.tb-grp { box-shadow: none; padding: 1px 4px; border-radius: 6px; }
 
 /* « Je retiens » en cartes animées pour le verbe, les mots invariables et le graphique en barres (D-107) */
 .jr.m-francais { border-color: var(--francais); }
-.jr.m-francais .jr-haut h3, .jr.m-francais .jr-texte h4, .jr.m-francais .jr-mini > div > b:first-child { color: var(--francais); }
+.jr.m-francais .jr-haut h3, .jr.m-francais .jr-texte h4, .jr.m-francais .jr-mini > div > b:first-of-type { color: var(--francais); }
 .jr.m-francais .jr-pastilles button { border-color: var(--francais); color: var(--francais); }
 .jr.m-francais .jr-pastilles button[aria-current="true"] { background: var(--francais); color: #fff; }
 .jr.m-francais .jr-carte, .jr.m-francais .jr-mini { background: var(--francais-clair); }
@@ -1044,3 +1044,10 @@ span.tb-grp { box-shadow: none; padding: 1px 4px; border-radius: 6px; }
 @keyframes jr-monte { from { transform: scaleY(0); } to { transform: scaleY(1); } }
 @media (prefers-reduced-motion: reduce) { .jr-cycle > span:first-child { opacity: 1; } }
 @media (max-width: 600px) { .jr-ph { font-size: 20px; } .jr-temps { font-size: 19px; } }
+
+/* Personnages des cartes « Je retiens » (D-108) : un compagnon de la séquence à côté du texte */
+.jr-texte.jr-avec-perso { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 16px; align-items: center; }
+.jr-perso { width: 110px; height: auto; animation: jr-perso .55s cubic-bezier(.3, 1.4, .5, 1) both; }
+.jr-mini-perso { float: right; width: 52px; height: auto; margin: 0 0 4px 8px; }
+@keyframes jr-perso { from { opacity: 0; transform: translateY(14px) scale(.8); } to { opacity: 1; transform: none; } }
+@media (max-width: 760px) { .jr-texte.jr-avec-perso { grid-template-columns: 76px minmax(0, 1fr); gap: 12px; align-items: start; } .jr-perso { width: 76px; } }
