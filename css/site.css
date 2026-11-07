@@ -930,3 +930,20 @@ span.po-billet, span.po-piece { cursor: default; box-shadow: none; }
   .mode-etoiles .et-niveau { background: none; box-shadow: none; } .mode-etoiles .et-a-valider { visibility: hidden; }
   .mode-etoiles .et-tab, .mode-etoiles .et-etoile * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
+
+/* ---------- corrigés des étoiles de calcul (D-101) ---------- */
+.ec-etoiles { display: flex; flex-wrap: wrap; gap: 6px; }
+.ec-choix { display: grid; justify-items: center; gap: 2px; min-width: 76px; padding: 6px 8px; border: 3px solid transparent; border-radius: 14px; background: #fff; font: 600 15px/1 var(--font-texte); color: var(--encre); cursor: pointer; }
+.ec-choix[aria-pressed="true"] { border-color: var(--lagon); background: var(--lagon-clair); }
+.ec-tete { display: flex; gap: 14px; align-items: center; background: #fff; border: 3px solid var(--trait); border-radius: 18px; padding: 8px 16px; }
+.ec-tete p { margin: 0; font: 500 20px/1.3 var(--font-texte); }
+.ec-tete .et-etoile { margin: 0; flex: none; }
+.ec-evals { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; align-items: start; }
+.ec-eval { background: #fff; border: 3px solid var(--maths); border-radius: 18px; padding: 12px 16px; }
+.ec-eval h2 { margin: 0 0 8px; font: 400 25px/1.2 var(--font-titre); color: var(--maths); }
+.ec-eval ol { margin: 0; padding-left: 24px; display: grid; gap: 10px; }
+.ec-eval li { font: 500 21px/1.35 var(--font-lecture); }
+.ec-eval b { color: var(--reussite); white-space: nowrap; }
+.ec-eval small { display: block; font: 600 14px/1.3 var(--font-texte); color: var(--encre-douce); }
+.ec-op { white-space: nowrap; } .ec-fl { color: var(--encre-douce); }
+@media (max-width: 860px) { .ec-evals { grid-template-columns: 1fr; } }

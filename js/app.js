@@ -2103,6 +2103,7 @@
   function pageEnsEtoiles() {
     var d = etDonnees(), n = d.eleves.length;
     var outils = '<div class="coco-row no-print et-outils"><a class="coco-btn coco-btn--secondaire" href="#ens-suivi">← Suivi des élèves</a>' +
+      '<a class="coco-btn coco-btn--secondaire" href="#ens-corriges">Corrigés des évaluations</a>' +
       '<button class="coco-btn coco-btn--secondaire" type="button" data-action="et-liste" aria-pressed="' + ET.liste + '">' + (ET.liste ? "Fermer la liste" : "Gérer la liste des élèves") + "</button>" +
       '<button class="coco-btn coco-btn--secondaire" type="button" data-action="imprimer"' + (n ? "" : " disabled") + ">Imprimer le tableau</button>" +
       '<button class="coco-btn coco-btn--secondaire" type="button" data-action="et-sauver"' + (n ? "" : " disabled") + ">Sauvegarder</button>" +
@@ -2133,6 +2134,7 @@
   }
   function actionEtoiles(a, el) {
     var d = etDonnees(); ET.msg = "";
+    if (a === "et-corr") { ET_CORR = +el.dataset.v; return; }
     if (a === "et-etoile") {
       var id = el.dataset.id, k = +el.dataset.k; d.val[id] = d.val[id] || {};
       if (d.val[id][k]) ET.sel = { id: id, k: k };
@@ -2170,9 +2172,30 @@
       r.readAsText(el.files[0]);
     }
   });
+
+  /* ---------- Corrigés des évaluations des étoiles de calcul (D-101) : les 3 évaluations de chaque étoile, résultats seulement ;
+     divisions écrites comme la leçon CAL8, avec les parenthèses du site : 681 = (9 × 75) + 6 ---------- */
+  var ET_EVAL = [[["834 + 46", "62 + 387 + 455", "458 + 793 + 813", "265 + 191 + 84", "210 + 376 + 543"], ["765 + 87", "54 + 292 + 648", "529 + 619 + 443", "618 + 172 + 96", "340 + 485 + 466"], ["915 + 57", "48 + 273 + 541", "357 + 829 + 243", "607 + 391 + 75", "320 + 654 + 198"]], [["346 + 4659 + 79", "6215 + 87 + 863", "1458 + 3479 + 1602", "2165 + 183 + 7037", "2980 + 7653 + 1254"], ["245 + 2178 + 49", "4768 + 32 + 702", "2305 + 1219 + 9014", "4075 + 268 + 7943", "1096 + 6532 + 7630"], ["421 + 7658 + 86", "2350 + 58 + 129", "3256 + 4605 + 2541", "2875 + 528 + 3456", "6129 + 5783 + 2902"]], [["7654 + 54 + 321", "385 - 123", "916 - 145", "605 - 208", "712 - 237"], ["56 + 893 + 2192", "495 - 335", "827 - 153", "801 - 604", "332 - 287"], ["3761 + 496 + 75", "898 - 468", "728 - 346", "502 - 309", "345 - 286"]], [["763 + 1209 + 45", "1546 - 832", "5407 - 1285", "5681 - 2468", "2024 - 1989"], ["85 + 866 + 1653", "4196 - 862", "3551 - 2370", "7283 - 3075", "6162 - 3894"], ["763 + 1209 + 45", "7186 - 546", "4905 - 1633", "7654 - 3419", "9402 - 7658"]], [["7801 - 358", "58 x 6", "569 x 5", "891 x 3", "357 x 9"], ["9632 - 1575", "64 x 7", "667 x 5", "214 x 8", "395 x 4"], ["3141 - 295", "95 x 6", "751 x 9", "908 x 5", "474 x 4"]], [["9365 - 765", "892 x 4", "4518 x 6", "5913 x 3", "2145 x 5"], ["3651 + 479 + 2180", "608 x 5", "3519 x 7", "7168 x 2", "3186 x 3"], ["2903 - 1675", "854 x 8", "3679 x 2", "5983 x 6", "4178 x 5"]], [["2850 - 1749", "2748 x 7", "569 x 36", "195 x 25", "457 x 42"], ["4629 + 563 + 68", "1437 x 8", "352 x 43", "678 x 56", "856 x 27"], ["6561 - 3980", "536 x 6", "452 x 29", "659 x 35", "761 x 47"]], [["1428 - 1279", "587 x 27", "1746 x 39", "3852 x 54", "7150 x 68"], ["5628 + 6201 + 266", "561 x 63", "5789 x 29", "4718 x 75", "1462 x 48"], ["5108 - 4518", "376 x 49", "4619 x 26", "5617 x 38", "6471 x 57"]], [["3659 - 1963", "42 : 7", "681 : 9", "743 : 5", "337 : 6"], ["1740 x 65", "25 : 5", "832 : 8", "865 : 7", "450 : 6"], ["6735 x 34", "18 : 3", "285 : 4", "623 : 7", "966 : 8"]]];
+  var ET_CORR = 0;
+  function etResultat(op) {
+    var n = op.match(/\d+/g).map(Number), joli = op.replace(/ x /g, " × ").replace(/ - /g, " − ");
+    if (op.indexOf(":") >= 0) { var q = Math.floor(n[0] / n[1]), r = n[0] % n[1];
+      return '<span class="ec-op">' + esc(joli) + "</span>" + (r ? ' <span class="ec-fl">→</span> <b>' + n[0] + " = (" + n[1] + " × " + q + ") + " + r + '</b><small>quotient ' + q + ", reste " + r + "</small>" : " = <b>" + q + "</b>"); }
+    var v = op.indexOf("x") >= 0 ? n[0] * n[1] : op.indexOf("-") >= 0 ? n[0] - n[1] : n.reduce(function (a, b) { return a + b; }, 0);
+    return '<span class="ec-op">' + esc(joli) + "</span> = <b>" + exMille(v) + "</b>";
+  }
+  function pageEnsCorriges() {
+    var k = ET_CORR, s = ETOILES[k];
+    return ensEntete("Corrigés des étoiles de calcul") +
+      '<div class="coco-row et-outils"><a class="coco-btn coco-btn--secondaire" href="#ens-etoiles">← Suivi des étoiles</a></div>' +
+      '<div class="ec-etoiles" role="group" aria-label="Choisir l’étoile">' + ETOILES.map(function (e, i) { return '<button type="button" class="ec-choix" data-action="et-corr" data-v="' + i + '" aria-pressed="' + (i === k) + '">' + etEtoile(e[1]) + "<span>" + e[0] + "</span></button>"; }).join("") + "</div>" +
+      '<div class="ec-tete">' + etEtoile(s[1], false, true) + "<p><b>Étoile " + s[0].toLowerCase() + "</b> · " + s[2] + " · « Pose et calcule »</p></div>" +
+      '<div class="ec-evals">' + ET_EVAL[k].map(function (ops, i) { return '<section class="ec-eval"><h2>Évaluation ' + (i + 1) + "</h2><ol>" + ops.map(function (op) { return "<li>" + etResultat(op) + "</li>"; }).join("") + "</ol></section>"; }).join("") + "</div>";
+  }
   function pageEnsSuivi() {
     var d = etDonnees(), n = d.eleves.length, v = 0; d.eleves.forEach(function (e) { v += Object.keys(d.val[e.id] || {}).length; });
-    return ensEntete("Suivi des élèves") + '<section class="ens-dossiers ens-suivi-liste"><a class="ens-dossier et-dossier" href="#ens-etoiles">' + etEtoile("#f7f06a", false, true) + "<h2>Étoiles de calcul</h2><p>" + (n ? n + " élève" + (n > 1 ? "s" : "") + " · " + v + " étoile" + (v > 1 ? "s validées" : " validée") : "Les 9 étoiles, de la blanche à la noire : à remplir") + "</p></a></section>" +
+    return ensEntete("Suivi des élèves") + '<section class="ens-dossiers ens-suivi-liste"><a class="ens-dossier et-dossier" href="#ens-etoiles">' + etEtoile("#f7f06a", false, true) + "<h2>Étoiles de calcul</h2><p>" + (n ? n + " élève" + (n > 1 ? "s" : "") + " · " + v + " étoile" + (v > 1 ? "s validées" : " validée") : "Les 9 étoiles, de la blanche à la noire : à remplir") + "</p></a>" +
+      '<a class="ens-dossier et-dossier" href="#ens-corriges">' + etEtoile("#bdbdbd", false, true) + "<h2>Corrigés des étoiles</h2><p>Les 3 évaluations de chaque étoile, avec les résultats</p></a></section>" +
       '<section class="ens-vide ens-vide--petit"><p>Le suivi des résultats des activités du site viendra avec la <b>base en ligne</b> (D-93) : réussites par activité, bilans par séquence, repères pour le livret scolaire unique.</p></section>';
   }
   function pageEnsFormation() {
@@ -2314,7 +2337,7 @@
   /* ---------- routeur ---------- */
   var ROUTES = {
     accueil: pageAccueil, "seq-verbe": function () { return pageSequence("verbe"); }, "seq-mots": pageSequenceMots, "lecon-mots": pageLeconMots, "fiche-mots": ficheMots,
-    "seq-heure": pageSequenceHeure, "seq-digitale": pageSequenceDigitale, "ens-suivi": pageEnsSuivi, "ens-etoiles": pageEnsEtoiles, "ens-sequences": pageEnsSequences, "ens-formation": pageEnsFormation, "fiche-digitale": ficheDigitale, "seq-diagrammes": pageSequenceDiagrammes, "lecon-diagrammes": pageLeconDiagrammes, "fiche-diagrammes": ficheDiagrammes, "lecon-heure": function () { return pageLeconHeure(true); }, "maquette-retiens": function () { return pageLeconHeure(true); }, "fiche-heure": ficheHeure, "exos-heure": function () { return pageExos("heure"); }, "lecon-digitale": pageLeconDigitale, "lecon-division": pageLeconDivision, "lecon-monnaie": pageLeconMonnaie, "exos-verbe": function () { return pageExos("verbe"); }, "exos-mots": function () { return pageExos("mots"); },
+    "seq-heure": pageSequenceHeure, "seq-digitale": pageSequenceDigitale, "ens-suivi": pageEnsSuivi, "ens-etoiles": pageEnsEtoiles, "ens-corriges": pageEnsCorriges, "ens-sequences": pageEnsSequences, "ens-formation": pageEnsFormation, "fiche-digitale": ficheDigitale, "seq-diagrammes": pageSequenceDiagrammes, "lecon-diagrammes": pageLeconDiagrammes, "fiche-diagrammes": ficheDiagrammes, "lecon-heure": function () { return pageLeconHeure(true); }, "maquette-retiens": function () { return pageLeconHeure(true); }, "fiche-heure": ficheHeure, "exos-heure": function () { return pageExos("heure"); }, "lecon-digitale": pageLeconDigitale, "lecon-division": pageLeconDivision, "lecon-monnaie": pageLeconMonnaie, "exos-verbe": function () { return pageExos("verbe"); }, "exos-mots": function () { return pageExos("mots"); },
     "exos-monnaie": function () { return pageExos("monnaie"); }, "exos-division": function () { return pageExos("division"); }, "exos-digitale": function () { return pageExos("digitale"); }, "exos-diagrammes": function () { return pageExos("diagrammes"); }, "tbi-heure": pageTbiHeure,
     "lecon-verbe": pageLecon, "jeu-verbe-decouvre": jeuDecouvre, "jeu-verbe-chasse": jeuChasse, enseignante: pageEnseignante, banque: pageBanque
   };
