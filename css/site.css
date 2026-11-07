@@ -1164,3 +1164,5 @@ a.fo-carte:hover { background: var(--lagon-clair); }
 @media (max-width: 600px) { .fo-def th { width: 96px; } .fo-tete { grid-template-columns: 64px 1fr; } .fo-tete .fo-code { width: 58px; height: 58px; font-size: 22px; } }
 .fo-tete > div { min-width: 0; } .fo-fiche { overflow-wrap: break-word; } @media (max-width: 600px) { .fo-tete h1 { font-size: 30px; line-height: 34px; hyphens: auto; } .fo-fiche { padding-left: 14px; padding-right: 14px; } }
 .fo-fiche { border-color: var(--lagon); } .fo-fiche h1 { color: var(--lagon-fonce); } .fo-fiche p { margin: 6px 0; } .fo-fiche ul, .fo-fiche ol { margin: 4px 0 8px; } .fo-fiche h3 { color: var(--lagon-fonce); margin-top: 16px; } .fo-site h2 { color: var(--lagon-fonce); }
+/* fiches de Français en bleu (D-115) */
+.fiche.m-francais { border-color: var(--francais); } .fiche.m-francais h1 { color: var(--francais); } .fiche.m-francais h2 { color: var(--francais-fonce); } .fiche.m-francais .f-prog h2 { color: var(--lagon-fonce); } .fiche.m-francais .f-table th { background: var(--francais-clair); }

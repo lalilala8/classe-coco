@@ -574,6 +574,8 @@
   };
   PROG.masses = { ref: "Mathématiques · Grandeurs et mesures (masses)", att: ATT_GM, comp: ["chercher", "modeliser", "calculer", "communiquer"], rp: "mathématiques p. 13 et 15",
     reperes: ["L’élève fait correspondre un mesurage de masse à l’unité convenable (voir le lexique spécifique associé).", "L’élève connaît et utilise le kilogramme, le gramme, la tonne pour exprimer une mesure de masse, choisit l’unité appropriée pour exprimer et rendre compte de l’estimation d’une mesure.", "Il met en relation les unités et connaît et utilise ces relations : 1t = 1 000kg ; 1kg=1 000g pour comparer des mesures ou effectuer des calculs.", "Il construit des rapports simples de masse : double et moitié : exemple la moitié de 1kg est 500g ; multiples de 10 ;100 ;1 000 : exemple 2kg=2x1 000g"] };
+  PROG.verbe = { ref: "Français · Étude de la langue (grammaire et conjugaison)", att: ["Raisonner pour réaliser les accords dans le groupe nominal d’une part (déterminant, nom, adjectif), entre le verbe et son sujet d’autre part (cas simples : sujet placé avant le verbe et proche de lui ; sujet composé d’un groupe nominal comportant au plus un adjectif).", "Utiliser ses connaissances sur la langue pour mieux s’exprimer à l’oral, pour mieux comprendre des mots et des textes, pour améliorer des textes écrits."], socle: [1, 2], comp: "Se repérer dans la phrase simple : reconnaître les principaux constituants de la phrase : le sujet, le verbe (connaissance des propriétés permettant de l’identifier), les compléments ; reconnaître les formes négative et exclamative et savoir effectuer des transformations.", rp: "français p. 31 et 33",
+    reperes: ["Il mobilise différentes stratégies qui permettent d’identifier le verbe : il opère des transformations (nombre, temps) et observe les modifications par exemple."] };
   PROG.digitale = { ref: PROG.heure.ref, att: PROG.heure.att, comp: PROG.heure.comp, rp: "mathématiques p. 16 et 17",
     reperes: ["Il lit l’heure sur un affichage digital.", "Il repère des évènements de la journée en utilisant les heures, et les minutes.", "Il connaît et utilise la relation : 1h=60min pour comparer des durées."] };
   function encadreProgramme(cle) {
@@ -628,7 +630,7 @@
     return barre("maths") + '<section class="entete m-maths"><img src="' + IMG(m.perso) + '" alt=""><div><h1>' + esc(tr(s.titre)) + "</h1><p>" + esc(tr(m.nom)) + " · " + (en ? "Problem solving" : "Résolution de problèmes") + "</p></div></section>" +
       '<p class="objectif m-maths">' + t("objectif") + " <b>" + esc(tr(s.objectif)) + "</b></p>" +
       '<div class="coco-row"><a class="coco-btn coco-btn--secondaire" href="#lecon-diagrammes"><img src="' + PICTO("ampoule") + '" alt="">' + t("lecon") + "</a>" + boutonExos("diagrammes") + "</div>" +
-      '<section class="etapes">' + cartes + "</section>";
+      '<section class="etapes">' + cartes + cartesPO("diagrammes") + "</section>";
   }
   function pageLeconDiagrammes() {
     var m = MATIERE.maths, en = langue === "en";
@@ -744,7 +746,8 @@
         ["1 · Lis le graphique", "Graduations de 1 en 1 : lire la valeur d’une barre, trouver la plus haute et la plus basse."],
         ["2 · Lis les graduations", "Graduations de 2 en 2, de 5 en 5 et de 10 en 10, valeurs parfois entre deux graduations."],
         ["2 · Je construis le graphique", "Monter les barres d’après un tableau (graduations de 1 en 1, puis de 2 en 2)."],
-        ["3 · Problèmes avec un graphique", "Total, écart, problème en deux étapes, prix (× 100 F), information inutile."]
+        ["3 · Problèmes avec un graphique", "Total, écart, problème en deux étapes, prix (× 100 F), information inutile."],
+        ["4 · Problèmes ouverts", "« Le graphique mélangé » (24 élèves, l’ordre des fruits : 84 graphiques possibles) et « Deux chiens de plus » (l’écart et le total : 7 graphiques), adaptés de Sullivan & Lilburn, chap. 8 ; chacun avec son mode autonome, son mode classe au TBI, sa feuille de recherche et sa fiche (D-116)."]
       ].map(function (r) { return "<tr><th>" + r[0] + "</th><td>" + r[1] + "</td></tr>"; }).join("") + "</tbody></table></section>" +
       '<div class="f-deux"><section><h2>Les erreurs à guetter</h2><ul>' + li(["Lire le nombre de graduations au lieu de la valeur (graduations de 2, 5 ou 10).", "Lire la barre voisine : suivre la ligne avec la règle ou le doigt.", "Une valeur entre deux graduations : chercher le nombre du milieu.", "Prendre toutes les données d’un problème, même celle qui ne sert pas."]) + "</ul></section>" +
       "<section><h2>Pour prolonger en classe</h2><ul>" + li(["Construire un graphique avec les données de la classe (sport préféré, transport, anniversaires par mois), en lien avec «\u00a0Questionner le monde\u00a0».", "Comparer un tableau et un graphique : lequel permet de voir plus vite le plus grand ?"]) + "</ul></section></div></article>";
@@ -781,12 +784,71 @@
         "La moitié de 1 kg, c’est 500 g ; 2 kg = 2 × 1 000 g (repères du niveau 3)."]) + "</ul></section>" +
       '<p class="f-source">Sources : programmation périodique P5 de la collègue, leçon GM8 de la classe, programmes de Nouvelle-Calédonie 2021, repères de progressivité de la DENC (cycle 2, mathématiques, p. 13 et 15), Sullivan & Lilburn, « La masse », p. 78.</p></article>';
   }
-  function ficheDigitale() {
-    return '<div class="no-print coco-row"><a class="coco-btn coco-btn--secondaire" href="#ens-sequences">← Séquences d’apprentissage</a><a class="coco-btn" href="' + JEU_DIGITAL + '">Au TBI</a><a class="coco-btn coco-btn--secondaire" href="#seq-digitale">Voir la séquence</a><button class="coco-btn coco-btn--secondaire" type="button" data-action="imprimer">Imprimer la fiche</button></div>' +
-      '<article class="fiche m-maths"><small>Maths · Grandeurs et mesures (durées) · CE2 · période 5, séquence 1</small><h1>Lire l’heure digitale</h1>' +
-      '<p class="f-source">Pour l’instant : les jeux collectifs « L’heure à l’ardoise » (séances 1 à 3), création de la collègue Teacher Nadège, adaptés pour la classe avec son accord (D-73). Leçon de classe : GM5 « Lire l’heure digitale ». Les autres étapes de la séquence sont à construire.</p>' +
-      encadreProgramme("digitale") + "</article>";
+  /* fiches enseignantes des séquences, même modèle que « Mesurer des masses » (D-112) : D-115 */
+  function ficheSeq(o) {
+    var li = function (a) { return a.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join(""); }, cls = o.mat === "francais" ? "m-francais" : "m-maths";
+    var liens = [["La leçon", "#lecon-" + o.seq], ["Fiche d’exercices", "#exos-" + o.seq]].concat(o.tbi ? [["Au TBI", o.tbi]] : []).concat([["Voir la séquence", "#seq-" + o.seq]]);
+    return '<div class="no-print coco-row"><a class="coco-btn coco-btn--secondaire" href="#ens-sequences">← Séquences d’apprentissage</a>' + liens.map(function (l) { return '<a class="coco-btn coco-btn--secondaire" href="' + l[1] + '">' + l[0] + "</a>"; }).join("") + '<button class="coco-btn coco-btn--secondaire" type="button" data-action="imprimer">Imprimer la fiche</button></div>' +
+      '<article class="fiche ' + cls + '"><small>' + esc(o.dom) + " · Cycle 2, CE2, niveau de maîtrise 3</small><h1>" + esc(tr(C[o.seq].titre)) + "</h1>" +
+      '<p class="f-q">Objectif : « ' + esc(C[o.seq].objectif.fr) + " »</p>" + '<p class="f-source">' + esc(o.source) + "</p>" + encadreProgramme(o.prog) +
+      '<section><h2>Les séances et les activités du site</h2><table class="f-table"><thead><tr><th>Séance</th><th>Objectif</th><th>Sur le site</th></tr></thead><tbody>' +
+      o.seances.map(function (r) { return "<tr><th>" + esc(r[0]) + "</th><td>" + esc(r[1]) + "</td><td>" + esc(r[2]) + "</td></tr>"; }).join("") + "</tbody></table></section>" +
+      '<div class="f-deux"><section><h2>Les erreurs à guetter</h2><ul>' + li(o.erreurs) + "</ul></section><section><h2>Conseils d’utilisation</h2><ul>" + li(o.conseils.concat(["Le site à la maison reste facultatif : jamais de devoir écrit (art. 34)."])) + "</ul></section></div>" +
+      "<section><h2>Pour prolonger en classe</h2><ul>" + li(o.prolonger) + "</ul></section>" + '<p class="f-source">' + esc(o.sources) + "</p></article>";
   }
+  function ficheVerbe() {
+    return ficheSeq({ seq: "verbe", mat: "francais", prog: "verbe", dom: "Français · Étude de la langue (grammaire et conjugaison)",
+      source: "Progression de français de la classe : n° 4 « Le verbe ». Leçon de classe : CONJ2 « Le verbe » (2023). Pas de programmation par période pour le français : les séances ci-dessous sont proposées [PROPOSITION].",
+      seances: [
+        ["Séance 1", "Découvrir : le verbe exprime un état ou une action ; il change selon le temps de la phrase. [PROPOSITION]", "Revoir la leçon (cartes « état / action », hier · aujourd’hui · demain) · Le verbe se cache (avec « Je me rappelle »)"],
+        ["Séance 2", "Trouver le verbe conjugué avec la forme négative : il est entre ne et pas. [PROPOSITION]", "Revoir la leçon (la machine ne … pas) · Chasse aux verbes"],
+        ["Séance 3", "Réinvestir : trouver tous les verbes conjugués d’un court texte. [PROPOSITION]", "Les verbes du texte"],
+        ["Séance 4", "Évaluation des objectifs de la séquence. [PROPOSITION]", "Fiche d’exercices (corrigé à part, correction au TBI)"]],
+      erreurs: ["Prendre le sujet ou un nom pour le verbe (« la pluie ») : faire changer le moment de la phrase, le mot qui change est le verbe.", "Ne pas reconnaître un verbe d’état (« est », « semble ») : rappeler qu’un verbe peut exprimer un état, pas seulement une action.", "Placer ne … pas autour d’un autre mot que le verbe : relire la phrase à voix haute, elle doit rester correcte.", "Avec ne devant une voyelle : « n’ », comme dans la leçon GRAM3."],
+      conseils: ["Code des leçons : le verbe en rouge ; ne et pas dans des bulles rouges.", "En mode anglais, les consignes passent en anglais mais les phrases restent en français (D-27).", "La fiche d’exercices porte un numéro : le même numéro redonne les mêmes exercices, pour corriger au TBI."],
+      prolonger: ["Transformer des phrases de la vie de la classe (hier, aujourd’hui, demain) et entourer le mot qui change.", "Relier à la leçon suivante de la progression : l’infinitif du verbe (CONJ3)."],
+      sources: "Sources : progression de français de la classe, leçon CONJ2, programmes de Nouvelle-Calédonie 2021, repères de progressivité de la DENC (cycle 2, français, p. 31 et 33)." });
+  }
+  function ficheDivision() {
+    return ficheSeq({ seq: "division", mat: "maths", prog: "division", dom: "Maths · Nombres et calculs",
+      source: "Programmation de maths de la collègue (D-40) : période 5, séquence 3 « Le partage et la division en ligne », semaines 3 et 4 (du 9 au 20 novembre 2026). Leçons de classe : CAL7 « Diviser : grouper ou partager » et CAL8 « La division en ligne avec reste » (2023). Problèmes ouverts de l’outil de la collègue, adaptés (D-55).",
+      seances: [
+        ["Séances 1 à 3", "Partager en parts égales ; quotient et reste. [CLASSE : programmation de la collègue]", "Revoir la leçon (grouper, partager, avec reste) · Je me rappelle (tables) · Grouper ou partager · Problème ouvert « Les coquillages de Nina »"],
+        ["Séances 2 à 5", "Groupement ou partage ; division sans reste. [CLASSE : programmation de la collègue]", "Calcule · Problème ouvert « Les sachets de letchis »"],
+        ["Séance suivante", "Écrire la division avec reste : 23 = (4 × 5) + 3 ; le vocabulaire (dividende, diviseur, quotient, reste). [PROPOSITION]", "Avec un reste"],
+        ["Dernière séance", "Évaluation des objectifs de la séquence. [PROPOSITION]", "Fiche d’exercices (corrigé à part, correction au TBI)"]],
+      erreurs: ["Un reste plus grand que le diviseur (« 23 = (4 × 4) + 7 ») : on peut encore faire un groupe ; le reste est toujours plus petit que le diviseur.", "Confondre grouper et partager : se demander « combien de groupes ? » ou « combien dans chaque part ? ».", "Oublier le reste dans l’égalité : vérifier en recalculant (4 × 5) + 3.", "Inverser dividende et diviseur dans « 23 : 4 »."],
+      conseils: ["La classe ne pose pas la division au CE2 : division en ligne seulement (D-104).", "Écriture de la classe avec les parenthèses : 43 = (5 × 8) + 3 (D-52).", "Les tables de multiplication sont le premier outil : « Je me rappelle » les fait revoir."],
+      prolonger: ["Manipuler (jetons, coquillages, letchis) avant d’écrire l’égalité.", "Problèmes « quotient + 1 » (« 23 élèves, des voitures de 4 places : combien de voitures ? ») : repère du niveau 3, pas encore sur le site."],
+      sources: "Sources : programmation périodique P5 de la collègue, leçons CAL7 et CAL8 de la classe, programmes de Nouvelle-Calédonie 2021, repères de progressivité de la DENC (cycle 2, mathématiques, p. 7 et 11)." });
+  }
+  function ficheMonnaie() {
+    return ficheSeq({ seq: "monnaie", mat: "maths", prog: "monnaie", dom: "Maths · Grandeurs et mesures (prix)",
+      source: "Progression de maths de la classe : grandeurs et mesures, « 2. prix ». Leçon de classe : GM1 « La monnaie » (2023 ; pièces de 5 à 200 F, billets de 500 à 10 000 F). Pas de programmation par période reçue pour cette séquence : les séances ci-dessous sont proposées [PROPOSITION].",
+      seances: [
+        ["Séance 1", "Connaître les billets et les pièces de la monnaie calédonienne ; compter une somme. [PROPOSITION]", "Revoir la leçon (bloc 1) · Je me rappelle (décomposer un nombre) · Combien d’argent ?"],
+        ["Séance 2", "Décomposer une somme pour payer le prix exact. [PROPOSITION]", "Revoir la leçon (bloc 2) · Paie le prix exact · Problème ouvert « Le jus à 100 F »"],
+        ["Séance 3", "Calculer une dépense et la monnaie rendue. [PROPOSITION]", "Au marché · Problème ouvert « Au marché »"],
+        ["Séance 4", "Évaluation des objectifs de la séquence. [PROPOSITION]", "Fiche d’exercices (corrigé à part, correction au TBI)"]],
+      erreurs: ["Compter les pièces au lieu de leur valeur (« 3 pièces, donc 3 F »).", "Commencer par les petites pièces et se perdre : commencer par les plus gros billets et les plus grosses pièces.", "Rendre la monnaie en ajoutant au lieu de soustraire : vérifier que prix + monnaie rendue = somme donnée.", "Chercher des pièces de 1 F ou de 2 F : elles ne circulent plus (D-77)."],
+      conseils: ["Les pièces et billets sont ceux de la leçon GM1 : 5, 10, 20, 50, 100, 200 F ; 500, 1 000, 5 000, 10 000 F.", "Les fruits du marché sont en étiquettes écrites, en attendant les illustrations de l’enseignante.", "La fiche d’exercices porte un numéro : le même numéro redonne les mêmes exercices, pour corriger au TBI."],
+      prolonger: ["Jouer à la marchande avec de la monnaie factice et les étiquettes de prix du marché.", "Relier aux nombres jusqu’à 9 999 : décomposer 6 875 F en milliers, centaines, dizaines et unités."],
+      sources: "Sources : progression de maths de la classe, leçon GM1, programmes de Nouvelle-Calédonie 2021, repères de progressivité de la DENC (cycle 2, mathématiques, p. 12 et 17)." });
+  }
+  function ficheDigitale() {
+    return ficheSeq({ seq: "digitale", mat: "maths", prog: "digitale", tbi: JEU_DIGITAL, dom: "Maths · Grandeurs et mesures (durées)",
+      source: "Programmation de maths de la collègue (D-40) : période 5, séquence 1, semaine 1 (du 26 au 30 octobre 2026). Leçon de classe : GM5 « Lire l’heure digitale ». Jeux collectifs « L’heure à l’ardoise » (séances 1 à 3), création de la collègue Teacher Nadège, adaptés avec son accord (D-73) ; problèmes ouverts de son outil (D-96).",
+      seances: [
+        ["Séance 1", "1 journée = 24 h (2 × 12 h) ; 6 h du soir = 18 h. [CLASSE : « L’heure à l’ardoise », séance 1]", "Au TBI (séance 1 de « L’heure à l’ardoise ») · Revoir la leçon · Je me rappelle · Matin ou après-midi ? · Deux façons de dire l’heure · Problème ouvert « L’heure magique »"],
+        ["Séances 2 et 3", "Lire et dire l’heure pile et et demie (1 h = 60 min), puis et quart et moins le quart (un quart d’heure = 15 min). [CLASSE : « L’heure à l’ardoise », séances 2 et 3]", "Au TBI (séances 2 et 3) · Lis le réveil"],
+        ["Séance 4", "Calculer une heure de fin quand on connaît le début et la durée. [PROPOSITION]", "Ma journée · Problème ouvert « La demi-heure de lecture »"],
+        ["Séance 5", "Évaluation des objectifs de la séquence. [PROPOSITION]", "Fiche d’exercices (corrigé à part, correction au TBI)"]],
+      erreurs: ["Lire 18:00 « six heures » sans dire « du soir » : rappeler les deux tours du cadran (+12 h).", "Ajouter 12 dans le mauvais sens (14:15 → 26:15) : le matin va de 0 h à 12 h, l’après-midi et le soir de 12 h à 24 h.", "« et demie » pour 30 minutes, mais « et demi » après midi et minuit.", "Une durée qui dépasse l’heure (9:45 + 30 min = 9:75) : après 59 minutes, on passe à l’heure suivante."],
+      conseils: ["Code des leçons : les heures en rouge, les minutes en bleu.", "L’écriture de la classe : « 6h30 » dans les phrases, « 6:30 » sur le réveil, comme la leçon GM5.", "« L’heure à l’ardoise » reste en français ; les activités du site existent aussi en anglais (« noon », a.m. / p.m.)."],
+      prolonger: ["L’emploi du temps de la classe : relever les heures de la journée et les écrire de deux façons.", "Relier à la séquence suivante : lire l’heure à aiguilles (P5, séquence 2)."],
+      sources: "Sources : programmation périodique P5 de la collègue, leçon GM5 de la classe, programmes de Nouvelle-Calédonie 2021, repères de progressivité de la DENC (cycle 2, mathématiques, p. 16 et 17)." });
+  }
+
 
   /* ---------- Maths : lire l'heure à aiguilles (module du v0 repris et rendu bilingue : D-64 à D-67) ---------- */
   var HE = window.COCO_HEURE;
@@ -2817,7 +2879,7 @@
   /* ---------- routeur ---------- */
   var ROUTES = {
     accueil: pageAccueil, "seq-verbe": function () { return pageSequence("verbe"); }, "seq-mots": pageSequenceMots, "lecon-mots": pageLeconMots, "fiche-mots": ficheMots,
-    "seq-heure": pageSequenceHeure, "seq-digitale": pageSequenceDigitale, "ens-suivi": pageEnsSuivi, "ens-etoiles": pageEnsEtoiles, "ens-corriges": pageEnsCorriges, "ens-sequences": pageEnsSequences, "ens-formation": pageEnsFormation, "fiche-digitale": ficheDigitale, "seq-diagrammes": pageSequenceDiagrammes, "lecon-diagrammes": pageLeconDiagrammes, "fiche-diagrammes": ficheDiagrammes, "fiche-masses": ficheMasses, "lecon-heure": function () { return pageLeconHeure(true); }, "maquette-retiens": function () { return pageLeconHeure(true); }, "fiche-heure": ficheHeure, "exos-heure": function () { return pageExos("heure"); }, "lecon-digitale": pageLeconDigitale, "lecon-division": pageLeconDivision, "lecon-monnaie": pageLeconMonnaie, "lecon-masses": pageLeconMasses, "exos-verbe": function () { return pageExos("verbe"); }, "exos-mots": function () { return pageExos("mots"); },
+    "seq-heure": pageSequenceHeure, "seq-digitale": pageSequenceDigitale, "ens-suivi": pageEnsSuivi, "ens-etoiles": pageEnsEtoiles, "ens-corriges": pageEnsCorriges, "ens-sequences": pageEnsSequences, "ens-formation": pageEnsFormation, "fiche-digitale": ficheDigitale, "seq-diagrammes": pageSequenceDiagrammes, "lecon-diagrammes": pageLeconDiagrammes, "fiche-diagrammes": ficheDiagrammes, "fiche-masses": ficheMasses, "fiche-verbe": ficheVerbe, "fiche-division": ficheDivision, "fiche-monnaie": ficheMonnaie, "lecon-heure": function () { return pageLeconHeure(true); }, "maquette-retiens": function () { return pageLeconHeure(true); }, "fiche-heure": ficheHeure, "exos-heure": function () { return pageExos("heure"); }, "lecon-digitale": pageLeconDigitale, "lecon-division": pageLeconDivision, "lecon-monnaie": pageLeconMonnaie, "lecon-masses": pageLeconMasses, "exos-verbe": function () { return pageExos("verbe"); }, "exos-mots": function () { return pageExos("mots"); },
     "exos-monnaie": function () { return pageExos("monnaie"); }, "exos-division": function () { return pageExos("division"); }, "exos-masses": function () { return pageExos("masses"); }, "exos-digitale": function () { return pageExos("digitale"); }, "exos-diagrammes": function () { return pageExos("diagrammes"); }, "tbi-heure": pageTbiHeure,
     "lecon-verbe": pageLecon, "jeu-verbe-decouvre": jeuDecouvre, "jeu-verbe-chasse": jeuChasse, enseignante: pageEnseignante, banque: pageBanque
   };

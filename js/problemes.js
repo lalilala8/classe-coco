@@ -868,4 +868,141 @@
       reinvestir: ["« J’ai acheté 500 g de fruits. Quels fruits ai-je pu acheter ? »", "« Je pose trois objets sur la balance : ils pèsent 3 kg en tout. Combien peut peser chaque objet ? »"]
     }
   };
+
+  /* ==========================================================================================
+     Graphique en barres (Maths · résolution de problèmes, leçon OGD1) : 2 problèmes ouverts, D-116.
+     Adaptés de Sullivan & Lilburn, « La statistique », chap. 8 (p. 150, 8-10 ans ; p. 146, 6-8 ans, rendu plus exigeant).
+     L’élève monte les barres avec les réglettes ; le graphique (graduations de 2 en 2) se dessine sous ses yeux.
+     ========================================================================================== */
+  PO.sequences.diagrammes = ["melange", "chiens"];
+  var grapheM = function (cats, titre, axe, axeX, max, vals, lg) {
+    var DG = window.COCO_DONNEES, d = { ctx: { titre: titre, axe: axe, axeX: axeX, cats: cats }, pas: 2, max: max, vals: vals };
+    return '<div class="po-dessin po-dessin--centre po-graphe"><figure class="dg-fig"><h3 class="dg-titre">' + (lg === "en" ? titre.en : titre.fr) + "</h3>" + DG.diagramme(d, { en: lg === "en", valeurs: true }) + "</figure></div>";
+  };
+  var FRUITS_G = [{ k: "m", fr: "mangue", en: "mango" }, { k: "p", fr: "papaye", en: "papaya" }, { k: "a", fr: "ananas", en: "pineapple" }, { k: "l", fr: "letchi", en: "lychee" }];
+  var TOUTES_M = []; (function () { for (var a = 0; a <= 24; a++) for (var b = 0; b < a; b++) for (var c = 0; c < b; c++) { var d = 24 - a - b - c; if (d >= 0 && d < c) TOUTES_M.push({ m: a, p: b, a: c, l: d }); } })();
+
+  /* ---------- 1. Le graphique mélangé ---------- */
+  PO.problemes.melange = {
+    id: "melange", sequence: "diagrammes", type: "reglages", perso: "nina",
+    titre: { fr: "Le graphique mélangé", en: "The mixed-up bar chart" },
+    question: { fr: "À quoi peut ressembler le graphique ?", en: "What could the bar chart look like?" },
+    enonce: { fr: "J’ai demandé aux <b>24 élèves</b> de la classe leur fruit préféré. Le préféré est la <b>mangue</b>, puis la <b>papaye</b>, puis l’<b>ananas</b>. Le moins aimé est le <b>letchi</b>. Mais j’ai perdu mon graphique ! À quoi peut-il ressembler ? Trouve plusieurs graphiques possibles !",
+              en: "I asked the <b>24 pupils</b> in my class for their favourite fruit. The favourite is the <b>mango</b>, then the <b>papaya</b>, then the <b>pineapple</b>. The least liked is the <b>lychee</b>. But I have lost my bar chart! What could it look like? Find several possible bar charts!" },
+    champs: FRUITS_G.map(function (f) { return { k: f.k, fr: "Barre « " + f.fr + " »", en: "“" + f.en + "” bar", min: 0, max: 24, depart: 0 }; }),
+    dessin: function (sol, lg) { return grapheM(FRUITS_G, { fr: "Les fruits préférés de la classe", en: "The class’s favourite fruit" }, { fr: "élèves", de: "d’élèves", en: "pupils" }, { fr: "Fruits", en: "Fruit" }, 24, FRUITS_G.map(function (f) { return sol[f.k]; }), lg); },
+    verifier: function (sol) {
+      var t = sol.m + sol.p + sol.a + sol.l;
+      if (t !== 24) return { ok: false, fr: "Ton graphique compte " + t + " élèves : " + sol.m + " + " + sol.p + " + " + sol.a + " + " + sol.l + " = " + t + ". Il en faut 24.", en: "Your bar chart counts " + t + " pupils: " + sol.m + " + " + sol.p + " + " + sol.a + " + " + sol.l + " = " + t + ". There must be 24." };
+      var o = [["m", "p"], ["p", "a"], ["a", "l"]].filter(function (x) { return !(sol[x[0]] > sol[x[1]]); })[0];
+      if (o) { var n = function (k, lg) { return FRUITS_G.filter(function (f) { return f.k === k; })[0][lg]; };
+        return { ok: false, fr: "La barre « " + n(o[0], "fr") + " » doit être plus haute que la barre « " + n(o[1], "fr") + " » : plus d’élèves la préfèrent.", en: "The “" + n(o[0], "en") + "” bar must be taller than the “" + n(o[1], "en") + "” bar: more pupils like it." }; }
+      return { ok: true, fr: sol.m + " + " + sol.p + " + " + sol.a + " + " + sol.l + " = 24, et les barres descendent de la mangue au letchi.", en: sol.m + " + " + sol.p + " + " + sol.a + " + " + sol.l + " = 24, and the bars go down from the mango to the lychee." };
+    },
+    diagnostic: function (sol) { return { total: sol.m + sol.p + sol.a + sol.l === 24, ordre: sol.m > sol.p && sol.p > sol.a && sol.a > sol.l }; },
+    cle: function (sol) { return [sol.m, sol.p, sol.a, sol.l].join("-"); },
+    ecrire: function (sol, lg) { var en = lg === "en"; return (en ? "mango " : "mangue ") + sol.m + " · " + (en ? "papaya " : "papaye ") + sol.p + " · " + (en ? "pineapple " : "ananas ") + sol.a + " · " + (en ? "lychee " : "letchi ") + sol.l; },
+    ranger: function (x, y) { return y.m - x.m || y.p - x.p || y.a - x.a; },
+    checklist: [
+      { id: "total", fr: "J’ai additionné les 4 barres : ça fait bien 24 élèves.", en: "I added the 4 bars: it makes 24 pupils." },
+      { id: "ordre", fr: "Les barres descendent : mangue, puis papaye, puis ananas, puis letchi.", en: "The bars go down: mango, then papaya, then pineapple, then lychee." }
+    ],
+    pouce: { fr: "Commence par la mangue : donne-lui 10 élèves. Il reste 14 élèves pour les trois autres fruits. Partage-les en faisant des barres de plus en plus petites.", en: "Start with the mango: give it 10 pupils. There are 14 pupils left for the other three fruits. Share them out, with smaller and smaller bars." },
+    relances: [
+      { fr: "Quelle est la barre de la mangue la plus haute possible ? La plus basse possible ?", en: "What is the tallest possible mango bar? The shortest?" },
+      { fr: "Et si personne n’aime le letchi ?", en: "What if nobody likes the lychee?" },
+      { fr: "Trouve un graphique où deux barres voisines ont seulement 1 élève d’écart.", en: "Find a bar chart where two bars side by side are only 1 pupil apart." },
+      { fr: "Invente ta propre histoire de graphique perdu pour un camarade.", en: "Make up your own lost bar chart story for a friend." }
+    ],
+    strategies: [
+      { fr: "J’ai commencé par la barre de la mangue.", en: "I started with the mango bar." },
+      { fr: "J’ai calculé ce qui reste pour les autres fruits.", en: "I worked out what is left for the other fruit." },
+      { fr: "J’ai changé un seul nombre pour trouver un autre graphique.", en: "I changed just one number to find another bar chart." },
+      { fr: "J’ai essayé, puis j’ai corrigé.", en: "I tried, then I corrected it." }
+    ],
+    retenir: { fr: "Dans un graphique en barres, la hauteur de chaque barre donne un nombre. Ici, toutes les barres ensemble font le nombre total d’élèves : 24. La barre la plus haute montre le fruit le plus aimé.", en: "In a bar chart, the height of each bar gives a number. Here, all the bars together make the total number of pupils: 24. The tallest bar shows the favourite fruit." },
+    exemple: "9 + 7 + 5 + 3 = 24",
+    toutes: null, nbToutes: 84,
+    feuille: { colonnes: [{ fr: "Mangue", en: "Mango" }, { fr: "Papaye", en: "Papaya" }, { fr: "Ananas", en: "Pineapple" }, { fr: "Letchi", en: "Lychee" }, { fr: "En tout", en: "Total" }], lignes: 9,
+      bas: { fr: "Choisis un de tes graphiques et dessine-le au dos de la feuille, avec un titre et des graduations de 2 en 2.", en: "Choose one of your bar charts and draw it on the back, with a title and a scale going up in twos." } },
+    fiche: {
+      source: "Adapté de Sullivan & Lilburn, « Activités ouvertes en mathématiques » (Chenelière, 2010), « La statistique », 8-10 ans, p. 150 : « Un diagramme indique que, dans une classe, les chaussures que préfèrent les élèves sont les souliers de course. […] Celles que les élèves aiment le moins sont les tongs. À quoi peut ressembler le diagramme qui représente ces données ? » Ici, avec des fruits et un total imposé (24 élèves), pour que le site puisse vérifier.",
+      moment: "Après « Je construis le graphique » (lire et construire un graphique gradué de 2 en 2)",
+      apprend: ["Relier la hauteur d’une barre à un nombre, et l’ordre des barres à un classement.", "Comprendre que les barres d’un graphique forment ensemble un total (ici, les 24 élèves).", "Construire un graphique en barres gradué de 2 en 2, avec un titre et des axes nommés (leçon OGD1).", "Chercher plusieurs solutions et s’organiser."],
+      pourquoi: ["Le graphique n’est plus seulement à lire : il faut le fabriquer à partir d’informations.", "84 graphiques possibles : chacun en trouve à son niveau, et les solutions se comparent.", "Deux contraintes à tenir ensemble (le total et l’ordre) : on voit tout de suite qui contrôle les deux."],
+      materiel: ["Le mode classe, projeté (les 4 temps).", "Une feuille de recherche par élève ou par groupe.", "Du papier quadrillé pour dessiner les graphiques ; 24 jetons ou cubes pour ceux qui veulent manipuler.", "Les iPad pour le mode autonome : l’élève monte les barres, le graphique se dessine."],
+      temps: [
+        ["Poser la question", "5 min", "Projette l’énoncé. Faites dire ce qu’on sait (24 élèves, l’ordre des fruits) et ce qu’on cherche. Ne donne aucune méthode.", "« Que sait-on ? Que cherche-t-on ? Y a-t-il un seul graphique possible ? »"],
+        ["Chercher par 2 ou 3", "15 à 20 min", "Lance le minuteur et observe. Un groupe oublie le total : « Combien d’élèves en tout ? ». Un groupe bloque : le coup de pouce. Un groupe a trouvé : les relances.", ""],
+        ["Mettre en commun", "15 min", "Chaque groupe donne un graphique : monte les barres. Laisse la classe donner son avis, puis vérifie. « Ranger » classe les graphiques de la plus haute barre de mangue à la plus basse.", "« Comment savez-vous qu’il y a bien 24 élèves ? » « Pouvez-vous changer un seul nombre et garder 24 ? »"],
+        ["Retenir", "5 à 10 min", "La trace écrite, puis les graphiques de la classe, rangés.", ""]
+      ],
+      reponses: "84 graphiques possibles (barres toutes différentes, de la plus haute à la plus basse, total 24). Par exemple : 9, 7, 5, 3 · 8, 7, 5, 4 · 10, 8, 4, 2 · 12, 6, 4, 2 · 21, 2, 1, 0. La barre de la mangue va de 8 (8, 7, 5, 4 ou 8, 7, 6, 3 : avec 7, on ne peut pas dépasser 7 + 6 + 5 + 4 = 22) à 21 (21, 2, 1, 0, si personne n’aime le letchi).",
+      erreurs: [["Le total n’est pas 24.", "Une seule contrainte est contrôlée.", "« Ajoute tes 4 barres : combien d’élèves ? »"], ["Deux barres de la même hauteur.", "« Le préféré, puis… » n’est pas compris comme un ordre strict.", "« Si la mangue et la papaye ont 7, laquelle est préférée ? »"], ["Barres dans le désordre.", "L’ordre de l’énoncé n’est pas relié à la hauteur des barres.", "« Quel fruit doit avoir la barre la plus haute ? »"], ["Barre entre deux graduations mal lue.", "Graduations de 2 en 2.", "« Ta barre s’arrête au milieu entre 6 et 8 : combien ? »"]],
+      niveaux: ["Monte des barres au hasard.", "Respecte l’ordre ou le total, mais pas les deux.", "Trouve un graphique juste, après plusieurs essais.", "Trouve plusieurs graphiques justes, en changeant une barre à la fois.", "Trouve la barre de mangue la plus haute et la plus basse possibles, et l’explique."],
+      reinvestir: ["Faire le vrai sondage dans la classe, puis comparer avec les graphiques inventés.", "« Dans un sondage, exactement la moitié des élèves répond oui et l’autre moitié non. Sur quel sujet ce sondage peut-il porter ? » (Sullivan & Lilburn, p. 150)"]
+    }
+  };
+
+  /* ---------- 2. Deux chiens de plus ---------- */
+  var ANIMAUX_G = [{ k: "c", fr: "chats", en: "cats" }, { k: "h", fr: "chiens", en: "dogs" }, { k: "p", fr: "poissons", en: "fish" }];
+  PO.problemes.chiens = {
+    id: "chiens", sequence: "diagrammes", type: "reglages", perso: "waeko",
+    titre: { fr: "Deux chiens de plus", en: "Two more dogs" },
+    question: { fr: "À quoi peut ressembler le graphique des animaux ?", en: "What could the pets bar chart look like?" },
+    enonce: { fr: "Dans le graphique des animaux de la classe, il y a des <b>chats</b>, des <b>chiens</b> et des <b>poissons</b>. Il y a <b>2 chiens de plus que de chats</b>, et <b>14 animaux en tout</b>. À quoi peut ressembler le graphique ? Trouve-les tous !",
+              en: "In the bar chart of the class’s pets, there are <b>cats</b>, <b>dogs</b> and <b>fish</b>. There are <b>2 more dogs than cats</b>, and <b>14 pets altogether</b>. What could the bar chart look like? Find them all!" },
+    champs: ANIMAUX_G.map(function (f) { return { k: f.k, fr: "Barre « " + f.fr + " »", en: "“" + f.en + "” bar", min: 0, max: 14, depart: 0 }; }),
+    dessin: function (sol, lg) { return grapheM(ANIMAUX_G, { fr: "Les animaux de la classe", en: "The class’s pets" }, { fr: "animaux", de: "d’animaux", en: "pets" }, { fr: "Animaux", en: "Pets" }, 14, ANIMAUX_G.map(function (f) { return sol[f.k]; }), lg); },
+    verifier: function (sol) {
+      var t = sol.c + sol.h + sol.p;
+      if (sol.h !== sol.c + 2) return { ok: false, fr: "Il y a " + sol.h + " chiens et " + sol.c + " chats : la différence est " + (sol.h - sol.c) + ". Il faut 2 chiens de plus que de chats.", en: "There are " + sol.h + " dogs and " + sol.c + " cats: the difference is " + (sol.h - sol.c) + ". There must be 2 more dogs than cats." };
+      if (t !== 14) return { ok: false, fr: sol.c + " + " + sol.h + " + " + sol.p + " = " + t + " animaux. Il en faut 14 en tout.", en: sol.c + " + " + sol.h + " + " + sol.p + " = " + t + " pets. There must be 14 altogether." };
+      return { ok: true, fr: sol.h + " − " + sol.c + " = 2 et " + sol.c + " + " + sol.h + " + " + sol.p + " = 14.", en: sol.h + " − " + sol.c + " = 2 and " + sol.c + " + " + sol.h + " + " + sol.p + " = 14." };
+    },
+    diagnostic: function (sol) { return { deux: sol.h === sol.c + 2, total: sol.c + sol.h + sol.p === 14 }; },
+    cle: function (sol) { return [sol.c, sol.h, sol.p].join("-"); },
+    ecrire: function (sol, lg) { var en = lg === "en", nb = function (n, un, pl) { return n + " " + ((en ? n === 1 : n <= 1) ? un : pl); };
+      return en ? nb(sol.c, "cat", "cats") + " · " + nb(sol.h, "dog", "dogs") + " · " + sol.p + " fish" : nb(sol.c, "chat", "chats") + " · " + nb(sol.h, "chien", "chiens") + " · " + nb(sol.p, "poisson", "poissons"); },
+    ranger: function (x, y) { return x.c - y.c; },
+    checklist: [
+      { id: "deux", fr: "La barre des chiens dépasse celle des chats de 2.", en: "The dogs bar is 2 taller than the cats bar." },
+      { id: "total", fr: "J’ai additionné les 3 barres : ça fait bien 14 animaux.", en: "I added the 3 bars: it makes 14 pets." }
+    ],
+    pouce: { fr: "Commence avec 1 chat. Combien de chiens alors ? Combien d’animaux déjà ? Il en manque combien pour faire 14 ?", en: "Start with 1 cat. How many dogs, then? How many pets so far? How many are missing to make 14?" },
+    relances: [
+      { fr: "Les as-tu tous trouvés ? Comment en être sûr ?", en: "Have you found them all? How can you be sure?" },
+      { fr: "Peut-il n’y avoir aucun chat ? Aucun poisson ?", en: "Could there be no cats at all? No fish?" },
+      { fr: "Et s’il y avait 3 chiens de plus que de chats ?", en: "What if there were 3 more dogs than cats?" },
+      { fr: "Et avec 15 animaux en tout ?", en: "What about 15 pets altogether?" }
+    ],
+    strategies: [
+      { fr: "J’ai commencé par les chats, puis j’ai ajouté 2 pour les chiens.", en: "I started with the cats, then added 2 for the dogs." },
+      { fr: "J’ai calculé ce qui reste pour les poissons.", en: "I worked out what is left for the fish." },
+      { fr: "J’ai rangé mes graphiques : 0 chat, 1 chat, 2 chats…", en: "I sorted my bar charts: 0 cats, 1 cat, 2 cats…" },
+      { fr: "J’ai essayé, puis j’ai corrigé.", en: "I tried, then I corrected it." }
+    ],
+    retenir: { fr: "Dans un graphique en barres, on compare deux barres en calculant l’écart : 2 chiens de plus que de chats, c’est une barre des chiens plus haute de 2. Pour trouver toutes les possibilités, je m’organise : 0 chat, 1 chat, 2 chats…", en: "In a bar chart, we compare two bars by working out the difference: 2 more dogs than cats means the dogs bar is 2 taller. To find every possibility, I get organised: 0 cats, 1 cat, 2 cats…" },
+    exemple: "3 + 5 + 6 = 14",
+    toutes: [0, 1, 2, 3, 4, 5, 6].map(function (c) { return { c: c, h: c + 2, p: 12 - 2 * c }; }),
+    feuille: { colonnes: [{ fr: "Chats", en: "Cats" }, { fr: "Chiens", en: "Dogs" }, { fr: "Poissons", en: "Fish" }, { fr: "En tout", en: "Total" }], lignes: 8,
+      bas: { fr: "Comment sais-tu que tu les as tous trouvés ?", en: "How do you know you have found them all?" } },
+    fiche: {
+      source: "Adapté de Sullivan & Lilburn, « Activités ouvertes en mathématiques » (Chenelière, 2010), « La statistique », 6-8 ans, p. 146 : « Dans un diagramme qui porte sur les animaux de compagnie des élèves de la classe, je compte deux chiens de plus que de chats. À quoi peut ressembler ce diagramme ? » Rendu plus exigeant pour le CE2 : un troisième animal et un total imposé (14 animaux), ce qui donne exactement 7 graphiques.",
+      moment: "Après « Problèmes avec un graphique » (total, écart)",
+      apprend: ["Traduire « 2 de plus que » en écart entre deux barres.", "Tenir deux contraintes ensemble : l’écart et le total.", "Chercher toutes les possibilités en s’organisant, et savoir quand on les a toutes."],
+      pourquoi: ["L’écart entre deux barres, souvent seulement lu, devient ici une contrainte à fabriquer.", "7 réponses exactement : le groupe qui les a toutes peut prouver qu’il n’y en a pas d’autre.", "La question « aucun chat ? » ouvre un vrai débat mathématique."],
+      materiel: ["Le mode classe, projeté (les 4 temps).", "Une feuille de recherche par élève ou par groupe.", "14 jetons de trois couleurs pour ceux qui veulent manipuler.", "Les iPad pour le mode autonome."],
+      temps: [
+        ["Poser la question", "5 min", "Projette l’énoncé. Faites reformuler « 2 chiens de plus que de chats » avec un exemple. Ne donne aucune méthode.", "« S’il y a 4 chats, combien de chiens ? »"],
+        ["Chercher par 2 ou 3", "15 à 20 min", "Lance le minuteur et observe : qui part des chats et s’organise ? Coup de pouce pour les groupes bloqués, relances pour ceux qui ont tout trouvé.", "« Vous en avez un ? Cherchez-en un autre. »"],
+        ["Mettre en commun", "15 min", "Chaque groupe donne un graphique : monte les barres. La classe vérifie avant toi. Puis « Ranger » : de 0 chat à 6 chats.", "« Comment êtes-vous sûrs qu’il n’y en a pas d’autre ? » « Pourquoi le nombre de poissons baisse-t-il de 2 à chaque fois ? »"],
+        ["Retenir", "5 à 10 min", "La trace écrite, puis les 7 graphiques : ceux de la classe en vert.", ""]
+      ],
+      reponses: "7 graphiques : 0 chat, 2 chiens, 12 poissons · 1, 3, 10 · 2, 4, 8 · 3, 5, 6 · 4, 6, 4 · 5, 7, 2 · 6 chats, 8 chiens, 0 poisson. À chaque chat de plus, il y a un chien de plus, donc 2 poissons de moins. Les cas « 0 chat » et « 0 poisson » se discutent en classe.",
+      erreurs: [["2 chiens et 2 chats.", "« 2 de plus » lu comme « 2 ».", "« Combien de chiens de plus que de chats ? »"], ["Chats = chiens + 2.", "Le sens de l’écart est inversé.", "« Qui en a le plus, les chiens ou les chats ? »"], ["Le total n’est pas 14.", "Une seule contrainte est contrôlée.", "« Ajoute tes 3 barres. »"], ["S’arrête après une solution.", "Pas de recherche organisée.", "« Et avec un chat de plus ? »"]],
+      niveaux: ["Monte des barres au hasard.", "Respecte l’écart ou le total, mais pas les deux.", "Trouve un ou deux graphiques justes.", "Trouve les 7 graphiques en s’organisant (0, 1, 2… chats).", "Prouve qu’il n’y en a pas d’autre, ou traite « 3 chiens de plus » ou « 15 animaux »."],
+      reinvestir: ["« Dans le graphique des sports préférés, il y a 3 élèves de plus pour le foot que pour la natation. À quoi peut-il ressembler ? »", "Faire le vrai graphique des animaux de la classe et comparer."]
+    }
+  };
 })();
