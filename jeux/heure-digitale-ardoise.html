@@ -395,13 +395,13 @@ body{background-color:#f2f9f7;background-image:linear-gradient(#d6ece7 1px,trans
 kbd{font-family:var(--main)}
 /* barre d'onglets du site (surligneur avec petits avatars, D-79) */
 .cs-barre{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;margin:0 0 6px}
-.cs-onglet{display:inline-flex;align-items:center;gap:8px;min-height:48px;padding:0 10px 0 4px;font:400 21px/1 var(--titre);color:var(--c);text-decoration:none;border-radius:10px}
-.cs-onglet img{width:36px;height:36px;object-fit:contain;flex:none}
+.cs-onglet{display:inline-flex;align-items:center;gap:8px;min-height:56px;padding:0 10px 0 4px;font:400 24px/1 var(--titre);color:var(--c);text-decoration:none;border-radius:10px}
+.cs-onglet img{width:46px;height:46px;object-fit:contain;flex:none}
 .cs-onglet span{padding:6px 2px}
 .cs-onglet[aria-current="page"] span{background:linear-gradient(177deg,transparent 50%,var(--s) 51%,var(--s) 84%,transparent 85%);padding:6px}
 .cs-onglet:hover span{text-decoration:underline 2px;text-underline-offset:5px}
 .retour{font-family:var(--main);font-weight:600;font-size:1.1rem;color:#0a6b78}
-@media (max-width:520px){.cs-onglet{font-size:18px;gap:5px;padding:0 6px 0 2px;min-height:44px}.cs-onglet img{width:30px;height:30px}}
+@media (max-width:520px){.cs-barre{gap:0 2px}.cs-onglet{font-size:19px;gap:4px;padding:0 4px 0 1px;min-height:48px}.cs-onglet img{width:36px;height:36px}}
 
 </style>
 </head>

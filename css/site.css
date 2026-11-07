@@ -6,13 +6,13 @@ body { min-height: 100vh; }
 /* onglets « surligneur avec petits avatars » (choix de l'enseignante, D-79) : pas de cadre, le personnage de la matière à côté du nom,
    un trait de surligneur sur l'onglet ouvert ; zone à toucher d'au moins 48 px de haut */
 .barre .coco-onglets { gap: 4px 10px; align-items: center; }
-.barre .coco-onglet { border: 0; background: none; min-height: 48px; padding: 0 10px 0 4px; gap: 8px; font-size: 21px; line-height: 1; border-radius: var(--arrondi-petit); color: var(--c); }
+.barre .coco-onglet { border: 0; background: none; min-height: 56px; padding: 0 10px 0 4px; gap: 8px; font-size: 24px; line-height: 1; border-radius: var(--arrondi-petit); color: var(--c); }
 .barre .coco-onglet--francais { --c-clair: var(--francais-surligneur); }
 .barre .coco-onglet--maths { --c-clair: var(--maths-surligneur); }
 .barre .coco-onglet--anglais { --c-clair: var(--anglais-surligneur); }
 .barre .coco-onglet--qlm { --c-clair: var(--qlm-surligneur); }
 .barre .coco-onglet:not([class*="coco-onglet--"]) { --c-clair: var(--lagon-surligneur); }
-.barre .coco-onglet .onglet-av { width: 36px; height: 36px; flex: none; object-fit: contain; } /* personnage entier, jamais recadré (charte, « Illustrations ») */
+.barre .coco-onglet .onglet-av { width: 46px; height: 46px; flex: none; object-fit: contain; } /* personnage entier, jamais recadré (charte, « Illustrations ») */
 .barre .coco-onglet span { padding: 6px 2px; }
 .barre .coco-onglet[aria-current="page"] { background: none; color: var(--c); }
 .barre .coco-onglet[aria-current="page"] span { background: linear-gradient(177deg, transparent 50%, var(--c-clair) 51%, var(--c-clair) 84%, transparent 85%); padding: 6px 6px; }
@@ -125,7 +125,7 @@ body { min-height: 100vh; }
   .jeu-haut { grid-template-columns: auto 1fr; }
   .jeu-haut .jeu-prog { grid-column: 1 / -1; }
   .jeu-haut h1 { font-size: 27px; line-height: 31px; }
-  .barre .coco-onglet { font-size: 19px; }
+  .barre .coco-onglet { font-size: 22px; }
   .coco-bulle-perso { width: 72px; }
   .entete { grid-template-columns: 1fr; }
   .coco-etiquette { font-size: 26px; }
@@ -484,7 +484,7 @@ body.mode-classe .site { max-width: none; padding-block: 12px 24px; }
 .hr-reglages h3 { margin: 0; font: 600 20px/26px var(--font-texte); }
 @media (max-width: 860px) { .hr-rec, .hr-tbi-dec, .hr-tbi-run { grid-template-columns: 1fr; } .hr-saisie span { min-width: 0; text-align: center; width: 100%; } }
 @media (prefers-reduced-motion: reduce) { .hr-tbi-barre i { transition: none; } }
-@media (max-width: 520px) { .barre .coco-langue button { font-size: 18px; min-width: 64px; } .domaine.domaine-matiere h2 { font-size: 25px; line-height: 29px; } .barre .coco-onglets { gap: 0 6px; } .barre .coco-onglet { font-size: 18px; padding: 0 6px 0 2px; gap: 5px; min-height: 44px; } .barre .coco-onglet .onglet-av { width: 30px; height: 30px; } }
+@media (max-width: 520px) { .barre .coco-langue button { font-size: 18px; min-width: 64px; } .domaine.domaine-matiere h2 { font-size: 25px; line-height: 29px; } .barre .coco-onglets { gap: 0 2px; } .barre .coco-onglet { font-size: 19px; padding: 0 4px 0 1px; gap: 4px; min-height: 48px; } .barre .coco-onglet .onglet-av { width: 36px; height: 36px; } }
 
 /* encadré « Programme et repères » des fiches enseignantes (D-77) */
 .f-prog { background: var(--lagon-clair); border: var(--bord) solid var(--lagon); border-radius: var(--arrondi-grand); padding: 16px 20px; display: grid; gap: 8px; break-inside: avoid; }
