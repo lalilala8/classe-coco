@@ -677,16 +677,17 @@ body.mode-classe .site { max-width: none; padding-block: 12px 24px; }
 .ex-case input { width: 24px; height: 24px; accent-color: var(--lagon); }
 .ex-aide { margin: 0; color: var(--encre-douce); font-size: 17px; }
 .exos { background: #fff; border: 2px solid var(--trait); border-radius: var(--arrondi); padding: 28px 32px; display: grid; gap: 18px; font: 400 18px/1.45 var(--font-texte); color: var(--encre); max-width: 820px; margin: 0 auto; width: 100%; box-sizing: border-box; }
-.ex-tete { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; border-bottom: 2px solid var(--maths); padding-bottom: 10px; }
-.ex-tete small { color: var(--maths-fonce); font-weight: 600; }
-.ex-tete h1 { font: 400 30px/34px var(--font-titre); color: var(--maths); margin: 2px 0 0; }
+.exos { --ec: var(--maths); --ecf: var(--maths-fonce); } .exos.m-francais { --ec: var(--francais); --ecf: var(--francais-fonce); }
+.ex-tete { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; border-bottom: 2px solid var(--ec); padding-bottom: 10px; }
+.ex-tete small { color: var(--ecf); font-weight: 600; }
+.ex-tete h1 { font: 400 30px/34px var(--font-titre); color: var(--ec); margin: 2px 0 0; }
 .ex-nom { margin: 0; line-height: 2.1; white-space: nowrap; }
 .ex-nom .ex-ligne { min-width: 150px; }
 .ex-rappel { margin: 0; background: var(--soutien-clair); border-radius: var(--arrondi-petit); padding: 8px 14px; }
 .ex-rappel > b:first-child { margin-right: 6px; }
 .ex { break-inside: avoid; display: grid; gap: 10px; }
 .ex h2 { font: 600 19px/1.3 var(--font-texte); margin: 0; display: flex; gap: 10px; align-items: center; }
-.ex h2 span { flex: none; width: 28px; height: 28px; border-radius: 50%; background: var(--maths); color: #fff; display: grid; place-items: center; font-size: 16px; }
+.ex h2 span { flex: none; width: 28px; height: 28px; border-radius: 50%; background: var(--ec); color: #fff; display: grid; place-items: center; font-size: 16px; }
 .ex-grille { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 24px; }
 .ex-grille.ex-quatre { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .ex-grille > div { display: grid; justify-items: center; gap: 4px; }
@@ -700,9 +701,63 @@ body.mode-classe .site { max-width: none; padding-block: 12px 24px; }
 .ex-ligne-clk .ex-clk { max-width: 110px; }
 .ex-ligne-clk p { margin: 0 0 6px; }
 .ex-conv { margin: 0; padding-left: 22px; display: grid; gap: 10px; }
-.ex-corrige h2 { font: 400 26px/30px var(--font-titre); color: var(--maths); margin: 0 0 10px; }
+.ex-corrige h2 { font: 400 26px/30px var(--font-titre); color: var(--ec); margin: 0 0 10px; }
 .ex-corrige ol { margin: 0; padding-left: 24px; display: grid; gap: 10px; }
 .ex-page { margin-top: 24px; }
+/* D-95 : éléments des autres fiches */
+.ex-fr { font-family: var(--font-lecture); }
+.ex-deux-col-ol { grid-template-columns: 1fr 1fr; column-gap: 32px; }
+.ex-neg li { line-height: 2.2; }
+.ex-neg .ex-ligne.ex-long { min-width: 240px; }
+.ex-deux-temps { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 24px; }
+.ex-invente { margin: 0; line-height: 2.4; } .ex-invente .ex-ligne { width: 100%; }
+.ex-construire { grid-template-columns: auto minmax(0, 1fr); }
+.ex-construire .dg { max-width: 460px; }
+.ex-dg .dg-grille { stroke: #9aa3b5; }
+.ex-phrases, .ex-dictee { margin: 0; padding-left: 26px; display: grid; gap: 10px; }
+.ex-phrases li { line-height: 1.9; }
+.ex-temps { list-style: none; margin: 0 0 6px; padding: 0 0 0 4px; display: grid; gap: 2px; border-left: 3px solid var(--ec); padding-left: 12px; }
+.ex-deux-col { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 8px 24px; }
+.ex-boite { display: inline-block; width: 28px; height: 24px; border: 2px solid var(--encre-douce); border-radius: 6px; vertical-align: middle; margin-right: 6px; }
+.ex-mots { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px 20px; font-size: 22px; }
+.ex-choix { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px 24px; font-size: 21px; }
+.ex-sep { color: var(--encre-douce); margin: 0 10px; }
+.ex-banque { margin: 0; padding: 8px 12px; border: 2px dashed var(--trait); border-radius: var(--arrondi-petit); font-size: 20px; }
+.ex-familles { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 24px; }
+.ex-familles b { font-size: 22px; color: var(--ec); }
+.ex-familles p { margin: 6px 0 0; display: flex; gap: 16px; }
+.ex-familles .ex-ligne { flex: 1; }
+.ex-dictee .ex-ligne.ex-long { min-width: 260px; }
+.ex-bourses { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.ex-bourses > div { display: grid; gap: 6px; justify-items: center; }
+.ex-bourse { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; justify-content: center; border: 2px solid var(--trait); border-radius: 18px; padding: 8px; min-height: 52px; }
+.ex-piece { width: 42px; height: 42px; border-radius: 50%; border: 2px solid #5b5648; display: inline-grid; place-items: center; align-content: center; font: 700 15px/1 var(--font-lecture); color: var(--encre); background: #fff; }
+.ex-piece small { font-size: 9px; }
+.ex-piece--5 { width: 36px; height: 36px; }
+.ex-piece--100, .ex-piece--200 { width: 48px; height: 48px; border-width: 3px; }
+.ex-billet { display: inline-grid; place-items: center; width: 80px; height: 40px; border: 2px solid #5b5648; border-radius: 6px; font: 700 14px/1 var(--font-lecture); background: repeating-linear-gradient(135deg, #fff 0 6px, #f1f1ee 6px 8px); }
+.ex-payer { display: grid; grid-template-columns: 70px 1fr; gap: 12px; align-items: center; margin-bottom: 6px; }
+.ex-payer > b { font: 700 20px/1 var(--font-lecture); }
+.ex-payer .ex-bourse { justify-content: flex-start; border-style: dashed; }
+.ex-letchis { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; }
+.ex-rond { width: 16px; height: 16px; border-radius: 50%; border: 2px solid #8f1c22; background: #f6c4c6; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.ex-sachets { display: flex; gap: 14px; flex-wrap: wrap; }
+.ex-sachet { width: 110px; height: 70px; border: 2px solid var(--encre-douce); border-radius: 6px 6px 18px 18px; }
+.ex-trois-col { grid-template-columns: repeat(3, 1fr) !important; }
+.ex-une-col { grid-template-columns: 1fr !important; }
+.ex-egalite { margin: 0; font: 700 22px/1.3 var(--font-lecture); }
+.ex-dig { font: 700 18px/1 var(--font-lecture); letter-spacing: .04em; border: 2px solid var(--encre); border-radius: 6px; padding: 2px 6px; background: #f4f4f1; }
+.ex-cote { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+.ex-dg { margin: 0; }
+.ex-dg figcaption { font-weight: 700; font-size: 16px; text-align: center; margin-bottom: 4px; }
+.ex-dg .dg { width: 100%; max-width: 380px; display: block; margin: 0 auto; }
+.ex-qs { margin: 0; padding-left: 22px; display: grid; gap: 10px; }
+.ex-tab { border-collapse: collapse; justify-self: center; align-self: center; font-size: 17px; }
+.ex-tab th, .ex-tab td { border: 2px solid var(--encre-douce); padding: 6px 14px; min-width: 70px; height: 30px; text-align: left; }
+.ex-tab th { background: var(--maths-clair); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.ex-petit-dg .dg { max-width: 260px; }
+.ex-outils select { font: 600 17px/1 var(--font-texte); min-height: 44px; border: 2px solid var(--lagon); border-radius: var(--arrondi-petit); padding: 0 10px; background: #fff; color: var(--encre); max-width: 260px; }
+@media (max-width: 700px) { .ex-cote, .ex-familles, .ex-deux-col, .ex-choix, .ex-bourses, .ex-deux-col-ol, .ex-deux-temps, .ex-construire { grid-template-columns: 1fr; } .ex-outils select { max-width: 100%; } .ex-mots, .ex-trois-col { grid-template-columns: 1fr 1fr !important; } .ex-dictee .ex-ligne.ex-long { min-width: 150px; } }
 @media (max-width: 700px) { .exos { padding: 18px 16px; } .ex-tete { flex-direction: column; } .ex-grille, .ex-grille.ex-quatre { grid-template-columns: repeat(2, minmax(0, 1fr)); } .ex-ligne.ex-long { min-width: 160px; } }
 @media print {
   .exos { border: none; padding: 0; max-width: none; font-size: 12pt; gap: 12px; }
@@ -723,6 +778,20 @@ body.mode-classe .site { max-width: none; padding-block: 12px 24px; }
   .ex-ligne-clk .ex-clk { max-width: 19mm; }
   .ex-ligne.ex-long { min-width: 90mm; }
   .ex-conv { grid-template-columns: 1fr 1fr; gap: 6px 20px; }
+  .ex-mots, .ex-choix, .ex-banque, .ex-familles b, .ex-egalite { font-size: 14pt; }
+  .ex-phrases li { line-height: 1.7; }
+  .ex-dg .dg { max-width: 58mm; }
+  .ex-dg figcaption { font-size: 10pt; }
+  .ex-qs { font-size: 11pt; }
+  .ex-familles p { margin-top: 3px; }
+  .ex-petit-dg .dg { max-width: 55mm; }
+  .ex-sachet { width: 26mm; height: 16mm; }
+  .ex-piece { width: 9mm; height: 9mm; font-size: 10pt; } .ex-piece--5 { width: 8mm; height: 8mm; } .ex-piece--100, .ex-piece--200 { width: 10mm; height: 10mm; }
+  .ex-billet { width: 17mm; height: 9mm; font-size: 9pt; }
+  .ex-bourse { padding: 4px; min-height: 0; gap: 4px; }
+  .ex-construire .dg { max-width: 84mm; }
+  .ex-tab { font-size: 11pt; } .ex-tab th, .ex-tab td { padding: 3px 10px; height: 22px; }
+  .ex-qs { gap: 6px; }
   .ex-rappel { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .ex h2 span, .hr-hhl, .hr-mhl { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }

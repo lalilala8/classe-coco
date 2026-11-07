@@ -167,7 +167,7 @@
         carte("maths", "3 · " + t("reinvestis"), t("bientot"), "", "waeko", "", true) +
         (PO.sequences[id] || []).map(function (pid, k) { var p = po(pid); return carte("maths", "4 · " + t("ouvert") + " " + (k + 1), tr(p.titre), tr(p.question), p.perso, "po-" + pid); }).join("");
     }
-    var lecon = id === "verbe" ? '<a class="coco-btn coco-btn--secondaire" href="#lecon-verbe" style="justify-self:start"><img src="' + PICTO("ampoule") + '" alt="">' + t("lecon") + "</a>" : "";
+    var lecon = '<div class="coco-row">' + (id === "verbe" ? '<a class="coco-btn coco-btn--secondaire" href="#lecon-verbe"><img src="' + PICTO("ampoule") + '" alt="">' + t("lecon") + "</a>" : "") + boutonExos(id) + "</div>";
     return barre(s.matiere) + '<section class="entete ' + m.classe + '"><img src="' + IMG(m.perso) + '" alt=""><div><h1>' + esc(tr(s.titre)) + "</h1><p>" + esc(tr(m.nom)) + "</p></div></section>" +
       '<p class="objectif ' + m.classe + '">' + t("objectif") + " <b>" + esc(tr(s.objectif)) + "</b></p>" + lecon + '<section class="etapes">' + cartes + "</section>";
   }
@@ -387,7 +387,7 @@
     return barre("francais") + '<section class="entete m-francais"><img src="' + IMG(m.perso) + '" alt=""><div><h1>' + esc(tr(s.titre)) + "</h1><p>" + esc(tr(m.nom)) + " · " + (en ? "Spelling" : "Orthographe") + "</p></div></section>" +
       '<p class="objectif m-francais">' + t("objectif") + " <b>" + esc(tr(s.objectif)) + "</b></p>" +
       (en ? '<p class="apercu">' + t("noteFr") + "</p>" : "") +
-      '<a class="coco-btn coco-btn--secondaire" href="#lecon-mots" style="justify-self:start"><img src="' + PICTO("ampoule") + '" alt="">' + t("lecon") + "</a>" +
+      '<div class="coco-row"><a class="coco-btn coco-btn--secondaire" href="#lecon-mots"><img src="' + PICTO("ampoule") + '" alt="">' + t("lecon") + "</a>" + boutonExos("mots") + "</div>" +
       miChoixMots() + '<section class="etapes">' + cartes + "</section>";
   }
   function pageLeconMots() {
@@ -556,7 +556,7 @@
       carte("maths", "4 · " + t("ouvert") + " 1", t("bientot"), en ? "The magic time" : "L’heure magique", "adi", "", true) +
       carte("maths", "4 · " + t("ouvert") + " 2", t("bientot"), en ? "Half an hour of reading" : "La demi-heure de lecture", "adi", "", true);
     return barre("maths") + '<section class="entete m-maths"><img src="' + IMG(m.perso) + '" alt=""><div><h1>' + esc(tr(s.titre)) + "</h1><p>" + esc(tr(m.nom)) + " · " + (en ? "Measures" : "Grandeurs et mesures") + "</p></div></section>" +
-      '<p class="objectif m-maths">' + t("objectif") + " <b>" + esc(tr(s.objectif)) + "</b></p>" + '<section class="etapes">' + cartes + "</section>";
+      '<p class="objectif m-maths">' + t("objectif") + " <b>" + esc(tr(s.objectif)) + "</b></p>" + (ensOuvert ? '<div class="coco-row">' + boutonExos("digitale") + "</div>" : "") + '<section class="etapes">' + cartes + "</section>";
   }
 
   /* ---------- encadré « Programme et repères » des fiches enseignantes (D-77) : citations mot pour mot ---------- */
@@ -631,7 +631,7 @@
     var cartes = Object.keys(JEUX_DIAG).map(function (id) { var J = JEUX_DIAG[id]; return carte("maths", J.etape + " · " + t(ETAPES_DIAG[J.etape]), en ? J.en : J.fr, en ? J.den : J.dfr, J.perso, "diag-" + id); }).join("");
     return barre("maths") + '<section class="entete m-maths"><img src="' + IMG(m.perso) + '" alt=""><div><h1>' + esc(tr(s.titre)) + "</h1><p>" + esc(tr(m.nom)) + " · " + (en ? "Problem solving" : "Résolution de problèmes") + "</p></div></section>" +
       '<p class="objectif m-maths">' + t("objectif") + " <b>" + esc(tr(s.objectif)) + "</b></p>" +
-      '<a class="coco-btn coco-btn--secondaire" href="#lecon-diagrammes" style="justify-self:start"><img src="' + PICTO("ampoule") + '" alt="">' + t("lecon") + "</a>" +
+      '<div class="coco-row"><a class="coco-btn coco-btn--secondaire" href="#lecon-diagrammes"><img src="' + PICTO("ampoule") + '" alt="">' + t("lecon") + "</a>" + boutonExos("diagrammes") + "</div>" +
       '<section class="etapes">' + cartes + "</section>";
   }
   function pageLeconDiagrammes() {
@@ -1130,7 +1130,7 @@
   function boutonExos(seq) { return ensOuvert ? '<a class="coco-btn coco-btn--secondaire" href="#exos-' + seq + '"><svg class="ex-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 8V3h10v5M7 17H4v-7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v7h-3M7 14h10v7H7z"/></svg>' + (langue === "en" ? "Worksheet" : "Fiche d’exercices") + "</a>" : ""; }
   var EXOS = {
     heure: {
-      seq: "seq-heure", titre: function () { return tr(C.heure.titre); },
+      seq: "seq-heure", matiere: "maths", titre: function () { return tr(C.heure.titre); },
       rappel: function (en) { return en ? "The <b class=\"hr-h\">short hand</b> shows the <b class=\"hr-h\">hours</b>. The <b class=\"hr-m\">long hand</b> shows the <b class=\"hr-m\">minutes</b>."
         : "La <b class=\"hr-h\">petite aiguille</b> indique les <b class=\"hr-h\">heures</b>. La <b class=\"hr-m\">grande aiguille</b> indique les <b class=\"hr-m\">minutes</b>."; },
       tirer: function () {
@@ -1168,20 +1168,256 @@
       }
     }
   };
+
+  /* aides communes aux fiches (D-95) */
+  var EXL = '<span class="ex-ligne"></span>', EXLL = '<span class="ex-ligne ex-long"></span>';
+  function exMille(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, " "); }
+  function exPiece(v) { return v >= 500 ? '<span class="ex-billet">' + exMille(v) + " F</span>" : '<span class="ex-piece ex-piece--' + v + '">' + v + "<small>F</small></span>"; }
+  function exNb(n) { return ["zéro", "une", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf", "dix", "onze", "douze", "treize", "quatorze", "quinze", "seize", "dix-sept", "dix-huit", "dix-neuf", "vingt", "vingt et une", "vingt-deux", "vingt-trois", "vingt-quatre"][n]; }
+  /* l'heure digitale en mots, comme la leçon GM5 (« Je me lève à 6h30. → six heures et demie ») */
+  function exDigMots(h, m) {
+    if (m === 45) { var s = (h + 1) % 24; return (s === 0 ? "minuit" : s === 12 ? "midi" : exNb(s) + (s === 1 ? " heure" : " heures")) + " moins le quart"; }
+    var base = h === 0 ? "minuit" : h === 12 ? "midi" : exNb(h) + (h === 1 ? " heure" : " heures");
+    return base + (m === 0 ? (h === 0 || h === 12 ? "" : " pile") : m === 15 ? " et quart" : m === 30 ? (h === 0 || h === 12 ? " et demi" : " et demie") : " " + m);
+  }
+  function exDig(h, m) { return '<span class="ex-dig">' + h + ":" + HE.pad(m) + "</span>"; }
+  /* le verbe : trois moments de la même phrase (leçon CONJ2 : le verbe change selon le temps de la phrase) [PROPOSITION] */
+  var EX_TEMPS = [["Léo", "jouait", "joue", "jouera", "au ballon."], ["Méi", "chantait", "chante", "chantera", "à l’école."], ["Il", "pleuvait", "pleut", "pleuvra", "sur Nouméa."],
+    ["Nous", "étions", "sommes", "serons", "à la plage."], ["Kakou", "courait", "court", "courra", "dans la forêt."], ["Tehani", "mangeait", "mange", "mangera", "une mangue."], ["Les enfants", "nageaient", "nagent", "nageront", "dans le lagon."]];
+  /* état ou action (leçon CONJ2 : état = être, sembler, paraître) */
+  var EX_ETAT = [["Margouille est orange.", "E"], ["Le ciel semble gris.", "E"], ["Tao paraît fatigué.", "E"], ["La mer est calme.", "E"], ["Les mangues sont mûres.", "E"],
+    ["Kakou court dans la forêt.", "A"], ["Wadra plonge dans le lagon.", "A"], ["Nina dessine un cagou.", "A"], ["Papi Tao pêche un poisson.", "A"], ["Vaka lance le ballon.", "A"]];
+  /* phrases au présent avec un seul verbe, en plus de la « Chasse aux verbes » (6 phrases), pour ne jamais répéter une phrase sur la fiche [PROPOSITION] */
+  var EX_PHRASES = [{ mots: ["Wadra", "nage", "dans", "le", "lagon."], v: 1, neg: "Wadra ne nage pas dans le lagon." }, { mots: ["Le", "vent", "souffle", "sur", "la", "plage."], v: 2, neg: "Le vent ne souffle pas sur la plage." },
+    { mots: ["Nina", "lit", "un", "livre."], v: 1, neg: "Nina ne lit pas un livre." }, { mots: ["Les", "élèves", "chantent", "en", "classe."], v: 2, neg: "Les élèves ne chantent pas en classe." }, { mots: ["Le", "soleil", "brille."], v: 2, neg: "Le soleil ne brille pas." }];
+  var EXOS2 = {
+    verbe: {
+      seq: "seq-verbe", matiere: "francais", titre: function () { return tr(C.verbe.titre); },
+      rappel: function (en) { return en ? "To find the conjugated verb, I make the sentence negative: the verb is between <span class=\"coco-negation\">ne</span> and <span class=\"coco-negation\">pas</span>!"
+        : "Pour trouver le verbe conjugué dans une phrase, je la mets à la <b>forme négative</b> : le verbe est entre <span class=\"coco-negation\">ne</span> et <span class=\"coco-negation\">pas</span> !"; },
+      tirer: function () {
+        var ch = HE.shuf(C.verbe.chasse.concat(EX_PHRASES));
+        return { soul: ch.slice(0, 4), neg: ch.slice(4, 7), temps: HE.shuf(EX_TEMPS).slice(0, 2),
+          etat: HE.shuf(HE.shuf(EX_ETAT.filter(function (x) { return x[1] === "E"; })).slice(0, 3).concat(HE.shuf(EX_ETAT.filter(function (x) { return x[1] === "A"; })).slice(0, 3))) };
+      },
+      exos: function (d, en) {
+        var ph = function (x) { return x.mots.join(" "); };
+        return [
+          { c: en ? "Underline the conjugated verb in each sentence." : "Souligne le verbe conjugué dans chaque phrase.",
+            q: '<ol class="ex-fr ex-phrases ex-deux-col-ol">' + d.soul.map(function (x) { return "<li>" + esc(ph(x)) + "</li>"; }).join("") + "</ol>",
+            r: d.soul.map(function (x) { return "<b>" + esc(x.mots[x.v]) + "</b>"; }).join(" · ") },
+          { c: en ? "Write each sentence with ne … pas, then circle the verb." : "Écris chaque phrase avec ne … pas, puis entoure le verbe.",
+            q: '<ol class="ex-fr ex-phrases ex-neg">' + d.neg.map(function (x) { return "<li>" + esc(ph(x)) + " → " + EXLL + "</li>"; }).join("") + "</ol>",
+            r: d.neg.map(function (x) { return esc(x.neg); }).join(" · ") },
+          { c: en ? "Circle the word that changes. It is the verb." : "Entoure le mot qui change. C’est le verbe.",
+            q: '<div class="ex-deux-temps">' + d.temps.map(function (x) { var s = /^(Il|Nous)$/.test(x[0]) ? x[0].toLowerCase() : x[0]; return '<ul class="ex-fr ex-temps"><li>Hier, ' + esc(s) + " " + x[1] + " " + esc(x[4]) + "</li><li>Aujourd’hui, " + esc(s) + " " + x[2] + " " + esc(x[4]) + "</li><li>Demain, " + esc(s) + " " + x[3] + " " + esc(x[4]) + "</li></ul>"; }).join("") + "</div>",
+            r: d.temps.map(function (x) { return x[1] + ", " + x[2] + ", " + x[3]; }).join(" · ") },
+          { c: en ? "State or action? Write S (state) or A (action)." : "État ou action ? Écris É ou A.",
+            q: '<ul class="ex-fr ex-deux-col">' + d.etat.map(function (x) { return '<li><span class="ex-boite"></span> ' + esc(x[0]) + "</li>"; }).join("") + "</ul>",
+            r: d.etat.map(function (x) { return (en ? (x[1] === "E" ? "S" : "A") : (x[1] === "E" ? "É" : "A")); }).join(" · ") },
+          { c: en ? "Make up a sentence with an action verb, then underline the verb." : "Invente une phrase avec un verbe d’action, puis souligne le verbe.",
+            q: '<p class="ex-invente">' + EXLL + "</p>", r: en ? "Answers will vary: check that the underlined word changes with yesterday / tomorrow." : "Réponses variées : vérifier que le mot souligné change avec « hier » et « demain »." }
+        ];
+      }
+    },
+    mots: {
+      seq: "seq-mots", matiere: "francais", titre: function () { return tr(C.mots.titre); }, optDefaut: "g1",
+      rappel: function (en) { return en ? "Invariable words never change: we learn them by heart!" : "Les mots invariables ne changent jamais : on les apprend par cœur !"; },
+      reglage: function (E, en) {
+        return '<label class="ex-case">' + (en ? "Word list:" : "Liste de mots :") + ' <select id="ex-liste">' + MO.GROUPS.map(function (g) { return '<option value="' + g.id + '"' + (E.opt === g.id ? " selected" : "") + ">" + esc(g.name) + "</option>"; }).join("") + "</select></label>";
+      },
+      tirer: function (g) {
+        var fams = MO.FAMS.filter(function (f) { return f.group.id === (g || "g1"); }), sel = {};
+        fams.forEach(function (f) { sel[f.id] = 1; });
+        var pool = HE.shuf(MO.pool(sel)), f3 = HE.shuf(fams.filter(function (f) { return f.words.length >= 3; })), deux = f3.slice(0, 1);
+        var cleP = function (f) { return MO.plain(f.key).replace(/-/g, ""); };
+        f3.some(function (f) { if (deux.length && cleP(f).indexOf(cleP(deux[0])) < 0 && cleP(deux[0]).indexOf(cleP(f)) < 0) { deux.push(f); return true; } return false; });
+        return { trous: pool.slice(0, 6).map(function (x) { return { m: x.m, h: MO.hiddenPart(x.m) }; }),
+          choix: pool.slice(6, 10).map(function (x) { return { p: x.p, o: HE.shuf([x.p].concat(MO.misspell(x.p, 2))) }; }),
+          phrases: HE.shuf(MO.gapPool(sel)).slice(0, 4).map(function (q) { return { w: q.p, s: q.sent, o: HE.shuf([q.p].concat(q.opts)) }; }),
+          familles: deux.map(function (f) { return { key: f.key, words: f.words }; }),
+          dictee: HE.shuf(pool).slice(0, 6) };
+      },
+      exos: function (d, en) {
+        var cle = function (k) { return MO.plain(k).replace(/^-/, "… ").replace(/-$/, " …"); };
+        var melange = HE.shuf(d.familles.reduce(function (a, f) { return a.concat(f.words.map(MO.plain)); }, []));
+        var ex = [
+          { c: en ? "Fill in the missing letters." : "Complète les lettres qui manquent.",
+            q: '<ul class="ex-fr ex-mots">' + d.trous.map(function (x) { return "<li>" + esc(x.h.before) + '<span class="ex-ligne"></span>' + esc(x.h.after) + "</li>"; }).join("") + "</ul>",
+            r: d.trous.map(function (x) { return MO.html(x.m); }).join(" · ") },
+          { c: en ? "Circle the word that is spelt correctly." : "Entoure le mot bien écrit.",
+            q: '<ul class="ex-fr ex-choix">' + d.choix.map(function (x) { return "<li>" + x.o.map(esc).join('<span class="ex-sep">/</span>') + "</li>"; }).join("") + "</ul>",
+            r: d.choix.map(function (x) { return esc(x.p); }).join(" · ") }
+        ];
+        if (d.phrases.length >= 2) ex.push({ c: en ? "Circle the right word to complete the sentence." : "Entoure le mot qui complète la phrase.",
+          q: '<ul class="ex-fr ex-phrases">' + d.phrases.map(function (x) { return "<li>" + esc(x.s).replace("___", "( " + x.o.map(esc).join(" / ") + " )") + "</li>"; }).join("") + "</ul>",
+          r: d.phrases.map(function (x) { return esc(x.w); }).join(" · ") });
+        if (d.familles.length === 2) ex.push({ c: en ? "Sort the words into their family." : "Range les mots dans leur famille.",
+          q: '<p class="ex-fr ex-banque">' + melange.map(esc).join(" · ") + '</p><div class="ex-familles">' + d.familles.map(function (f) { return '<div><b class="ex-fr">' + esc(cle(f.key)) + "</b>" + f.words.map(function () { return "<p>" + EXL + "</p>"; }).join("") + "</div>"; }).join("") + "</div>",
+          r: d.familles.map(function (f) { return esc(cle(f.key)) + " : " + f.words.map(MO.html).join(", "); }).join(" — ") });
+        ex.push({ c: en ? "Word dictation: write the words your teacher reads." : "Dictée de mots : écris les mots que dit la maîtresse.",
+          q: '<ol class="ex-dictee ex-deux-col-ol">' + d.dictee.map(function () { return "<li>" + EXLL + "</li>"; }).join("") + "</ol>",
+          r: (en ? "Words to read aloud: " : "Mots à dicter : ") + d.dictee.map(function (x) { return MO.html(x.m); }).join(" · ") });
+        return ex;
+      }
+    },
+    monnaie: {
+      seq: "seq-monnaie", matiere: "maths", titre: function () { return tr(C.monnaie.titre); },
+      rappel: function (en) { return (en ? "The coins: " : "Les pièces : ") + "5 F, 10 F, 20 F, 50 F, 100 F, 200 F. " + (en ? "The notes: " : "Les billets : ") + "500 F, 1 000 F, 5 000 F, 10 000 F."; },
+      tirer: function () {
+        var P = PO.PIECES, bourse = function (n, billet) { var b = []; for (var i = 0; i < n; i++) b.push(HE.pk(P)); if (billet) b.push(HE.pk([500, 1000])); return b.sort(function (x, y) { return y - x; }); };
+        var cible = function () { var c = HE.shuf(P).slice(0, HE.rint(2, 3)); if (Math.random() < 0.5) c.push(c[0]); return c.sort(function (x, y) { return y - x; }); };
+        var payer = [cible(), cible()].map(function (c) { var leurres = HE.shuf(P.filter(function (v) { return c.indexOf(v) < 0; })).slice(0, 3); return { c: c, montre: HE.shuf(c.concat(leurres)) }; });
+        var fruits = HE.shuf(PO.FRUITS).slice(0, 2);
+        return { bourses: [bourse(3), bourse(4), bourse(3, true)], payer: payer, facons: HE.pk([100, 150, 250, 300]),
+          rendre: [[500, 50 * HE.rint(2, 9)], [1000, 50 * HE.rint(4, 19)], [500, 50 * HE.rint(1, 9)]], fruits: fruits };
+      },
+      exos: function (d, en) {
+        var somme = function (b) { return b.reduce(function (a, v) { return a + v; }, 0); };
+        var montant = function (c) { return somme(c); };
+        var deuxFacons = function (n) { /* une façon avec les grosses pièces, une autre en remplaçant la plus grosse */
+          var f1 = [], r = n; PO.PIECES.slice().reverse().forEach(function (v) { while (r >= v) { f1.push(v); r -= v; } });
+          var f2 = f1.slice(1), g = f1[0], r2 = g; PO.PIECES.slice().reverse().forEach(function (v) { while (v < g && r2 >= v) { f2.push(v); r2 -= v; } });
+          f2.sort(function (x, y) { return y - x; });
+          return [f1, f2].map(function (f) { return f.map(function (v) { return v + " F"; }).join(" + "); }); };
+        var f = d.fruits, tot = f[0].prix + f[1].prix;
+        return [
+          { c: en ? "How much money is there in each purse?" : "Combien d’argent y a-t-il dans chaque porte-monnaie ?",
+            q: '<div class="ex-bourses">' + d.bourses.map(function (b) { return '<div><div class="ex-bourse">' + b.map(exPiece).join("") + "</div><p>" + EXL + " F</p></div>"; }).join("") + "</div>",
+            r: d.bourses.map(function (b) { return exMille(somme(b)) + " F"; }).join(" · ") },
+          { c: en ? "Circle the coins to pay exactly the price." : "Entoure les pièces pour payer le prix exact.",
+            q: d.payer.map(function (x) { return '<div class="ex-payer"><b>' + montant(x.c) + ' F</b><div class="ex-bourse">' + x.montre.map(exPiece).join("") + "</div></div>"; }).join(""),
+            r: d.payer.map(function (x) { return montant(x.c) + " F = " + x.c.map(function (v) { return v + " F"; }).join(" + ") + (en ? " (or another correct way)" : " (ou une autre façon juste)"); }).join(" · ") },
+          { c: en ? "Find two different ways to pay " + d.facons + " F." : "Trouve deux façons différentes de payer " + d.facons + " F.",
+            q: "<p>" + (en ? "1st way: " : "1re façon : ") + EXLL + "</p><p>" + (en ? "2nd way: " : "2e façon : ") + EXLL + "</p>",
+            r: deuxFacons(d.facons).join(en ? " · or " : " · ou ") + (en ? " (other ways are possible)" : " (d’autres façons sont possibles)") },
+          { c: en ? "How much change do you get?" : "Combien la marchande rend-elle ?",
+            q: '<ul class="ex-conv ex-une-col">' + d.rendre.map(function (x) { return "<li>" + (en ? "I pay " + x[1] + " F with a " + exMille(x[0]) + " F note. I get " : "Je paie " + x[1] + " F avec un billet de " + exMille(x[0]) + " F. On me rend ") + EXL + " F.</li>"; }).join("") + "</ul>",
+            r: d.rendre.map(function (x) { return exMille(x[0] - x[1]) + " F"; }).join(" · ") },
+          { c: en ? "Solve the problem." : "Résous le problème.",
+            q: "<p>" + (en ? "At the market, Tehani buys " + f[0].en + " (" + f[0].prix + " F) and " + f[1].en + " (" + f[1].prix + " F). She pays with a 500 F note. How much does she spend? How much change does she get?"
+              : "Au marché, Tehani achète " + f[0].fr + " (" + f[0].prix + " F) et " + f[1].fr + " (" + f[1].prix + " F). Elle paie avec un billet de 500 F. Combien dépense-t-elle ? Combien la marchande lui rend-elle ?") + "</p><p>" + (en ? "She spends " : "Elle dépense ") + EXL + " F. " + (en ? "She gets " : "On lui rend ") + EXL + " F.</p>",
+            r: f[0].prix + " F + " + f[1].prix + " F = " + tot + " F · 500 F − " + tot + " F = " + (500 - tot) + " F" }
+        ];
+      }
+    },
+    division: {
+      seq: "seq-division", matiere: "maths", titre: function () { return tr(C.division.titre); },
+      rappel: function (en) { return en ? "In a division, we share into equal parts. 23 = (4 × 5) + 3: 23 is the dividend, 4 the divisor, 5 the quotient and 3 the remainder. The remainder is always smaller than the divisor."
+        : "Dans une division, on partage en parts égales. 23 = (4 × 5) + 3 : 23 est le dividende, 4 le diviseur, 5 le quotient et 3 le reste. Le reste est toujours plus petit que le diviseur."; },
+      tirer: function () {
+        var dv = function () { var b = HE.rint(2, 5), q = HE.rint(2, 10); return [b * q, b]; };
+        var calc = []; while (calc.length < 6) { var c = dv(); if (!calc.some(function (x) { return x[0] === c[0] && x[1] === c[1]; })) calc.push(c); }
+        var reste = function () { var b = HE.rint(3, 6), q = HE.rint(2, 7), r = HE.rint(1, b - 1); return [b * q + r, b, q, r]; };
+        var b0 = HE.rint(2, 4), q0 = HE.rint(3, 5);
+        return { partage: [b0 * q0, b0, q0], calc: calc, restes: [reste(), reste(), reste()], vocab: reste(), pb: reste() };
+      },
+      exos: function (d, en) {
+        var div = en ? " ÷ " : " : ";
+        var p = d.partage, v = d.vocab, pb = d.pb;
+        return [
+          { c: en ? "Share the " + p[0] + " lychees equally into " + p[1] + " bags. Draw them, then complete." : "Partage les " + p[0] + " letchis dans " + p[1] + " sachets, en parts égales. Dessine-les, puis complète.",
+            q: '<p class="ex-letchis">' + new Array(p[0] + 1).join('<span class="ex-rond"></span>') + '</p><div class="ex-sachets">' + new Array(p[1] + 1).join('<span class="ex-sachet"></span>') + "</div><p>" + (en ? "Each bag has " : "Chaque sachet a ") + EXL + (en ? " lychees.  " : " letchis.  ") + p[0] + div + p[1] + " = " + EXL + "</p>",
+            r: p[0] + div + p[1] + " = " + p[2] },
+          { c: en ? "Work out." : "Calcule.",
+            q: '<ul class="ex-conv ex-trois-col">' + d.calc.map(function (x) { return "<li>" + x[0] + div + x[1] + " = " + EXL + "</li>"; }).join("") + "</ul>",
+            r: d.calc.map(function (x) { return x[0] + div + x[1] + " = " + x[0] / x[1]; }).join(" · ") },
+          { c: en ? "Share, then write the equality with the remainder." : "Partage, puis écris l’égalité avec le reste.",
+            q: '<ul class="ex-conv ex-une-col">' + d.restes.map(function (x) { return "<li>" + (en ? x[0] + " shells shared between " + x[1] + " friends: " : x[0] + " coquillages partagés entre " + x[1] + " amis : ") + x[0] + " = (" + x[1] + " × " + EXL + ") + " + EXL + "</li>"; }).join("") + "</ul>",
+            r: d.restes.map(function (x) { return x[0] + " = (" + x[1] + " × " + x[2] + ") + " + x[3]; }).join(" · ") },
+          { c: en ? "Complete with the right number." : "Complète avec le bon nombre.",
+            q: '<p class="ex-egalite">' + v[0] + " = (" + v[1] + " × " + v[2] + ") + " + v[3] + '</p><ul class="ex-conv">' + (en ? ["The dividend is ", "The divisor is ", "The quotient is ", "The remainder is "] : ["Le dividende est ", "Le diviseur est ", "Le quotient est ", "Le reste est "]).map(function (s) { return "<li>" + s + EXL + ".</li>"; }).join("") + "</ul>",
+            r: (en ? "dividend " : "dividende ") + v[0] + (en ? " · divisor " : " · diviseur ") + v[1] + " · quotient " + v[2] + (en ? " · remainder " : " · reste ") + v[3] },
+          { c: en ? "Solve the problem." : "Résous le problème.",
+            q: "<p>" + (en ? "Nina has " + pb[0] + " shells. She puts them in boxes of " + pb[1] + ". How many boxes can she fill? How many shells are left?" : "Nina a " + pb[0] + " coquillages. Elle les range dans des boîtes de " + pb[1] + ". Combien de boîtes peut-elle remplir ? Combien de coquillages reste-t-il ?") + "</p><p>" + (en ? "She fills " : "Elle remplit ") + EXL + (en ? " boxes. There are " : " boîtes. Il reste ") + EXL + (en ? " shells left." : " coquillages.") + "</p>",
+            r: pb[0] + " = (" + pb[1] + " × " + pb[2] + ") + " + pb[3] + " · " + (en ? pb[2] + " boxes, " + pb[3] + " left" : pb[2] + " boîtes, il reste " + pb[3] + " coquillages") }
+        ];
+      }
+    },
+    digitale: {
+      seq: "seq-digitale", matiere: "maths", titre: function () { return tr(C.digitale.titre); },
+      rappel: function (en) { return en ? "There are 24 hours in a day. We can say afternoon and evening times in two ways: +12 h or −12 h (4:00 p.m. → 16:00; 14:15 → 2:15 p.m.)."
+        : "Dans une journée, il y a 24 heures. On peut dire les heures de l’après-midi et du soir de deux façons : +12h (4:00 de l’après-midi → 16:00) ou −12h (14:15 → 2:15 de l’après-midi)."; },
+      tirer: function () {
+        var Q = [0, 15, 30, 45], J = [["Je me lève", "I get up", [6, 7]], ["Je pars à l’école", "I leave for school", [7, 7]], ["La récréation est", "Break time is", [9, 10]], ["Je mange", "I have lunch", [11, 12]], ["Je finis l’école", "School finishes", [15, 15]], ["Je me couche", "I go to bed", [19, 20]]];
+        var jour = HE.shuf(J).slice(0, 4).map(function (x) { return [x[0], x[1], HE.rint(x[2][0], x[2][1]), HE.pk(Q)]; });
+        var plus = HE.shuf([13, 14, 15, 16, 17, 18, 19, 20, 21]).slice(0, 2).map(function (h) { return [h, HE.pk(Q)]; }), moins = HE.shuf([13, 14, 15, 16, 17, 19, 20, 21, 22]).slice(0, 2).map(function (h) { return [h, HE.pk(Q)]; });
+        var hor = HE.shuf([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]).slice(0, 3).map(function (h) { return [h, HE.pk(Q)]; });
+        var DUR = [[15, "un quart d’heure", "a quarter of an hour"], [30, "une demi-heure", "half an hour"], [60, "une heure", "an hour"]], du = HE.pk(DUR);
+        var PB = [["La récréation commence à", "Break time starts at", "Elle dure", "It lasts", "À quelle heure finit-elle ?", "What time does it end?"], ["Le film commence à", "The film starts at", "Il dure", "It lasts", "À quelle heure finit-il ?", "What time does it end?"], ["Le cours de natation commence à", "The swimming lesson starts at", "Il dure", "It lasts", "À quelle heure finit-il ?", "What time does it end?"]];
+        return { jour: jour.sort(function (a, b) { return a[2] * 60 + a[3] - b[2] * 60 - b[3]; }), conv: HE.shuf(plus.map(function (x) { return ["+", x[0], x[1]]; }).concat(moins.map(function (x) { return ["-", x[0], x[1]]; }))), hor: hor,
+          pb: { t: HE.pk(PB), h: HE.rint(9, 16), m: HE.pk([0, 15, 30]), du: du } };
+      },
+      exos: function (d, en) {
+        var soir = function (h) { return h >= 18 ? (en ? "p.m." : "du soir") : (en ? "p.m." : "de l’après-midi"); };
+        var fin = (d.pb.h * 60 + d.pb.m + d.pb.du[0]), pb = d.pb;
+        return [
+          { c: en ? "Write the time in words." : "Écris l’heure en lettres.",
+            q: '<ul class="ex-conv ex-une-col">' + d.jour.map(function (x) { return "<li>" + (en ? x[1] + " at " + x[2] + ":" + HE.pad(x[3]) + ". " : x[0] + " à " + x[2] + "h" + HE.pad(x[3]) + ". ") + EXLL + "</li>"; }).join("") + "</ul>",
+            r: d.jour.map(function (x) { return en ? HE.cap(HE.direEn(x[2], x[3])) : HE.cap(exDigMots(x[2], x[3])) + (x[2] > 12 ? " (ou " + HE.direFr(x[2] - 12, x[3]).replace(/ \(\d+ min\)$/, "") + " " + soir(x[2]) + ")" : ""); }).join(" · ") },
+          { c: en ? "Write the time in two ways." : "Écris l’heure de deux façons.",
+            q: '<ul class="ex-conv">' + d.conv.map(function (x) { return x[0] === "+" ? "<li>" + exDig(x[1] - 12, x[2]) + " " + soir(x[1]) + " → " + EXL + ":" + EXL + "</li>" : "<li>" + exDig(x[1], x[2]) + " → " + EXL + ":" + EXL + " " + soir(x[1]) + "</li>"; }).join("") + "</ul>",
+            r: d.conv.map(function (x) { return x[0] === "+" ? x[1] + ":" + HE.pad(x[2]) : (x[1] - 12) + ":" + HE.pad(x[2]); }).join(" · ") },
+          { c: en ? "What time is it? Write the morning time and the afternoon or evening time." : "Quelle heure est-il ? Écris l’heure du matin, puis celle de l’après-midi ou du soir.",
+            q: '<div class="ex-liste">' + d.hor.map(function (x) { return '<div class="ex-ligne-clk">' + HE.horloge(x[0], x[1], { deco: true, cls: "ex-clk" }) + "<p>" + (en ? "a.m. " : "matin ") + EXL + ":" + EXL + " &nbsp; " + (en ? "p.m. " : "après-midi ou soir ") + EXL + ":" + EXL + "</p></div>"; }).join("") + "</div>",
+            r: d.hor.map(function (x) { return x[0] + ":" + HE.pad(x[1]) + " / " + (x[0] + 12) + ":" + HE.pad(x[1]); }).join(" · ") },
+          { c: en ? "Complete." : "Complète.",
+            q: '<ul class="ex-conv">' + (en ? ["1 hour = ", "half an hour = ", "a quarter of an hour = ", "In a day, there are "] : ["1 heure = ", "une demi-heure = ", "un quart d’heure = ", "Dans une journée, il y a "]).map(function (s, i) { return "<li>" + s + EXL + (i < 3 ? " min" : (en ? " hours." : " heures.")) + "</li>"; }).join("") + "</ul>",
+            r: "60 min · 30 min · 15 min · 24" },
+          { c: en ? "Solve the problem." : "Résous le problème.",
+            q: "<p>" + (en ? pb.t[1] + " " + pb.h + ":" + HE.pad(pb.m) + ". " + pb.t[3] + " " + pb.du[2] + ". " + pb.t[5] : pb.t[0] + " " + pb.h + "h" + HE.pad(pb.m) + ". " + pb.t[2] + " " + pb.du[1] + ". " + pb.t[4]) + "</p><p>" + (en ? "Answer: " : "Réponse : ") + EXL + ":" + EXL + "</p>",
+            r: Math.floor(fin / 60) + ":" + HE.pad(fin % 60) }
+        ];
+      }
+    },
+    diagrammes: {
+      seq: "seq-diagrammes", matiere: "maths", titre: function () { return tr(C.diagrammes.titre); },
+      rappel: function (en) { return en ? "We can organise information in two ways: the table and the bar chart." : "On peut organiser des <b>informations</b> sous deux formes : <b>le tableau</b> et <b>le graphique en barres</b>."; },
+      tirer: function () {
+        var ids = HE.shuf(DG.CONTEXTES.map(function (c) { return c.id; }));
+        var d1 = DG.tirer({ ctx: ids[0], pas: 2, niveaux: 10, min: 2 }), d2 = DG.tirer({ ctx: ids[1], pas: 5, niveaux: 8, min: 5 }), d3 = DG.tirer({ ctx: ids[2], pas: 2, niveaux: 8, min: 2 });
+        var k = HE.shuf(d1.vals.map(function (_, i) { return i; }));
+        return { d1: d1, d2: d2, d3: d3, k: k };
+      },
+      exos: function (d, en) {
+        var nom = function (dd, i) { return en ? dd.ctx.cats[i].en : dd.ctx.cats[i].fr; };
+        var fig = function (dd, o) { return '<figure class="ex-dg"><figcaption>' + esc(tr(dd.ctx.titre)) + "</figcaption>" + DG.diagramme(dd, Object.assign({ en: en }, o || {})) + "</figure>"; };
+        var tableau = function (dd, vide) { return '<table class="ex-tab"><tr><th>' + esc(tr(dd.ctx.axeX)) + "</th><th>" + (en ? "Number" : "Nombre") + "</th></tr>" + dd.ctx.cats.map(function (_, i) { return "<tr><td>" + esc(nom(dd, i)) + "</td><td>" + (vide ? "" : dd.vals[i]) + "</td></tr>"; }).join("") + "</table>"; };
+        var d1 = d.d1, a = d.k[0], b = d.k[1], im = d1.vals.indexOf(Math.max.apply(null, d1.vals)), il = d1.vals.indexOf(Math.min.apply(null, d1.vals));
+        var hi = d1.vals[a] >= d1.vals[b] ? a : b, lo = hi === a ? b : a, ec = DG.ecart(d1.ctx, d1.ctx.cats[hi], d1.ctx.cats[lo]);
+        return [
+          { c: en ? "Read the bar chart and answer." : "Lis le graphique et réponds.",
+            q: '<div class="ex-cote">' + fig(d1) + '<ol class="ex-qs">' + [(en ? "What number does the “" + nom(d1, a) + "” bar show?" : "Quel nombre la barre « " + nom(d1, a) + " » indique-t-elle ?"), (en ? "What number does the “" + nom(d1, b) + "” bar show?" : "Quel nombre la barre « " + nom(d1, b) + " » indique-t-elle ?"), tr(d1.ctx.plus), tr(d1.ctx.moins),
+              (en ? "How many " + d1.ctx.axe.en + " are there in all?" : "Combien " + d1.ctx.axe.de + " y a-t-il en tout ?"), tr(ec)].map(function (s) { return "<li>" + esc(s) + " " + EXL + "</li>"; }).join("") + "</ol></div>",
+            r: [d1.vals[a], d1.vals[b], nom(d1, im), nom(d1, il)].join(" · ") + " · " + d1.vals.join(" + ") + " = " + DG.somme(d1.vals) + " · " + d1.vals[hi] + " − " + d1.vals[lo] + " = " + (d1.vals[hi] - d1.vals[lo]) },
+          { c: en ? "Complete the table using the bar chart." : "Complète le tableau à partir du graphique.",
+            q: '<div class="ex-cote">' + fig(d.d2) + tableau(d.d2, true) + "</div>",
+            r: d.d2.ctx.cats.map(function (_, i) { return esc(nom(d.d2, i)) + " " + d.d2.vals[i]; }).join(" · ") },
+          { c: en ? "Draw the bar chart using the table." : "Construis le graphique à partir du tableau.",
+            q: '<div class="ex-cote ex-construire">' + tableau(d.d3) + fig(d.d3, { vals: d.d3.vals.map(function () { return 0; }) }) + "</div>",
+            r: '<div class="ex-petit-dg">' + fig(d.d3) + "</div>" }
+        ];
+      }
+    }
+  };
+  Object.keys(EXOS2).forEach(function (k) { EXOS[k] = EXOS2[k]; });
   function pageExos(seq) {
     var X = EXOS[seq], en = langue === "en";
-    if (!EXF || EXF.seq !== seq) EXF = { seq: seq, d: X.tirer(), corrige: EXF ? EXF.corrige : false };
+    if (!EXF || EXF.seq !== seq) EXF = { seq: seq, opt: X.optDefaut || "", corrige: EXF ? EXF.corrige : false };
+    if (!EXF.d) EXF.d = X.tirer(EXF.opt);
     var ex = X.exos(EXF.d, en);
-    var tete = '<header class="ex-tete"><div><small>' + (en ? "Maths · Worksheet" : "Maths · Fiche d’exercices") + "</small><h1>" + esc(X.titre()) + '</h1></div><p class="ex-nom">' + (en ? "Name: " : "Prénom : ") + '<span class="ex-ligne"></span><br>' + (en ? "Date: " : "Date : ") + '<span class="ex-ligne"></span></p></header>' +
+    var mat = MATIERE[X.matiere];
+    var tete = '<header class="ex-tete"><div><small>' + esc(tr(mat.nom)) + " · " + (en ? "Worksheet" : "Fiche d’exercices") + "</small><h1>" + esc(X.titre()) + '</h1></div><p class="ex-nom">' + (en ? "Name: " : "Prénom : ") + '<span class="ex-ligne"></span><br>' + (en ? "Date: " : "Date : ") + '<span class="ex-ligne"></span></p></header>' +
       '<p class="ex-rappel"><b>' + (en ? "I remember" : "Je me rappelle") + "</b> " + X.rappel(en) + "</p>";
     var corps = ex.map(function (e, i) { return '<section class="ex"><h2><span>' + (i + 1) + "</span>" + e.c + "</h2>" + e.q + "</section>"; }).join("");
     var corrige = EXF.corrige ? '<section class="ex-corrige"><h2>' + (en ? "Answers" : "Corrigé") + "</h2><ol>" + ex.map(function (e) { return "<li>" + e.r + "</li>"; }).join("") + "</ol></section>" : "";
     return '<div class="no-print ex-outils coco-row"><a class="coco-btn coco-btn--secondaire" href="#' + X.seq + '">← ' + (en ? "Back to the unit" : "Retour à la séquence") + '</a>' +
       '<button class="coco-btn coco-btn--secondaire" type="button" data-action="ex-nouveau">' + (en ? "New worksheet" : "Nouvelle fiche") + "</button>" +
+      (X.reglage ? X.reglage(EXF, en) : "") +
       '<label class="ex-case"><input type="checkbox" data-action="ex-corrige"' + (EXF.corrige ? " checked" : "") + "> " + (en ? "Add the answers (on a separate page)" : "Ajouter le corrigé (sur une page à part)") + "</label>" +
       '<button class="coco-btn" type="button" data-action="imprimer">' + (en ? "Print or save as PDF" : "Imprimer ou enregistrer en PDF") + "</button>" + choixLangue() + "</div>" +
-      '<p class="no-print ex-aide">' + (en ? "To get a PDF file: in the print window, choose “Save as PDF”. Each click on “New worksheet” draws new times." : "Pour obtenir un fichier PDF : dans la fenêtre d’impression, choisissez « Enregistrer au format PDF ». Chaque « Nouvelle fiche » tire d’autres heures.") + "</p>" +
-      '<article class="exos m-maths">' + tete + corps + "</article>" + (corrige ? '<article class="exos ex-page m-maths">' + corrige + "</article>" : "");
+      '<p class="no-print ex-aide">' + (en ? "To get a PDF file: in the print window, choose “Save as PDF”. Each click on “New worksheet” draws new exercises." : "Pour obtenir un fichier PDF : dans la fenêtre d’impression, choisissez « Enregistrer au format PDF ». Chaque « Nouvelle fiche » tire d’autres exercices.") + "</p>" +
+      '<article class="exos ' + mat.classe + '">' + tete + corps + "</article>" + (corrige ? '<article class="exos ex-page ' + mat.classe + '">' + corrige + "</article>" : "");
   }
   function ficheHeure() {
     var li = function (a) { return a.map(function (x) { return "<li>" + x + "</li>"; }).join(""); };
@@ -1498,15 +1734,15 @@
   function pageEnsSequences() {
     var F = "ens-pb--francais";
     return ensEntete("Séquences d’apprentissage") +
-      ensDomaine("m-francais", "Français · Grammaire et conjugaison", [ensLigne("tehani", "Le verbe", "Leçon CONJ2, « Le verbe se cache », « Chasse aux verbes »", [["Voir la séquence", "#seq-verbe"]], F)]) +
-      ensDomaine("m-francais", "Français · Orthographe", [ensLigne("sari", "Les mots invariables", "7 activités, de « Je me rappelle » à la dictée sans erreur", [["La fiche", "#fiche-mots"], ["Voir la séquence", "#seq-mots"]], F)]) +
-      ensDomaine("m-maths", "Maths · Techniques opératoires", [ensLigne("nina", "La division en ligne", "Période 5, séquence 3 · deux problèmes ouverts", [["Voir la séquence", "#seq-division"]])].concat(PO.sequences.division.map(ensPO))) +
-      ensDomaine("m-maths", "Maths · Grandeurs et mesures", [ensLigne("mei", "La monnaie et les prix", "Deux problèmes ouverts", [["Voir la séquence", "#seq-monnaie"]])].concat(PO.sequences.monnaie.map(ensPO)).concat([
-        ensLigne("tehani", "Lire l’heure digitale", "« L’heure à l’ardoise » : 10 jeux collectifs au TBI pour les séances 1 à 3 (outil de la collègue, adapté)", [["Au TBI", JEU_DIGITAL], ["La fiche", "#fiche-digitale"], ["Voir la séquence", "#seq-digitale"]]),
+      ensDomaine("m-francais", "Français · Grammaire et conjugaison", [ensLigne("tehani", "Le verbe", "Leçon CONJ2, « Le verbe se cache », « Chasse aux verbes »", [["Fiche d’exercices", "#exos-verbe"], ["Voir la séquence", "#seq-verbe"]], F)]) +
+      ensDomaine("m-francais", "Français · Orthographe", [ensLigne("sari", "Les mots invariables", "7 activités, de « Je me rappelle » à la dictée sans erreur", [["La fiche", "#fiche-mots"], ["Fiche d’exercices", "#exos-mots"], ["Voir la séquence", "#seq-mots"]], F)]) +
+      ensDomaine("m-maths", "Maths · Techniques opératoires", [ensLigne("nina", "La division en ligne", "Période 5, séquence 3 · deux problèmes ouverts", [["Fiche d’exercices", "#exos-division"], ["Voir la séquence", "#seq-division"]])].concat(PO.sequences.division.map(ensPO))) +
+      ensDomaine("m-maths", "Maths · Grandeurs et mesures", [ensLigne("mei", "La monnaie et les prix", "Deux problèmes ouverts", [["Fiche d’exercices", "#exos-monnaie"], ["Voir la séquence", "#seq-monnaie"]])].concat(PO.sequences.monnaie.map(ensPO)).concat([
+        ensLigne("tehani", "Lire l’heure digitale", "« L’heure à l’ardoise » : 10 jeux collectifs au TBI pour les séances 1 à 3 (outil de la collègue, adapté)", [["Au TBI", JEU_DIGITAL], ["La fiche", "#fiche-digitale"], ["Fiche d’exercices", "#exos-digitale"], ["Voir la séquence", "#seq-digitale"]]),
         ensLigne("coralie", "Lire l’heure à aiguilles", "Découverte guidée et jeu des ardoises au TBI ; leçon, 8 activités", [["Au TBI", "#tbi-heure"], ["La fiche", "#fiche-heure"], ["Fiche d’exercices", "#exos-heure"], ["Voir la séquence", "#seq-heure"]])])) +
       ensDomaine("m-maths", "Maths · Résolution de problèmes", [
         ensLigne("adi", "Banque de problèmes (Vergnaud)", "217 problèmes classés par type, avec leurs schémas", [["Ouvrir la banque", "#banque"]]),
-        ensLigne("waeko", "Lire un graphique en barres", "Leçon (OGD1), 4 jeux et problèmes", [["La fiche", "#fiche-diagrammes"], ["Voir la séquence", "#seq-diagrammes"]])]);
+        ensLigne("waeko", "Lire un graphique en barres", "Leçon (OGD1), 4 jeux et problèmes", [["La fiche", "#fiche-diagrammes"], ["Fiche d’exercices", "#exos-diagrammes"], ["Voir la séquence", "#seq-diagrammes"]])]);
   }
   function pageEnsSuivi() {
     return ensEntete("Suivi des élèves") + '<section class="ens-vide">' + DOSSIER_SVG + "<h2>Ce dossier est encore vide</h2><p>Il accueillera le suivi des résultats de vos élèves : réussites par activité, bilans par séquence, repères pour le livret scolaire unique.</p>" +
@@ -1651,7 +1887,8 @@
   /* ---------- routeur ---------- */
   var ROUTES = {
     accueil: pageAccueil, "seq-verbe": function () { return pageSequence("verbe"); }, "seq-mots": pageSequenceMots, "lecon-mots": pageLeconMots, "fiche-mots": ficheMots,
-    "seq-heure": pageSequenceHeure, "seq-digitale": pageSequenceDigitale, "ens-suivi": pageEnsSuivi, "ens-sequences": pageEnsSequences, "ens-formation": pageEnsFormation, "fiche-digitale": ficheDigitale, "seq-diagrammes": pageSequenceDiagrammes, "lecon-diagrammes": pageLeconDiagrammes, "fiche-diagrammes": ficheDiagrammes, "lecon-heure": function () { return pageLeconHeure(true); }, "maquette-retiens": function () { return pageLeconHeure(true); }, "fiche-heure": ficheHeure, "exos-heure": function () { return pageExos("heure"); }, "tbi-heure": pageTbiHeure,
+    "seq-heure": pageSequenceHeure, "seq-digitale": pageSequenceDigitale, "ens-suivi": pageEnsSuivi, "ens-sequences": pageEnsSequences, "ens-formation": pageEnsFormation, "fiche-digitale": ficheDigitale, "seq-diagrammes": pageSequenceDiagrammes, "lecon-diagrammes": pageLeconDiagrammes, "fiche-diagrammes": ficheDiagrammes, "lecon-heure": function () { return pageLeconHeure(true); }, "maquette-retiens": function () { return pageLeconHeure(true); }, "fiche-heure": ficheHeure, "exos-heure": function () { return pageExos("heure"); }, "exos-verbe": function () { return pageExos("verbe"); }, "exos-mots": function () { return pageExos("mots"); },
+    "exos-monnaie": function () { return pageExos("monnaie"); }, "exos-division": function () { return pageExos("division"); }, "exos-digitale": function () { return pageExos("digitale"); }, "exos-diagrammes": function () { return pageExos("diagrammes"); }, "tbi-heure": pageTbiHeure,
     "lecon-verbe": pageLecon, "jeu-verbe-decouvre": jeuDecouvre, "jeu-verbe-chasse": jeuChasse, enseignante: pageEnseignante, banque: pageBanque
   };
   C.matieres.forEach(function (m) { ROUTES[m.id] = function () { return pageMatiere(m.id); }; });
@@ -1710,7 +1947,7 @@
     else if (/^jr-/.test(a)) actionJr(a, el);
     else if (/^bq-/.test(a)) { if (a === "bq-reglages") e.preventDefault(); actionBanque(a, el); }
     else if (a === "imprimer") { try { window.print(); } catch (x) {} return; }
-    else if (a === "ex-nouveau") { if (EXF) EXF.d = EXOS[EXF.seq].tirer(); }
+    else if (a === "ex-nouveau") { if (EXF) EXF.d = EXOS[EXF.seq].tirer(EXF.opt); }
     else if (a === "ex-corrige") { if (EXF) EXF.corrige = el.checked; }
     else if (/^l-/.test(a)) actionLecon(a, el);
     rendre();
@@ -1730,6 +1967,7 @@
     } else if (el.dataset.ecrit !== undefined && A) A.ecrit[el.dataset.ecrit] = v;
   });
   document.addEventListener("input", function (e) { if (e.target.id === "mi-reponse" && G) G.typed = e.target.value; });
+  document.addEventListener("change", function (e) { if (e.target.id === "ex-liste" && EXF) { EXF.opt = e.target.value; EXF.d = EXOS[EXF.seq].tirer(EXF.opt); rendre(); } });
   document.addEventListener("pointerdown", function (e) { if (e.target.closest && e.target.closest("[data-mi-acc]")) e.preventDefault(); });
   document.addEventListener("click", function (e) {
     var b = e.target.closest && e.target.closest("[data-mi-acc]"); if (!b || !G) return;

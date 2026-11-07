@@ -169,5 +169,5 @@
     return s + "</svg>";
   }
 
-  window.COCO_DONNEES = { CONTEXTES: CONTEXTES, RAPPEL: RAPPEL, tirer: tirer, questionsLire: questionsLire, questionsConstruire: questionsConstruire, problemes: problemes, diagramme: diagramme, somme: somme };
+  window.COCO_DONNEES = { CONTEXTES: CONTEXTES, RAPPEL: RAPPEL, tirer: tirer, questionsLire: questionsLire, questionsConstruire: questionsConstruire, problemes: problemes, diagramme: diagramme, somme: somme, ecart: ecart };
 })();
