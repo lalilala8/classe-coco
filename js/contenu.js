@@ -70,7 +70,7 @@ window.COCO_CONTENU = {
           [{ fr: "La monnaie et les prix", en: "Money and prices" }, "demo", "monnaie"],
           [{ fr: "Mesurer des durées · l'heure digitale", en: "Time · digital clocks" }, "demo", "digitale"],
           [{ fr: "Mesurer des durées · l'heure à aiguilles", en: "Time · telling the time" }, "demo", "heure"],
-          [{ fr: "Mesurer des masses", en: "Measuring mass" }], [{ fr: "Mesurer des capacités", en: "Measuring capacity" }]
+          [{ fr: "Mesurer des masses", en: "Measuring mass" }, "demo", "masses"], [{ fr: "Mesurer des capacités", en: "Measuring capacity" }]
         ] },
         { nom: { fr: "Espace et géométrie", en: "Geometry" }, sequences: [
           /* d'après le fichier de géométrie 2026 de l'enseignante (GEOM1 à GEOM12, D-86) ; « Les polygones » gardé en attente d'une leçon */
@@ -194,5 +194,12 @@ window.COCO_CONTENU = {
     matiere: "maths",
     titre: { fr: "La division en ligne", en: "Division" },
     objectif: { fr: "Je sais partager en parts égales et écrire la division en ligne.", en: "I can share into equal parts and write the division." }
+  },
+
+  /* ---------- Période 5 · séquence 4 : les masses (problèmes ouverts de la collègue, adaptés, D-109 ; leçon GM8) ---------- */
+  masses: {
+    matiere: "maths",
+    titre: { fr: "Mesurer des masses", en: "Measuring mass" },
+    objectif: { fr: "Je sais choisir l’unité qui convient pour exprimer une masse et j’utilise 1 kg = 1 000 g.", en: "I can choose the right unit for a mass and I use 1 kg = 1,000 g." }
   }
 };

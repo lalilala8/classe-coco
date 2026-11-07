@@ -650,4 +650,222 @@
       reinvestir: ["« L’aiguille des minutes a fait un demi-tour. Quelle heure était-il avant ? Et après ? »", "« Le dessin animé dure trois quarts d’heure et finit à midi moins dix. À quelle heure commence-t-il ? »"]
     }
   };
+
+  /* ==========================================================================================
+     Période 5 · séquence 4 : les masses (problèmes repris de l’outil de la collègue, personnage Sari, D-50).
+     Repères : leçon GM8 (1 g, c’est le poids d’un trombone) et ceux de la collègue (un paquet de sucre 1 kg,
+     une petite voiture environ 1 t), D-109. « L’étiquette effacée » : tri vérifié + objets libres de l’élève, D-109.
+     ========================================================================================== */
+  PO.sequences.masses = ["etiquette", "panier"];
+  var milliers = function (n, lg) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, lg === "en" ? "," : " "); };
+  var cap = function (s) { return s.charAt(0).toUpperCase() + s.slice(1); };
+  var somme = function (a) { return a.reduce(function (x, y) { return x + y; }, 0); };
+  /* une balance de cuisine : la masse affichée et son unité (« ? » si l’unité est effacée) */
+  var balanceM = function (v, u) {
+    return '<svg class="po-balance" viewBox="0 0 220 140" aria-hidden="true"><rect class="po-bal-plateau" x="28" y="6" width="164" height="14" rx="7"/><rect class="po-bal-pied" x="96" y="20" width="28" height="14"/>' +
+      '<rect class="po-bal-corps" x="8" y="32" width="204" height="102" rx="26"/><rect class="po-bal-ecran" x="32" y="52" width="156" height="62" rx="10"/>' +
+      '<text class="po-bal-v" x="110" y="96" text-anchor="middle">' + v + '<tspan class="po-bal-u' + (u === "?" ? " po-bal-efface" : "") + '" dx="8">' + u + "</tspan></text></svg>";
+  };
+  PO.balance = balanceM;
+
+  /* ---------- 1. L’étiquette effacée (5 g, 5 kg ou 5 t : estimer et choisir l’unité) ---------- */
+  var UNITES_M = [
+    { k: "g", fr: "5 g", en: "5 g", g: 5 },
+    { k: "kg", fr: "5 kg", en: "5 kg", g: 5000 },
+    { k: "t", fr: "5 t", en: "5 t", g: 5000000 },
+    { k: "non", fr: "Aucune des trois", en: "None of the three" }
+  ];
+  /* masses approchées : on vérifie l’ordre de grandeur ; les pièges ne pèsent ni 5 g, ni 5 kg, ni 5 t */
+  var OBJETS_M = [
+    { id: "morceau", u: "g", g: 5, fr: "un morceau de sucre", en: "a sugar cube", m: { fr: "environ 5 g", en: "about 5 g" } },
+    { id: "feuille", u: "g", g: 5, fr: "une feuille de papier", en: "a sheet of paper", m: { fr: "environ 5 g", en: "about 5 g" } },
+    { id: "crayon", u: "g", g: 5, fr: "un crayon de papier", en: "a pencil", m: { fr: "environ 5 g", en: "about 5 g" } },
+    { id: "riz", u: "kg", g: 5000, fr: "un sac de riz de 5 kg", en: "a 5 kg bag of rice", m: { fr: "5 kg", en: "5 kg" } },
+    { id: "sucre5", u: "kg", g: 5000, fr: "5 paquets de sucre", en: "5 bags of sugar", m: { fr: "5 kg", en: "5 kg" } },
+    { id: "chat", u: "kg", g: 5000, fr: "un chat", en: "a cat", m: { fr: "environ 5 kg", en: "about 5 kg" } },
+    { id: "pasteque", u: "kg", g: 5000, fr: "une pastèque", en: "a watermelon", m: { fr: "environ 5 kg", en: "about 5 kg" } },
+    { id: "elephant", u: "t", g: 5000000, fr: "un éléphant", en: "an elephant", m: { fr: "environ 5 t", en: "about 5 t" } },
+    { id: "camion", u: "t", g: 5000000, fr: "un petit camion", en: "a small lorry", m: { fr: "environ 5 t", en: "about 5 t" } },
+    { id: "voitures", u: "t", g: 5000000, fr: "5 petites voitures", en: "5 small cars", m: { fr: "environ 5 t", en: "about 5 t" } },
+    { id: "trombone", u: "non", g: 1, fr: "un trombone", en: "a paper clip", m: { fr: "1 g", en: "1 g" } },
+    { id: "mangue", u: "non", g: 400, fr: "une mangue", en: "a mango", m: { fr: "environ 400 g", en: "about 400 g" } },
+    { id: "sucre", u: "non", g: 1000, fr: "un paquet de sucre", en: "a bag of sugar", m: { fr: "1 kg", en: "1 kg" } },
+    { id: "enfant", u: "non", g: 27000, fr: "un enfant de 8 ans", en: "an 8-year-old child", m: { fr: "environ 27 kg", en: "about 27 kg" } },
+    { id: "voiture", u: "non", g: 1000000, fr: "une petite voiture", en: "a small car", m: { fr: "environ 1 t", en: "about 1 t" } },
+    { id: "fourmi", u: "non", g: 0.005, fr: "une fourmi", en: "an ant", m: { fr: "bien moins de 1 g", en: "much less than 1 g" } }
+  ];
+  var objM = function (id) { return OBJETS_M.filter(function (o) { return o.id === id; })[0]; };
+  var uniteM = function (k) { return UNITES_M.filter(function (u) { return u.k === k; })[0]; };
+  var nomM = function (sol, lg) { return sol.libre ? sol.libre : objM(sol.o)[lg === "en" ? "en" : "fr"]; };
+  PO.OBJETS_M = OBJETS_M; PO.UNITES_M = UNITES_M;
+
+  PO.problemes.etiquette = {
+    id: "etiquette", sequence: "masses", type: "etiquette", perso: "sari",
+    titre: { fr: "L’étiquette effacée", en: "The rubbed-out label" },
+    question: { fr: "Qu’ai-je pu peser ?", en: "What could I have weighed?" },
+    enonce: { fr: "J’ai pesé quelque chose. La balance affiche <b>5</b>… mais l’unité est effacée ! 5 grammes ? 5 kilogrammes ? 5 tonnes ? <b>Qu’ai-je pu peser ?</b> Trouve des objets pour chaque unité !",
+              en: "I weighed something. The scale shows <b>5</b>… but the unit has been rubbed out! 5 grams? 5 kilograms? 5 tonnes? <b>What could I have weighed?</b> Find objects for each unit!" },
+    enonceExtra: function () { return '<span class="po-bal-zone">' + balanceM("5", "?") + "</span>"; },
+    depart: function () { return { o: "", u: "", libre: "" }; },
+    pret: function (sol) { return !!((sol.o || String(sol.libre).trim()) && sol.u); },
+    verifier: function (sol) {
+      var u = uniteM(sol.u);
+      if (sol.libre) {
+        if (sol.u === "non") return { ok: false, fr: "Pour ton objet, choisis 5 g, 5 kg ou 5 t : cherche un objet qui pèse autant !", en: "For your own object, choose 5 g, 5 kg or 5 t: look for something that weighs that much!" };
+        return { ok: true, libre: true, fr: "On vérifiera en classe s’il peut vraiment peser " + u.fr + " : avec un repère, ou à la balance.", en: "We will check in class whether it can really weigh " + u.en + ": with a benchmark, or on the scale." };
+      }
+      var o = objM(sol.o);
+      if (o.u === sol.u) return o.u === "non"
+        ? { ok: true, fr: "Bien vu : " + o.fr + " pèse " + o.m.fr + ", ni 5 g, ni 5 kg, ni 5 t.", en: "Well spotted: " + o.en + " weighs " + o.m.en + ", not 5 g, 5 kg or 5 t." }
+        : { ok: true, fr: cap(o.fr) + " pèse " + o.m.fr + ".", en: cap(o.en) + " weighs " + o.m.en + "." };
+      var dit = cap(o.fr) + " pèse " + o.m.fr + ". ", say = cap(o.en) + " weighs " + o.m.en + ". ";
+      if (sol.u === "non") return { ok: false, fr: dit + "Dans quelle boîte va-t-il ?", en: say + "Which box does it go in?" };
+      return o.g > u.g ? { ok: false, fr: dit + "C’est bien plus lourd que " + u.fr + ".", en: say + "That is much heavier than " + u.en + "." }
+        : { ok: false, fr: dit + "C’est bien plus léger que " + u.fr + ".", en: say + "That is much lighter than " + u.en + "." };
+    },
+    diagnostic: function (sol) { return { repere: true, lu: this.verifier(sol).ok }; },
+    cle: function (sol) { return sol.libre ? "libre:" + String(sol.libre).trim().toLowerCase() + ":" + sol.u : sol.o + ":" + sol.u; },
+    estLibre: function (sol) { return !!sol.libre; },
+    ecrire: function (sol, lg) {
+      var en = lg === "en", u = uniteM(sol.u);
+      return nomM(sol, lg) + " → " + (sol.u === "non" ? (en ? "none of the three" : "aucune des trois") : u[en ? "en" : "fr"]) + (sol.libre ? (en ? " (to check in class)" : " (à vérifier en classe)") : "");
+    },
+    ranger: function (a, b) {
+      var r = function (s) { return ["g", "kg", "t", "non"].indexOf(s.u) * 2 + (s.libre ? 1 : 0); };
+      return r(a) - r(b) || nomM(a).localeCompare(nomM(b), "fr");
+    },
+    checklist: [
+      { id: "repere", fr: "J’ai comparé avec un repère : un trombone (1 g), un paquet de sucre (1 kg), une petite voiture (environ 1 t).", en: "I compared with a benchmark: a paper clip (1 g), a bag of sugar (1 kg), a small car (about 1 t)." },
+      { id: "lu", fr: "J’ai lu le nombre avec son unité : 5 grammes, 5 kilogrammes ou 5 tonnes.", en: "I read the number with its unit: 5 grams, 5 kilograms or 5 tonnes." }
+    ],
+    pouce: { fr: "Un trombone pèse 1 g. Un paquet de sucre pèse 1 kg. Une petite voiture pèse environ 1 t. Qu’est-ce qui pèse autant que 5 paquets de sucre ? Et que 5 trombones ?", en: "A paper clip weighs 1 g. A bag of sugar weighs 1 kg. A small car weighs about 1 t. What weighs as much as 5 bags of sugar? And as much as 5 paper clips?" },
+    relances: [
+      { fr: "Trouve un objet plus lourd que 5 kg, mais plus léger que 5 t.", en: "Find an object heavier than 5 kg but lighter than 5 t." },
+      { fr: "Et si la balance affiche 5 000 ? Quelle unité, quel objet ?", en: "What if the scale shows 5,000? Which unit, which object?" },
+      { fr: "Range tes objets du plus léger au plus lourd.", en: "Put your objects in order from lightest to heaviest." },
+      { fr: "Un éléphant pèse environ 5 t. Combien de kilogrammes ?", en: "An elephant weighs about 5 t. How many kilograms is that?" }
+    ],
+    strategies: [
+      { fr: "J’ai comparé avec le trombone, le paquet de sucre ou la petite voiture.", en: "I compared with the paper clip, the bag of sugar or the small car." },
+      { fr: "J’ai imaginé l’objet dans mes mains : léger, lourd ou impossible à porter ?", en: "I imagined holding the object: light, heavy or impossible to carry?" },
+      { fr: "J’ai pensé à la balance qui sert à le peser.", en: "I thought about which scale we would use to weigh it." },
+      { fr: "J’ai essayé, puis j’ai corrigé.", en: "I tried, then I corrected it." }
+    ],
+    retenir: { fr: "Pour exprimer une masse, on choisit l’unité qui convient : le gramme (g) pour les objets légers, comme un trombone (1 g) ; le kilogramme (kg), comme un paquet de sucre (1 kg) ; la tonne (t) pour les objets très lourds, comme une petite voiture (environ 1 t). 1 kg = 1 000 g et 1 t = 1 000 kg.",
+               en: "To give a mass, we choose the right unit: the gram (g) for light objects, like a paper clip (1 g); the kilogram (kg), like a bag of sugar (1 kg); the tonne (t) for very heavy objects, like a small car (about 1 t). 1 kg = 1,000 g and 1 t = 1,000 kg." },
+    exemple: { fr: "1 kg = 1 000 g · 1 t = 1 000 kg", en: "1 kg = 1,000 g · 1 t = 1,000 kg" },
+    toutes: null,
+    vueToutes: function (trouves, lg) {
+      var en = lg === "en";
+      return "<h3>" + (en ? "The objects of the list" : "Les objets de la liste") + '</h3><div class="po-colonnes">' + UNITES_M.map(function (u) {
+        return "<div><b>" + u[en ? "en" : "fr"] + "</b><ul>" + OBJETS_M.filter(function (o) { return o.u === u.k; }).map(function (o) { var k = o.id + ":" + o.u; return '<li class="' + (trouves[k] ? "trouve" : "") + '">' + o[en ? "en" : "fr"] + (trouves[k] ? " <b>✓</b>" : "") + "</li>"; }).join("") + "</ul></div>";
+      }).join("") + "</div>" + '<p class="po-note">' + (en ? "The same number 5 means very different masses: we choose the unit by estimating, with a benchmark." : "Le même nombre 5 donne des masses très différentes : on choisit l’unité en estimant, avec un repère.") + "</p>";
+    },
+    feuille: { colonnes: [{ fr: "5 g", en: "5 g" }, { fr: "5 kg", en: "5 kg" }, { fr: "5 t", en: "5 t" }], lignes: 7,
+      bas: { fr: "Range tes objets du plus léger au plus lourd.", en: "Put your objects in order from lightest to heaviest." } },
+    fiche: {
+      source: "Problème repris de l’outil « Problèmes ouverts P5 » de la collègue (séquence 4, les masses). D’après Sullivan & Lilburn, « Activités ouvertes en mathématiques » (Chenelière, 2010), « La masse », 8-10 ans, p. 78 : « Je vois un objet dont la masse est supérieure à 1 kg mais inférieure à 2 kg. Quel peut être cet objet ? »",
+      moment: "Séance 1 des masses : instruments et unités (g, kg, t)",
+      apprend: ["Avoir des repères de masse : 1 g (un trombone, leçon GM8), 1 kg (un paquet de sucre), 1 t (une petite voiture).", "Choisir l’unité qui convient pour exprimer une masse.", "Connaître les relations 1 kg = 1 000 g et 1 t = 1 000 kg.", "Relier un objet à l’instrument qui sert à le peser (balance de cuisine, pèse-personne, pèse-bagage…)."],
+      pourquoi: ["Le même nombre 5 change complètement de sens avec l’unité : il faut estimer, pas calculer.", "Des réponses très variées : chacun propose des objets de sa vie (un sac de riz de 5 kg, un éléphant de 5 t).", "Les propositions montrent qui a de vrais repères : « un chien de 5 t » fait réagir toute la classe."],
+      materiel: ["Le mode classe, projeté (les 4 temps).", "Une feuille de recherche par élève ou par groupe.", "La balance de Roberval et des masses marquées, un paquet de sucre de 1 kg, de petits objets à peser (trombones, gomme, cahier).", "Les iPad pour le mode autonome : l’élève range des objets dans « 5 g », « 5 kg », « 5 t » ou « aucune des trois » (le site vérifie), puis propose ses propres objets, à vérifier en classe."],
+      temps: [
+        ["Poser la question", "5 min", "Faites soupeser le paquet de sucre (1 kg) et un trombone (1 g) avant de commencer. Projette l’énoncé ; un élève le lit, 2 ou 3 autres l’expliquent avec leurs mots. Ne donne aucune méthode.", "« Pourquoi ne sait-on pas ce qui a été pesé ? Que veut dire 5 g ? Et 5 kg ? »"],
+        ["Chercher par 2 ou 3", "15 à 20 min", "Lance le minuteur et observe. Un groupe ne trouve que des kilogrammes : relance vers le très léger et le très lourd. Un groupe bloque : le coup de pouce.", "« Et quelque chose de très léger ? De très, très lourd ? »"],
+        ["Mettre en commun", "15 min", "Chaque groupe donne un objet et son unité : choisis-le dans la liste ou tape-le. Les objets de la liste se vérifient ; les objets tapés s’affichent « à discuter » : la classe donne son avis, et on pèse tout de suite les petits objets à la balance.", "« Ça peut vraiment peser 5 kg ? Plus lourd ou plus léger qu’un paquet de sucre ? » « Avec quelle balance le pèserait-on ? »"],
+        ["Retenir", "5 à 10 min", "La trace écrite et les repères (1 g, 1 kg, 1 t), puis les objets de la classe, rangés par unité.", ""]
+      ],
+      reponses: "Des réponses possibles. 5 g : un morceau de sucre, une feuille de papier, un crayon, 5 trombones… 5 kg : un sac de riz de 5 kg, un chat, une pastèque, 5 paquets de sucre, 5 bouteilles d’eau d’un litre (un peu plus de 5 kg)… 5 t : un éléphant, un petit camion… Les masses sont approchées : on accepte ce qui est vraisemblable, et on vérifie à la balance quand c’est possible. Dans le mode autonome, les pièges (un trombone, une mangue, un paquet de sucre, un enfant de 8 ans, une petite voiture, une fourmi) vont dans « aucune des trois ».",
+      erreurs: [
+        ["Un chat de 5 g.", "Pas de repère pour le gramme.", "« Un trombone pèse 1 g. Un chat pèse-t-il comme 5 trombones ? »"],
+        ["Une voiture de 5 kg.", "Pas de repère pour les grandes masses.", "« Peux-tu porter 5 paquets de sucre ? Et une voiture ? »"],
+        ["Plus c’est gros, plus c’est lourd.", "La taille confondue avec la masse (un ballon de baudruche, une boule de pétanque).", "« Soupèse-les : lequel est le plus lourd ? »"],
+        ["« 5 kg, c’est un peu plus que 5 g. »", "La relation 1 kg = 1 000 g n’est pas construite.", "« Combien de grammes dans un kilogramme ? »"]
+      ],
+      niveaux: ["Propose des objets au hasard, sans lien avec l’unité.", "Trouve des objets justes pour une seule unité (souvent le kilogramme).", "Trouve des objets pour les trois unités, avec quelques erreurs d’ordre de grandeur.", "Trouve des objets vraisemblables pour les trois unités et les justifie avec un repère (le paquet de sucre).", "Relie les unités entre elles (5 000 g = 5 kg) ou range ses objets du plus léger au plus lourd en justifiant."],
+      reinvestir: ["« Je vois un objet qui pèse plus de 1 kg mais moins de 2 kg. Quel peut être cet objet ? » (Sullivan & Lilburn, p. 78)", "« Trouve deux objets de la même taille, mais de masses différentes. »"]
+    }
+  };
+
+  /* ---------- 2. Le panier d’un kilo (1 kg = 1 000 g, additionner des masses) ---------- */
+  var PRODUITS_M = [
+    { id: "sucre", fr: "un paquet de sucre", pl: "paquets de sucre", en: "a bag of sugar", plEn: "bags of sugar", g: 1000, etiq: "1 kg" },
+    { id: "riz", fr: "un paquet de riz", pl: "paquets de riz", en: "a bag of rice", plEn: "bags of rice", g: 500, etiq: "500 g" },
+    { id: "papaye", fr: "une papaye", pl: "papayes", en: "a papaya", plEn: "papayas", g: 600, etiq: "600 g" },
+    { id: "mangue", fr: "une mangue", pl: "mangues", en: "a mango", plEn: "mangoes", g: 400, etiq: "400 g" },
+    { id: "beurre", fr: "une plaquette de beurre", pl: "plaquettes de beurre", en: "a block of butter", plEn: "blocks of butter", g: 250, etiq: "250 g" },
+    { id: "avocat", fr: "un avocat", pl: "avocats", en: "an avocado", plEn: "avocados", g: 200, etiq: "200 g" },
+    { id: "banane", fr: "une banane", pl: "bananes", en: "a banana", plEn: "bananas", g: 150, etiq: "150 g" },
+    { id: "citron", fr: "un citron", pl: "citrons", en: "a lime", plEn: "limes", g: 100, etiq: "100 g" },
+    { id: "oeuf", fr: "un œuf", pl: "œufs", en: "an egg", plEn: "eggs", g: 50, etiq: "50 g" }
+  ];
+  var prodM = function (id) { return PRODUITS_M.filter(function (p) { return p.id === id; })[0]; };
+  var compteM = function (sol) { return PRODUITS_M.map(function (p) { return [p, sol.filter(function (i) { return i === p.id; }).length]; }).filter(function (x) { return x[1]; }); };
+  var totalM = function (sol) { return somme(sol.map(function (i) { return prodM(i).g; })); };
+  var detailM = function (sol, lg) { return compteM(sol).map(function (x) { return (x[1] > 1 ? x[1] + " × " : "") + milliers(x[0].g, lg) + " g"; }).join(" + "); };
+  PO.PRODUITS_M = PRODUITS_M; PO.totalM = totalM; PO.milliers = milliers;
+
+  PO.problemes.panier = {
+    id: "panier", sequence: "masses", type: "panier", perso: "sari",
+    titre: { fr: "Le panier d’un kilo", en: "The one-kilo basket" },
+    question: { fr: "Que peut-il y avoir dans mon panier ?", en: "What could be in my basket?" },
+    enonce: { fr: "Les produits de mon panier pèsent <b>exactement 1 kg</b> en tout. Je les ai choisis parmi ceux-ci, et j’ai pu prendre plusieurs fois le même. <b>Que peut-il y avoir dans mon panier ?</b> Trouve plusieurs paniers !",
+              en: "The things in my basket weigh <b>exactly 1 kg</b> altogether. I chose them from these, and I could take the same thing more than once. <b>What could be in my basket?</b> Find several baskets!" },
+    enonceExtra: function (lg) { return '<span class="po-prix">' + PRODUITS_M.map(function (p) { return p[lg === "en" ? "en" : "fr"] + " <b>" + p.etiq + "</b>"; }).join(" · ") + "</span>"; },
+    verifier: function (sol) {
+      var t = totalM(sol), fr = detailM(sol, "fr"), en = detailM(sol, "en");
+      if (t === 1000) return { ok: true, fr: fr + " = 1 000 g = 1 kg.", en: en + " = 1,000 g = 1 kg." };
+      if (t < 1000) return { ok: false, fr: fr + " = " + milliers(t, "fr") + " g. Il manque " + (1000 - t) + " g pour faire 1 kg.", en: en + " = " + milliers(t, "en") + " g. " + (1000 - t) + " g are missing to make 1 kg." };
+      return { ok: false, fr: fr + " = " + milliers(t, "fr") + " g. C’est " + milliers(t - 1000, "fr") + " g de trop : 1 kg = 1 000 g.", en: en + " = " + milliers(t, "en") + " g. That is " + milliers(t - 1000, "en") + " g too much: 1 kg = 1,000 g." };
+    },
+    diagnostic: function (sol) { return { grammes: true, total: totalM(sol) === 1000 }; },
+    cle: function (sol) { return sol.slice().sort().join("+"); },
+    ecrire: function (sol, lg) { var en = lg === "en"; return compteM(sol).map(function (x) { return x[1] > 1 ? x[1] + " " + (en ? x[0].plEn : x[0].pl) : x[0][en ? "en" : "fr"]; }).join(" + "); },
+    ranger: function (a, b) { return a.length - b.length || totalM(b) - totalM(a) || a.slice().sort().join().localeCompare(b.slice().sort().join()); },
+    checklist: [
+      { id: "grammes", fr: "J’ai écrit toutes les masses en grammes : 1 kg = 1 000 g.", en: "I wrote every mass in grams: 1 kg = 1,000 g." },
+      { id: "total", fr: "J’ai calculé le total : ça fait 1 000 g.", en: "I worked out the total: it makes 1,000 g." }
+    ],
+    pouce: { fr: "1 kg, c’est 1 000 g. Dans mon panier, j’ai déjà un paquet de riz de 500 g. Combien de grammes manque-t-il ? Quels produits font ces grammes ?", en: "1 kg is 1,000 g. In my basket I already have a 500 g bag of rice. How many grams are missing? Which things make those grams?" },
+    relances: [
+      { fr: "Le panier avec le plus de produits ? Avec le moins de produits ?", en: "The basket with the most things? With the fewest?" },
+      { fr: "Un panier avec 5 produits tous différents.", en: "A basket with 5 things that are all different." },
+      { fr: "Un panier sans fruit.", en: "A basket with no fruit." },
+      { fr: "Et pour un panier de 2 kg ?", en: "What about a 2 kg basket?" }
+    ],
+    strategies: [
+      { fr: "J’ai écrit 1 kg = 1 000 g.", en: "I wrote 1 kg = 1,000 g." },
+      { fr: "J’ai commencé par un produit, puis j’ai cherché ce qui manque.", en: "I started with one thing, then looked for what was missing." },
+      { fr: "J’ai cherché des produits qui vont bien ensemble (500 + 500, 600 + 400).", en: "I looked for things that go well together (500 + 500, 600 + 400)." },
+      { fr: "J’ai essayé, puis j’ai corrigé.", en: "I tried, then I corrected it." }
+    ],
+    retenir: { fr: "1 kg = 1 000 g. Pour savoir si un panier pèse 1 kg, on écrit toutes les masses en grammes et on les ajoute : 500 g + 250 g + 250 g = 1 000 g = 1 kg.",
+               en: "1 kg = 1,000 g. To find out whether a basket weighs 1 kg, we write every mass in grams and add them: 500 g + 250 g + 250 g = 1,000 g = 1 kg." },
+    exemple: { fr: "500 g + 250 g + 250 g = 1 000 g = 1 kg", en: "500 g + 250 g + 250 g = 1,000 g = 1 kg" },
+    toutes: null, nbToutes: 297,
+    feuille: { colonnes: [{ fr: "Les produits du panier", en: "The things in the basket", large: true }, { fr: "En grammes", en: "In grams", large: true }, { fr: "En tout", en: "Total" }], lignes: 7,
+      bas: { fr: "Comment sais-tu que ton panier pèse bien 1 kg ?", en: "How do you know your basket really weighs 1 kg?" } },
+    fiche: {
+      source: "Problème repris de l’outil « Problèmes ouverts P5 » de la collègue (séquence 4, les masses). D’après Sullivan & Lilburn, « Activités ouvertes en mathématiques » (Chenelière, 2010), « La masse », 8-10 ans, p. 78 : « Je pose trois objets sur une balance. Leur masse combinée est de 3 kg. Quelle peut être la masse de chaque objet ? » ; voir aussi p. 79 (10-12 ans) : « J’ai acheté 500 g de fruits. Quels fruits puis-je avoir achetés et combien peut peser chacun ? »",
+      moment: "Séances 2 et 3 des masses : 1 kg = 1 000 g, problèmes de masse",
+      apprend: ["1 kg = 1 000 g : le paquet de sucre seul fait un panier juste !", "Ajouter des masses en grammes et comparer à 1 000 g.", "Chercher les compléments à 1 000 : 600 + 400, 500 + 250 + 250…", "Écrire une masse en grammes ou en kilogrammes."],
+      pourquoi: ["Beaucoup de paniers possibles (297 !) : les uns s’arrêtent à 500 + 500, les autres en fabriquent de très longs.", "L’étiquette « 1 kg » du sucre, au milieu des grammes, montre qui sait que 1 kg = 1 000 g.", "Il faut calculer, vérifier et ajuster : « il manque 150 g » relance la recherche."],
+      materiel: ["Le mode classe, projeté (les 4 temps).", "Une feuille de recherche par élève ou par groupe (les étiquettes y sont).", "Si possible, la balance de la classe et de vrais produits, ou des masses marquées.", "Les iPad pour le mode autonome : l’élève remplit le panier ; la balance ne montre pas le total, c’est à lui de le calculer avant de vérifier."],
+      temps: [
+        ["Poser la question", "5 min", "Projette l’énoncé. Faites lire les étiquettes et dire ce que veut dire « 1 kg en tout ». Ne donne aucune méthode.", "« Qu’est-ce qu’on cherche ? Peut-on prendre deux fois le même produit ? » (oui)"],
+        ["Chercher par 2 ou 3", "15 à 20 min", "Lance le minuteur et observe. Un groupe additionne « 1 + 500 » : relance sur l’unité. Un groupe bloque : le coup de pouce. Un groupe a trouvé : les relances.", "« 1 kg, c’est combien de grammes ? »"],
+        ["Mettre en commun", "15 min", "Touche les produits du panier d’un groupe, puis « Ajouter au tableau ». Laisse la classe donner son avis, puis vérifie. « Ranger » classe les paniers par nombre de produits.", "« Ça fait combien en tout ? Il manque combien pour 1 kg ? » « Écris-le en grammes, puis en kilogrammes. »"],
+        ["Retenir", "5 à 10 min", "La trace écrite (1 kg = 1 000 g), puis les paniers de la classe, rangés. « Qui a le panier avec le plus de produits ? »", ""]
+      ],
+      reponses: "297 paniers en tout. Par exemple : le sucre seul ; 2 paquets de riz ; papaye + mangue ; riz + 2 plaquettes de beurre ; papaye + 2 avocats ; 2 mangues + avocat ; riz + mangue + citron ; mangue + beurre + avocat + citron + œuf ; riz + avocat + banane + citron + œuf. Le panier le plus court est le sucre seul, le plus long 20 œufs. Pour vérifier, on écrit tout en grammes : 600 g + 400 g = 1 000 g = 1 kg.",
+      erreurs: [
+        ["Sucre + riz = 501.", "1 kg lu comme 1 g.", "« Le paquet de sucre est-il plus léger que le riz ? 1 kg, c’est combien de grammes ? »"],
+        ["Un panier de 1 100 g accepté.", "Le total n’est pas comparé à 1 000 g.", "« Refais le total. Il y a combien de trop ? »"],
+        ["600 + 400 et 400 + 600 comptés comme deux paniers.", "L’ordre des produits ne compte pas.", "« C’est le même panier ? »"],
+        ["250 + 250 = 450.", "Une erreur de calcul.", "« 250 + 250, c’est le double de 250. Combien ? »"]
+      ],
+      niveaux: ["Choisit des produits au hasard, sans calculer le total.", "Trouve le sucre seul ou 500 + 500, mais se trompe en mélangeant kg et g.", "Trouve plusieurs paniers justes, avec quelques erreurs de calcul.", "Trouve des paniers variés et les vérifie en grammes et en kilogrammes.", "Trouve des paniers avec des contraintes (5 produits différents, sans fruit) ou s’organise pour en trouver beaucoup."],
+      reinvestir: ["« J’ai acheté 500 g de fruits. Quels fruits ai-je pu acheter ? »", "« Je pose trois objets sur la balance : ils pèsent 3 kg en tout. Combien peut peser chaque objet ? »"]
+    }
+  };
 })();

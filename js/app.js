@@ -572,6 +572,8 @@
     diagrammes: { ref: "Mathématiques · Nombres et calculs (résolution de problèmes)", att: [ATT_NC[0]], comp: ["representer", "modeliser", "calculer"], rp: "mathématiques p. 7 et 8",
       reperes: ["L’élève résout des problèmes nécessitant : plusieurs étapes ; la gestion de données numériques variées (utiles ou non à la résolution du problème) ; plusieurs opérations nécessitant par exemple l’exploration d’un tableau ou d’un graphique.", "L’élève lit des données numériques organisées sous forme de diagrammes en barres. Il exploite ces données pour répondre à des questions ou résoudre des problèmes."] }
   };
+  PROG.masses = { ref: "Mathématiques · Grandeurs et mesures (masses)", att: ATT_GM, comp: ["chercher", "modeliser", "calculer", "communiquer"], rp: "mathématiques p. 13 et 15",
+    reperes: ["L’élève fait correspondre un mesurage de masse à l’unité convenable (voir le lexique spécifique associé).", "L’élève connaît et utilise le kilogramme, le gramme, la tonne pour exprimer une mesure de masse, choisit l’unité appropriée pour exprimer et rendre compte de l’estimation d’une mesure.", "Il met en relation les unités et connaît et utilise ces relations : 1t = 1 000kg ; 1kg=1 000g pour comparer des mesures ou effectuer des calculs.", "Il construit des rapports simples de masse : double et moitié : exemple la moitié de 1kg est 500g ; multiples de 10 ;100 ;1 000 : exemple 2kg=2x1 000g"] };
   PROG.digitale = { ref: PROG.heure.ref, att: PROG.heure.att, comp: PROG.heure.comp, rp: "mathématiques p. 16 et 17",
     reperes: ["Il lit l’heure sur un affichage digital.", "Il repère des évènements de la journée en utilisant les heures, et les minutes.", "Il connaît et utilise la relation : 1h=60min pour comparer des durées."] };
   function encadreProgramme(cle) {
@@ -1125,7 +1127,7 @@
   });
   /* ---------- fiches d'exercices à imprimer (D-94) : une par séquence, tirée au hasard, avec corrigé facultatif ---------- */
   var EXF = null;
-  function boutonExos(seq) { return ensOuvert ? '<a class="coco-btn coco-btn--secondaire" href="#exos-' + seq + '"><svg class="ex-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 8V3h10v5M7 17H4v-7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v7h-3M7 14h10v7H7z"/></svg>' + (langue === "en" ? "Worksheet" : "Fiche d’exercices") + "</a>" : ""; }
+  function boutonExos(seq) { return ensOuvert && ROUTES["exos-" + seq] ? '<a class="coco-btn coco-btn--secondaire" href="#exos-' + seq + '"><svg class="ex-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 8V3h10v5M7 17H4v-7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v7h-3M7 14h10v7H7z"/></svg>' + (langue === "en" ? "Worksheet" : "Fiche d’exercices") + "</a>" : ""; }
   var EXOS = {
     heure: {
       seq: "seq-heure", matiere: "maths", titre: function () { return tr(C.heure.titre); },
@@ -1916,10 +1918,10 @@
   }
   /* zone de manipulation : pièces ou étals du marché */
   /* problèmes « réglages » (division…) : réglettes − / +, champs à taper et dessin */
-  function depart(p) { if (!p.champs) return []; var s = {}; p.champs.forEach(function (c) { s[c.k] = c.saisie ? "" : c.depart; }); return s; }
-  function pret(p, sel) { if (!p.champs) return sel.length > 0; return p.champs.every(function (c) { return !c.saisie || /^\d+$/.test(String(sel[c.k])); }); }
-  function copie(p, sel) { return p.champs ? JSON.parse(JSON.stringify(sel)) : sel.slice(); }
-  function relancer(p, sel) { if (!p.champs) return []; var s = copie(p, sel); p.champs.forEach(function (c) { if (c.saisie) s[c.k] = ""; }); return s; }
+  function depart(p) { if (p.depart) return p.depart(); if (!p.champs) return []; var s = {}; p.champs.forEach(function (c) { s[c.k] = c.saisie ? "" : c.depart; }); return s; }
+  function pret(p, sel) { if (p.pret) return p.pret(sel); if (!p.champs) return sel.length > 0; return p.champs.every(function (c) { return !c.saisie || /^\d+$/.test(String(sel[c.k])); }); }
+  function copie(p, sel) { return Array.isArray(sel) ? sel.slice() : JSON.parse(JSON.stringify(sel)); }
+  function relancer(p, sel) { if (p.depart) return p.depart(); if (!p.champs) return []; var s = copie(p, sel); p.champs.forEach(function (c) { if (c.saisie) s[c.k] = ""; }); return s; }
   function regler(p, sel, el) {
     var c = p.champs.filter(function (x) { return x.k === el.dataset.k; })[0]; if (!c) return;
     sel[c.k] = Math.max(c.min, Math.min(c.max, sel[c.k] + (+el.dataset.d) * (c.pas || 1)));
@@ -1937,6 +1939,8 @@
   }
   function manipulation(p, sel, actAjout, actRetire, actif) {
     if (p.champs) return reglages(p, sel, actAjout.charAt(0), actif !== false);
+    if (p.type === "panier") return maniPanier(sel, actAjout, actRetire);
+    if (p.type === "etiquette") return maniEtiquette(sel, actAjout, actAjout.charAt(0), actif !== false);
     if (p.type === "pieces") {
       var total = sel.reduce(function (a, b) { return a + b; }, 0);
       return "<h3>" + (langue === "en" ? "The coins" : "Les pièces") + '</h3><div class="po-pieces">' + PO.PIECES.map(function (v) { return pieceBtn(v, actAjout); }).join("") + "</div>" +
@@ -1950,11 +1954,30 @@
   }
   function basculer(p, sel, v) {
     if (p.type === "pieces") { if (sel.length < 30) sel.push(+v); return; }
+    if (p.type === "panier") { if (sel.length < 25) sel.push(v); return; }
+    if (p.type === "etiquette") { var kv = v.split(":"); if (kv[0] === "o") { sel.o = sel.o === kv[1] ? "" : kv[1]; sel.libre = ""; } else sel.u = sel.u === kv[1] ? "" : kv[1]; return; }
     var i = sel.indexOf(v); if (i >= 0) sel.splice(i, 1); else sel.push(v);
   }
   function enonceBloc(p) {
     var prix = p.type === "marche" ? '<span class="po-prix">' + PO.FRUITS.map(function (f) { return esc(f[langue] || f.fr) + " <b>" + f.prix + " F</b>"; }).join(" · ") + "</span>" : "";
-    return tr(p.enonce) + prix;
+    return tr(p.enonce) + prix + (p.enonceExtra ? p.enonceExtra(langue) : "");
+  }
+  /* les masses (D-109) : le panier (on peut prendre plusieurs fois le même produit) et le tri des étiquettes */
+  function maniPanier(sel, actAjout, actRetire) {
+    var en = langue === "en";
+    return "<h3>" + (en ? "The shop · tap a thing to put it in the basket" : "Le magasin · touche un produit pour le mettre dans le panier") + '</h3><div class="po-etal">' +
+      PO.PRODUITS_M.map(function (f) { return '<button class="po-fruit" type="button" data-action="' + actAjout + '" data-v="' + f.id + '"><span>' + esc(f[en ? "en" : "fr"]) + "</span><b>" + f.etiq + "</b></button>"; }).join("") + "</div>" +
+      "<h3>" + (en ? "My basket · tap a thing to take it out" : "Mon panier · touche un produit pour l’enlever") + '</h3><div class="po-bourse po-panier" data-vide="' + (en ? "Empty" : "Vide") + '">' +
+      sel.map(function (id, k) { var f = PO.PRODUITS_M.filter(function (x) { return x.id === id; })[0]; return '<button class="po-fruit po-fruit--petit" type="button" data-action="' + actRetire + '" data-k="' + k + '" aria-label="' + esc((en ? "Take out " : "Enlever ") + f[en ? "en" : "fr"]) + '"><span>' + esc(f[en ? "en" : "fr"]) + "</span><b>" + f.etiq + "</b></button>"; }).join("") + "</div>" +
+      '<p class="po-note">' + (sel.length ? (en ? sel.length + " thing" + (sel.length > 1 ? "s" : "") + " in the basket. How much does it weigh altogether? Work it out, then check." : sel.length + " produit" + (sel.length > 1 ? "s" : "") + " dans le panier. Combien pèse-t-il en tout ? Calcule, puis vérifie.") : (en ? "The scale will only show the total when you check." : "La balance ne montre le total que quand tu vérifies.")) + "</p>";
+  }
+  function maniEtiquette(sel, act, pre, actif) {
+    var en = langue === "en", dis = actif ? "" : " disabled";
+    var u = sel.u && sel.u !== "non" ? PO.UNITES_M.filter(function (x) { return x.k === sel.u; })[0].fr.slice(2) : "?";
+    return '<div class="po-etiq"><div class="po-etiq-bal">' + PO.balance("5", u) + '<p class="po-etiq-quoi">' + (sel.o || sel.libre ? esc(sel.libre || PO.OBJETS_M.filter(function (o) { return o.id === sel.o; })[0][en ? "en" : "fr"]) : (en ? "Choose an object…" : "Choisis un objet…")) + "</p></div>" +
+      "<div><h3>" + (en ? "1 · An object" : "1 · Un objet") + '</h3><div class="po-etal po-objets">' + PO.OBJETS_M.map(function (o) { return '<button class="po-fruit po-objet' + (sel.o === o.id ? " is-choisi" : "") + '" type="button" data-action="' + act + '" data-v="o:' + o.id + '" aria-pressed="' + (sel.o === o.id) + '"' + dis + "><span>" + esc(o[en ? "en" : "fr"]) + "</span></button>"; }).join("") + "</div>" +
+      '<label class="po-libre"><span>' + (en ? "…or my own object:" : "… ou mon objet à moi :") + '</span><input type="text" maxlength="40" autocomplete="off" data-po-libre="1" data-mode="' + pre + '" value="' + esc(sel.libre || "") + '" placeholder="' + (en ? "e.g. a dog" : "par exemple : un chien") + '"' + dis + "></label>" +
+      "<h3>" + (en ? "2 · The unit" : "2 · L’unité") + '</h3><div class="coco-row po-unites">' + PO.UNITES_M.map(function (x) { return '<button class="coco-btn ' + (sel.u === x.k ? "" : "coco-btn--secondaire") + '" type="button" data-action="' + act + '" data-v="u:' + x.k + '" aria-pressed="' + (sel.u === x.k) + '"' + dis + ">" + x[en ? "en" : "fr"] + "</button>"; }).join("") + "</div></div></div>";
   }
 
   /* ---------- mode autonome (élève) ---------- */
@@ -1964,7 +1987,7 @@
     if (!A || A.id !== id) A = { id: id, sel: depart(p), sols: [], etape: "cherche", coches: {}, msg: "", pouce: false, relance: 0, strats: {}, range: false };
     var titre = { sous: tr(s.titre) + " · " + t("ouvert"), titre: tr(p.titre) };
     var liste = A.sols.slice(); if (A.range) liste.sort(p.ranger);
-    var sols = liste.map(function (x) { return "<li>" + esc(p.ecrire(x, langue)) + " <b>✓</b></li>"; }).join("");
+    var sols = liste.map(function (x) { return "<li>" + esc(p.ecrire(x, langue)) + (p.estLibre && p.estLibre(x) ? ' <b class="po-adiscuter">?</b>' : " <b>✓</b>") + "</li>"; }).join("");
     var blocSols = '<section class="po-sol"><h3>' + (en ? "My ways: " : "Mes solutions : ") + A.sols.length + "</h3>" + (sols ? "<ol>" + sols + "</ol>" : "") +
       '<p class="po-note">' + (en ? "There is more than one right answer." : "Il n'y a pas qu'une seule bonne réponse.") + "</p>" +
       (A.sols.length > 1 ? '<button class="coco-btn coco-btn--secondaire" type="button" data-action="a-ranger" aria-pressed="' + A.range + '">' + (A.range ? (en ? "Back to my order" : "Remettre dans mon ordre") : (en ? "Sort my ways" : "Ranger mes solutions")) + "</button>" : "") + "</section>";
@@ -2031,9 +2054,13 @@
         A.attente = copie(p, A.sel); A.ecrit = {}; A.rien = rien; A.etape = "ecrit";
         A.msg = retour("bravo", en ? "It works!" : "Ça marche !", en ? "Now write it with numbers." : "Maintenant, écris-la avec des nombres.");
       }
+      else if (r.ok && r.libre) {
+        A.sols.push(copie(p, A.sel)); A.sel = relancer(p, A.sel);
+        A.msg = retour("astuce", en ? "Noted!" : "C’est noté !", esc(r[langue]));
+      }
       else if (r.ok) {
         A.sols.push(copie(p, A.sel)); A.sel = relancer(p, A.sel);
-        A.msg = retour("bravo", t("bravo"), (en ? "It works. " : "Ça marche. ") + noteVerif(rien));
+        A.msg = retour("bravo", t("bravo"), (r[langue] ? esc(r[langue]) + " " : (en ? "It works. " : "Ça marche. ")) + noteVerif(rien));
       } else {
         var meta = faux.length ? "<br>" + (en ? "You ticked « " + tr(faux[0]) + " », but it is not the case yet. Check again." : "Tu as coché « " + tr(faux[0]) + " », mais ce n'est pas encore le cas. Vérifie à nouveau.") : "";
         A.msg = retour("revoir", t("pasEncore"), r[langue] + meta);
@@ -2084,8 +2111,8 @@
     } else if (K.temps === 3) {
       var tab = K.tableau.slice(); if (K.range) tab.sort(function (a, b) { return p.ranger(a.sol, b.sol); });
       var cartes = tab.map(function (c) {
-        var idx = K.tableau.indexOf(c), r = p.verifier(c.sol), etat = c.vu ? (r.ok ? "ok" : "non") : "";
-        return '<button class="k-carte ' + etat + '" type="button" data-action="k-voir" data-k="' + idx + '"><span>' + esc(p.ecrire(c.sol, langue)) + "</span>" + (c.vu ? "<small>" + (r.ok ? "✓ " + (en ? "It works" : "Ça marche") : "↻ " + esc(r[langue])) + "</small>" : "<small>" + (en ? "Tap to check" : "Touche pour vérifier") + "</small>") + "</button>";
+        var idx = K.tableau.indexOf(c), r = p.verifier(c.sol), etat = c.vu ? (r.libre ? "libre" : r.ok ? "ok" : "non") : "";
+        return '<button class="k-carte ' + etat + '" type="button" data-action="k-voir" data-k="' + idx + '"><span>' + esc(p.ecrire(c.sol, langue)) + "</span>" + (c.vu ? "<small>" + (r.libre ? "? " + (en ? "To discuss: does it really weigh that much? We weigh it or look it up." : "À discuter : ça pèse vraiment autant ? On le pèse ou on se renseigne.") : r.ok ? "✓ " + (r[langue] ? esc(r[langue]) : (en ? "It works" : "Ça marche")) : "↻ " + esc(r[langue])) + "</small>" : "<small>" + (en ? "Tap to check" : "Touche pour vérifier") + "</small>") + "</button>";
       }).join("");
       corps = '<div class="k-relances">' + [en ? "How do you know?" : "Comment le savez-vous ?", en ? "Is it really a new way?" : "Est-ce vraiment une nouvelle façon ?", en ? "Who did it differently?" : "Qui a fait autrement ?"].map(function (x) { return "<span>" + x + "</span>"; }).join("") + "</div>" +
         '<div class="k-commun"><section class="po-zone m-maths">' + manipulation(p, K.sel, "k-ajout", "k-retire") + '<div class="coco-row"><button class="coco-btn" type="button" data-action="k-tableau"' + (pret(p, K.sel) ? "" : " disabled") + ">" + (en ? "Add to the board" : "Ajouter au tableau") + '</button><button class="coco-btn coco-btn--secondaire" type="button" data-action="k-vider">' + (en ? "Empty" : "Vider") + "</button></div></section>" +
@@ -2127,7 +2154,8 @@
     var p = po(id), s = C[p.sequence];
     var cases = ""; for (var i = 0; i < 8; i++) cases += '<div class="f-case"></div>';
     var rappel = p.type === "pieces" ? "<p><b>Les pièces :</b> " + PO.PIECES.map(function (v) { return v + " F"; }).join(" · ") + "</p>"
-      : p.type === "marche" ? "<p><b>Les prix :</b> " + PO.FRUITS.map(function (f) { return esc(f.fr) + " " + f.prix + " F"; }).join(" · ") + "</p>" : "";
+      : p.type === "marche" ? "<p><b>Les prix :</b> " + PO.FRUITS.map(function (f) { return esc(f.fr) + " " + f.prix + " F"; }).join(" · ") + "</p>"
+      : p.enonceExtra ? "<p>" + p.enonceExtra(langue) + "</p>" : "";
     var zone = '<div class="f-cases">' + cases + "</div>";
     if (p.feuille) {
       var F = p.feuille, lignes = "";
@@ -2208,7 +2236,8 @@
       ensDomaine("m-maths", "Maths · Techniques opératoires", [ensLigne("nina", "La division en ligne", "Période 5, séquence 3 · deux problèmes ouverts", [["Fiche d’exercices", "#exos-division"], ["Voir la séquence", "#seq-division"]])].concat(PO.sequences.division.map(ensPO))) +
       ensDomaine("m-maths", "Maths · Grandeurs et mesures", [ensLigne("mei", "La monnaie et les prix", "Deux problèmes ouverts", [["Fiche d’exercices", "#exos-monnaie"], ["Voir la séquence", "#seq-monnaie"]])].concat(PO.sequences.monnaie.map(ensPO)).concat([
         ensLigne("tehani", "Lire l’heure digitale", "« L’heure à l’ardoise » : 10 jeux collectifs au TBI pour les séances 1 à 3 (outil de la collègue, adapté)", [["Au TBI", JEU_DIGITAL], ["La fiche", "#fiche-digitale"], ["Fiche d’exercices", "#exos-digitale"], ["Voir la séquence", "#seq-digitale"]])]).concat(PO.sequences.digitale.map(ensPO)).concat([
-        ensLigne("coralie", "Lire l’heure à aiguilles", "Découverte guidée et jeu des ardoises au TBI ; leçon, 8 activités", [["Au TBI", "#tbi-heure"], ["La fiche", "#fiche-heure"], ["Fiche d’exercices", "#exos-heure"], ["Voir la séquence", "#seq-heure"]])]).concat(PO.sequences.heure.map(ensPO))) +
+        ensLigne("coralie", "Lire l’heure à aiguilles", "Découverte guidée et jeu des ardoises au TBI ; leçon, 8 activités", [["Au TBI", "#tbi-heure"], ["La fiche", "#fiche-heure"], ["Fiche d’exercices", "#exos-heure"], ["Voir la séquence", "#seq-heure"]])]).concat(PO.sequences.heure.map(ensPO)).concat([
+        ensLigne("sari", "Mesurer des masses", "Période 5, séquence 4 · deux problèmes ouverts (outil de la collègue, adapté)", [["Voir la séquence", "#seq-masses"]])]).concat(PO.sequences.masses.map(ensPO))) +
       ensDomaine("m-maths", "Maths · Résolution de problèmes", [
         ensLigne("adi", "Banque de problèmes (Vergnaud)", "217 problèmes classés par type, avec leurs schémas", [["Ouvrir la banque", "#banque"]]),
         ensLigne("waeko", "Lire un graphique en barres", "Leçon (OGD1), 4 jeux et problèmes", [["La fiche", "#fiche-diagrammes"], ["Fiche d’exercices", "#exos-diagrammes"], ["Voir la séquence", "#seq-diagrammes"]])]);
@@ -2617,6 +2646,16 @@
     } else if (el.dataset.ecrit !== undefined && A) A.ecrit[el.dataset.ecrit] = v;
   });
   document.addEventListener("input", function (e) { if (e.target.id === "mi-reponse" && G) G.typed = e.target.value; });
+  /* « L’étiquette effacée » (D-109) : l’objet tapé par l’élève remplace l’objet choisi dans la liste */
+  document.addEventListener("input", function (e) {
+    var el = e.target; if (!el.dataset || el.dataset.poLibre === undefined) return;
+    var S = el.dataset.mode === "k" ? K : A; if (!S) return;
+    S.sel.libre = el.value.slice(0, 40); if (S.sel.libre) S.sel.o = "";
+    document.querySelectorAll(".po-objet.is-choisi").forEach(function (b) { b.classList.remove("is-choisi"); b.setAttribute("aria-pressed", "false"); });
+    var q = document.querySelector(".po-etiq-quoi"); if (q) q.textContent = S.sel.libre || (langue === "en" ? "Choose an object…" : "Choisis un objet…");
+    var b = document.querySelector('[data-action="' + (el.dataset.mode === "k" ? "k-tableau" : "a-proposer") + '"]'); if (b) b.disabled = !pret(po(S.id), S.sel);
+    if (S === A && A.msg) { A.msg = ""; var rz = document.querySelector(".retour-zone"); if (rz) rz.innerHTML = ""; }
+  });
   document.addEventListener("input", function (e) { var el = e.target; if (!el.dataset || el.dataset.qz === undefined || !QZ) return; var v = el.value.replace(/[^\d]/g, "").slice(0, 5); if (v !== el.value) el.value = v; QZ.val[el.dataset.qz] = v; });
   document.addEventListener("keydown", function (e) { if (e.key === "Enter" && e.target.dataset && e.target.dataset.qz !== undefined) { var b = document.querySelector('[data-action="qz-valider"]'); if (b) b.click(); } });
   document.addEventListener("change", function (e) { if (e.target.id === "ex-liste" && EXF) { EXF.opt = e.target.value; EXF.n = exNouveauNum(); exTirer(); rendre(); } });
@@ -2639,7 +2678,7 @@
   document.addEventListener("keydown", function (e) {
     var el = e.target; if (e.key !== "Enter" || !el.dataset) return;
     if (el.id === "mi-reponse") { var bm = document.querySelector('[data-action="m-valider"]') || document.querySelector('[data-action="m-suite"]'); if (bm) { e.preventDefault(); bm.click(); } return; }
-    var cible = el.dataset.ecrit !== undefined ? "a-ecrit-ok" : el.dataset.poChamp !== undefined ? (el.dataset.mode === "k" ? "k-tableau" : "a-proposer") : "";
+    var cible = el.dataset.ecrit !== undefined ? "a-ecrit-ok" : el.dataset.poChamp !== undefined || el.dataset.poLibre !== undefined ? (el.dataset.mode === "k" ? "k-tableau" : "a-proposer") : "";
     var b = cible && document.querySelector('[data-action="' + cible + '"]'); if (b && !b.disabled) { e.preventDefault(); b.click(); }
   });
   window.addEventListener("hashchange", rendre);

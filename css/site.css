@@ -1051,3 +1051,41 @@ span.tb-grp { box-shadow: none; padding: 1px 4px; border-radius: 6px; }
 .jr-mini-perso { float: right; width: 52px; height: auto; margin: 0 0 4px 8px; }
 @keyframes jr-perso { from { opacity: 0; transform: translateY(14px) scale(.8); } to { opacity: 1; transform: none; } }
 @media (max-width: 760px) { .jr-texte.jr-avec-perso { grid-template-columns: 76px minmax(0, 1fr); gap: 12px; align-items: start; } .jr-perso { width: 76px; } }
+
+/* Les masses (D-109) : balance de cuisine, tri des étiquettes, panier d’un kilo */
+.po-balance { width: 100%; max-width: 200px; height: auto; display: block; }
+.po-bal-plateau { fill: var(--lagon-clair); stroke: var(--lagon-fonce); stroke-width: 3; }
+.po-bal-pied { fill: var(--lagon-fonce); }
+.po-bal-corps { fill: var(--lagon); stroke: var(--lagon-fonce); stroke-width: 4; }
+.po-bal-ecran { fill: #1d2744; }
+.po-bal-v { font: 700 40px var(--font-lecture); fill: #fff; }
+.po-bal-u { font-size: 30px; fill: #bfe3e8; }
+.po-bal-efface { fill: var(--soutien); }
+.po-bal-zone { display: block; max-width: 170px; margin-top: 10px; }
+.k-enonce .po-bal-zone { max-width: 220px; }
+.f-enonce .po-bal-zone { max-width: 120px; }
+.po-etiq { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 20px; align-items: start; }
+.po-etiq-bal { display: grid; justify-items: center; gap: 8px; position: sticky; top: 12px; }
+.po-etiq-quoi { font: 700 22px/1.3 var(--font-lecture); text-align: center; margin: 0; min-height: 1.3em; overflow-wrap: anywhere; }
+.po-objets { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+.po-objet { padding: 10px 8px; }
+.po-objet span { font-size: 18px; line-height: 23px; }
+.po-libre { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 14px 0 4px; font: 600 18px/24px var(--font-texte); color: var(--encre-douce); }
+.po-libre input { flex: 1 1 220px; min-width: 0; height: var(--cible); border: var(--bord) solid var(--trait); border-radius: var(--arrondi-petit); background: var(--carte); color: var(--encre); font: 700 22px/1 var(--font-lecture); padding: 0 12px; }
+.po-libre input:focus { border-color: var(--lagon); }
+.po-unites .coco-btn { min-width: 96px; }
+.po-sol li b.po-adiscuter { color: var(--soutien-fonce); }
+.k-carte.libre { border-color: var(--soutien-fonce); background: var(--soutien-clair); }
+.k-carte.libre small { color: var(--encre); font-weight: 600; }
+.po-panier { gap: 8px; }
+.po-fruit--petit { padding: 6px 10px; box-shadow: 0 3px 0 var(--trait); }
+.po-fruit--petit span { font-size: 16px; line-height: 20px; }
+.po-fruit--petit b { font-size: 18px; }
+.po-colonnes { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 8px 0; }
+.po-colonnes > div { background: var(--carte); border: 2px solid var(--trait); border-radius: var(--arrondi); padding: 10px 12px; }
+.po-colonnes > div > b { font: 700 20px/1.2 var(--font-lecture); color: var(--maths-fonce); }
+.po-colonnes ul { margin: 6px 0 0; padding-left: 18px; }
+.po-colonnes li.trouve { font-weight: 700; color: var(--reussite); }
+@media (max-width: 760px) { .po-etiq { grid-template-columns: 1fr; } .po-etiq-bal { position: static; grid-template-columns: 120px 1fr; align-items: center; justify-items: start; } .po-etiq-quoi { text-align: left; } .po-objets { grid-template-columns: repeat(2, minmax(0, 1fr)); } .po-unites .coco-btn { min-width: 0; flex: 1 1 40%; } }
+.po-corps > * { min-width: 0; }
+.k-commun .po-etiq { grid-template-columns: 1fr; } .k-commun .po-etiq-bal { position: static; grid-template-columns: 150px 1fr; justify-items: start; align-items: center; } .k-commun .po-etiq-quoi { text-align: left; }
