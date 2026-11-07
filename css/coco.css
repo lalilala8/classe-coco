@@ -1,5 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Chewy&family=Fredoka:wght@400;500;600;700&display=swap");
 @font-face { font-family: "KGRed Hands"; src: url("../fonts/KGRedHands.ttf") format("truetype"); font-display: swap; }
+@font-face { font-family: "KG Always A Good Time"; src: url("../fonts/KGAlwaysAGoodTime.ttf") format("truetype"); font-display: swap; }
 /* Classe Coco — jetons de la charte graphique (tokens.json) */
 :root {
   color-scheme: light;

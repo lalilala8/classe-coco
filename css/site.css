@@ -34,7 +34,10 @@ body { min-height: 100vh; }
 /* ---------- accueil ---------- */
 .hero { display: grid; grid-template-columns: minmax(160px, 260px) 1fr; gap: var(--espace-6); align-items: center; }
 .hero img { width: 100%; height: auto; }
-.hero h1 { font: 400 clamp(40px, 6vw, 64px)/1 var(--font-titre); margin: 0 0 18px; color: var(--encre); text-wrap: balance; }
+.hero h1 { font: 400 clamp(40px, 6vw, 64px)/1.05 var(--font-titre); margin: 0 0 18px; color: var(--encre); text-wrap: balance; }
+/* titre de l’accueil sur deux lignes (D-105) : « Maîtresse Coco » / « Miss Coco’s » en KG Always A Good Time, un peu plus grand pour équilibrer */
+.hero h1 .t1, .hero h1 .t2 { display: block; }
+.hero h1 .t2 { font-family: "KG Always A Good Time", var(--font-titre); font-size: 1.12em; line-height: 1.25; }
 .hero .coco-bulle-texte { max-width: 560px; }
 .hero .coco-bulle-texte::before { bottom: auto; top: 24px; }
 .portes { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--espace-6); }

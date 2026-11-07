@@ -51,14 +51,14 @@
   /* ---------- textes de l'interface ---------- */
   var T = {
     fr: { accueil: "Accueil", langue: "Langue", ecouter: "Écouter", retour: "Retour", bonjour: "Bonjour ! Choisis une matière pour commencer.",
-      titre: "La classe de maîtresse Coco", bientot: "Bientôt", ancien: "Dans l'ancien site · à intégrer", demo: "Disponible",
+      titre: "La classe de Maîtresse Coco", titreH: '<span class="t1">La classe de</span> <span class="t2">Maîtresse Coco</span>', bientot: "Bientôt", ancien: "Dans l'ancien site · à intégrer", demo: "Disponible",
       choisisSeq: "Choisis une séquence.", objectif: "Mon objectif :", decouvre: "Je découvre", entraine: "Je m'entraîne", reinvestis: "Je réinvestis",
       ouvert: "Le problème ouvert", rappelle: "Je me rappelle", lecon: "Revoir la leçon", valider: "Valider", suivant: "Suivant", reessayer: "Réessayer",
       indice: "Indice", bravo: "Bravo !", pasEncore: "Pas encore…", astuce: "Astuce de la leçon", fini: "Terminé !", rejouer: "Rejouer",
       versSequence: "Retour à la séquence", question: function (i, n) { return "Question " + i + " sur " + n; },
       fait: "fait ✓", noteFr: "", passe: "Passé", present: "Présent", futur: "Futur" },
     en: { accueil: "Home", langue: "Language", ecouter: "Listen", retour: "Back", bonjour: "Hello! Choose a subject to start.",
-      titre: "Miss Coco's class", bientot: "Coming soon", ancien: "In the old site · to be added", demo: "Available",
+      titre: "Miss Coco’s classroom", titreH: '<span class="t2">Miss Coco’s</span> <span class="t1">classroom</span>', bientot: "Coming soon", ancien: "In the old site · to be added", demo: "Available",
       choisisSeq: "Choose a unit.", objectif: "My goal:", decouvre: "I discover", entraine: "I practise", reinvestis: "I use it",
       ouvert: "The open problem", rappelle: "I remember", lecon: "Look at the lesson again", valider: "Check", suivant: "Next", reessayer: "Try again",
       indice: "Hint", bravo: "Well done!", pasEncore: "Not yet…", astuce: "Tip from the lesson", fini: "Finished!", rejouer: "Play again",
@@ -135,7 +135,7 @@
       return '<a class="porte ' + m.classe + '" href="#' + m.id + '"><img src="' + IMG(m.perso) + '" alt=""><span><b>' + esc(tr(m.nom)) + "</b><i>" + esc(tr(m.sous)) + "</i></span></a>";
     }).join("");
     return barre("accueil") +
-      '<section class="hero"><img src="' + IMG("coralie") + '" alt="Maîtresse Coco"><div><h1>' + t("titre") + "</h1></div></section>" +
+      '<section class="hero"><img src="' + IMG("coralie") + '" alt="Maîtresse Coco"><div><h1>' + t("titreH") + "</h1></div></section>" +
       '<section class="portes">' + portes + "</section>" + '<p class="pied"><a href="#enseignante">Espace enseignante</a></p>';
   }
   function bulleSimple(texte) { return '<div class="coco-bulle-texte"><p>' + texte + "</p></div>"; }
