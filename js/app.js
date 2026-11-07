@@ -204,9 +204,7 @@
       '<div class="coco-row"><button class="coco-btn" type="button" data-action="l-machine">' + (L.machine ? (en ? "Take ne … pas away" : "J'enlève ne … pas") : (en ? "Put ne … pas" : "Je mets ne … pas")) + "</button>" +
       '<button class="coco-btn coco-btn--secondaire" type="button" data-action="l-phrase">' + (en ? "Another sentence" : "Une autre phrase") + "</button></div>" +
       (L.machine ? retour("astuce", t("astuce"), "Le verbe est entre <span class=\"coco-negation\">ne</span> et <span class=\"coco-negation\">pas</span> !") : "") + "</div></section>" +
-      '<section class="retiens"><img src="' + POSE("coralie", "idee") + '" alt=""><div><h3>' + (en ? "I remember" : "Je retiens") + "</h3>" +
-      "<p>Le verbe est un mot qui exprime un <b>état</b> (être, sembler, paraître) ou une <b>action</b>. Il <b>change</b> selon le temps de la phrase.</p>" +
-      "<p>Pour trouver le verbe conjugué dans une phrase, je la mets à la <b>forme négative</b> : le verbe est entre <span class=\"coco-negation\">ne</span> et <span class=\"coco-negation\">pas</span> !</p></div></section>" +
+      jrSection(jrCartesVerbe, "francais") +
       '<div class="coco-row"><a class="coco-btn" href="#jeu-verbe-decouvre">' + t("decouvre") + '</a><a class="coco-btn coco-btn--secondaire" href="#seq-verbe">' + t("versSequence") + "</a></div>";
   }
   function actionLecon(a, el) {
@@ -393,7 +391,7 @@
     return barre("francais") + hautJeu(m, "seq-mots", { sous: tr(C.mots.titre), titre: t("lecon") }) + (en ? '<p class="apercu">' + t("noteFr") + "</p>" : "") +
       bulle("coralie", en ? "Look at the <b>common part</b>, in orange, and the <b>silent or final letter</b>, in yellow." : "Observe la <b>partie commune</b>, en orange, et la <b>lettre muette</b> ou finale, en jaune.") +
       '<div class="mi-lecon">' + miFamillesHTML(false) + "</div>" +
-      '<section class="retiens"><img src="' + POSE("coralie", "idee") + '" alt=""><div><h3>' + (en ? "I remember" : "Je retiens") + "</h3><p>" + (en ? "Invariable words never change: we learn them by heart!" : "Les mots invariables ne changent jamais : on les apprend par cœur !") + "</p></div></section>" +
+      jrSection(jrCartesMots, "francais") +
       '<div class="coco-row"><a class="coco-btn" href="#seq-mots">' + t("versSequence") + "</a></div>";
   }
   function miEcrire(dis) {
@@ -638,8 +636,7 @@
     return barre("maths") + hautJeu(m, "seq-diagrammes", { sous: tr(C.diagrammes.titre), titre: t("lecon") }, "") +
       '<section class="dg-lecon">' + dgFigure(d, { montre: 2 }) + '<ol class="dg-parties">' + parties.map(function (p) { return "<li><b>" + esc(typo(p[0])) + "</b><span>" + esc(typo(p[1])) + "</span></li>"; }).join("") +
       '<li class="dg-exemple"><b>' + (en ? "Example" : "Exemple") + "</b><span>" + (en ? "The papayas bar stops halfway between 10 and 12: <b>11 papayas</b> were sold." : "La barre des papayes s’arrête entre 10 et 12, au milieu : on a vendu <b>11 papayes</b>.") + "</span></li></ol></section>" +
-      '<section class="retiens m-maths"><img src="' + POSE("coralie", "idee") + '" alt=""><div><h3>' + (en ? "I remember" : "Je retiens") + "</h3><p>" + (en ? "We can organise <b>information</b> in two ways: <b>the table</b> and <b>the bar chart</b>." : "On peut organiser des <b>informations</b> sous deux formes : <b>le tableau</b> et <b>le graphique en barres</b>.") + "</p>" +
-      '<div class="dg-deux"><table class="dg-table"><thead><tr><th>' + esc(tr(d.ctx.axeX)) + "</th><th>" + (en ? "Number of " + esc(d.ctx.axe.en) : "Nombre " + esc(d.ctx.axe.de)) + "</th></tr></thead><tbody>" + d.ctx.cats.map(function (_, k) { return "<tr><td>" + esc(dgNom(d, k)) + "</td><td>" + d.vals[k] + "</td></tr>"; }).join("") + "</tbody></table>" + dgFigure(d) + "</div></div></section>";
+      jrSection(jrCartesDiagrammes);
   }
   function jeuDiag(jeu) {
     var J = JEUX_DIAG[jeu], m = MATIERE.maths, en = langue === "en";
@@ -853,13 +850,14 @@
     ];
   }
   var JR_SRC = jrCartes;
-  function jrSection(src) {
+  function jrSection(src, mat) {
     JR_SRC = src || jrCartes;
+    var cls = "jr m-" + (mat || "maths");
     var en = langue === "en", C2 = JR_SRC(en), n = C2.length; if (JR.i >= n) JR.i = 0; var c = C2[JR.i];
     var pastilles = '<ol class="jr-pastilles">' + C2.map(function (x, k) { return '<li><button type="button" data-action="jr-aller" data-v="' + k + '" aria-current="' + (k === JR.i) + '" aria-label="' + esc(x.t) + '">' + (k + 1) + "</button></li>"; }).join("") + "</ol>";
-    if (JR.tout) return '<section class="jr m-maths"><header class="jr-haut"><img src="' + POSE("coralie", "idee") + '" alt=""><h3>' + (en ? "I remember" : "Je retiens") + '</h3><button class="coco-btn coco-btn--secondaire" type="button" data-action="jr-tout">' + (en ? "Card by card" : "Carte par carte") + '</button></header><div class="jr-liste">' +
+    if (JR.tout) return '<section class="' + cls + '"><header class="jr-haut"><img src="' + POSE("coralie", "idee") + '" alt=""><h3>' + (en ? "I remember" : "Je retiens") + '</h3><button class="coco-btn coco-btn--secondaire" type="button" data-action="jr-tout">' + (en ? "Card by card" : "Carte par carte") + '</button></header><div class="jr-liste">' +
       C2.map(function (x) { return '<div class="jr-mini' + (x.complement ? " jr-complement" : "") + '">' + x.svg + "<div><b>" + esc(x.t) + "</b>" + x.txt.map(function (p) { return "<p>" + typo(p) + "</p>"; }).join("") + "</div></div>"; }).join("") + "</div></section>";
-    return '<section class="jr m-maths"><header class="jr-haut"><img src="' + POSE("coralie", "idee") + '" alt=""><h3>' + (en ? "I remember" : "Je retiens") + "</h3>" + pastilles + "</header>" +
+    return '<section class="' + cls + '"><header class="jr-haut"><img src="' + POSE("coralie", "idee") + '" alt=""><h3>' + (en ? "I remember" : "Je retiens") + "</h3>" + pastilles + "</header>" +
       '<div class="jr-carte' + (c.complement ? " jr-complement" : "") + '" key="' + JR.i + '"><div class="jr-illu">' + c.svg + '</div><div class="jr-texte"><h4>' + esc(typo(c.t)) + "</h4>" + c.txt.map(function (p, k) { return '<p class="jr-p" style="animation-delay:' + (0.3 + k * 0.5) + 's">' + typo(p) + "</p>"; }).join("") + (c.note ? '<p class="jr-note">' + esc(typo(c.note)) + "</p>" : "") + "</div></div>" +
       '<footer class="jr-bas"><button class="coco-btn coco-btn--secondaire" type="button" data-action="jr-prec"' + (JR.i === 0 ? " disabled" : "") + ">← " + (en ? "Back" : "Précédent") + '</button><button class="jr-lien" type="button" data-action="jr-tout">' + (en ? "See everything" : "Tout voir") + '</button><button class="coco-btn" type="button" data-action="jr-suiv"' + (JR.i === n - 1 ? " disabled" : "") + ">" + (en ? "Next" : "Suivant") + " →</button></footer></section>";
   }
@@ -1697,6 +1695,67 @@
       { t: en ? "The coins" : "Les pièces", svg: '<div class="lx-illu lx-wrap">' + [200, 100, 50, 20, 10, 5].map(lxArgent).join("") + "</div>", txt: en ? ["Coins of 200 F, 100 F, 50 F, 20 F, 10 F and 5 F."] : ["Les pièces de 200 F, 100 F, 50 F, 20 F, 10 F et 5 F."] },
       { t: en ? "Splitting an amount" : "Décomposer une somme", svg: '<div class="lx-illu lx-col">' + lxPop("<b class=\"lx-somme\">6 875 F</b>", 0) + d.map(function (x, k) { return lxPop('<span class="lx-ligne-arg"><b>' + exMille(x.p) + " F</b> = " + x.l.map(function (v) { return exMille(v) + " F"; }).join(" + ") + "</span>", k + 1); }).join("") + "</div>",
         txt: en ? ["To make an amount of money, we split it:", "6,875 F = 6,000 + 800 + 70 + 5"] : ["Pour pouvoir constituer une somme d’argent, il faut la décomposer :", "6 875 F = 6 000 + 800 + 70 + 5"] }
+    ];
+  }
+  /* « Je retiens » en cartes animées étendu au verbe (CONJ2), aux mots invariables (v0, D-62) et au graphique en barres (OGD1) : D-107.
+     Les phrases de la trace écrite sont reprises mot pour mot et découpées ; en mode EN, les phrases de français restent en français (D-27). */
+  function jrCycle(items) { /* 3 états montrés l'un après l'autre, en boucle */
+    return '<span class="jr-cycle">' + items.map(function (h, k) { return '<span style="animation-delay:' + (k * 2.2) + 's">' + h + "</span>"; }).join("") + "</span>";
+  }
+  function jrCartesVerbe(en) {
+    var V = function (x) { return '<span class="v-marque">' + x + "</span>"; }, N = function (x) { return '<span class="coco-negation">' + x + "</span>"; };
+    var temps = function (lib, a, b) { return '<span class="jr-temps"><small>' + lib + "</small><span>Sarah " + V(a) + " malade.</span><span>Sa mère " + V(b) + " le médecin.</span></span>"; };
+    return [
+      { t: en ? "A state or an action" : "Un état ou une action",
+        svg: '<div class="lx-illu lx-col jr-phrases">' + lxPop('<span class="jr-ph">Sarah ' + V("est") + " malade.<small>" + (en ? "a state" : "un état") + "</small></span>", 0) + lxPop('<span class="jr-ph">Sa mère ' + V("appelle") + " le médecin.<small>" + (en ? "an action" : "une action") + "</small></span>", 2) + "</div>",
+        txt: ["Le verbe est un mot qui exprime un <b>état</b> (être, sembler, paraître) ou une <b>action</b>."] },
+      { t: en ? "It changes with the time" : "Il change selon le temps",
+        svg: '<div class="lx-illu">' + jrCycle([temps(en ? "Yesterday · past" : "Hier · passé", "était", "a appelé"), temps(en ? "Today · present" : "Aujourd’hui · présent", "est", "appelle"), temps(en ? "Tomorrow · future" : "Demain · futur", "sera", "appellera")]) + "</div>",
+        txt: ["Il <b>change</b> selon le temps de la phrase."] },
+      { t: en ? "Finding the verb: ne … pas" : "Pour le trouver : ne … pas",
+        svg: '<div class="lx-illu lx-col jr-phrases"><span class="jr-ph">La pluie tombe sur la forêt.</span>' + lxPop('<span class="jr-fl">↓</span>', 2) + lxPop('<span class="jr-ph">La pluie ' + N("ne") + " " + V("tombe") + " " + N("pas") + " sur la forêt.</span>", 4) + "</div>",
+        txt: ["Pour trouver le verbe conjugué dans une phrase, je la mets à la <b>forme négative</b> :", "le verbe est entre " + N("ne") + " et " + N("pas") + " !"] }
+    ];
+  }
+  function jrCartesMots(en) {
+    var W = function (w) { return motHTML(w, true); };
+    var fam = function (g, f, k) { var G = MO.GROUPS[g], F = G.fams[f]; return lxPop('<span class="jr-fam"><small>' + esc(tr(G.nom)) + '</small><span class="mi-racine">' + MO.html(F.key) + "</span>" + F.words.map(W).join("") + "</span>", k); };
+    var cache = function (k, h) { return lxPop('<span class="jr-etape"><small>' + h + "</small>" + (k === 1 ? '<span class="mi-mot mi-mot--petit jr-cache">bientôt</span>' : k === 2 ? '<span class="mi-mot mi-mot--petit jr-ecrit">bientôt</span>' : W("bien[tô]{t}")) + "</span>", k * 2); };
+    return [
+      { t: en ? "They never change" : "Ils ne changent jamais",
+        svg: '<div class="lx-illu">' + jrCycle(['<span class="jr-ph">Kakou court ' + W("souv[en]{t}") + ".</span>", '<span class="jr-ph">Les cagous courent ' + W("souv[en]{t}") + ".</span>", '<span class="jr-ph">Kakou courait ' + W("souv[en]{t}") + ".</span>"]) + "</div>",
+        txt: [en ? "Invariable words <b>never change</b>." : "Les mots invariables <b>ne changent jamais</b>."] },
+      { t: en ? "Families of words" : "Des familles de mots",
+        svg: '<div class="lx-illu lx-col jr-fams">' + fam(1, 1, 0) + fam(2, 2, 2) + fam(3, 1, 4) + "</div>",
+        txt: [en ? 'Look at the <b class="mi-c">common part</b>, in orange, and the <b class="mi-m">silent or final letter</b>, in yellow.' : 'Observe la <b class="mi-c">partie commune</b>, en orange, et la <b class="mi-m">lettre muette</b> ou finale, en jaune.'] },
+      { t: en ? "Learning them by heart" : "On les apprend par cœur",
+        svg: '<div class="lx-illu">' + cache(0, en ? "I look" : "Je regarde") + cache(1, en ? "I hide" : "Je cache") + cache(2, en ? "I write" : "J’écris") + "</div>",
+        txt: [en ? "We learn them <b>by heart</b>!" : "On les apprend <b>par cœur</b> !"] }
+    ];
+  }
+  function jrGraphique(d, en) { /* graphique en barres animé : les barres montent l'une après l'autre */
+    var X0 = 40, Y0 = 170, H = 140, W = 54, s = '<svg class="jr-svg jr-large jr-graph" viewBox="0 0 330 228" aria-hidden="true">';
+    for (var v = 0; v <= d.max; v += 4) { var y = Y0 - v / d.max * H; s += '<line class="dg-grille" x1="' + X0 + '" y1="' + y + '" x2="318" y2="' + y + '"/><text class="jr-gnb" x="' + (X0 - 6) + '" y="' + (y + 4) + '" text-anchor="end">' + v + "</text>"; }
+    d.vals.forEach(function (val, k) { var h = val / d.max * H, x = X0 + 8 + k * (W + 2);
+      s += '<rect class="dg-barre jr-barre" style="animation-delay:' + (0.3 + k * 0.45) + 's" x="' + x + '" y="' + (Y0 - h) + '" width="' + (W - 12) + '" height="' + h + '"/>' +
+        '<text class="jr-gcat" x="' + (x + (W - 12) / 2) + '" y="' + (Y0 + 16) + '" text-anchor="middle">' + esc(dgNom(d, k)) + "</text>"; });
+    s += '<line class="dg-axe" x1="' + X0 + '" y1="' + Y0 + '" x2="320" y2="' + Y0 + '"/><line class="dg-axe" x1="' + X0 + '" y1="' + Y0 + '" x2="' + X0 + '" y2="16"/>' +
+      '<text class="jr-gaxe" x="' + (X0 - 30) + '" y="10">↑ ' + (en ? "Number of " + esc(d.ctx.axe.en) : "Nombre " + esc(d.ctx.axe.de)) + '</text><text class="jr-gaxe" x="320" y="222" text-anchor="end">' + esc(tr(d.ctx.axeX)) + " →</text></svg>";
+    return s;
+  }
+  function jrCartesDiagrammes(en) {
+    var d = { ctx: DG.CONTEXTES[0], pas: 2, max: 20, vals: [14, 8, 11, 5, 16] };
+    var table = function (anime) { return '<table class="dg-table jr-table"><thead><tr><th>' + esc(tr(d.ctx.axeX)) + "</th><th>" + (en ? "Number of " + esc(d.ctx.axe.en) : "Nombre " + esc(d.ctx.axe.de)) + "</th></tr></thead><tbody>" + d.ctx.cats.map(function (_, k) { return "<tr" + (anime ? ' class="jr-ligne" style="animation-delay:' + (0.3 + k * 0.45) + 's"' : "") + "><td>" + esc(dgNom(d, k)) + "</td><td>" + d.vals[k] + "</td></tr>"; }).join("") + "</tbody></table>"; };
+    return [
+      { t: en ? "Two ways" : "Deux formes",
+        svg: '<div class="lx-illu jr-deux">' + lxPop(table(false), 0) + lxPop(jrGraphique(d, en).replace(/jr-barre"/g, 'jr-barre jr-fixe"'), 2) + "</div>",
+        txt: en ? ["We can organise <b>information</b> in two ways:", "<b>the table</b> and <b>the bar chart</b>."] : ["On peut organiser des <b>informations</b> sous deux formes :", "<b>le tableau</b> et <b>le graphique en barres</b>."] },
+      { t: en ? "The table" : "Le tableau",
+        svg: '<div class="lx-illu">' + table(true) + "</div>",
+        txt: en ? ["<b>The table</b>: one line for each fruit, with its number."] : ["<b>Le tableau</b> : une ligne pour chaque fruit, avec son nombre."] },
+      { t: en ? "The bar chart" : "Le graphique en barres",
+        svg: '<div class="lx-illu">' + jrGraphique(d, en) + "</div>",
+        txt: en ? ["<b>The bar chart</b>: one bar for each fruit. The taller the bar, the bigger the number.", "We name the two axes: <b>" + esc(tr(d.ctx.axeX)) + "</b> and <b>Number of " + esc(d.ctx.axe.en) + "</b>."] : ["<b>Le graphique en barres</b> : une barre pour chaque fruit. Plus la barre est haute, plus le nombre est grand.", "On nomme les deux axes : <b>" + esc(tr(d.ctx.axeX)) + "</b> et <b>Nombre " + esc(d.ctx.axe.de) + "</b>."] }
     ];
   }
   function lxLecon(seq, sous, blocs, src) {

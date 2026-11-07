@@ -562,7 +562,7 @@ body.mode-classe .site { max-width: none; padding-block: 12px 24px; }
 .jr-mini { display: grid; grid-template-columns: 110px 1fr; gap: 12px; align-items: start; background: var(--maths-clair); border-radius: var(--arrondi); padding: 12px; }
 .jr-mini.jr-complement { background: var(--lagon-clair); }
 .jr-mini .jr-svg { max-width: 110px; }
-.jr-mini b { font: 400 21px/25px var(--font-titre); color: var(--maths); display: block; margin-bottom: 4px; }
+.jr-mini > div > b:first-child { font: 400 21px/25px var(--font-titre); color: var(--maths); display: block; margin-bottom: 4px; }
 .jr-mini p { margin: 0 0 4px; font-size: 17px; line-height: 24px; }
 /* dessins */
 .jr-cadran { fill: #fff; stroke: var(--encre); stroke-width: 3; }
@@ -1004,3 +1004,43 @@ span.tb-grp { box-shadow: none; padding: 1px 4px; border-radius: 6px; }
 .ex-sachet.tb-plein { display: inline-flex; flex-wrap: wrap; gap: 4px; align-content: center; justify-content: center; padding: 6px; }
 @media (max-width: 600px) { .tb-scene { font-size: 19px; } .tb-trou.tb-long { min-width: 6em; } .tb-tete h1 { font-size: 26px; } }
 
+
+/* « Je retiens » en cartes animées pour le verbe, les mots invariables et le graphique en barres (D-107) */
+.jr.m-francais { border-color: var(--francais); }
+.jr.m-francais .jr-haut h3, .jr.m-francais .jr-texte h4, .jr.m-francais .jr-mini > div > b:first-child { color: var(--francais); }
+.jr.m-francais .jr-pastilles button { border-color: var(--francais); color: var(--francais); }
+.jr.m-francais .jr-pastilles button[aria-current="true"] { background: var(--francais); color: #fff; }
+.jr.m-francais .jr-carte, .jr.m-francais .jr-mini { background: var(--francais-clair); }
+.jr-mini .lx-illu { padding: 0; gap: 4px; zoom: .55; }
+.jr-mini .jr-graph { max-width: 110px; }
+.jr-phrases { gap: 12px; }
+.jr-ph { display: inline-block; font: 700 24px/1.4 var(--font-lecture); color: var(--encre); background: #fff; border-radius: 12px; padding: 8px 14px; }
+.jr-ph small { display: block; font: 600 15px/1.3 var(--font-texte); color: var(--encre-douce); }
+.jr-fl { font: 700 28px/1 var(--font-texte); color: var(--encre-douce); }
+.jr-cycle { display: inline-grid; }
+.jr-cycle > span { grid-area: 1 / 1; opacity: 0; animation: jr-cycle 6.6s ease infinite both; }
+.jr-temps { display: grid; gap: 6px; font: 700 23px/1.35 var(--font-lecture); background: #fff; border-radius: 12px; padding: 10px 16px; }
+.jr-temps small { font: 600 16px/1.2 var(--font-texte); color: var(--francais); }
+.jr-fams { gap: 10px; }
+.jr-fam { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; background: #fff; border-radius: 12px; padding: 6px 10px; }
+.jr-fam small { flex-basis: 100%; font: 600 14px/1.2 var(--font-texte); color: var(--encre-douce); }
+.jr-fam .mi-racine { font-size: 20px; }
+.jr-etape { display: inline-grid; justify-items: center; gap: 6px; }
+.jr-etape small { font: 600 16px/1.2 var(--font-texte); color: var(--francais); }
+.jr-cache { color: transparent; background: repeating-linear-gradient(45deg, var(--francais-clair) 0 8px, #fff 8px 16px); }
+.jr-ecrit { font-family: var(--font-lecture); background: #fff; border-right-color: var(--encre-douce); }
+.jr-deux { flex-direction: column; align-items: center; }
+.jr-deux .dg-table { font-size: 15px; min-width: 0; }
+.jr-deux .dg-table td { font-size: 17px; }
+.jr-deux .jr-graph { max-width: 230px; }
+.jr-table { background: #fff; }
+.jr-ligne { animation: jr-entre .45s ease-out both; }
+.jr-barre { transform-box: fill-box; transform-origin: 50% 100%; animation: jr-monte .7s ease-out both; }
+.jr-barre.jr-fixe { animation: none; }
+.jr-gnb { font: 500 12px var(--font-texte); fill: var(--encre-douce); }
+.jr-gcat { font: 600 11px var(--font-texte); fill: var(--encre); }
+.jr-gaxe { font: 600 13px var(--font-texte); fill: var(--maths-fonce); }
+@keyframes jr-cycle { 0% { opacity: 0; } 4%, 30% { opacity: 1; } 34%, 100% { opacity: 0; } }
+@keyframes jr-monte { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@media (prefers-reduced-motion: reduce) { .jr-cycle > span:first-child { opacity: 1; } }
+@media (max-width: 600px) { .jr-ph { font-size: 20px; } .jr-temps { font-size: 19px; } }
