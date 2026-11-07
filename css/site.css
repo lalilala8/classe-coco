@@ -1111,3 +1111,18 @@ span.tb-grp { box-shadow: none; padding: 1px 4px; border-radius: 6px; }
 /* téléphone : le bouton « Suivant » des retours passe sous le texte (il débordait de l’écran dans toutes les activités, D-110) */
 @media (max-width: 600px) { .coco-retour { flex-wrap: wrap; } .coco-retour > div:not(.coco-retour-actions) { flex: 1 1 0; min-width: 0; } .coco-retour .coco-retour-actions { flex-basis: 100%; margin-left: 0; } .coco-retour .coco-retour-actions .coco-btn { max-width: 100%; } }
 .lx-echelle-leg { text-align: center; margin-bottom: 0; } .lx-fois { font-size: 28px; }
+
+/* Espace enseignante › Séquences d’apprentissage : boutons harmonisés (D-113) */
+.ens-legende { font-size: 17px; color: var(--encre-douce); margin: 0 0 8px; }
+.ens-boutons { justify-content: flex-end; }
+.ens-avenir { display: inline-grid; justify-items: center; line-height: 1.1; opacity: .55; cursor: default; box-shadow: none; border-style: dashed; filter: grayscale(1); }
+.ens-avenir small { font: 600 13px/1.1 var(--font-texte); }
+.ens-po { margin-left: 56px; grid-template-columns: 56px 1fr auto; padding: 8px 14px; border-width: 2px; }
+.ens-po img { width: 56px; }
+.ens-po b { font-size: 20px; line-height: 24px; }
+@media (max-width: 860px) { .ens-po { margin-left: 20px; } .ens-boutons { justify-content: flex-start; } }
+.ens-seq { grid-template-columns: 80px 1fr; row-gap: 10px; }
+.ens-seq > .ens-boutons { grid-column: 2; justify-content: flex-start; }
+@media (max-width: 860px) { .ens-seq > .ens-boutons { grid-column: 1 / -1; } }
+@media (max-width: 600px) { .ens-boutons { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; } .ens-boutons .coco-btn { width: 100%; min-width: 0; padding-left: 6px; padding-right: 6px; font-size: 15px; } .ens-po { margin-left: 12px; } }
+@media (max-width: 600px) { .ens-boutons .coco-btn { box-sizing: border-box; margin: 0; } }

@@ -2430,20 +2430,44 @@
       return '<a class="ens-dossier" href="#' + d.id + '">' + DOSSIER_SVG + "<b>" + d.t + "</b><small>" + d.d + '</small><span class="ens-compte">' + n[d.id] + "</span></a>";
     }).join("") + "</section>";
   }
-  function pageEnsSequences() {
-    var F = "ens-pb--francais";
-    return ensEntete("Séquences d’apprentissage") +
-      ensDomaine("m-francais", "Français · Grammaire et conjugaison", [ensLigne("tehani", "Le verbe", "Leçon CONJ2, « Le verbe se cache », « Chasse aux verbes »", [["Fiche d’exercices", "#exos-verbe"], ["Voir la séquence", "#seq-verbe"]], F)]) +
-      ensDomaine("m-francais", "Français · Orthographe", [ensLigne("sari", "Les mots invariables", "7 activités, de « Je me rappelle » à la dictée sans erreur", [["La fiche", "#fiche-mots"], ["Fiche d’exercices", "#exos-mots"], ["Voir la séquence", "#seq-mots"]], F)]) +
-      ensDomaine("m-maths", "Maths · Techniques opératoires", [ensLigne("nina", "La division en ligne", "Période 5, séquence 3 · deux problèmes ouverts", [["Fiche d’exercices", "#exos-division"], ["Voir la séquence", "#seq-division"]])].concat(PO.sequences.division.map(ensPO))) +
-      ensDomaine("m-maths", "Maths · Grandeurs et mesures", [ensLigne("mei", "La monnaie et les prix", "Deux problèmes ouverts", [["Fiche d’exercices", "#exos-monnaie"], ["Voir la séquence", "#seq-monnaie"]])].concat(PO.sequences.monnaie.map(ensPO)).concat([
-        ensLigne("tehani", "Lire l’heure digitale", "« L’heure à l’ardoise » : 10 jeux collectifs au TBI pour les séances 1 à 3 (outil de la collègue, adapté)", [["Au TBI", JEU_DIGITAL], ["La fiche", "#fiche-digitale"], ["Fiche d’exercices", "#exos-digitale"], ["Voir la séquence", "#seq-digitale"]])]).concat(PO.sequences.digitale.map(ensPO)).concat([
-        ensLigne("coralie", "Lire l’heure à aiguilles", "Découverte guidée et jeu des ardoises au TBI ; leçon, 8 activités", [["Au TBI", "#tbi-heure"], ["La fiche", "#fiche-heure"], ["Fiche d’exercices", "#exos-heure"], ["Voir la séquence", "#seq-heure"]])]).concat(PO.sequences.heure.map(ensPO)).concat([
-        ensLigne("sari", "Mesurer des masses", "Période 5, séquence 4 · leçon GM8, 5 activités, deux problèmes ouverts (outil de la collègue, adapté)", [["La fiche", "#fiche-masses"], ["La leçon", "#lecon-masses"], ["Fiche d’exercices", "#exos-masses"], ["Voir la séquence", "#seq-masses"]])]).concat(PO.sequences.masses.map(ensPO))) +
-      ensDomaine("m-maths", "Maths · Résolution de problèmes", [
-        ensLigne("adi", "Banque de problèmes (Vergnaud)", "217 problèmes classés par type, avec leurs schémas", [["Ouvrir la banque", "#banque"]]),
-        ensLigne("waeko", "Lire un graphique en barres", "Leçon (OGD1), 4 jeux et problèmes", [["La fiche", "#fiche-diagrammes"], ["Fiche d’exercices", "#exos-diagrammes"], ["Voir la séquence", "#seq-diagrammes"]])]);
+  /* Espace enseignante › Séquences d’apprentissage (D-113) : pour chaque séquence, les mêmes 5 boutons dans le même ordre ;
+     un bouton dont le contenu n’existe pas encore reste visible, grisé, avec « À venir ». Les problèmes ouverts sont rangés sous leur séquence. */
+  function ensBouton(lib, lien, principal) {
+    if (!lien) return '<span class="coco-btn coco-btn--secondaire ens-avenir" aria-disabled="true">' + lib + "<small>À venir</small></span>";
+    return '<a class="coco-btn' + (principal ? "" : " coco-btn--secondaire") + '" href="' + lien + '">' + lib + "</a>";
   }
+  function ensSeq(seq, img, titre, lecon, nbAct, tbi, cls) {
+    var nbPO = (PO.sequences[seq] || []).length;
+    var sous = [lecon ? "Leçon " + lecon : "", nbAct + " activité" + (nbAct > 1 ? "s" : ""), nbPO ? nbPO + " problème" + (nbPO > 1 ? "s" : "") + " ouvert" + (nbPO > 1 ? "s" : "") : ""].filter(Boolean).join(" · ");
+    var boutons = [
+      ensBouton("Fiche enseignante", ROUTES["fiche-" + seq] ? "#fiche-" + seq : "", true),
+      ensBouton("La leçon", ROUTES["lecon-" + seq] ? "#lecon-" + seq : ""),
+      ensBouton("Fiche d’exercices", ROUTES["exos-" + seq] ? "#exos-" + seq : ""),
+      ensBouton("Au TBI", tbi || ""),
+      ensBouton("Voir la séquence", "#seq-" + seq)
+    ].join("");
+    var ligne = '<div class="ens-pb ens-seq' + (cls ? " " + cls : "") + '"><img src="' + IMG(img) + '" alt=""><div><b>' + titre + "</b><small>" + sous + '</small></div><div class="coco-row ens-boutons">' + boutons + "</div></div>";
+    return ligne + (PO.sequences[seq] || []).map(function (id, k) { var p = po(id);
+      return '<div class="ens-pb ens-po' + (cls ? " " + cls : "") + '"><img src="' + IMG(p.perso) + '" alt=""><div><b>' + esc(p.titre.fr) + "</b><small>Problème ouvert " + (k + 1) + " · « " + esc(p.question.fr) + ' »</small></div><div class="coco-row ens-boutons">' +
+        ensBouton("Fiche enseignante", "#fiche-" + id, true) + ensBouton("Au TBI", "#classe-" + id) + ensBouton("Feuille de recherche", "#feuille-" + id) + "</div></div>"; }).join("");
+  }
+  function pageEnsSequences() {
+    var F = "ens-pb--francais", nQ = function (seq) { return QUIZ[seq] ? Object.keys(QUIZ[seq].jeux).length : 0; };
+    return ensEntete("Séquences d’apprentissage") +
+      '<p class="ens-legende">Pour chaque séquence, toujours les mêmes boutons : <b>Fiche enseignante</b>, La leçon, Fiche d’exercices, Au TBI, Voir la séquence. Un bouton grisé « À venir » montre ce qui reste à construire.</p>' +
+      ensDomaine("m-francais", "Français · Grammaire et conjugaison", [ensSeq("verbe", "tehani", "Le verbe", "CONJ2", 2 + nQ("verbe"), "", F)]) +
+      ensDomaine("m-francais", "Français · Orthographe", [ensSeq("mots", "sari", "Les mots invariables", "affiches 2026", Object.keys(JEUX_MOTS).length, "", F)]) +
+      ensDomaine("m-maths", "Maths · Techniques opératoires", [ensSeq("division", "nina", "La division en ligne", "CAL7 et CAL8", nQ("division"), "")]) +
+      ensDomaine("m-maths", "Maths · Grandeurs et mesures", [
+        ensSeq("monnaie", "mei", "La monnaie et les prix", "GM1", nQ("monnaie"), ""),
+        ensSeq("digitale", "tehani", "Lire l’heure digitale", "GM5", nQ("digitale"), JEU_DIGITAL),
+        ensSeq("heure", "coralie", "Lire l’heure à aiguilles", "GM5", Object.keys(JEUX_HEURE).length, "#tbi-heure"),
+        ensSeq("masses", "sari", "Mesurer des masses", "GM8", nQ("masses"), "")]) +
+      ensDomaine("m-maths", "Maths · Résolution de problèmes", [
+        ensSeq("diagrammes", "waeko", "Lire un graphique en barres", "OGD1", Object.keys(JEUX_DIAG).length, ""),
+        ensLigne("adi", "Banque de problèmes (Vergnaud)", "217 problèmes classés par type, avec leurs schémas", [["Ouvrir la banque", "#banque"]])]);
+  }
+
 
   /* ==========================================================================================
      Suivi des étoiles de calcul (D-97) : Espace enseignante › Suivi des élèves
