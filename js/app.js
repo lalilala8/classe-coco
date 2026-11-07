@@ -7,7 +7,7 @@
   var UNIQUE = window.COCO_PAGE_UNIQUE || "", IMAGES = window.COCO_IMAGES || {};
   var IMG = function (n) { return IMAGES[n] || "img/personnages/" + n + ".webp"; };
   /* postures des personnages (D-88, D-89) : presente, reflechit, victoire, idee, content */
-  var POSTURES = ["coralie", "leo", "mei", "tao", "wadra", "dylan", "tehani", "vaka", "waeko", "kakou", "margouille"];
+  var POSTURES = ["coralie", "leo", "mei", "tao", "wadra", "dylan", "tehani", "vaka", "waeko", "kakou", "margouille", "nina", "adi", "sari"];
   var POSE = function (n, p) { return !IMAGES[n] && POSTURES.indexOf(n) >= 0 ? "img/postures/" + n + "-" + p + ".webp" : IMG(n); };
   /* fin de jeu : victoire si l'élève a très bien réussi (80 % et plus), content sinon */
   var POSE_BILAN = function (n, sc, total) { return POSE(n, !total || sc / total >= 0.8 ? "victoire" : "content"); };
