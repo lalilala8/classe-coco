@@ -3,26 +3,25 @@ html { background: var(--papier); }
 body { min-height: 100vh; }
 .site { max-width: 1100px; margin: 0 auto; padding-block: 20px 56px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: var(--espace-8); }
 .barre { display: flex; justify-content: space-between; align-items: center; gap: var(--espace-4); flex-wrap: wrap; }
-.barre .coco-onglet img { width: 26px; height: 26px; }
-.barre .coco-onglet .onglet-maison { width: 26px; height: 26px; flex: none; }
-/* onglets au repos : fond clair de la couleur du texte (demande de l'enseignante, 06/11/2026) */
-.barre .coco-onglet { background: var(--c-clair); }
-.barre .coco-onglet--francais { --c-clair: var(--francais-clair); }
-.barre .coco-onglet--maths { --c-clair: var(--maths-clair); }
-.barre .coco-onglet--anglais { --c-clair: var(--anglais-clair); }
-.barre .coco-onglet--qlm { --c-clair: var(--qlm-clair); }
-.barre .coco-onglet[aria-current="page"] { background: var(--c); }
-/* relief des onglets : un socle dans la teinte foncée de leur couleur, comme les boutons (demande du 07/11/2026) */
-.barre .coco-onglet { --c-fonce: var(--lagon-fonce); box-shadow: 0 4px 0 var(--c-fonce), 0 6px 10px rgba(29, 39, 68, .12); margin-bottom: 4px; transition: transform .12s ease, box-shadow .12s ease; }
-.barre .coco-onglet--francais { --c-fonce: var(--francais-fonce); }
-.barre .coco-onglet--maths { --c-fonce: var(--maths-fonce); }
-.barre .coco-onglet--anglais { --c-fonce: var(--anglais-fonce); }
-.barre .coco-onglet--qlm { --c-fonce: var(--qlm-fonce); }
-.barre .coco-onglet:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--c-fonce); }
-@media (prefers-reduced-motion: reduce) { .barre .coco-onglet { transition: none; } }
+/* onglets « surligneur avec petits avatars » (choix de l'enseignante, D-79) : pas de cadre, le personnage de la matière à côté du nom,
+   un trait de surligneur sur l'onglet ouvert ; zone à toucher d'au moins 48 px de haut */
+.barre .coco-onglets { gap: 4px 10px; align-items: center; }
+.barre .coco-onglet { border: 0; background: none; min-height: 48px; padding: 0 10px 0 4px; gap: 8px; font-size: 21px; line-height: 1; border-radius: var(--arrondi-petit); color: var(--c); }
+.barre .coco-onglet--francais { --c-clair: #c3d4f2; }
+.barre .coco-onglet--maths { --c-clair: #f6c4c6; }
+.barre .coco-onglet--anglais { --c-clair: #dccbef; }
+.barre .coco-onglet--qlm { --c-clair: #cfe8bf; }
+.barre .coco-onglet:not([class*="coco-onglet--"]) { --c-clair: #b5e6ec; }
+.barre .coco-onglet .onglet-av { width: 36px; height: 36px; flex: none; border-radius: 50%; object-fit: cover; }
+.barre .coco-onglet span { padding: 6px 2px; }
+.barre .coco-onglet[aria-current="page"] { background: none; color: var(--c); }
+.barre .coco-onglet[aria-current="page"] span { background: linear-gradient(177deg, transparent 50%, var(--c-clair) 51%, var(--c-clair) 84%, transparent 85%); padding: 6px 6px; }
+.barre .coco-onglet:hover span { text-decoration: underline 2px; text-underline-offset: 5px; }
+.barre .coco-onglet[aria-current="page"]:hover span { text-decoration: none; }
+.barre .coco-onglet:focus-visible { outline: 3px solid var(--c); outline-offset: 2px; }
 /* sélecteur FR / EN : même police et même relief que les onglets (demande du 07/11/2026) */
 .barre .coco-langue { box-shadow: 0 4px 0 var(--encre), 0 6px 10px rgba(29, 39, 68, .12); margin-bottom: 4px; }
-.barre .coco-langue button { font: 400 22px/1 var(--font-titre); letter-spacing: .02em; }
+.barre .coco-langue button { font: 400 20px/1 var(--font-titre); letter-spacing: .02em; }
 /* sous-domaines des pages Français, Maths… : titre dans la couleur de la matière, filet clair (demande du 07/11/2026) */
 .domaine-matiere { --mc: var(--c); --mcf: var(--cf); }
 .domaine.domaine-matiere h2 { display: flex; align-items: center; gap: 12px; color: var(--c); }
@@ -52,10 +51,10 @@ body { min-height: 100vh; }
 /* ---------- page matière ---------- */
 .entete { display: grid; grid-template-columns: auto 1fr; gap: var(--espace-6); align-items: center; }
 .entete img { width: 120px; height: 120px; object-fit: contain; background: var(--cc); border-radius: 50%; border: var(--bord) solid var(--c); }
-.entete h1 { font: 400 48px/52px var(--font-titre); margin: 0; color: var(--c); }
+.entete h1 { font: 400 42px/46px var(--font-titre); margin: 0; color: var(--c); }
 .entete p { margin: 4px 0 0; color: var(--encre-douce); }
 .domaine { display: grid; gap: var(--espace-4); }
-.domaine h2 { font: 400 32px/38px var(--font-titre); margin: 0; color: var(--encre); }
+.domaine h2 { font: 400 28px/34px var(--font-titre); margin: 0; color: var(--encre); }
 .sequences { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: var(--espace-4); }
 .seq { --c: var(--lagon); --cf: var(--lagon-fonce); text-decoration: none; color: var(--encre); background: var(--carte); border: var(--bord) solid var(--c); border-radius: var(--arrondi); padding: 14px 18px; display: grid; gap: 4px; box-shadow: 0 var(--socle) 0 var(--cf); }
 .seq small { font: 500 15px/20px var(--font-texte); color: var(--encre-douce); }
@@ -73,7 +72,7 @@ body { min-height: 100vh; }
 .jeu { display: grid; gap: var(--espace-6); }
 .jeu-haut { display: grid; grid-template-columns: auto 1fr auto; gap: var(--espace-4); align-items: center; }
 .jeu-haut small { font: 500 16px/22px var(--font-texte); color: var(--encre-douce); }
-.jeu-haut h1 { font: 400 36px/40px var(--font-titre); margin: 0; color: var(--c); }
+.jeu-haut h1 { font: 400 32px/36px var(--font-titre); margin: 0; color: var(--c); }
 .zone { background: var(--carte); border: var(--bord) solid var(--c); border-radius: var(--arrondi-grand); padding: 32px 24px; display: grid; gap: 20px; justify-items: center; text-align: center; }
 .zone .coco-row { justify-content: center; }
 .zone .phrase { font: 400 26px/38px var(--font-lecture); margin: 0; }
@@ -85,9 +84,9 @@ body { min-height: 100vh; }
 .retour-zone:empty { display: none; }
 .bilan { display: grid; gap: var(--espace-4); justify-items: center; text-align: center; background: var(--reussite-clair); border: var(--bord) solid var(--reussite); border-radius: var(--arrondi-grand); padding: 28px; }
 .bilan img { width: 150px; }
-.bilan h2 { font: 400 40px/44px var(--font-titre); margin: 0; color: var(--reussite); }
+.bilan h2 { font: 400 35px/39px var(--font-titre); margin: 0; color: var(--reussite); }
 .lecon { background: var(--carte); border: var(--bord) solid var(--c); border-radius: var(--arrondi-grand); padding: 24px 28px; display: grid; gap: 14px; }
-.lecon h2 { font: 400 32px/36px var(--font-titre); margin: 0; color: var(--c); }
+.lecon h2 { font: 400 28px/32px var(--font-titre); margin: 0; color: var(--c); }
 .lecon p { margin: 0; }
 .lecon .exemple { font: 400 24px/36px var(--font-lecture); background: var(--cc); border-radius: var(--arrondi-petit); padding: 10px 16px; }
 .etape-titre { font: 600 18px/24px var(--font-texte); color: var(--encre-douce); text-transform: none; margin: 0; }
@@ -125,8 +124,8 @@ body { min-height: 100vh; }
   .portes { grid-template-columns: 1fr; }
   .jeu-haut { grid-template-columns: auto 1fr; }
   .jeu-haut .jeu-prog { grid-column: 1 / -1; }
-  .jeu-haut h1 { font-size: 30px; line-height: 34px; }
-  .barre .coco-onglet { font-size: 20px; padding: 0 10px; }
+  .jeu-haut h1 { font-size: 27px; line-height: 31px; }
+  .barre .coco-onglet { font-size: 19px; }
   .coco-bulle-perso { width: 72px; }
   .entete { grid-template-columns: 1fr; }
   .coco-etiquette { font-size: 26px; }
@@ -137,7 +136,7 @@ body { min-height: 100vh; }
 
 /* ---------- leçon interactive ---------- */
 .lecon-bloc { background: var(--carte); border: var(--bord) solid var(--c); border-radius: var(--arrondi-grand); padding: 22px 26px; display: grid; gap: 16px; }
-.lecon-bloc h3 { font: 400 30px/34px var(--font-titre); color: var(--c); margin: 0; }
+.lecon-bloc h3 { font: 400 26px/30px var(--font-titre); color: var(--c); margin: 0; }
 .lecon-num { display: inline-grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: var(--c); color: var(--sur-couleur); font: 700 20px/1 var(--font-texte); margin-right: 10px; vertical-align: 4px; text-shadow: none; }
 .duo { display: grid; grid-template-columns: 1fr 1fr; gap: var(--espace-6); }
 .retourne { font: inherit; color: var(--encre); background: var(--cc); border: var(--bord) solid var(--c); border-radius: var(--arrondi); padding: 16px; display: grid; grid-template-columns: 110px 1fr; gap: 14px; align-items: center; text-align: left; cursor: pointer; box-shadow: 0 var(--socle) 0 var(--cf); }
@@ -156,7 +155,7 @@ body { min-height: 100vh; }
 .machine .ph { font: 400 30px/48px var(--font-lecture); }
 .retiens { background: var(--francais-clair); border: var(--bord) solid var(--francais); border-radius: var(--arrondi-grand); padding: 22px 26px; display: grid; grid-template-columns: 120px 1fr; gap: 20px; align-items: center; }
 .retiens img { width: 120px; }
-.retiens h3 { font: 400 32px/36px var(--font-titre); color: var(--francais); margin: 0 0 8px; }
+.retiens h3 { font: 400 28px/32px var(--font-titre); color: var(--francais); margin: 0 0 8px; }
 .retiens p { margin: 0 0 8px; font-size: 21px; line-height: 31px; }
 @media (max-width: 760px) { .duo { grid-template-columns: 1fr; } .retiens { grid-template-columns: 1fr; } .retourne { grid-template-columns: 80px 1fr; } .retourne img { width: 80px; height: 80px; } }
 @media (prefers-reduced-motion: reduce) { .apparait { animation: none; } }
@@ -236,12 +235,12 @@ body.mode-classe .site { max-width: none; padding-block: 12px 24px; }
 .ens-liste { display: grid; gap: 14px; }
 .ens-pb { display: grid; grid-template-columns: 80px 1fr auto; gap: 16px; align-items: center; background: var(--carte); border: var(--bord) solid var(--maths); border-radius: var(--arrondi-grand); padding: 12px 18px; }
 .ens-pb img { width: 80px; }
-.ens-pb b { display: block; font: 400 26px/30px var(--font-titre); color: var(--maths); }
+.ens-pb b { display: block; font: 400 23px/27px var(--font-titre); color: var(--maths); }
 .ens-pb small { font-size: 17px; color: var(--encre-douce); }
 .f-source { font-size: 15px; line-height: 21px; color: var(--encre-douce); font-style: italic; }
 .fiche, .feuille { background: var(--carte); border: var(--bord) solid var(--maths); border-radius: var(--arrondi-grand); padding: 28px 32px; display: grid; gap: 16px; font-size: 18px; line-height: 27px; }
-.fiche h1, .feuille h1 { font: 400 42px/46px var(--font-titre); color: var(--maths); margin: 0; }
-.fiche h2, .feuille h2 { font: 400 26px/30px var(--font-titre); color: var(--maths-fonce); margin: 0 0 6px; }
+.fiche h1, .feuille h1 { font: 400 37px/41px var(--font-titre); color: var(--maths); margin: 0; }
+.fiche h2, .feuille h2 { font: 400 23px/27px var(--font-titre); color: var(--maths-fonce); margin: 0 0 6px; }
 .fiche ul, .fiche ol, .feuille ul, .feuille ol { margin: 0; padding-left: 22px; }
 .f-q { font: 600 22px/30px var(--font-texte); margin: 0; }
 .f-deux { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
@@ -388,7 +387,7 @@ body.mode-classe .site { max-width: none; padding-block: 12px 24px; }
 .mi-prep .mi-mot { font-size: 30px; }
 .mi-prep small { font-size: 16px; color: var(--encre-douce); }
 .mi-lecon, .mi-outil { display: grid; gap: var(--espace-6); }
-.mi-groupe h3 { font: 400 28px/32px var(--font-titre); color: var(--francais); margin: 0 0 12px; }
+.mi-groupe h3 { font: 400 25px/29px var(--font-titre); color: var(--francais); margin: 0 0 12px; }
 .mi-familles { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
 .mi-famille { display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: center; background: var(--carte); border: 2px solid var(--trait); border-radius: var(--arrondi); padding: 12px 14px; }
 .mi-racine { font: 700 30px/1 var(--font-lecture); background: var(--mot-etiquette); border: 2px solid var(--encre); border-right: 6px solid var(--mot-bord); border-radius: 14px; padding: 8px 12px; white-space: nowrap; }
@@ -485,7 +484,7 @@ body.mode-classe .site { max-width: none; padding-block: 12px 24px; }
 .hr-reglages h3 { margin: 0; font: 600 20px/26px var(--font-texte); }
 @media (max-width: 860px) { .hr-rec, .hr-tbi-dec, .hr-tbi-run { grid-template-columns: 1fr; } .hr-saisie span { min-width: 0; text-align: center; width: 100%; } }
 @media (prefers-reduced-motion: reduce) { .hr-tbi-barre i { transition: none; } }
-@media (max-width: 520px) { .barre .coco-langue button { font-size: 20px; min-width: 64px; } .domaine.domaine-matiere h2 { font-size: 28px; line-height: 32px; } }
+@media (max-width: 520px) { .barre .coco-langue button { font-size: 18px; min-width: 64px; } .domaine.domaine-matiere h2 { font-size: 25px; line-height: 29px; } .barre .coco-onglets { gap: 0 6px; } .barre .coco-onglet { font-size: 18px; padding: 0 6px 0 2px; gap: 5px; min-height: 44px; } .barre .coco-onglet .onglet-av { width: 30px; height: 30px; } }
 
 /* encadré « Programme et repères » des fiches enseignantes (D-77) */
 .f-prog { background: var(--lagon-clair); border: var(--bord) solid var(--lagon); border-radius: var(--arrondi-grand); padding: 16px 20px; display: grid; gap: 8px; break-inside: avoid; }
@@ -529,6 +528,10 @@ body.mode-classe .site { max-width: none; padding-block: 12px 24px; }
 .dg-lecon { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 24px; align-items: center; background: var(--carte); border: var(--bord) solid var(--maths); border-radius: var(--arrondi-grand); padding: 20px; }
 .dg-parties { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
 .dg-parties li { display: grid; gap: 2px; }
-.dg-parties li > b { font: 400 22px/26px var(--font-titre); color: var(--maths); }
+.dg-parties li > b { font: 400 20px/24px var(--font-titre); color: var(--maths); }
 .dg-parties .dg-exemple { background: var(--maths-clair); border-radius: var(--arrondi-petit); padding: 8px 12px; }
 @media (max-width: 860px) { .dg-lecon { grid-template-columns: 1fr; } }
+
+/* titres KG Red Hands environ 12 % plus petits (D-79), sauf l'accueil (grand titre et cartes des matières) et le mode TBI */
+.coco-carte h3 { font-size: 23px; line-height: 27px; }
+.coco-retour h4 { font-size: 25px; line-height: 29px; }

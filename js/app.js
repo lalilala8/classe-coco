@@ -53,8 +53,9 @@
   var MATIERE = {}; C.matieres.forEach(function (m) { MATIERE[m.id] = m; });
   function barre(actif) {
     if (UNIQUE) return '<header class="barre"><span></span>' + choixLangue() + "</header>";
-    var onglets = '<a class="coco-onglet" href="#accueil" aria-current="' + (actif === "accueil" ? "page" : "false") + '"><svg class="onglet-maison" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 23 24 8l18 15"/><path d="M11 20v20h26V20"/><path d="M20 40V29h8v11"/></svg>' + t("accueil") + "</a>" +
-      C.matieres.map(function (m) { return '<a class="coco-onglet coco-onglet--' + m.id + '" href="#' + m.id + '" aria-current="' + (actif === m.id ? "page" : "false") + '">' + esc(m.id === "qlm" ? "QLM" : tr(m.nom)) + "</a>"; }).join("");
+    /* onglets « surligneur avec petits avatars » (D-79) : Coralie pour l'accueil, le personnage de chaque matière */
+    var onglets = '<a class="coco-onglet" href="#accueil" aria-current="' + (actif === "accueil" ? "page" : "false") + '"><img class="onglet-av" src="' + IMG("coralie") + '" alt=""><span>' + t("accueil") + "</span></a>" +
+      C.matieres.map(function (m) { return '<a class="coco-onglet coco-onglet--' + m.id + '" href="#' + m.id + '" aria-current="' + (actif === m.id ? "page" : "false") + '"><img class="onglet-av" src="' + IMG(m.perso) + '" alt=""><span>' + esc(m.id === "qlm" ? "QLM" : tr(m.nom)) + "</span></a>"; }).join("");
     return '<header class="barre"><nav class="coco-onglets" aria-label="Menu">' + onglets + "</nav>" + choixLangue() + "</header>";
   }
   function choixLangue() {
