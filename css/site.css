@@ -885,12 +885,13 @@ span.po-billet, span.po-piece { cursor: default; box-shadow: none; }
 @media (max-width: 700px) { .po-deux { grid-template-columns: 1fr; } .po-reveil { font-size: 30px; } }
 
 /* ---------- suivi des étoiles de calcul (D-97) ---------- */
-.et-etoile { width: 34px; height: 34px; display: block; margin: 0 auto; }
-.et-etoile.et-grande { width: 56px; height: 56px; }
-.et-etoile path { stroke: #1d2744; stroke-width: 1.6; stroke-linejoin: round; }
-.et-etoile .et-sourire { fill: none; stroke-width: 1.6; stroke-linecap: round; }
-.et-etoile circle { fill: #1d2744; }
-.et-etoile.et-vide path { fill-opacity: .16; stroke: #9aa3b5; stroke-dasharray: 3 2; }
+.et-etoile { width: 44px; height: 44px; display: block; margin: 0 auto; }
+.et-etoile.et-grande { width: 64px; height: 64px; }
+.et-forme { stroke: #151515; stroke-width: 5; stroke-linejoin: round; }
+.et-points { fill: #1a1a1a; opacity: .7; }
+.et-reflet { fill: none; stroke: #fff; stroke-width: 4; stroke-linecap: round; opacity: .55; }
+.et-visage circle { fill: #151515; } .et-visage .et-sourire { fill: none; stroke: #151515; stroke-width: 2.6; stroke-linecap: round; }
+.et-etoile.et-vide .et-forme { fill-opacity: .16; stroke: #9aa3b5; stroke-width: 3; stroke-dasharray: 6 4; }
 .et-intro, .et-note { margin: 0; color: var(--encre-douce); font-size: 17px; }
 .et-outils { align-items: center; }
 .et-restaurer { cursor: pointer; }
@@ -928,5 +929,5 @@ span.po-billet, span.po-piece { cursor: default; box-shadow: none; }
   .mode-etoiles .et-cadre { border: 1px solid #999; border-radius: 0; overflow: visible; }
   .mode-etoiles .et-tab { font-size: 10pt; } .mode-etoiles .et-case { min-height: 0; } .mode-etoiles .et-etoile { width: 22px; height: 22px; }
   .mode-etoiles .et-niveau { background: none; box-shadow: none; } .mode-etoiles .et-a-valider { visibility: hidden; }
-  .mode-etoiles .et-tab, .mode-etoiles .et-etoile path { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .mode-etoiles .et-tab, .mode-etoiles .et-etoile * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
