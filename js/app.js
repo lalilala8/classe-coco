@@ -2395,7 +2395,7 @@
   var ENS_DOSSIERS = [
     { id: "ens-suivi", t: "Suivi des élèves", d: "Les résultats et les bilans de la classe." },
     { id: "ens-sequences", t: "Séquences d’apprentissage", d: "Fiches, projection au TBI et feuilles de recherche, rangées par domaine." },
-    { id: "ens-formation", t: "Formation", d: "Mes fiches de révision : pédagogues et didactique." }
+    { id: "ens-formation", t: "Formation", d: "Mes fiches de formation : lexique, didactique générale, mathématiques, français." }
   ];
   var DOSSIER_SVG = '<svg class="ens-dossier-ic" viewBox="0 0 64 52" aria-hidden="true"><path d="M4 10a5 5 0 0 1 5-5h15l6 6h25a5 5 0 0 1 5 5v27a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z" class="ens-d-fond"/><path d="M4 18h56v25a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z" class="ens-d-face"/></svg>';
   var CADENAS = '<svg class="ens-cadenas" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></svg>';
@@ -2425,7 +2425,7 @@
   function ensPO(id) { var p = po(id); return ensLigne(p.perso, esc(p.titre.fr), "Problème ouvert · « " + esc(p.question.fr) + " »", [["Projeter en classe", "#classe-" + id], ["La fiche", "#fiche-" + id], ["Feuille de recherche", "#feuille-" + id]]); }
   function ensDomaine(cls, titre, lignes) { return '<section class="domaine domaine-matiere ' + cls + '"><h2>' + titre + '</h2><div class="ens-liste">' + lignes.join("") + "</div></section>"; }
   function pageEnseignante() {
-    var n = { "ens-suivi": "Bientôt", "ens-sequences": "8 séquences", "ens-formation": "1 fiche" };
+    var n = { "ens-suivi": "Bientôt", "ens-sequences": "8 séquences", "ens-formation": Object.keys(FO.fiches).filter(function (c) { return !FO.fiches[c].vide; }).length + " fiches" };
     return ensEntete("") + '<section class="ens-dossiers">' + ENS_DOSSIERS.map(function (d) {
       return '<a class="ens-dossier" href="#' + d.id + '">' + DOSSIER_SVG + "<b>" + d.t + "</b><small>" + d.d + '</small><span class="ens-compte">' + n[d.id] + "</span></a>";
     }).join("") + "</section>";
@@ -2648,12 +2648,42 @@
       '<a class="ens-dossier et-dossier" href="#ens-corriges">' + etEtoile("#bdbdbd", false, true) + "<h2>Corrigés des étoiles</h2><p>Les 3 évaluations de chaque étoile, avec les résultats</p></a></section>" +
       '<section class="ens-vide ens-vide--petit"><p>Le suivi des résultats des activités du site viendra avec la <b>base en ligne</b> (D-93) : réussites par activité, bilans par séquence, repères pour le livret scolaire unique.</p></section>';
   }
+  /* Espace enseignante › Formation (D-114) : organisé comme le sommaire des notes de l’enseignante (Lexique, Didactique générale,
+     Mathématiques, Français ; fiches L, D, M, F) ; fiches vides grisées « À venir » ; encadré « Dans le site » [PROPOSITION]. */
+  var FO = window.COCO_FORMATION || { domaines: [], fiches: {} };
+  var FO_SULLIVAN = '<p><b>Une « bonne » question</b> demande plus qu\'un rappel, fait apprendre l\'élève (et renseigne l\'enseignant), et accepte plusieurs réponses.</p><p><b>4 temps :</b> poser la question (sans donner de méthode) · chercher par 2 ou 3 (coup de pouce si on bloque, relance si on a fini) · mettre en commun (la classe donne son avis avant la vérification) · faire un résumé.</p><p><b>Évaluer sans note :</b> 5 niveaux de compréhension et une liste de comportements à observer.</p><p class="f-source">Sullivan & Lilburn, « Activités ouvertes en mathématiques », Chenelière, 2010, chapitres 1 à 4. Fiche de synthèse préparée pour le site.</p>';
+  function foPastille(code) { return '<span class="fo-code">' + code + "</span>"; }
+  function foCarte(code, f) {
+    var lien = f && !f.vide ? "#ens-form-" + code : "";
+    var sous = f ? [f.auteur, f.theme && f.theme !== f.titre ? f.theme : "", f.ouvrage ? "« " + f.ouvrage + " »" : ""].filter(Boolean).join(" · ") : "";
+    var etat = !f || f.vide ? "À venir" : f.aCompleter ? "À compléter" : "";
+    var corps = foPastille(code) + "<span><b>" + (f ? esc(f.titre) : "Fiche " + code) + "</b>" + (sous ? "<small>" + esc(sous) + "</small>" : "") + (f && f.liens ? "<small>" + esc(f.liens.join(" · ")) + "</small>" : "") + (etat ? '<em class="fo-etat">' + etat + "</em>" : "") + "</span>";
+    return lien ? '<a class="fo-carte' + (f.synthese ? " fo-carte--synthese" : "") + (f.aCompleter ? " fo-carte--partielle" : "") + '" href="' + lien + '">' + corps + "</a>" : '<span class="fo-carte fo-carte--avenir" aria-disabled="true">' + corps + "</span>";
+  }
   function pageEnsFormation() {
     return ensEntete("Formation") +
-      '<section class="domaine"><h2 class="ens-h2">Didactique des mathématiques</h2><details class="ens-sullivan"><summary>La démarche de Peter Sullivan, en bref</summary><p><b>Une « bonne » question</b> demande plus qu\'un rappel, fait apprendre l\'élève (et renseigne l\'enseignant), et accepte plusieurs réponses.</p><p><b>4 temps :</b> poser la question (sans donner de méthode) · chercher par 2 ou 3 (coup de pouce si on bloque, relance si on a fini) · mettre en commun (la classe donne son avis avant la vérification) · faire un résumé.</p><p><b>Évaluer sans note :</b> 5 niveaux de compréhension et une liste de comportements à observer.</p><p class="f-source">Sullivan & Lilburn, « Activités ouvertes en mathématiques », Chenelière, 2010, chapitres 1 à 4. Fiche de synthèse préparée pour le site.</p></details></section>' +
-      '<section class="domaine"><h2 class="ens-h2">Pédagogues</h2><div class="ens-vide ens-vide--petit"><p>Vos fiches de révision arriveront ici. Envoyez-les-moi (PDF, Word ou PowerPoint) : je les mettrai en page, une fiche par pédagogue.</p></div></section>' +
-      '<section class="domaine"><h2 class="ens-h2">Didactique</h2><div class="ens-vide ens-vide--petit"><p>Même chose pour vos fiches de didactique (français, mathématiques, langues…).</p></div></section>';
+      '<p class="ens-legende">Vos fiches de formation professionnelle, rangées comme votre sommaire. Les fiches grisées « À venir » restent à rédiger ; « À compléter » : fiche commencée.</p>' +
+      FO.domaines.map(function (d) {
+        var cartes = []; for (var k = 1; k <= d.n; k++) cartes.push(foCarte(d.id + k, FO.fiches[d.id + k]));
+        if (d.id === "M") cartes.push('<a class="fo-carte fo-carte--site" href="#ens-form-sullivan">' + foPastille("★") + "<span><b>La démarche de Peter Sullivan</b><small>Problèmes ouverts · « Activités ouvertes en mathématiques »</small><em class=\"fo-etat fo-etat--site\">Fiche du site</em></span></a>");
+        return '<section class="domaine fo-domaine"><h2 class="ens-h2">' + d.nom + '</h2><div class="fo-grille">' + cartes.join("") + "</div></section>";
+      }).join("");
   }
+  function pageFormationFiche(code) {
+    var retour = '<div class="no-print coco-row"><a class="coco-btn coco-btn--secondaire" href="#ens-formation">← Formation</a><button class="coco-btn coco-btn--secondaire" type="button" data-action="imprimer">Imprimer la fiche</button></div>';
+    if (code === "sullivan") return retour + '<article class="fiche fo-fiche m-maths"><header class="fo-tete">' + foPastille("★") + '<div><small>Formation · Mathématiques · Fiche du site</small><h1>La démarche de Peter Sullivan</h1></div></header>' + FO_SULLIVAN +
+      foSite([["Les problèmes ouverts des séquences de maths, en 4 versions (mode autonome, au TBI, feuille de recherche, fiche).", "#ens-sequences"]]) + "</article>";
+    var f = FO.fiches[code], d = FO.domaines.filter(function (x) { return x.id === code.charAt(0); })[0];
+    var tab = f.tableau ? '<table class="fo-table fo-def"><tbody>' + f.tableau.map(function (r) { return "<tr><th>" + r[0] + "</th><td>" + (r[1] || '<span class="fo-vide">À rédiger</span>') + "</td></tr>"; }).join("") + "</tbody></table>" : "";
+    return retour + '<article class="fiche fo-fiche"><header class="fo-tete">' + foPastille(code) + "<div><small>Formation · " + esc(d.nom) + (f.aCompleter ? " · fiche à compléter" : "") + "</small><h1>" + esc(f.titre) + "</h1>" +
+      (f.sousTitre || f.auteur ? '<p class="fo-auteur">' + esc(f.sousTitre || f.auteur) + "</p>" : "") + (f.ouvrage ? '<p class="fo-ouvrage">Ouvrage : <i>' + esc(f.ouvrage) + "</i></p>" : "") + "</div></header>" +
+      tab + (f.corps || "") +
+      (f.schemas ? '<p class="fo-schemas"><b>Schémas</b> (non repris sur le site, droits d’auteur) : ' + f.schemas.map(esc).join(" ") + "</p>" : "") +
+      (f.site ? foSite(f.site) : "") +
+      '<p class="f-source">Fiche ' + code + " · « Didactique – Formation professionnelle », notes de l’enseignante.</p></article>";
+  }
+  function foSite(l) { return '<section class="fo-site"><h2>Dans le site</h2><ul>' + l.map(function (x) { return '<li><a href="' + x[1] + '">' + esc(x[0]) + "</a></li>"; }).join("") + '</ul><p class="fo-prop">Liens proposés par Claude [PROPOSITION].</p></section>'; }
+
 
   /* ---------- banque de problèmes (Vergnaud), reprise du site v0 ---------- */
   var BQ = window.COCO_BANQUE;
@@ -2796,6 +2826,7 @@
   Object.keys(JEUX_HEURE).forEach(function (j) { ROUTES["heure-" + j] = function () { return jeuHeure(j); }; });
   Object.keys(JEUX_DIAG).forEach(function (j) { ROUTES["diag-" + j] = function () { return jeuDiag(j); }; });
   Object.keys(PO.sequences).forEach(function (sid) { ROUTES["seq-" + sid] = function () { return pageSequence(sid); }; });
+  Object.keys(FO.fiches).concat(["sullivan"]).forEach(function (c) { if (c === "sullivan" || !FO.fiches[c].vide) ROUTES["ens-form-" + c] = function () { return pageFormationFiche(c); }; });
   Object.keys(PO.problemes).forEach(function (id) {
     ROUTES["po-" + id] = function () { return poAutonome(id); };
     ROUTES["classe-" + id] = function () { return poClasse(id); };

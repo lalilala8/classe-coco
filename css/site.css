@@ -1126,3 +1126,41 @@ span.tb-grp { box-shadow: none; padding: 1px 4px; border-radius: 6px; }
 @media (max-width: 860px) { .ens-seq > .ens-boutons { grid-column: 1 / -1; } }
 @media (max-width: 600px) { .ens-boutons { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; } .ens-boutons .coco-btn { width: 100%; min-width: 0; padding-left: 6px; padding-right: 6px; font-size: 15px; } .ens-po { margin-left: 12px; } }
 @media (max-width: 600px) { .ens-boutons .coco-btn { box-sizing: border-box; margin: 0; } }
+
+/* Espace enseignante › Formation (D-114) : les fiches de l’enseignante, rangées comme son sommaire */
+.fo-grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+.fo-carte { display: grid; grid-template-columns: 60px 1fr; gap: 12px; align-items: center; background: var(--carte); border: var(--bord) solid var(--lagon); border-radius: var(--arrondi); padding: 10px 14px; color: var(--encre); text-decoration: none; box-shadow: 0 4px 0 var(--lagon-fonce); }
+a.fo-carte:hover { background: var(--lagon-clair); }
+.fo-carte b { display: block; font: 400 21px/25px var(--font-titre); color: var(--lagon-fonce); }
+.fo-carte small { display: block; font-size: 15px; line-height: 20px; color: var(--encre-douce); }
+.fo-code { display: inline-grid; place-items: center; width: 54px; height: 54px; border-radius: 50%; background: #fff; border: 3px solid var(--encre); font: 400 22px/1 var(--font-titre); color: var(--encre); box-shadow: 0 3px 0 var(--trait); }
+.fo-etat { display: inline-block; margin-top: 4px; font: 600 13px/1 var(--font-texte); font-style: normal; color: var(--encre-douce); border: 1.5px dashed var(--trait); border-radius: 999px; padding: 3px 8px; }
+.fo-carte--partielle .fo-etat { color: var(--soutien-fonce); border-color: var(--soutien-fonce); background: var(--soutien-clair); border-style: solid; }
+.fo-carte--avenir { opacity: .55; filter: grayscale(1); border-style: dashed; box-shadow: none; cursor: default; }
+.fo-carte--synthese .fo-code { background: var(--soutien-clair); }
+.fo-carte--site { border-color: var(--maths); box-shadow: 0 4px 0 var(--maths-fonce); }
+.fo-carte--site b { color: var(--maths); }
+.fo-etat--site { color: var(--maths-fonce); border-style: solid; border-color: var(--maths); }
+.fo-domaine { margin-top: 18px; }
+.fo-fiche { max-width: 900px; }
+.fo-tete { display: grid; grid-template-columns: 80px 1fr; gap: 16px; align-items: center; margin-bottom: 14px; }
+.fo-tete .fo-code { width: 72px; height: 72px; font-size: 28px; }
+.fo-tete h1 { margin: 0; }
+.fo-auteur { font: 600 20px/1.3 var(--font-texte); margin: 2px 0 0; }
+.fo-ouvrage { margin: 2px 0 0; color: var(--encre-douce); }
+.fo-table { width: 100%; border-collapse: collapse; margin: 10px 0 16px; }
+.fo-table th, .fo-table td { border-bottom: 1.5px dashed var(--trait); padding: 8px 12px; text-align: left; vertical-align: top; }
+.fo-def th { width: 170px; background: #f1f3f6; font-weight: 600; color: var(--encre-douce); }
+.fo-table td ul { margin: 4px 0; }
+.fo-vide { color: var(--encre-douce); font-style: italic; }
+.fo-focales { display: grid; gap: 12px; }
+.fo-focales section { border: 2px solid var(--trait); border-radius: var(--arrondi); padding: 10px 16px; }
+.fo-fiche h3 { font-size: 19px; margin: 18px 0 6px; }
+.fo-schemas { background: #f1f3f6; border-radius: var(--arrondi-petit); padding: 10px 14px; font-size: 16px; }
+.fo-site { margin-top: 18px; background: var(--lagon-clair); border: 2px solid var(--lagon); border-radius: var(--arrondi); padding: 10px 16px; }
+.fo-site h2 { margin: 0 0 6px; font-size: 22px; }
+.fo-site a { color: var(--lagon-texte); font-weight: 600; }
+.fo-prop { font-size: 14px; color: var(--encre-douce); font-style: italic; margin: 4px 0 0; }
+@media (max-width: 600px) { .fo-def th { width: 96px; } .fo-tete { grid-template-columns: 64px 1fr; } .fo-tete .fo-code { width: 58px; height: 58px; font-size: 22px; } }
+.fo-tete > div { min-width: 0; } .fo-fiche { overflow-wrap: break-word; } @media (max-width: 600px) { .fo-tete h1 { font-size: 30px; line-height: 34px; hyphens: auto; } .fo-fiche { padding-left: 14px; padding-right: 14px; } }
+.fo-fiche { border-color: var(--lagon); } .fo-fiche h1 { color: var(--lagon-fonce); } .fo-fiche p { margin: 6px 0; } .fo-fiche ul, .fo-fiche ol { margin: 4px 0 8px; } .fo-fiche h3 { color: var(--lagon-fonce); margin-top: 16px; } .fo-site h2 { color: var(--lagon-fonce); }
