@@ -27,7 +27,7 @@ body { min-height: 100vh; }
 .domaine-matiere { --mc: var(--c); --mcf: var(--cf); }
 .domaine.domaine-matiere h2 { display: flex; align-items: center; gap: 12px; color: var(--c); }
 .domaine-matiere h2::before { content: ""; flex: none; width: 14px; height: 14px; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 5px var(--cc); }
-.domaine-matiere .seq.est-bientot { border-color: color-mix(in srgb, var(--mc) 35%, var(--carte)); background: color-mix(in srgb, var(--cc) 35%, var(--carte)); }
+.domaine-matiere .seq.est-bientot { border-color: color-mix(in srgb, var(--mc) 35%, var(--carte)); }
 .domaine-matiere .seq.est-bientot small { color: var(--mcf); }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .apercu { font: 500 15px/20px var(--font-texte); color: var(--encre-douce); background: var(--carte); border: 2px dashed var(--trait); border-radius: var(--arrondi-petit); padding: 8px 14px; justify-self: start; }
