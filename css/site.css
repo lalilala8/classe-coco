@@ -639,6 +639,20 @@ body.mode-classe .site { max-width: none; padding-block: 12px 24px; }
 .ens-entete { --c: var(--lagon); --cc: var(--lagon-clair); }
 .ens-entete h1 { color: var(--encre); }
 .ens-fil a { color: var(--lagon-texte); font-weight: 600; }
+/* code d'accès de l'Espace enseignante (D-93) */
+
+.ens-cadenas { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; vertical-align: -4px; margin-right: 6px; }
+.ens-code { max-width: 560px; margin: var(--espace-8) auto 0; background: var(--carte); border: var(--bord) solid var(--lagon); border-radius: var(--arrondi-grand); padding: var(--espace-6); display: grid; gap: var(--espace-4); }
+.ens-code label { font: 400 26px/1.2 var(--font-titre); color: var(--encre); }
+.ens-code-ligne { display: flex; gap: var(--espace-3); flex-wrap: wrap; }
+.ens-code input { flex: 1 1 200px; min-height: 56px; font: 500 24px/1 var(--font-texte); letter-spacing: 0.08em; padding: 0 16px; border: var(--bord) solid var(--encre-douce); border-radius: var(--arrondi); background: var(--papier); color: var(--encre); min-width: 0; }
+.ens-code input:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+.ens-code-msg { margin: 0; min-height: 1.4em; }
+.ens-code-msg.est-visible { background: var(--soutien-clair, #fff4cc); border: 2px solid var(--soutien); border-radius: var(--arrondi-petit); padding: 10px 14px; color: var(--encre); }
+.ens-code-retour { text-align: center; margin-top: var(--espace-6); }
+@media (min-width: 861px) { .ens-entete { grid-template-columns: auto 1fr auto; } }
+.ens-entete .ens-verrou { align-self: center; justify-self: end; }
+@media (max-width: 860px) { .ens-entete .ens-verrou { justify-self: center; } }
 .ens-dossiers { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--espace-6); }
 .ens-dossier { display: grid; justify-items: start; gap: 6px; padding: 20px 22px 18px; background: var(--carte); border: var(--bord) solid var(--lagon); border-radius: var(--arrondi-grand); box-shadow: 0 var(--socle) 0 var(--lagon-fonce); text-decoration: none; color: var(--encre); transition: transform .12s ease; }
 .ens-dossier:hover { transform: translateY(-3px); }

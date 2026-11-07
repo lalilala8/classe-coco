@@ -16,6 +16,34 @@
   /* ---------- mémoire locale (facultative) ---------- */
   function lire(k, d) { try { var v = localStorage.getItem("coco-" + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } }
   function ecrire(k, v) { try { localStorage.setItem("coco-" + k, JSON.stringify(v)); } catch (e) {} }
+  /* Espace enseignante protégé par un code (D-93). Seule l'empreinte SHA-256 du code est dans le site ;
+     outils/changer_code.py la remplace. L'espace reste ouvert jusqu'à la fermeture du navigateur (sessionStorage). */
+  var ENS_EMPREINTE = "77bce9d74fae4a5f0ff319a39730036aef534c10e956bd0041f8bc551e97082b";
+  var ENS_ROUTES = /^(enseignante|ens-|fiche-|feuille-|classe-|tbi-)/;
+  var ensOuvert = (function () { try { return sessionStorage.getItem("coco-ens") === "1"; } catch (e) { return false; } })();
+  function ensNormaliser(s) { return String(s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]/g, ""); }
+  function sha256(ascii) {
+    function rr(v, n) { return (v >>> n) | (v << (32 - n)); }
+    var maxWord = Math.pow(2, 32), res = "", words = [], bits = ascii.length * 8, hash = [], k = [], nb = 0, comp = {}, i, j;
+    for (var c = 2; nb < 64; c++) if (!comp[c]) { for (i = 0; i < 313; i += c) comp[i] = c; hash[nb] = (Math.pow(c, 0.5) * maxWord) | 0; k[nb++] = (Math.pow(c, 1 / 3) * maxWord) | 0; }
+    ascii += "\x80"; while (ascii.length % 64 - 56) ascii += "\x00";
+    for (i = 0; i < ascii.length; i++) { j = ascii.charCodeAt(i); if (j >> 8) return ""; words[i >> 2] |= j << ((3 - i) % 4) * 8; }
+    words[words.length] = (bits / maxWord) | 0; words[words.length] = bits;
+    for (j = 0; j < words.length;) {
+      var w = words.slice(j, j += 16), old = hash; hash = hash.slice(0, 8);
+      for (i = 0; i < 64; i++) {
+        var w15 = w[i - 15], w2 = w[i - 2], a = hash[0], e = hash[4];
+        var t1 = hash[7] + (rr(e, 6) ^ rr(e, 11) ^ rr(e, 25)) + ((e & hash[5]) ^ (~e & hash[6])) + k[i] +
+          (w[i] = i < 16 ? w[i] : (w[i - 16] + (rr(w15, 7) ^ rr(w15, 18) ^ (w15 >>> 3)) + w[i - 7] + (rr(w2, 17) ^ rr(w2, 19) ^ (w2 >>> 10))) | 0);
+        var t2 = (rr(a, 2) ^ rr(a, 13) ^ rr(a, 22)) + ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]));
+        hash = [(t1 + t2) | 0].concat(hash); hash[4] = (hash[4] + t1) | 0;
+      }
+      for (i = 0; i < 8; i++) hash[i] = (hash[i] + old[i]) | 0;
+    }
+    for (i = 0; i < 8; i++) for (j = 3; j + 1; j--) { var b = (hash[i] >> (j * 8)) & 255; res += (b < 16 ? "0" : "") + b.toString(16); }
+    return res;
+  }
+  function ensCodeJuste(code) { var n = ensNormaliser(code); return n.length > 0 && sha256("coco-ens|" + n) === ENS_EMPREINTE; }
   var langue = lire("langue", "fr");
   var faits = lire("faits", {});
   function marquerFait(id) { faits[id] = true; ecrire("faits", faits); }
@@ -1375,9 +1403,25 @@
     { id: "ens-formation", t: "Formation", d: "Mes fiches de révision : pédagogues et didactique." }
   ];
   var DOSSIER_SVG = '<svg class="ens-dossier-ic" viewBox="0 0 64 52" aria-hidden="true"><path d="M4 10a5 5 0 0 1 5-5h15l6 6h25a5 5 0 0 1 5 5v27a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z" class="ens-d-fond"/><path d="M4 18h56v25a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z" class="ens-d-face"/></svg>';
+  var CADENAS = '<svg class="ens-cadenas" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></svg>';
+  function pageCode() {
+    return barre("") + '<section class="entete ens-entete"><img src="' + IMG("coralie-avatar") + '" alt=""><div><h1>Espace enseignante</h1><p>Cet espace est réservé à la maîtresse.</p></div></section>' +
+      '<form class="ens-code" data-ens-form novalidate><label for="ens-code">' + CADENAS + "Code d’accès</label>" +
+      '<div class="ens-code-ligne"><input id="ens-code" type="password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="go"><button class="coco-btn" type="submit">Entrer</button></div>' +
+      '<p class="ens-code-msg" role="status" aria-live="polite"></p></form>' +
+      '<p class="ens-code-retour"><a class="coco-btn coco-btn--secondaire" href="#accueil">← Retour à l’accueil</a></p>';
+  }
+  document.addEventListener("submit", function (e) {
+    var f = e.target; if (!f.matches || !f.matches("[data-ens-form]")) return; e.preventDefault();
+    var champ = f.querySelector("#ens-code"), msg = f.querySelector(".ens-code-msg");
+    if (ensCodeJuste(champ.value)) { ensOuvert = true; try { sessionStorage.setItem("coco-ens", "1"); } catch (x) {} derniere = ""; rendre(); return; }
+    msg.textContent = champ.value ? "Ce n’est pas le bon code. Vérifiez et réessayez." : "Tapez le code d’accès.";
+    msg.classList.add("est-visible"); champ.value = ""; champ.focus();
+  });
   function ensEntete(sous) {
     return barre("") + '<section class="entete ens-entete"><img src="' + IMG("coralie") + '" alt=""><div><h1>Espace enseignante</h1>' +
-      (sous ? '<p class="ens-fil"><a href="#enseignante">Espace enseignante</a> › ' + esc(sous) + "</p>" : "<p>Trois dossiers pour préparer, suivre et se former.</p>") + "</div></section>";
+      (sous ? '<p class="ens-fil"><a href="#enseignante">Espace enseignante</a> › ' + esc(sous) + "</p>" : "<p>Trois dossiers pour préparer, suivre et se former.</p>") + "</div>" +
+      '<button class="coco-btn coco-btn--secondaire ens-verrou" type="button" data-action="ens-verrouiller">' + CADENAS + "Verrouiller</button></section>";
   }
   function ensLigne(img, titre, sous, liens, cls) {
     return '<div class="ens-pb' + (cls ? " " + cls : "") + '"><img src="' + IMG(img) + '" alt=""><div><b>' + titre + "</b><small>" + sous + '</small></div><div class="coco-row">' +
@@ -1578,16 +1622,19 @@
     var r = route();
     if (r !== derniere) { if (r === "jeu-verbe-decouvre") D = null; if (r === "jeu-verbe-chasse") H = null; if (/^po-/.test(r)) A = null; if (/^mots-/.test(r)) G = null; if (/^heure-/.test(r)) HG = null; if (/^diag-/.test(r)) GD = null; if (r === "tbi-heure") { clearInterval(TB.tid); TB.part = "menu"; } try { if (MO.peutParler) speechSynthesis.cancel(); } catch (x) {} if (/^classe-/.test(r)) { K = null; clearInterval(minuteur); } if (r === "lecon-verbe") L = { carte: {}, moment: "present", machine: 0, phrase: 0 }; window.scrollTo(0, 0); derniere = r; }
     document.documentElement.lang = langue;
-    document.body.classList.toggle("mode-classe", /^classe-|^tbi-/.test(r));
-    document.body.classList.toggle("mode-papier", /^(fiche|feuille)-/.test(r));
-    app.innerHTML = ROUTES[r]();
+    var ferme = !ensOuvert && !UNIQUE && ENS_ROUTES.test(r);
+    document.body.classList.toggle("mode-classe", !ferme && /^classe-|^tbi-/.test(r));
+    document.body.classList.toggle("mode-papier", !ferme && /^(fiche|feuille)-/.test(r));
+    app.innerHTML = ferme ? pageCode() : ROUTES[r]();
+    if (ferme) { var ch = document.getElementById("ens-code"); if (ch) ch.focus(); }
     allerCible();
-    if (r === "tbi-heure") tbAnimer();
+    if (r === "tbi-heure" && !ferme) tbAnimer();
     majMinuteur();
   }
   document.addEventListener("click", function (e) {
     var el = e.target.closest("[data-action]"); if (!el) return;
     var a = el.dataset.action;
+    if (a === "ens-verrouiller") { ensOuvert = false; try { sessionStorage.removeItem("coco-ens"); } catch (x) {} location.hash = "accueil"; return; }
     if (a === "sous-menu") { var g = el.closest(".onglet-groupe"), ouvert = !g.classList.contains("est-ouvert"); fermerSousMenus(); g.classList.toggle("est-ouvert", ouvert); el.setAttribute("aria-expanded", String(ouvert)); return; }
     if (a === "aller") { e.preventDefault(); cibleScroll = el.dataset.cible; fermerSousMenus(); if (location.hash !== "#" + el.dataset.route) location.hash = el.dataset.route; else allerCible(); return; }
     if (a === "langue") { langue = el.dataset.langue; ecrire("langue", langue); }
