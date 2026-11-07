@@ -610,3 +610,48 @@ body.mode-classe .site { max-width: none; padding-block: 12px 24px; }
 .retiens .dg-titre { font: 600 20px/26px var(--font-texte); color: var(--encre); margin: 0; }
 .retiens .dg-legende { font-size: 15px; line-height: 20px; margin: 0; }
 .retiens .dg-deux .dg-fig { background: var(--carte); border-radius: var(--arrondi); padding: 12px; }
+
+/* ---------- menus déroulants des onglets (D-87) ---------- */
+.barre { position: relative; z-index: 20; }
+.onglet-groupe { position: relative; display: inline-flex; align-items: center; }
+.onglet-ouvrir { width: 34px; height: 44px; margin-left: -8px; border: 0; background: none; color: var(--c); cursor: pointer; display: grid; place-items: center; border-radius: var(--arrondi-petit); }
+.onglet-ouvrir svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; transition: transform .15s ease; }
+.onglet-ouvrir:hover { background: var(--cc); }
+.sous-menu { position: absolute; top: 100%; left: 0; min-width: 260px; display: none; flex-direction: column; gap: 2px; padding: 8px; background: var(--carte); border: var(--bord) solid var(--c); border-radius: var(--arrondi); box-shadow: var(--ombre-flottante, 0 12px 28px rgba(29, 39, 68, .18)); z-index: 30; }
+.sous-menu a { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 6px 12px; border-radius: var(--arrondi-petit); font: 500 18px/1.2 var(--font-texte); color: var(--encre); text-decoration: none; }
+.sous-menu a i { width: 10px; height: 10px; border-radius: 50%; background: var(--c); flex: none; box-shadow: 0 0 0 4px var(--cc); }
+.sous-menu a:hover, .sous-menu a:focus-visible { background: var(--cc); }
+.onglet-groupe.est-ouvert .sous-menu { display: flex; }
+.onglet-groupe.est-ouvert .onglet-ouvrir svg { transform: rotate(180deg); }
+@media (hover: hover) and (pointer: fine) {
+  .onglet-groupe:hover .sous-menu, .onglet-groupe:focus-within .sous-menu { display: flex; }
+  .onglet-groupe:hover .onglet-ouvrir svg { transform: rotate(180deg); }
+}
+@media (max-width: 520px) {
+  .onglet-groupe { position: static; }
+  .onglet-ouvrir { width: 30px; margin-left: -6px; }
+  .sous-menu { left: 0; right: 0; min-width: 0; top: 100%; margin-top: 4px; }
+  .barre .coco-onglets { position: relative; }
+}
+.domaine-matiere { scroll-margin-top: 16px; }
+
+/* ---------- Espace enseignante (D-87) ---------- */
+.ens-entete { --c: var(--lagon); --cc: var(--lagon-clair); }
+.ens-entete h1 { color: var(--encre); }
+.ens-fil a { color: var(--lagon-texte); font-weight: 600; }
+.ens-dossiers { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--espace-6); }
+.ens-dossier { display: grid; justify-items: start; gap: 6px; padding: 20px 22px 18px; background: var(--carte); border: var(--bord) solid var(--lagon); border-radius: var(--arrondi-grand); box-shadow: 0 var(--socle) 0 var(--lagon-fonce); text-decoration: none; color: var(--encre); transition: transform .12s ease; }
+.ens-dossier:hover { transform: translateY(-3px); }
+.ens-dossier:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--lagon-fonce); }
+.ens-dossier b { font: 400 26px/30px var(--font-titre); color: var(--lagon-fonce); }
+.ens-dossier small { font-size: 17px; line-height: 24px; color: var(--encre-douce); }
+.ens-compte { margin-top: 4px; font: 600 15px/1 var(--font-texte); color: var(--lagon-texte); background: var(--lagon-clair); border-radius: var(--arrondi-pilule); padding: 6px 12px; }
+.ens-dossier-ic { width: 64px; height: 52px; }
+.ens-d-fond { fill: var(--lagon); }
+.ens-d-face { fill: var(--lagon-clair); stroke: var(--lagon); stroke-width: 3; stroke-linejoin: round; }
+.ens-vide { display: grid; justify-items: center; text-align: center; gap: 8px; padding: 28px 24px; background: var(--carte); border: var(--bord) dashed var(--lagon); border-radius: var(--arrondi-grand); }
+.ens-vide h2 { font: 400 26px/30px var(--font-titre); color: var(--lagon-fonce); margin: 0; }
+.ens-vide p { margin: 0; max-width: 640px; color: var(--encre-douce); }
+.ens-vide--petit { padding: 16px 20px; }
+.ens-h2 { color: var(--lagon-fonce); }
+@media (prefers-reduced-motion: reduce) { .ens-dossier, .onglet-ouvrir svg { transition: none; } }

@@ -54,8 +54,15 @@
   function barre(actif) {
     if (UNIQUE) return '<header class="barre"><span></span>' + choixLangue() + "</header>";
     /* onglets « surligneur avec petits avatars » (D-79) : Coralie pour l'accueil, le personnage de chaque matière */
-    var onglets = '<a class="coco-onglet" href="#accueil" aria-current="' + (actif === "accueil" ? "page" : "false") + '"><img class="onglet-av" src="' + IMG("coralie") + '" alt=""><span>' + t("accueil") + "</span></a>" +
-      C.matieres.map(function (m) { return '<a class="coco-onglet coco-onglet--' + m.id + '" href="#' + m.id + '" aria-current="' + (actif === m.id ? "page" : "false") + '"><img class="onglet-av" src="' + IMG(m.perso) + '" alt=""><span>' + esc(m.id === "qlm" ? "QLM" : tr(m.nom)) + "</span></a>"; }).join("");
+    var onglets = '<a class="coco-onglet" href="#accueil" aria-current="' + (actif === "accueil" ? "page" : "false") + '"><img class="onglet-av" src="' + IMG("coralie-avatar") + '" alt=""><span>' + t("accueil") + "</span></a>" +
+      C.matieres.map(function (m) {
+        var nom = esc(m.id === "qlm" ? "QLM" : tr(m.nom));
+        var lien = '<a class="coco-onglet coco-onglet--' + m.id + '" href="#' + m.id + '" aria-current="' + (actif === m.id ? "page" : "false") + '"><img class="onglet-av" src="' + IMG(m.perso) + '" alt=""><span>' + nom + "</span></a>";
+        if (!m.domaines.length) return lien;
+        /* menu déroulant des sous-domaines (D-87) : au survol sur ordinateur, avec la flèche au doigt */
+        return '<div class="onglet-groupe ' + m.classe + '">' + lien + '<button type="button" class="onglet-ouvrir" data-action="sous-menu" aria-expanded="false" aria-label="' + (langue === "en" ? "Sections: " : "Rubriques : ") + nom + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>' +
+          '<div class="sous-menu">' + m.domaines.map(function (d, k) { return '<a href="#' + m.id + '" data-action="aller" data-route="' + m.id + '" data-cible="dom-' + m.id + "-" + k + '"><i></i>' + esc(tr(d.nom)) + "</a>"; }).join("") + "</div></div>";
+      }).join("");
     return '<header class="barre"><nav class="coco-onglets" aria-label="Menu">' + onglets + "</nav>" + choixLangue() + "</header>";
   }
   function choixLangue() {
@@ -101,8 +108,8 @@
   function bulleSimple(texte) { return '<div class="coco-bulle-texte"><p>' + texte + "</p></div>"; }
   function pageMatiere(id) {
     var m = MATIERE[id];
-    var corps = m.domaines.length ? m.domaines.map(function (d) {
-      return '<section class="domaine domaine-matiere ' + m.classe + '"><h2>' + esc(tr(d.nom)) + '</h2><div class="sequences">' + d.sequences.map(function (s, i) {
+    var corps = m.domaines.length ? m.domaines.map(function (d, kd) {
+      return '<section class="domaine domaine-matiere ' + m.classe + '" id="dom-' + id + "-" + kd + '"><h2>' + esc(tr(d.nom)) + '</h2><div class="sequences">' + d.sequences.map(function (s, i) {
         var nom = tr(s[0]), statut = s[1] || "bientot";
         if (statut === "demo") return '<a class="seq" href="' + (s[2].charAt(0) === "#" ? s[2] : "#seq-" + s[2]) + '" style="--c:var(--' + id + ');--cf:var(--' + id + '-fonce)"><small>' + (i + 1) + " · " + t("demo") + "</small><b>" + esc(nom) + "</b></a>";
         return '<div class="seq est-bientot"><small>' + (i + 1) + " · " + (statut === "ancien" ? t("ancien") : t("bientot")) + "</small><b>" + esc(nom) + "</b></div>";
@@ -488,7 +495,7 @@
   }
   function ficheMots() {
     var li = function (a) { return a.map(function (x) { return "<li>" + x + "</li>"; }).join(""); };
-    return '<div class="no-print coco-row"><a class="coco-btn coco-btn--secondaire" href="#enseignante">← Espace enseignante</a><a class="coco-btn" href="#seq-mots">Voir la séquence</a><button class="coco-btn coco-btn--secondaire" type="button" data-action="imprimer">Imprimer la fiche</button></div>' +
+    return '<div class="no-print coco-row"><a class="coco-btn coco-btn--secondaire" href="#ens-sequences">← Séquences d’apprentissage</a><a class="coco-btn" href="#seq-mots">Voir la séquence</a><button class="coco-btn coco-btn--secondaire" type="button" data-action="imprimer">Imprimer la fiche</button></div>' +
       '<article class="fiche m-francais"><small>Français · Étude de la langue · Orthographe lexicale · CE2</small><h1>Les mots invariables</h1>' +
       '<p class="f-source">Module « Mes mots invariables » du premier site de la classe, repris dans le nouveau site. Listes et familles : affiches « Mots-outils du CP-CE1 et mots invariables » (2026).</p>' +
       encadreProgramme("mots") +
@@ -699,7 +706,7 @@
   document.addEventListener("keydown", function (e) { if (e.key === "Enter" && e.target.dataset && e.target.dataset.gChamp !== undefined) { var b = document.querySelector('[data-action="g-rep"]'); if (b) b.click(); } });
   function ficheDiagrammes() {
     var li = function (a) { return a.map(function (x) { return "<li>" + x + "</li>"; }).join(""); };
-    return '<div class="no-print coco-row"><a class="coco-btn coco-btn--secondaire" href="#enseignante">← Espace enseignante</a><a class="coco-btn coco-btn--secondaire" href="#seq-diagrammes">Voir la séquence</a><button class="coco-btn coco-btn--secondaire" type="button" data-action="imprimer">Imprimer la fiche</button></div>' +
+    return '<div class="no-print coco-row"><a class="coco-btn coco-btn--secondaire" href="#ens-sequences">← Séquences d’apprentissage</a><a class="coco-btn coco-btn--secondaire" href="#seq-diagrammes">Voir la séquence</a><button class="coco-btn coco-btn--secondaire" type="button" data-action="imprimer">Imprimer la fiche</button></div>' +
       '<article class="fiche m-maths"><small>Maths · Résolution de problèmes · Organisation et gestion de données · CE2</small><h1>Lire un graphique en barres</h1>' +
       '<p class="f-source">Séquence créée le 07/11/2026 à la demande de l’enseignante, pour couvrir le repère « diagrammes en barres » (D-77). Leçon de classe : OGD1 « Le graphique en barres (ou histogramme) » ; « Je retiens » d’après OGD1 (D-83).</p>' +
       encadreProgramme("diagrammes") +
@@ -716,7 +723,7 @@
   }
 
   function ficheDigitale() {
-    return '<div class="no-print coco-row"><a class="coco-btn coco-btn--secondaire" href="#enseignante">← Espace enseignante</a><a class="coco-btn" href="' + JEU_DIGITAL + '">Au TBI</a><a class="coco-btn coco-btn--secondaire" href="#seq-digitale">Voir la séquence</a><button class="coco-btn coco-btn--secondaire" type="button" data-action="imprimer">Imprimer la fiche</button></div>' +
+    return '<div class="no-print coco-row"><a class="coco-btn coco-btn--secondaire" href="#ens-sequences">← Séquences d’apprentissage</a><a class="coco-btn" href="' + JEU_DIGITAL + '">Au TBI</a><a class="coco-btn coco-btn--secondaire" href="#seq-digitale">Voir la séquence</a><button class="coco-btn coco-btn--secondaire" type="button" data-action="imprimer">Imprimer la fiche</button></div>' +
       '<article class="fiche m-maths"><small>Maths · Grandeurs et mesures (durées) · CE2 · période 5, séquence 1</small><h1>Lire l’heure digitale</h1>' +
       '<p class="f-source">Pour l’instant : les jeux collectifs « L’heure à l’ardoise » (séances 1 à 3), création de la collègue Teacher Nadège, adaptés pour la classe avec son accord (D-73). Leçon de classe : GM5 « Lire l’heure digitale ». Les autres étapes de la séquence sont à construire.</p>' +
       encadreProgramme("digitale") + "</article>";
@@ -1034,7 +1041,7 @@
       else if (r.phase === "leve") r.phase = "voir";
       else { r.i++; if (r.i >= r.qs.length) { TB.part = "fin"; clearInterval(TB.tid); } else { r.phase = "ecrit"; r.reste = r.t; tbMinuteur(); } } }
   }
-  function tbRetour() { clearInterval(TB.tid); if (TB.part === "menu") location.hash = "#enseignante"; else TB.part = "menu"; }
+  function tbRetour() { clearInterval(TB.tid); if (TB.part === "menu") location.hash = "#ens-sequences"; else TB.part = "menu"; }
   function pageTbiHeure() {
     var en = langue === "en", P = TB.part, D = HE.DECOUVERTE;
     var titres = { menu: en ? "On the whiteboard: the whole class" : "Au TBI : toute la classe", dec: en ? "Discovering the time" : "Découverte de l’heure", setup: en ? "Show me your boards" : "Le jeu des ardoises", run: en ? "Boards up!" : "Ardoises levées !", fin: en ? "Well done, everyone!" : "Bravo la classe !" };
@@ -1085,7 +1092,7 @@
   });
   function ficheHeure() {
     var li = function (a) { return a.map(function (x) { return "<li>" + x + "</li>"; }).join(""); };
-    return '<div class="no-print coco-row"><a class="coco-btn coco-btn--secondaire" href="#enseignante">← Espace enseignante</a><a class="coco-btn" href="#tbi-heure">Au TBI</a><a class="coco-btn coco-btn--secondaire" href="#seq-heure">Voir la séquence</a><button class="coco-btn coco-btn--secondaire" type="button" data-action="imprimer">Imprimer la fiche</button></div>' +
+    return '<div class="no-print coco-row"><a class="coco-btn coco-btn--secondaire" href="#ens-sequences">← Séquences d’apprentissage</a><a class="coco-btn" href="#tbi-heure">Au TBI</a><a class="coco-btn coco-btn--secondaire" href="#seq-heure">Voir la séquence</a><button class="coco-btn coco-btn--secondaire" type="button" data-action="imprimer">Imprimer la fiche</button></div>' +
       '<article class="fiche m-maths"><small>Maths · Grandeurs et mesures (durées) · Cycle 2, CE2, niveau de maîtrise 3</small><h1>Lire l’heure à aiguilles</h1>' +
       '<p class="f-source">Module du premier site de la classe, repris et rendu bilingue. Programmation : période 5, semaine 2 (du 2 au 6 novembre), séquence 2. Leçons : GM5 « Lire l’heure digitale » et GM5 « Lire l’heure avec aiguilles » (reçues le 06/11/2026) ; leçon anglaise (Read the time) non reçue.</p>' +
       encadreProgramme("heure") +
@@ -1330,7 +1337,7 @@
       zone = '<table class="f-grille"><thead><tr>' + F.colonnes.map(function (c) { return "<th" + (c.large ? ' class="large"' : "") + ">" + esc(tr(c)) + "</th>"; }).join("") + "</tr></thead><tbody>" + lignes + "</tbody></table>" +
         (F.bas ? '<div class="f-bas"><p>' + esc(tr(F.bas)) + '</p><div class="f-lignes"></div></div>' : "");
     }
-    return '<div class="no-print coco-row"><a class="coco-btn coco-btn--secondaire" href="#enseignante">← Espace enseignante</a><button class="coco-btn" type="button" data-action="imprimer">Imprimer</button>' + choixLangue() + "</div>" +
+    return '<div class="no-print coco-row"><a class="coco-btn coco-btn--secondaire" href="#ens-sequences">← Séquences d’apprentissage</a><button class="coco-btn" type="button" data-action="imprimer">Imprimer</button>' + choixLangue() + "</div>" +
       '<article class="feuille"><header><div><small>Maths · ' + esc(tr(s.titre)) + " · Problème ouvert</small><h1>" + esc(tr(p.titre)) + '</h1></div><div class="f-nom">Prénom : ............................<br>Date : ................................</div></header>' +
       '<div class="f-enonce"><img src="' + IMG(p.perso) + '" alt=""><div><p>' + tr(p.enonce) + "</p>" + rappel + "</div></div>" +
       "<h2>" + (langue === "en" ? "My ways" : "Mes solutions") + "</h2>" + zone +
@@ -1342,7 +1349,7 @@
   /* ---------- fiche enseignante ---------- */
   function poFiche(id) {
     var p = po(id), f = p.fiche, s = C[p.sequence], li = function (a) { return a.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join(""); };
-    return '<div class="no-print coco-row"><a class="coco-btn coco-btn--secondaire" href="#enseignante">← Espace enseignante</a><a class="coco-btn" href="#classe-' + id + '">Projeter en classe</a><a class="coco-btn coco-btn--secondaire" href="#feuille-' + id + '">Feuille de recherche</a><button class="coco-btn coco-btn--secondaire" type="button" data-action="imprimer">Imprimer la fiche</button></div>' +
+    return '<div class="no-print coco-row"><a class="coco-btn coco-btn--secondaire" href="#ens-sequences">← Séquences d’apprentissage</a><a class="coco-btn" href="#classe-' + id + '">Projeter en classe</a><a class="coco-btn coco-btn--secondaire" href="#feuille-' + id + '">Feuille de recherche</a><button class="coco-btn coco-btn--secondaire" type="button" data-action="imprimer">Imprimer la fiche</button></div>' +
       '<article class="fiche m-maths"><small>Maths · ' + esc(s.titre.fr) + " · Problème ouvert · CE2 · 45 min environ · par 2 ou 3" + (f.moment ? " · " + esc(f.moment) : "") + "</small><h1>" + esc(p.titre.fr) + '</h1><p class="f-q">« ' + esc(p.question.fr) + " »</p><p>" + p.enonce.fr + '</p><p class="f-source">' + esc(f.source) + "</p>" + encadreProgramme(p.sequence) +
       '<div class="f-deux"><section><h2>Ce que les élèves apprennent</h2><ul>' + li(f.apprend) + "</ul></section><section><h2>Pourquoi c'est une bonne question</h2><ul>" + li(f.pourquoi) + "</ul></section></div>" +
       "<section><h2>Matériel</h2><ul>" + li(f.materiel) + "</ul></section>" +
@@ -1356,20 +1363,51 @@
   }
 
   /* ---------- espace enseignante ---------- */
+  /* ---------- Espace enseignante : trois dossiers (D-87) ---------- */
+  var ENS_DOSSIERS = [
+    { id: "ens-suivi", t: "Suivi des élèves", d: "Les résultats et les bilans de la classe." },
+    { id: "ens-sequences", t: "Séquences d’apprentissage", d: "Fiches, projection au TBI et feuilles de recherche, rangées par domaine." },
+    { id: "ens-formation", t: "Formation", d: "Mes fiches de révision : pédagogues et didactique." }
+  ];
+  var DOSSIER_SVG = '<svg class="ens-dossier-ic" viewBox="0 0 64 52" aria-hidden="true"><path d="M4 10a5 5 0 0 1 5-5h15l6 6h25a5 5 0 0 1 5 5v27a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z" class="ens-d-fond"/><path d="M4 18h56v25a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z" class="ens-d-face"/></svg>';
+  function ensEntete(sous) {
+    return barre("") + '<section class="entete ens-entete"><img src="' + IMG("coralie") + '" alt=""><div><h1>Espace enseignante</h1>' +
+      (sous ? '<p class="ens-fil"><a href="#enseignante">Espace enseignante</a> › ' + esc(sous) + "</p>" : "<p>Trois dossiers pour préparer, suivre et se former.</p>") + "</div></section>";
+  }
+  function ensLigne(img, titre, sous, liens, cls) {
+    return '<div class="ens-pb' + (cls ? " " + cls : "") + '"><img src="' + IMG(img) + '" alt=""><div><b>' + titre + "</b><small>" + sous + '</small></div><div class="coco-row">' +
+      liens.map(function (l, k) { return '<a class="coco-btn' + (k ? " coco-btn--secondaire" : "") + '" href="' + l[1] + '">' + l[0] + "</a>"; }).join("") + "</div></div>";
+  }
+  function ensPO(id) { var p = po(id); return ensLigne(p.perso, esc(p.titre.fr), "Problème ouvert · « " + esc(p.question.fr) + " »", [["Projeter en classe", "#classe-" + id], ["La fiche", "#fiche-" + id], ["Feuille de recherche", "#feuille-" + id]]); }
+  function ensDomaine(cls, titre, lignes) { return '<section class="domaine domaine-matiere ' + cls + '"><h2>' + titre + '</h2><div class="ens-liste">' + lignes.join("") + "</div></section>"; }
   function pageEnseignante() {
-    var seqs = Object.keys(PO.sequences).map(function (sid) {
-      return '<section class="domaine"><h2>' + esc(C[sid].titre.fr) + '</h2><div class="ens-liste">' + PO.sequences[sid].map(function (id) {
-        var p = po(id);
-        return '<div class="ens-pb"><img src="' + IMG(p.perso) + '" alt=""><div><b>' + esc(p.titre.fr) + "</b><small>« " + esc(p.question.fr) + ' »</small></div><div class="coco-row"><a class="coco-btn" href="#classe-' + id + '">Projeter en classe</a><a class="coco-btn coco-btn--secondaire" href="#fiche-' + id + '">La fiche</a><a class="coco-btn coco-btn--secondaire" href="#feuille-' + id + '">Feuille de recherche</a></div></div>';
-      }).join("") + "</div></section>";
-    }).join("");
-    seqs = '<section class="domaine"><h2>Maths · Lire un graphique en barres</h2><div class="ens-liste"><div class="ens-pb"><img src="' + IMG("waeko") + '" alt=""><div><b>Les graphiques en barres</b><small>Leçon, 4 jeux et problèmes, fiche avec « Programme et repères »</small></div><div class="coco-row"><a class="coco-btn" href="#fiche-diagrammes">Fiche</a><a class="coco-btn coco-btn--secondaire" href="#seq-diagrammes">Voir la séquence</a></div></div></div></section>' + seqs;
-    seqs = '<section class="domaine"><h2>Maths · Lire l’heure digitale</h2><div class="ens-liste"><div class="ens-pb"><img src="' + IMG("tehani") + '" alt=""><div><b>L’heure à l’ardoise</b><small>10 jeux collectifs au TBI pour les séances 1 à 3 (outil de la collègue, adapté)</small></div><div class="coco-row"><a class="coco-btn" href="' + JEU_DIGITAL + '">Au TBI</a><a class="coco-btn coco-btn--secondaire" href="#fiche-digitale">Fiche</a><a class="coco-btn coco-btn--secondaire" href="#seq-digitale">Voir la séquence</a></div></div></div></section>' + seqs;
-    seqs = '<section class="domaine"><h2>Maths · Lire l’heure à aiguilles</h2><div class="ens-liste"><div class="ens-pb"><img src="' + IMG("coralie") + '" alt=""><div><b>Lire l’heure à aiguilles</b><small>Découverte guidée et jeu des ardoises au TBI ; leçon, 8 activités</small></div><div class="coco-row"><a class="coco-btn" href="#tbi-heure">Au TBI</a><a class="coco-btn coco-btn--secondaire" href="#fiche-heure">La fiche</a><a class="coco-btn coco-btn--secondaire" href="#seq-heure">Voir la séquence</a></div></div></div></section>' + seqs;
-    seqs = '<section class="domaine"><h2>Français · Les mots invariables</h2><div class="ens-liste"><div class="ens-pb ens-pb--francais"><img src="' + IMG("coralie") + '" alt=""><div><b>Les mots invariables</b><small>7 activités, de « Je me rappelle » à la dictée sans erreur</small></div><div class="coco-row"><a class="coco-btn" href="#fiche-mots">La fiche</a><a class="coco-btn coco-btn--secondaire" href="#seq-mots">Voir la séquence</a></div></div></div></section>' + seqs;
-    return barre("") + '<section class="entete m-maths"><img src="' + IMG("coralie") + '" alt=""><div><h1>Espace enseignante</h1><p>Les problèmes ouverts : fiche, feuille de recherche et projection en classe.</p></div></section>' +
-      '<details class="ens-sullivan"><summary>La démarche de Peter Sullivan, en bref</summary><p><b>Une « bonne » question</b> demande plus qu\'un rappel, fait apprendre l\'élève (et renseigne l\'enseignant), et accepte plusieurs réponses.</p><p><b>4 temps :</b> poser la question (sans donner de méthode) · chercher par 2 ou 3 (coup de pouce si on bloque, relance si on a fini) · mettre en commun (la classe donne son avis avant la vérification) · faire un résumé.</p><p><b>Évaluer sans note :</b> 5 niveaux de compréhension et une liste de comportements à observer.</p><p class="f-source">Sullivan & Lilburn, « Activités ouvertes en mathématiques », Chenelière, 2010, chapitres 1 à 4.</p></details>' +
-      seqs + '<p class="apercu">Période 5 : la séquence 3 (division) est intégrée. Les 12 autres problèmes de l\'outil partagé avec votre collègue suivront, deux par séquence.</p>';
+    var n = { "ens-suivi": "Bientôt", "ens-sequences": "8 séquences", "ens-formation": "1 fiche" };
+    return ensEntete("") + '<section class="ens-dossiers">' + ENS_DOSSIERS.map(function (d) {
+      return '<a class="ens-dossier" href="#' + d.id + '">' + DOSSIER_SVG + "<b>" + d.t + "</b><small>" + d.d + '</small><span class="ens-compte">' + n[d.id] + "</span></a>";
+    }).join("") + "</section>";
+  }
+  function pageEnsSequences() {
+    var F = "ens-pb--francais";
+    return ensEntete("Séquences d’apprentissage") +
+      ensDomaine("m-francais", "Français · Grammaire et conjugaison", [ensLigne("tehani", "Le verbe", "Leçon CONJ2, « Le verbe se cache », « Chasse aux verbes »", [["Voir la séquence", "#seq-verbe"]], F)]) +
+      ensDomaine("m-francais", "Français · Orthographe", [ensLigne("sari", "Les mots invariables", "7 activités, de « Je me rappelle » à la dictée sans erreur", [["La fiche", "#fiche-mots"], ["Voir la séquence", "#seq-mots"]], F)]) +
+      ensDomaine("m-maths", "Maths · Techniques opératoires", [ensLigne("nina", "La division en ligne", "Période 5, séquence 3 · deux problèmes ouverts", [["Voir la séquence", "#seq-division"]])].concat(PO.sequences.division.map(ensPO))) +
+      ensDomaine("m-maths", "Maths · Grandeurs et mesures", [ensLigne("mei", "La monnaie et les prix", "Deux problèmes ouverts", [["Voir la séquence", "#seq-monnaie"]])].concat(PO.sequences.monnaie.map(ensPO)).concat([
+        ensLigne("tehani", "Lire l’heure digitale", "« L’heure à l’ardoise » : 10 jeux collectifs au TBI pour les séances 1 à 3 (outil de la collègue, adapté)", [["Au TBI", JEU_DIGITAL], ["La fiche", "#fiche-digitale"], ["Voir la séquence", "#seq-digitale"]]),
+        ensLigne("coralie", "Lire l’heure à aiguilles", "Découverte guidée et jeu des ardoises au TBI ; leçon, 8 activités", [["Au TBI", "#tbi-heure"], ["La fiche", "#fiche-heure"], ["Voir la séquence", "#seq-heure"]])])) +
+      ensDomaine("m-maths", "Maths · Résolution de problèmes", [
+        ensLigne("adi", "Banque de problèmes (Vergnaud)", "217 problèmes classés par type, avec leurs schémas", [["Ouvrir la banque", "#banque"]]),
+        ensLigne("waeko", "Lire un graphique en barres", "Leçon (OGD1), 4 jeux et problèmes", [["La fiche", "#fiche-diagrammes"], ["Voir la séquence", "#seq-diagrammes"]])]);
+  }
+  function pageEnsSuivi() {
+    return ensEntete("Suivi des élèves") + '<section class="ens-vide">' + DOSSIER_SVG + "<h2>Ce dossier est encore vide</h2><p>Il accueillera le suivi des résultats de vos élèves : réussites par activité, bilans par séquence, repères pour le livret scolaire unique.</p>" +
+      "<p><b>À décider avant la mise en ligne :</b> un suivi sans serveur (chaque élève garde un code bilan pseudonyme qu’il vous transmet) ou une base de données en ligne.</p></section>";
+  }
+  function pageEnsFormation() {
+    return ensEntete("Formation") +
+      '<section class="domaine"><h2 class="ens-h2">Didactique des mathématiques</h2><details class="ens-sullivan"><summary>La démarche de Peter Sullivan, en bref</summary><p><b>Une « bonne » question</b> demande plus qu\'un rappel, fait apprendre l\'élève (et renseigne l\'enseignant), et accepte plusieurs réponses.</p><p><b>4 temps :</b> poser la question (sans donner de méthode) · chercher par 2 ou 3 (coup de pouce si on bloque, relance si on a fini) · mettre en commun (la classe donne son avis avant la vérification) · faire un résumé.</p><p><b>Évaluer sans note :</b> 5 niveaux de compréhension et une liste de comportements à observer.</p><p class="f-source">Sullivan & Lilburn, « Activités ouvertes en mathématiques », Chenelière, 2010, chapitres 1 à 4. Fiche de synthèse préparée pour le site.</p></details></section>' +
+      '<section class="domaine"><h2 class="ens-h2">Pédagogues</h2><div class="ens-vide ens-vide--petit"><p>Vos fiches de révision arriveront ici. Envoyez-les-moi (PDF, Word ou PowerPoint) : je les mettrai en page, une fiche par pédagogue.</p></div></section>' +
+      '<section class="domaine"><h2 class="ens-h2">Didactique</h2><div class="ens-vide ens-vide--petit"><p>Même chose pour vos fiches de didactique (français, mathématiques, langues…).</p></div></section>';
   }
 
   /* ---------- banque de problèmes (Vergnaud), reprise du site v0 ---------- */
@@ -1391,7 +1429,7 @@
     if (t[0] === "2") return { g: [], e: { i: v[0], d: v[1], f: v[2] } };
     if (t[0] === "3") return { g: v[0] == null ? [] : [["big", "small", v[0], v[1]]], e: { d: v[2] } };
     if (t[0] === "4") return { g: [["top", "left", v[0], v[1]]], e: { prod: v[2] } };
-    return { g: [], e: { top: v[0], left: v[1] } };
+    return { g: [], e: { top: v[0], left: v[1], prod: v[2] } };
   }
   function bqVerifier(id) {
     var p = BQ.P[id], E = bqAttendu(p), V = Bq.vals[id] || {}, tout = true, k;
@@ -1426,7 +1464,7 @@
       var mult = t[0] === "4", g = '<rect x="76" y="30" width="220" height="88" class="bq-b"/>';
       for (var i = 1; i < 5; i++) g += '<path d="M' + (76 + 44 * i) + ' 30V118" class="' + (mult ? "bq-gd" : "bq-gs") + '"/>';
       for (var j = 1; j < 4; j++) g += '<path d="M76 ' + (30 + 22 * j) + 'H296" class="' + (mult ? "bq-gd" : "bq-gs") + '"/>';
-      lb("top", 136, 3, 100, 24, L.kn); lb("left", 4, 62, 66, 26, L.kn); if (mult) lb("prod", 156, 64, 60, 26, "");
+      lb("top", 136, 3, 100, 24, L.kn); lb("left", 4, 62, 66, 26, L.kn); lb("prod", 156, 64, 60, 26, mult ? "" : L.kn); /* la division a aussi besoin du total (D-87) */
       svg(g, L.bar);
     }
     return out;
@@ -1504,7 +1542,7 @@
   /* ---------- routeur ---------- */
   var ROUTES = {
     accueil: pageAccueil, "seq-verbe": function () { return pageSequence("verbe"); }, "seq-mots": pageSequenceMots, "lecon-mots": pageLeconMots, "fiche-mots": ficheMots,
-    "seq-heure": pageSequenceHeure, "seq-digitale": pageSequenceDigitale, "fiche-digitale": ficheDigitale, "seq-diagrammes": pageSequenceDiagrammes, "lecon-diagrammes": pageLeconDiagrammes, "fiche-diagrammes": ficheDiagrammes, "lecon-heure": function () { return pageLeconHeure(true); }, "maquette-retiens": function () { return pageLeconHeure(true); }, "fiche-heure": ficheHeure, "tbi-heure": pageTbiHeure,
+    "seq-heure": pageSequenceHeure, "seq-digitale": pageSequenceDigitale, "ens-suivi": pageEnsSuivi, "ens-sequences": pageEnsSequences, "ens-formation": pageEnsFormation, "fiche-digitale": ficheDigitale, "seq-diagrammes": pageSequenceDiagrammes, "lecon-diagrammes": pageLeconDiagrammes, "fiche-diagrammes": ficheDiagrammes, "lecon-heure": function () { return pageLeconHeure(true); }, "maquette-retiens": function () { return pageLeconHeure(true); }, "fiche-heure": ficheHeure, "tbi-heure": pageTbiHeure,
     "lecon-verbe": pageLecon, "jeu-verbe-decouvre": jeuDecouvre, "jeu-verbe-chasse": jeuChasse, enseignante: pageEnseignante, banque: pageBanque
   };
   C.matieres.forEach(function (m) { ROUTES[m.id] = function () { return pageMatiere(m.id); }; });
@@ -1520,6 +1558,17 @@
   });
   function route() { if (UNIQUE) return UNIQUE; var h = (location.hash || "").slice(1); return ROUTES[h] ? h : "accueil"; }
   var derniere = "";
+  /* sous-menus des onglets (D-87) */
+  var cibleScroll = null;
+  function allerCible() {
+    if (!cibleScroll) return; var id = cibleScroll; cibleScroll = null;
+    /* après l'affichage de la page : on attend une image pour que la mise en page soit faite */
+    requestAnimationFrame(function () { var c = document.getElementById(id); if (!c) return; var y = c.getBoundingClientRect().top + window.pageYOffset - 16;
+      try { window.scrollTo({ top: y, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }); } catch (x) { window.scrollTo(0, y); } });
+  }
+  function fermerSousMenus() { document.querySelectorAll(".onglet-groupe.est-ouvert").forEach(function (g) { g.classList.remove("est-ouvert"); var b = g.querySelector(".onglet-ouvrir"); if (b) b.setAttribute("aria-expanded", "false"); }); }
+  document.addEventListener("click", function (e) { if (!e.target.closest(".onglet-groupe")) fermerSousMenus(); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") fermerSousMenus(); });
   function rendre() {
     var r = route();
     if (r !== derniere) { if (r === "jeu-verbe-decouvre") D = null; if (r === "jeu-verbe-chasse") H = null; if (/^po-/.test(r)) A = null; if (/^mots-/.test(r)) G = null; if (/^heure-/.test(r)) HG = null; if (/^diag-/.test(r)) GD = null; if (r === "tbi-heure") { clearInterval(TB.tid); TB.part = "menu"; } try { if (MO.peutParler) speechSynthesis.cancel(); } catch (x) {} if (/^classe-/.test(r)) { K = null; clearInterval(minuteur); } if (r === "lecon-verbe") L = { carte: {}, moment: "present", machine: 0, phrase: 0 }; window.scrollTo(0, 0); derniere = r; }
@@ -1527,12 +1576,15 @@
     document.body.classList.toggle("mode-classe", /^classe-|^tbi-/.test(r));
     document.body.classList.toggle("mode-papier", /^(fiche|feuille)-/.test(r));
     app.innerHTML = ROUTES[r]();
+    allerCible();
     if (r === "tbi-heure") tbAnimer();
     majMinuteur();
   }
   document.addEventListener("click", function (e) {
     var el = e.target.closest("[data-action]"); if (!el) return;
     var a = el.dataset.action;
+    if (a === "sous-menu") { var g = el.closest(".onglet-groupe"), ouvert = !g.classList.contains("est-ouvert"); fermerSousMenus(); g.classList.toggle("est-ouvert", ouvert); el.setAttribute("aria-expanded", String(ouvert)); return; }
+    if (a === "aller") { e.preventDefault(); cibleScroll = el.dataset.cible; fermerSousMenus(); if (location.hash !== "#" + el.dataset.route) location.hash = el.dataset.route; else allerCible(); return; }
     if (a === "langue") { langue = el.dataset.langue; ecrire("langue", langue); }
     else if (a === "dire") { dire(el.dataset.texte, el.dataset.lg); return; }
     else if (/^(rappel|moment|change|test|d-suite)$/.test(a)) actionDecouvre(a, el);
