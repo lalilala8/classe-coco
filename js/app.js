@@ -2092,11 +2092,10 @@
   function etAujourdhui() { var j = new Date(); return j.getFullYear() + "-" + HE.pad(j.getMonth() + 1) + "-" + HE.pad(j.getDate()); }
   function etCourt(iso) { var p = iso.split("-"); return p[2] + "/" + p[1]; }
   function etLong(iso) { var p = iso.split("-"), M = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"]; return (+p[2]) + " " + M[+p[1] - 1] + " " + p[0]; }
-  /* étoile souriante dessinée par Claude (D-98) : contour épais, pointes arrondies, visage centré, sans points (D-100) */
-  var ET_FORME = "M41.4 13.4Q43.7 7.4 47.6 12.6L59.2 27.9Q61.3 30.7 64.6 31.0L82.8 32.5Q88.8 33.1 85.3 38.1L74.6 53.2Q72.7 56.0 73.7 59.4L79.4 78.1Q81.3 84.4 75.1 82.5L56.7 76.9Q53.4 75.9 50.5 77.6L34.9 87.0Q29.7 90.1 29.6 84.0L29.4 65.4Q29.3 62.1 26.5 59.9L10.9 48.1Q5.7 44.2 11.7 42.1L29.9 35.8Q33.2 34.6 34.5 31.4Z", ET_VISAGE = '<circle cx="46" cy="46" r="2.4"/><circle cx="54" cy="46" r="2.4"/><path d="M40 53q10 15 20 0" class="et-sourire"/>';
+  /* étoile dessinée par Claude (D-98) : contour épais, pointes arrondies ; sans points (D-100), sans visage ni reflet (D-102) */
+  var ET_FORME = "M41.4 13.4Q43.7 7.4 47.6 12.6L59.2 27.9Q61.3 30.7 64.6 31.0L82.8 32.5Q88.8 33.1 85.3 38.1L74.6 53.2Q72.7 56.0 73.7 59.4L79.4 78.1Q81.3 84.4 75.1 82.5L56.7 76.9Q53.4 75.9 50.5 77.6L34.9 87.0Q29.7 90.1 29.6 84.0L29.4 65.4Q29.3 62.1 26.5 59.9L10.9 48.1Q5.7 44.2 11.7 42.1L29.9 35.8Q33.2 34.6 34.5 31.4Z";
   function etEtoile(c, vide, grande) {
-    return '<svg class="et-etoile' + (vide ? " et-vide" : "") + (grande ? " et-grande" : "") + '" viewBox="0 0 100 100" aria-hidden="true"><path class="et-forme" d="' + ET_FORME + '" style="fill:' + c + '"/>' +
-      (vide ? "" : '<path class="et-reflet" d="M30 38q6-6 14-7"/><g class="et-visage">' + ET_VISAGE + "</g>") + "</svg>";
+    return '<svg class="et-etoile' + (vide ? " et-vide" : "") + (grande ? " et-grande" : "") + '" viewBox="0 0 100 100" aria-hidden="true"><path class="et-forme" d="' + ET_FORME + '" style="fill:' + c + '"/></svg>';
   }
 
   function etNiveau(d, id) { var v = d.val[id] || {}; for (var k = 0; k < ETOILES.length; k++) if (!v[k]) return k; return ETOILES.length; }
