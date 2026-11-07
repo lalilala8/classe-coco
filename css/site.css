@@ -1089,3 +1089,25 @@ span.tb-grp { box-shadow: none; padding: 1px 4px; border-radius: 6px; }
 @media (max-width: 760px) { .po-etiq { grid-template-columns: 1fr; } .po-etiq-bal { position: static; grid-template-columns: 120px 1fr; align-items: center; justify-items: start; } .po-etiq-quoi { text-align: left; } .po-objets { grid-template-columns: repeat(2, minmax(0, 1fr)); } .po-unites .coco-btn { min-width: 0; flex: 1 1 40%; } }
 .po-corps > * { min-width: 0; }
 .k-commun .po-etiq { grid-template-columns: 1fr; } .k-commun .po-etiq-bal { position: static; grid-template-columns: 150px 1fr; justify-items: start; align-items: center; } .k-commun .po-etiq-quoi { text-align: left; }
+
+/* Leçon GM8 « Les mesures de masses » (D-110) */
+.lx-pesee { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 20px; align-items: center; }
+.lx-pesee-bal { display: grid; justify-items: center; gap: 8px; }
+.lx-pesee-txt { font: 700 20px/1.35 var(--font-lecture); text-align: center; margin: 0; min-height: 2.7em; }
+.lx-echelle { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 12px; margin: 12px 0; }
+.lx-unite { display: inline-grid; justify-items: center; min-width: 96px; padding: 10px 14px; border: var(--bord) solid var(--maths); border-radius: var(--arrondi); background: #fff; }
+.lx-unite b { font: 700 32px/1 var(--font-lecture); color: var(--maths-fonce); }
+.lx-unite small { font: 600 15px/1.3 var(--font-texte); color: var(--encre-douce); }
+.lx-fois { font: 700 18px/1 var(--font-texte); color: var(--encre-douce); }
+.lx-egalites { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 28px; font: 700 26px/1.3 var(--font-lecture); }
+.lx-pareil { list-style: none; padding: 0; margin: 10px 0; display: grid; gap: 12px; font: 700 24px/1.6 var(--font-lecture); }
+.lx-trou { font: 700 22px/1 var(--font-lecture); min-width: 64px; min-height: 44px; padding: 6px 10px; border: 2.5px dashed var(--soutien-fonce); border-radius: var(--arrondi-petit); background: var(--soutien-clair); color: var(--encre); cursor: pointer; vertical-align: middle; }
+.lx-trou--vu { display: inline-block; border-style: solid; border-color: var(--reussite); background: var(--reussite-clair); text-align: center; cursor: default; }
+.lx-pesee-mini { display: inline-grid; justify-items: center; gap: 4px; }
+.lx-pesee-mini .po-balance { max-width: 160px; }
+.lx-pesee-mini small { font: 600 16px/1.2 var(--font-texte); }
+.lx-eg { font: 700 30px/1.3 var(--font-lecture); background: #fff; border-radius: 12px; padding: 8px 16px; }
+@media (max-width: 600px) { .lx-pesee { grid-template-columns: 1fr; } .lx-pareil { font-size: 20px; } .lx-eg { font-size: 24px; } .lx-unite { min-width: 76px; } }
+/* téléphone : le bouton « Suivant » des retours passe sous le texte (il débordait de l’écran dans toutes les activités, D-110) */
+@media (max-width: 600px) { .coco-retour { flex-wrap: wrap; } .coco-retour > div:not(.coco-retour-actions) { flex: 1 1 0; min-width: 0; } .coco-retour .coco-retour-actions { flex-basis: 100%; margin-left: 0; } .coco-retour .coco-retour-actions .coco-btn { max-width: 100%; } }
+.lx-echelle-leg { text-align: center; margin-bottom: 0; } .lx-fois { font-size: 28px; }

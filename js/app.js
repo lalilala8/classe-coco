@@ -1560,6 +1560,72 @@
           return qs; } }
     } },
 
+    /* ---------- Mesurer des masses (leçon GM8 « Les mesures de masses ») : D-110 ---------- */
+    masses: { matiere: "maths", jeux: {
+      rappel: { perso: "adi", etape: 0, fr: "Je me rappelle", en: "I remember", dfr: "Plus lourd, plus léger ; les milliers.", den: "Heavier, lighter; thousands.",
+        gen: function () { var n = HE.rint(2, 9);
+          return [
+            { t: "choix", c: { fr: "Qu’est-ce qui est le plus lourd ?", en: "Which is heavier?" }, o: [{ fr: "un ballon de baudruche", en: "a balloon" }, { fr: "une boule de pétanque", en: "a pétanque ball" }], a: 1, ex: { fr: "La boule de pétanque est plus petite, mais bien plus lourde : la taille ne dit pas la masse.", en: "The pétanque ball is smaller but much heavier: size does not tell you the mass." } },
+            { t: "choix", c: { fr: "Combien font <b>1 000 + 1 000 + 1 000</b> ?", en: "What is <b>1,000 + 1,000 + 1,000</b>?" }, o: [{ fr: "3 000", en: "3,000" }, { fr: "300", en: "300" }, { fr: "1 003", en: "1,003" }], a: 0, ex: { fr: "3 fois 1 000 : 3 000.", en: "3 lots of 1,000: 3,000." } },
+            { t: "champs", c: { fr: "Complète.", en: "Fill in the missing number." }, champs: [{ k: "v", avant: n + " × 1 000 = ", avantEn: n + " × 1,000 = " }], r: { v: n * 1000 }, ex: { fr: n + " × 1 000 = " + exMille(n * 1000).replace(" ", " ") + " : " + n + " milliers.", en: n + " × 1,000 = " + (n * 1000).toLocaleString("en-GB") + ": " + n + " thousands." } }
+          ]; } },
+      unite: { perso: "tehani", etape: 1, fr: "Quelle unité ?", en: "Which unit?", dfr: "Je choisis l’unité qui convient : g, kg ou t.", den: "I choose the right unit: g, kg or t.",
+        gen: function () {
+          var G = [["un trombone", "a paper clip", 1], ["un œuf", "an egg", 50], ["une mangue", "a mango", 400], ["une lettre", "a letter", 20], ["un crayon", "a pencil", 5]],
+            K = [["un sac de riz", "a bag of rice", 5], ["un chien", "a dog", 15], ["un enfant de 8 ans", "an 8-year-old child", 27], ["une valise", "a suitcase", 20], ["une pastèque", "a watermelon", 6]],
+            T = [["un éléphant", "an elephant", 5], ["une petite voiture", "a small car", 1], ["un bus", "a bus", 12], ["un camion", "a lorry", 10]];
+          var U = [{ fr: "grammes (g)", en: "grams (g)" }, { fr: "kilogrammes (kg)", en: "kilograms (kg)" }, { fr: "tonnes (t)", en: "tonnes (t)" }];
+          var EX = [{ fr: "C’est léger : on l’exprime en grammes. Un trombone pèse 1 g.", en: "It is light: we use grams. A paper clip weighs 1 g." },
+            { fr: "C’est plus lourd qu’un paquet de sucre (1 kg) : on l’exprime en kilogrammes.", en: "It is heavier than a bag of sugar (1 kg): we use kilograms." },
+            { fr: "C’est très lourd : on l’exprime en tonnes. Une petite voiture pèse environ 1 t.", en: "It is very heavy: we use tonnes. A small car weighs about 1 t." }];
+          var q = HE.shuf(G).slice(0, 3).map(function (x) { return [x, 0]; }).concat(HE.shuf(K).slice(0, 3).map(function (x) { return [x, 1]; }), HE.shuf(T).slice(0, 2).map(function (x) { return [x, 2]; }));
+          return HE.shuf(q).map(function (y) { var x = y[0];
+            return { t: "choix", c: { fr: HE.cap(x[0]) + " pèse environ <b>" + x[2] + " …</b> Quelle est l’unité ?", en: HE.cap(x[1]) + " weighs about <b>" + x[2] + " …</b> What is the unit?" },
+              z: function () { return '<div class="lx-illu">' + PO.balance(x[2], "?") + "</div>"; }, o: U, a: y[1], ex: EX[y[1]] }; }); } },
+      convertir: { perso: "dylan", etape: 1, fr: "C’est pareil que…", en: "It is the same as…", dfr: "J’écris une masse avec une autre unité : 4 kg = 4 000 g.", den: "I write a mass with another unit: 4 kg = 4,000 g.",
+        gen: function () {
+          var M = function (n, en) { return en ? n.toLocaleString("en-GB") : exMille(n).replace(/ /g, " "); };
+          var a = HE.shuf([2, 3, 4, 5, 6, 7, 8, 9]), b = HE.shuf([100, 200, 250, 300, 400, 500, 600, 750, 800]);
+          var qs = [
+            function (i) { var n = a[i]; return { t: "champs", c: { fr: "Complète.", en: "Fill in the missing number." }, champs: [{ k: "v", avant: n + " kg = ", apres: " g" }], r: { v: n * 1000 }, ex: { fr: "1 kg = 1 000 g, donc " + n + " kg = " + M(n * 1000) + " g.", en: "1 kg = 1,000 g, so " + n + " kg = " + M(n * 1000, true) + " g." } }; },
+            function (i) { var n = a[i]; return { t: "champs", c: { fr: "Complète.", en: "Fill in the missing number." }, champs: [{ k: "v", avant: n + " t = ", apres: " kg" }], r: { v: n * 1000 }, ex: { fr: "1 t = 1 000 kg, donc " + n + " t = " + M(n * 1000) + " kg.", en: "1 t = 1,000 kg, so " + n + " t = " + M(n * 1000, true) + " kg." } }; },
+            function (i) { var n = a[i] % 4 + 1, g = b[i]; return { t: "champs", c: { fr: "Complète.", en: "Fill in the missing number." }, champs: [{ k: "v", avant: n + " kg " + g + " g = ", apres: " g" }], r: { v: n * 1000 + g }, ex: { fr: n + " kg " + g + " g = " + M(n * 1000) + " g + " + g + " g = " + M(n * 1000 + g) + " g.", en: n + " kg " + g + " g = " + M(n * 1000, true) + " g + " + g + " g = " + M(n * 1000 + g, true) + " g." } }; },
+            function (i) { var n = a[i]; return { t: "champs", c: { fr: "Complète.", en: "Fill in the missing number." }, champs: [{ k: "v", avant: M(n * 1000) + " g = ", avantEn: M(n * 1000, true) + " g = ", apres: " kg" }], r: { v: n }, ex: { fr: "1 000 g = 1 kg, donc " + M(n * 1000) + " g = " + n + " kg.", en: "1,000 g = 1 kg, so " + M(n * 1000, true) + " g = " + n + " kg." } }; }
+          ];
+          return [0, 1, 2, 3, 0, 2, 1, 2].map(function (t2, i) { return qs[t2](i); }); } },
+      comparer: { perso: "vaka", etape: 2, fr: "Le plus lourd", en: "The heaviest", dfr: "Je compare deux masses écrites avec des unités différentes.", den: "I compare two masses written with different units.",
+        gen: function () {
+          var M = function (n, en) { return en ? n.toLocaleString("en-GB") : exMille(n).replace(/ /g, " "); };
+          var P = HE.shuf([2, 3, 4, 5, 6]), d = function () { return HE.pk([100, 200, 300, 500]); };
+          var paires = [
+            [P[0] + " kg", P[0] * 1000, M(P[0] * 1000 - d()) + " g"], [M(P[1] * 1000 + d()) + " g", null, P[1] + " kg"], [P[2] + " kg", P[2] * 1000, M(P[2] * 1000) + " g"],
+            [P[3] + " t", P[3] * 1000000, M(P[3] * 1000 - d()) + " kg"], ["1 kg 200 g", 1200, "1 500 g"], ["1 kg", 1000, "1 kg", "plumes"]
+          ];
+          var val = function (s) { var x = s.replace(/[\s ,]/g, ""), m; if ((m = /^(\d+)kg(\d+)g$/.exec(x))) return +m[1] * 1000 + +m[2]; if ((m = /^(\d+)t$/.exec(x))) return +m[1] * 1000000; if ((m = /^(\d+)kg$/.exec(x))) return +m[1] * 1000; return +x.replace("g", ""); };
+          return HE.shuf(paires).map(function (p) {
+            if (p[3]) return { t: "choix", c: { fr: "Qu’est-ce qui est le plus lourd ?", en: "Which is heavier?" }, o: [{ fr: "1 kg de plumes", en: "1 kg of feathers" }, { fr: "1 kg de riz", en: "1 kg of rice" }, { fr: "Ils pèsent pareil", en: "They weigh the same" }], a: 2, ex: { fr: "1 kg, c’est 1 kg : les plumes prennent beaucoup plus de place, mais elles pèsent pareil.", en: "1 kg is 1 kg: the feathers take up much more space, but they weigh the same." } };
+            var A = val(p[0]), B = val(p[2]), en = langue === "en", lib = function (s) { return { fr: s, en: s.replace(/(\d)[\s\u00a0\u202f](?=\d{3})/g, "$1,") }; };
+            var g = function (v) { return v >= 1000000 ? M(v / 1000) + " kg" : M(v) + " g"; }, gE = function (v) { return v >= 1000000 ? M(v / 1000, true) + " kg" : M(v, true) + " g"; };
+            var meme = p[0].indexOf("t") > 0 ? "kg" : "g";
+            /* on ne convertit que ce qui n’est pas déjà dans l’unité commune */
+            var conv = [[p[0], A], [p[2], B]].filter(function (x) { return !new RegExp("^[\\d\\s\\u00a0\\u202f]+ " + meme + "$").test(x[0]); });
+            return { t: "choix", c: { fr: "Qu’est-ce qui est le plus lourd ?", en: "Which is heavier?" }, o: [lib(p[0]), lib(p[2]), { fr: "Ils pèsent pareil", en: "They weigh the same" }], a: A === B ? 2 : A > B ? 0 : 1,
+              ex: { fr: "J’écris tout en " + (meme === "kg" ? "kilogrammes" : "grammes") + " : " + conv.map(function (x) { return x[0] + " = " + g(x[1]); }).join(" et ") + ". " + (A === B ? "C’est pareil." : g(Math.max(A, B)) + " > " + g(Math.min(A, B)) + "."),
+                    en: "I write everything in " + (meme === "kg" ? "kilograms" : "grams") + ": " + conv.map(function (x) { return lib(x[0]).en + " = " + gE(x[1]); }).join(" and ") + ". " + (A === B ? "They are the same." : gE(Math.max(A, B)) + " > " + gE(Math.min(A, B)) + ".") } }; }); } },
+      probleme: { perso: "mei", etape: 3, fr: "Problèmes de masses", en: "Mass problems", dfr: "Je résous des problèmes avec des grammes, des kilogrammes et des tonnes.", den: "I solve problems with grams, kilograms and tonnes.",
+        gen: function () {
+          var M = function (n, en) { return en ? n.toLocaleString("en-GB") : exMille(n).replace(/ /g, " "); };
+          var a = HE.rint(1, 3), b = HE.pk([250, 500, 750]), p = HE.pk([200, 300, 400, 600]), c = HE.rint(2, 6), d = HE.rint(2, 5), e = HE.rint(24, 32), f = HE.rint(2, 5), n = HE.rint(2, 4), m = HE.pk([200, 250, 300]);
+          return HE.shuf([
+            { t: "champs", c: { fr: "Sari achète un sac de riz de <b>" + a + " kg</b> et un paquet de farine de <b>" + b + " g</b>. Combien pèsent ses courses, en grammes ?", en: "Sari buys a <b>" + a + " kg</b> bag of rice and a <b>" + b + " g</b> bag of flour. How much does her shopping weigh, in grams?" }, champs: [{ k: "v", apres: " g" }], r: { v: a * 1000 + b }, ex: { fr: a + " kg = " + M(a * 1000) + " g ; " + M(a * 1000) + " g + " + b + " g = " + M(a * 1000 + b) + " g.", en: a + " kg = " + M(a * 1000, true) + " g; " + M(a * 1000, true) + " g + " + b + " g = " + M(a * 1000 + b, true) + " g." } },
+            { t: "champs", c: { fr: "Le panier de Tehani pèse <b>1 kg</b>. Elle enlève une papaye de <b>" + p + " g</b>. Combien pèse le panier maintenant ?", en: "Tehani’s basket weighs <b>1 kg</b>. She takes out a <b>" + p + " g</b> papaya. How much does the basket weigh now?" }, champs: [{ k: "v", apres: " g" }], r: { v: 1000 - p }, ex: { fr: "1 kg = 1 000 g ; 1 000 g − " + p + " g = " + (1000 - p) + " g.", en: "1 kg = 1,000 g; 1,000 g − " + p + " g = " + (1000 - p) + " g." } },
+            { t: "champs", c: { fr: "Un camion vide pèse <b>" + c + " t</b>. On le charge avec <b>" + d + " t</b> de sable. Combien pèse-t-il chargé ?", en: "An empty lorry weighs <b>" + c + " t</b>. It is loaded with <b>" + d + " t</b> of sand. How much does it weigh when loaded?" }, champs: [{ k: "v", apres: " t" }], r: { v: c + d }, ex: { fr: c + " t + " + d + " t = " + (c + d) + " t.", en: c + " t + " + d + " t = " + (c + d) + " t." } },
+            { t: "champs", c: { fr: "Dylan pèse <b>" + e + " kg</b>. Avec son cartable sur le dos, la balance affiche <b>" + (e + f) + " kg</b>. Combien pèse le cartable ?", en: "Dylan weighs <b>" + e + " kg</b>. With his school bag on his back, the scale shows <b>" + (e + f) + " kg</b>. How much does the bag weigh?" }, champs: [{ k: "v", apres: " kg" }], r: { v: f }, ex: { fr: (e + f) + " kg − " + e + " kg = " + f + " kg.", en: (e + f) + " kg − " + e + " kg = " + f + " kg." } },
+            { t: "champs", c: { fr: "Une mangue pèse <b>" + m + " g</b>. Combien pèsent <b>" + n + " mangues</b> ?", en: "A mango weighs <b>" + m + " g</b>. How much do <b>" + n + " mangoes</b> weigh?" }, champs: [{ k: "v", apres: " g" }], r: { v: n * m }, ex: { fr: n + " × " + m + " g = " + M(n * m) + " g" + (n * m === 1000 ? " = 1 kg." : n * m > 1000 ? " : c’est plus de 1 kg." : " : c’est moins de 1 kg."), en: n + " × " + m + " g = " + M(n * m, true) + " g" + (n * m === 1000 ? " = 1 kg." : n * m > 1000 ? ": more than 1 kg." : ": less than 1 kg.") } },
+            { t: "champs", c: { fr: "Une plaquette de beurre pèse <b>250 g</b>. Combien de plaquettes faut-il pour faire <b>1 kg</b> ?", en: "A block of butter weighs <b>250 g</b>. How many blocks make <b>1 kg</b>?" }, champs: [{ k: "v", apres: { fr: " plaquettes", en: " blocks" } }], r: { v: 4 }, ex: { fr: "1 kg = 1 000 g ; 250 + 250 + 250 + 250 = 1 000 : il faut 4 plaquettes.", en: "1 kg = 1,000 g; 250 + 250 + 250 + 250 = 1,000: you need 4 blocks." } }
+          ]); } }
+    } },
+
     /* ---------- Le verbe : « Je réinvestis » (leçon CONJ2) [PROPOSITION : textes écrits par Claude] ---------- */
     verbe: { matiere: "francais", jeux: {
       textes: { perso: "nina", etape: 3, fr: "Les verbes du texte", en: "Verbs in a text", dfr: "Je touche tous les verbes conjugués d'un petit texte.", den: "I tap all the conjugated verbs in a short text.",
@@ -1592,7 +1658,7 @@
       zone += '<p class="qz-champs">' + q.champs.map(function (f) {
         var avant = en && f.avantEn !== undefined ? f.avantEn : (f.avant || "");
         return (f.sep ? '<span class="qz-sep">' + esc(f.sep) + "</span>" : "") + (avant ? "<span>" + esc(avant) + "</span>" : "") +
-          '<input class="qz-champ" type="text" inputmode="numeric" autocomplete="off" data-qz="' + f.k + '" value="' + esc(QZ.val[f.k] || "") + '"' + (QZ.rep ? " disabled" : "") + ' aria-label="' + (en ? "answer" : "réponse") + '">' + (f.apres ? "<span>" + esc(f.apres) + "</span>" : ""); }).join("") + "</p>";
+          '<input class="qz-champ" type="text" inputmode="numeric" autocomplete="off" data-qz="' + f.k + '" value="' + esc(QZ.val[f.k] || "") + '"' + (QZ.rep ? " disabled" : "") + ' aria-label="' + (en ? "answer" : "réponse") + '">' + (f.apres ? "<span>" + esc(qzT(f.apres)) + "</span>" : ""); }).join("") + "</p>";
       bas = QZ.rep ? "" : '<button class="coco-btn coco-btn--grand" type="button" data-action="qz-valider">' + t("valider") + "</button>";
     } else if (q.t === "pieces") {
       var somme = QZ.sel.reduce(function (a, v) { return a + v; }, 0);
@@ -1824,6 +1890,51 @@
       '<div class="coco-row"><button class="coco-btn" type="button" data-action="lx-somme">' + (en ? "Another amount" : "Une autre somme") + "</button>" + (s !== 6875 ? '<button class="coco-btn coco-btn--secondaire" type="button" data-action="lx-somme0">' + (en ? "Back to the lesson example" : "Revenir à l’exemple de la leçon") + "</button>" : "") + "</div>";
     return lxLecon("monnaie", tr(C.monnaie.titre), [[en ? "The money of New Caledonia" : "La monnaie calédonienne", bloc1], [en ? "Splitting an amount" : "Décomposer une somme", bloc2]], jrCartesMonnaie);
   }
+  /* ---------- Leçon GM8 « Les mesures de masses » (D-110) : phrases de la leçon mot pour mot ---------- */
+  function lxMille(n, en) { return en ? n.toLocaleString("en-GB") : exMille(n).replace(/ /g, " "); }
+  var LX_PESEE = [
+    { id: "trombone", fr: "un trombone", en: "a paper clip", v: 1, u: "g", phr: { fr: "1 gramme, c’est le poids d’un trombone !", en: "1 gram is the weight of a paper clip!" } },
+    { id: "sucre", fr: "un paquet de sucre", en: "a bag of sugar", v: 1, u: "kg", phr: { fr: "Un paquet de sucre pèse 1 kg.", en: "A bag of sugar weighs 1 kg." } },
+    { id: "fruits", fr: "ces fruits", en: "this fruit", v: 4, u: "kg", phr: { fr: "Ces fruits pèsent 4 kg.", en: "This fruit weighs 4 kg." } },
+    { id: "camion", fr: "ce camion", en: "this lorry", v: 5, u: "t", phr: { fr: "Ce camion pèse 5 t.", en: "This lorry weighs 5 t." } }
+  ];
+  function pageLeconMasses() {
+    var en = langue === "en", P = LX_PESEE.filter(function (x) { return x.id === LX.pese; })[0], E = LX.ex || { a: 4, b: 5, c: 1, d: 500 }, vu = LX.vu || {};
+    var bloc1 = "<p>" + (en ? "To find out the weight of an object, how much it weighs, we measure its <b>mass</b> with a <b>scale</b>." : "Pour connaître le poids d’un objet, combien il pèse, on mesure sa <b>masse</b> à l’aide d’une <b>balance</b>.") + "</p>" +
+      '<div class="lx-pesee"><div class="lx-pesee-bal">' + PO.balance(P ? P.v : "0", P ? P.u : "g") + '<p class="lx-pesee-txt">' + (P ? esc(tr(P.phr)) : (en ? "Put something on the scale." : "Pose quelque chose sur la balance.")) + "</p></div>" +
+      '<div class="po-etal">' + LX_PESEE.map(function (x) { return '<button class="po-fruit' + (P === x ? " is-choisi" : "") + '" type="button" data-action="lx-pese" data-v="' + x.id + '" aria-pressed="' + (P === x) + '"><span>' + esc(x[en ? "en" : "fr"]) + "</span></button>"; }).join("") + "</div></div>";
+    var bloc2 = "<p>" + (en ? "The basic unit is the <b>gram (g)</b>. 1 gram is the weight of a paper clip!" : "L’unité de référence est le <b>gramme (g)</b>. 1 gramme, c’est le poids d’un trombone !") + "</p><p>" +
+      (en ? "To give bigger masses, we use the <b>kilogram</b> and/or the <b>tonne</b>." : "Pour exprimer des mesures de masses plus grandes on utilise le <b>kilogramme</b> et/ou la <b>tonne</b>.") + "</p>" +
+      '<p class="mi-indice lx-echelle-leg">' + (en ? "From the lightest to the heaviest:" : "Du plus léger au plus lourd :") + '</p><div class="lx-echelle"><span class="lx-unite"><b>g</b><small>' + (en ? "gram" : "gramme") + '</small></span><span class="lx-fois">→</span><span class="lx-unite"><b>kg</b><small>' + (en ? "kilogram" : "kilogramme") + '</small></span><span class="lx-fois">→</span><span class="lx-unite"><b>t</b><small>' + (en ? "tonne" : "tonne") + "</small></span></div>" +
+      '<p class="lx-egalites"><b>1 kg = ' + lxMille(1000, en) + " g</b><b>1 t = " + lxMille(1000, en) + " kg</b></p>";
+    var trou = function (k, v) { return vu[k] ? '<b class="lx-trou lx-trou--vu">' + v + "</b>" : '<button class="lx-trou" type="button" data-action="lx-voir" data-v="' + k + '" aria-label="' + (en ? "Show the answer" : "Montrer la réponse") + '">?</button>'; };
+    var bloc3 = "<p>" + (en ? "We can give the same mass with <b>different units</b>." : "On peut exprimer une même mesure de masse avec <b>différentes unités</b>.") + '</p><ul class="lx-pareil">' +
+      "<li>" + E.a + (en ? " kg is the same as " : " kg c’est pareil que ") + trou("a", lxMille(E.a * 1000, en)) + " g</li>" +
+      "<li>" + E.b + (en ? " t is the same as " : " t c’est pareil que ") + trou("b", lxMille(E.b * 1000, en)) + " kg</li>" +
+      "<li>" + E.c + " kg " + E.d + (en ? " g is the same as " : " g c’est pareil que ") + trou("c1", lxMille(E.c * 1000, en)) + " g + " + trou("c2", E.d) + " g = " + trou("c3", lxMille(E.c * 1000 + E.d, en)) + " g</li></ul>" +
+      '<p class="mi-indice">' + (en ? "Work it out, then tap a ? to check." : "Cherche, puis touche un ? pour vérifier.") + '</p><div class="coco-row"><button class="coco-btn" type="button" data-action="lx-autre">' + (en ? "Another example" : "Un autre exemple") + "</button>" +
+      (LX.ex ? '<button class="coco-btn coco-btn--secondaire" type="button" data-action="lx-ex0">' + (en ? "Back to the lesson example" : "Revenir à l’exemple de la leçon") + "</button>" : "") + "</div>";
+    return lxLecon("masses", tr(C.masses.titre), [[en ? "The scale" : "La balance", bloc1], [en ? "Gram, kilogram, tonne" : "Gramme, kilogramme, tonne", bloc2], [en ? "The same mass, different units" : "Une même masse, plusieurs unités", bloc3]], jrCartesMasses);
+  }
+  /* « Je retiens » : la leçon GM8 mot pour mot, découpée (en anglais : traduction, en attendant une leçon anglaise) */
+  function jrCartesMasses(en) {
+    var B = function (v, u, lib, k) { return lxPop('<span class="lx-pesee-mini">' + PO.balance(v, u) + "<small>" + lib + "</small></span>", k); };
+    var eg = function (a, b, k) { return lxPop('<span class="lx-eg"><b>' + a + "</b> = <b>" + b + "</b></span>", k); };
+    return [
+      { t: en ? "The scale" : "La balance", svg: '<div class="lx-illu">' + B("1", "kg", en ? "a bag of sugar" : "un paquet de sucre", 0) + "</div>",
+        txt: [en ? "To find out the weight of an object, how much it weighs, we measure its mass with a scale." : "Pour connaître le poids d’un objet, combien il pèse, on mesure sa masse à l’aide d’une balance."] },
+      { t: en ? "The gram" : "Le gramme", svg: '<div class="lx-illu">' + B("1", "g", en ? "a paper clip" : "un trombone", 0) + "</div>",
+        txt: en ? ["The basic unit is the gram (g).", "1 gram is the weight of a paper clip!"] : ["L’unité de référence est le gramme (g).", "1 gramme, c’est le poids d’un trombone !"] },
+      { t: en ? "The kilogram and the tonne" : "Le kilogramme et la tonne", svg: '<div class="lx-illu">' + B("4", "kg", en ? "this fruit" : "ces fruits", 0) + B("5", "t", en ? "this lorry" : "ce camion", 2) + "</div>",
+        txt: en ? ["To give bigger masses, we use the kilogram and/or the tonne.", "This fruit weighs 4 kg.", "This lorry weighs 5 t."] : ["Pour exprimer des mesures de masses plus grandes on utilise le kilogramme et/ou la tonne.", "Ces fruits pèsent 4 kg.", "Ce camion pèse 5 t."] },
+      { t: en ? "1 kg = 1,000 g · 1 t = 1,000 kg" : "1 kg = 1 000 g · 1 t = 1 000 kg", svg: '<div class="lx-illu lx-col">' + eg("1 kg", lxMille(1000, en) + " g", 0) + eg("1 t", lxMille(1000, en) + " kg", 2) + "</div>",
+        txt: ["1 kg = " + lxMille(1000, en) + " g", "1 t = " + lxMille(1000, en) + " kg"] },
+      { t: en ? "Different units" : "Plusieurs unités", svg: '<div class="lx-illu">' + jrCycle([eg("4 kg", lxMille(4000, en) + " g", 0), eg("5 t", lxMille(5000, en) + " kg", 0), eg("1 kg 500 g", lxMille(1500, en) + " g", 0)]) + "</div>",
+        txt: en ? ["We can give the same mass with different units.", "4 kg is the same as 4,000 g.", "5 t is the same as 5,000 kg.", "1 kg 500 g is the same as 1,000 g + 500 g = 1,500 g."]
+          : ["On peut exprimer une même mesure de masse avec différentes unités.", "4 kg c’est pareil que 4 000 g.", "5 t c’est pareil que 5 000 kg.", "1 kg 500 g c’est pareil que 1 000 g + 500 g = 1 500 g."] }
+    ];
+  }
+  jrCartesMasses.persos = [["sari", "presente"], ["tehani", "reflechit"], ["vaka", "content"], ["dylan", "idee"], ["mei", "victoire"]];
   function actionLX(a, el) {
     if (a === "lx-heure") LX.h = +el.dataset.v;
     else if (a === "lx-grouper") LX.g = Math.min(6, (LX.g || 0) + 1);
@@ -1834,6 +1945,10 @@
     else if (a === "lx-vider") LX.main = [];
     else if (a === "lx-somme") LX.s = HE.rint(1, 9) * 1000 + HE.rint(0, 9) * 100 + HE.rint(1, 9) * 10 + HE.pk([0, 5]);
     else if (a === "lx-somme0") LX.s = 6875;
+    else if (a === "lx-pese") LX.pese = el.dataset.v;
+    else if (a === "lx-voir") { LX.vu = LX.vu || {}; LX.vu[el.dataset.v] = true; }
+    else if (a === "lx-autre") { LX.ex = { a: HE.rint(2, 9), b: HE.rint(2, 9), c: HE.rint(1, 4), d: HE.pk([100, 200, 250, 300, 400, 600, 750, 800]) }; LX.vu = {}; }
+    else if (a === "lx-ex0") { LX.ex = null; LX.vu = {}; }
   }
   function exSauver() { var m = lire("fiches", {}); m[EXF.seq] = { n: EXF.n, opt: EXF.opt }; ecrire("fiches", m); }
   function exTirer() { var X = EXOS[EXF.seq]; EXF.d = exAvec(EXF.n, function () { return X.tirer(EXF.opt); }); EXF.vu = {}; EXF.i = 0; exSauver(); }
@@ -2237,7 +2352,7 @@
       ensDomaine("m-maths", "Maths · Grandeurs et mesures", [ensLigne("mei", "La monnaie et les prix", "Deux problèmes ouverts", [["Fiche d’exercices", "#exos-monnaie"], ["Voir la séquence", "#seq-monnaie"]])].concat(PO.sequences.monnaie.map(ensPO)).concat([
         ensLigne("tehani", "Lire l’heure digitale", "« L’heure à l’ardoise » : 10 jeux collectifs au TBI pour les séances 1 à 3 (outil de la collègue, adapté)", [["Au TBI", JEU_DIGITAL], ["La fiche", "#fiche-digitale"], ["Fiche d’exercices", "#exos-digitale"], ["Voir la séquence", "#seq-digitale"]])]).concat(PO.sequences.digitale.map(ensPO)).concat([
         ensLigne("coralie", "Lire l’heure à aiguilles", "Découverte guidée et jeu des ardoises au TBI ; leçon, 8 activités", [["Au TBI", "#tbi-heure"], ["La fiche", "#fiche-heure"], ["Fiche d’exercices", "#exos-heure"], ["Voir la séquence", "#seq-heure"]])]).concat(PO.sequences.heure.map(ensPO)).concat([
-        ensLigne("sari", "Mesurer des masses", "Période 5, séquence 4 · deux problèmes ouverts (outil de la collègue, adapté)", [["Voir la séquence", "#seq-masses"]])]).concat(PO.sequences.masses.map(ensPO))) +
+        ensLigne("sari", "Mesurer des masses", "Période 5, séquence 4 · leçon GM8, 5 activités, deux problèmes ouverts (outil de la collègue, adapté)", [["La leçon", "#lecon-masses"], ["Voir la séquence", "#seq-masses"]])]).concat(PO.sequences.masses.map(ensPO))) +
       ensDomaine("m-maths", "Maths · Résolution de problèmes", [
         ensLigne("adi", "Banque de problèmes (Vergnaud)", "217 problèmes classés par type, avec leurs schémas", [["Ouvrir la banque", "#banque"]]),
         ensLigne("waeko", "Lire un graphique en barres", "Leçon (OGD1), 4 jeux et problèmes", [["La fiche", "#fiche-diagrammes"], ["Fiche d’exercices", "#exos-diagrammes"], ["Voir la séquence", "#seq-diagrammes"]])]);
@@ -2561,7 +2676,7 @@
   /* ---------- routeur ---------- */
   var ROUTES = {
     accueil: pageAccueil, "seq-verbe": function () { return pageSequence("verbe"); }, "seq-mots": pageSequenceMots, "lecon-mots": pageLeconMots, "fiche-mots": ficheMots,
-    "seq-heure": pageSequenceHeure, "seq-digitale": pageSequenceDigitale, "ens-suivi": pageEnsSuivi, "ens-etoiles": pageEnsEtoiles, "ens-corriges": pageEnsCorriges, "ens-sequences": pageEnsSequences, "ens-formation": pageEnsFormation, "fiche-digitale": ficheDigitale, "seq-diagrammes": pageSequenceDiagrammes, "lecon-diagrammes": pageLeconDiagrammes, "fiche-diagrammes": ficheDiagrammes, "lecon-heure": function () { return pageLeconHeure(true); }, "maquette-retiens": function () { return pageLeconHeure(true); }, "fiche-heure": ficheHeure, "exos-heure": function () { return pageExos("heure"); }, "lecon-digitale": pageLeconDigitale, "lecon-division": pageLeconDivision, "lecon-monnaie": pageLeconMonnaie, "exos-verbe": function () { return pageExos("verbe"); }, "exos-mots": function () { return pageExos("mots"); },
+    "seq-heure": pageSequenceHeure, "seq-digitale": pageSequenceDigitale, "ens-suivi": pageEnsSuivi, "ens-etoiles": pageEnsEtoiles, "ens-corriges": pageEnsCorriges, "ens-sequences": pageEnsSequences, "ens-formation": pageEnsFormation, "fiche-digitale": ficheDigitale, "seq-diagrammes": pageSequenceDiagrammes, "lecon-diagrammes": pageLeconDiagrammes, "fiche-diagrammes": ficheDiagrammes, "lecon-heure": function () { return pageLeconHeure(true); }, "maquette-retiens": function () { return pageLeconHeure(true); }, "fiche-heure": ficheHeure, "exos-heure": function () { return pageExos("heure"); }, "lecon-digitale": pageLeconDigitale, "lecon-division": pageLeconDivision, "lecon-monnaie": pageLeconMonnaie, "lecon-masses": pageLeconMasses, "exos-verbe": function () { return pageExos("verbe"); }, "exos-mots": function () { return pageExos("mots"); },
     "exos-monnaie": function () { return pageExos("monnaie"); }, "exos-division": function () { return pageExos("division"); }, "exos-digitale": function () { return pageExos("digitale"); }, "exos-diagrammes": function () { return pageExos("diagrammes"); }, "tbi-heure": pageTbiHeure,
     "lecon-verbe": pageLecon, "jeu-verbe-decouvre": jeuDecouvre, "jeu-verbe-chasse": jeuChasse, enseignante: pageEnseignante, banque: pageBanque
   };
