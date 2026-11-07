@@ -7,12 +7,12 @@ body { min-height: 100vh; }
    un trait de surligneur sur l'onglet ouvert ; zone à toucher d'au moins 48 px de haut */
 .barre .coco-onglets { gap: 4px 10px; align-items: center; }
 .barre .coco-onglet { border: 0; background: none; min-height: 48px; padding: 0 10px 0 4px; gap: 8px; font-size: 21px; line-height: 1; border-radius: var(--arrondi-petit); color: var(--c); }
-.barre .coco-onglet--francais { --c-clair: #c3d4f2; }
-.barre .coco-onglet--maths { --c-clair: #f6c4c6; }
-.barre .coco-onglet--anglais { --c-clair: #dccbef; }
-.barre .coco-onglet--qlm { --c-clair: #cfe8bf; }
-.barre .coco-onglet:not([class*="coco-onglet--"]) { --c-clair: #b5e6ec; }
-.barre .coco-onglet .onglet-av { width: 36px; height: 36px; flex: none; border-radius: 50%; object-fit: cover; }
+.barre .coco-onglet--francais { --c-clair: var(--francais-surligneur); }
+.barre .coco-onglet--maths { --c-clair: var(--maths-surligneur); }
+.barre .coco-onglet--anglais { --c-clair: var(--anglais-surligneur); }
+.barre .coco-onglet--qlm { --c-clair: var(--qlm-surligneur); }
+.barre .coco-onglet:not([class*="coco-onglet--"]) { --c-clair: var(--lagon-surligneur); }
+.barre .coco-onglet .onglet-av { width: 36px; height: 36px; flex: none; object-fit: contain; } /* personnage entier, jamais recadré (charte, « Illustrations ») */
 .barre .coco-onglet span { padding: 6px 2px; }
 .barre .coco-onglet[aria-current="page"] { background: none; color: var(--c); }
 .barre .coco-onglet[aria-current="page"] span { background: linear-gradient(177deg, transparent 50%, var(--c-clair) 51%, var(--c-clair) 84%, transparent 85%); padding: 6px 6px; }
