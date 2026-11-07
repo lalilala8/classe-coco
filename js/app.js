@@ -19,7 +19,7 @@
   /* Espace enseignante protégé par un code (D-93). Seule l'empreinte SHA-256 du code est dans le site ;
      outils/changer_code.py la remplace. L'espace reste ouvert jusqu'à la fermeture du navigateur (sessionStorage). */
   var ENS_EMPREINTE = "77bce9d74fae4a5f0ff319a39730036aef534c10e956bd0041f8bc551e97082b";
-  var ENS_ROUTES = /^(enseignante|ens-|fiche-|feuille-|classe-|tbi-)/;
+  var ENS_ROUTES = /^(enseignante|ens-|fiche-|feuille-|classe-|tbi-|exos-)/;
   var ensOuvert = (function () { try { return sessionStorage.getItem("coco-ens") === "1"; } catch (e) { return false; } })();
   function ensNormaliser(s) { return String(s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]/g, ""); }
   function sha256(ascii) {
@@ -142,7 +142,7 @@
   function pageMatiere(id) {
     var m = MATIERE[id];
     var corps = m.domaines.length ? m.domaines.map(function (d, kd) {
-      return '<section class="domaine domaine-matiere ' + m.classe + '" id="dom-' + id + "-" + kd + '"><h2>' + esc(tr(d.nom)) + '</h2><div class="sequences">' + d.sequences.map(function (s, i) {
+      return '<section class="domaine domaine-matiere ' + m.classe + '" id="dom-' + id + "-" + kd + '"><h2>' + esc(tr(d.nom)) + '</h2><div class="sequences">' + (d.sequences.length ? "" : '<div class="seq est-bientot"><small>' + t("bientot") + "</small><b>" + (langue === "en" ? "The units for this period are on their way." : "Les séquences de cette période arrivent bientôt.") + "</b></div>") + d.sequences.map(function (s, i) {
         var nom = tr(s[0]), statut = s[1] || "bientot";
         if (statut === "demo") return '<a class="seq" href="' + (s[2].charAt(0) === "#" ? s[2] : "#seq-" + s[2]) + '" style="--c:var(--' + id + ');--cf:var(--' + id + '-fonce)"><small>' + (i + 1) + " · " + t("demo") + "</small><b>" + esc(nom) + "</b></a>";
         return '<div class="seq est-bientot"><small>' + (i + 1) + " · " + (statut === "ancien" ? t("ancien") : t("bientot")) + "</small><b>" + esc(nom) + "</b></div>";
@@ -766,7 +766,7 @@
   var HE = window.COCO_HEURE;
   var JEUX_HEURE = {
     rappel: { perso: "adi", etape: 1, fr: "Je me rappelle", en: "I remember", dfr: "Je retrouve ce que je sais sur l'heure digitale et les durées.", den: "I remember what I know about digital time and durations." },
-    aig: { perso: "waeko", etape: 1, fr: "Quelle aiguille ?", en: "Which hand?", dfr: "Je reconnais la petite et la grande aiguille.", den: "I can tell the short hand from the long hand." },
+    aig: { perso: "waeko", etape: 1, fr: "Heures ou minutes ?", en: "Hours or minutes?", dfr: "Je trouve l’aiguille des heures et l’aiguille des minutes.", den: "I can find the hour hand and the minute hand." },
     lire: { perso: "leo", etape: 1, fr: "Lis l'horloge", en: "Read the clock", dfr: "Je lis les heures piles, les demi-heures et les quarts d'heure.", den: "I read o’clock, half past, quarter past and quarter to.", niv: [1, 2, 3] },
     lire2: { perso: "leo", etape: 2, fr: "Lis les minutes", en: "Read the minutes", dfr: "Je lis les minutes de 5 en 5, jusqu'à « moins cinq ».", den: "I read the minutes in fives, up to “five to”.", niv: [4, 5] },
     regle: { perso: "tao", etape: 2, fr: "Règle l'horloge", en: "Set the clock", dfr: "Je place les aiguilles sur l'heure demandée.", den: "I move the hands to show the time." },
@@ -802,7 +802,7 @@
       carte("maths", "4 · " + t("ouvert") + " 2", t("bientot"), en ? "A quarter turn" : "Un quart de tour", "dylan", "", true);
     return barre("maths") + '<section class="entete m-maths"><img src="' + IMG(m.perso) + '" alt=""><div><h1>' + esc(tr(s.titre)) + "</h1><p>" + esc(tr(m.nom)) + " · " + (en ? "Measures" : "Grandeurs et mesures") + "</p></div></section>" +
       '<p class="objectif m-maths">' + t("objectif") + " <b>" + esc(tr(s.objectif)) + "</b></p>" +
-      '<a class="coco-btn coco-btn--secondaire" href="#lecon-heure" style="justify-self:start"><img src="' + PICTO("ampoule") + '" alt="">' + t("lecon") + "</a>" +
+      '<div class="coco-row"><a class="coco-btn coco-btn--secondaire" href="#lecon-heure"><img src="' + PICTO("ampoule") + '" alt="">' + t("lecon") + "</a>" + boutonExos("heure") + "</div>" +
       '<section class="etapes">' + cartes + "</section>";
   }
   /* ---------- la leçon (récap interactif du v0) ---------- */
@@ -916,7 +916,7 @@
       zone = '<p class="phrase">' + esc(typo(tr(q))) + "</p>" + heChoix(q.o, q.a, function (o) { return tr(o); });
     } else if (jeu === "aig") {
       var qa = HG.qs[HG.i];
-      consigne = en ? "Tap the <b>" + (qa.t === "hh" ? "short hand" : "long hand") + "</b>." : "Touche <b>" + (qa.t === "hh" ? "la petite aiguille" : "la grande aiguille") + "</b>.";
+      consigne = en ? "Tap the <b>" + (qa.t === "hh" ? "hour hand" : "minute hand") + "</b>." : "Touche l’<b>" + (qa.t === "hh" ? "aiguille des heures" : "aiguille des minutes") + "</b>.";
       zone = HE.horloge(qa.h, qa.m, { act: HG.rep ? "" : "h-aiguille", en: en, cls: HG.rep ? "montre-" + qa.t : "" });
     } else if (jeu === "lire" || jeu === "lire2") {
       if (!HG.niv) return haut + bulle(J.perso, en ? "Choose your <b>level</b>." : "Choisis ton <b>niveau</b>.") + '<section class="zone m-maths"><div class="coco-row">' + J.niv.map(function (v) { return '<button class="coco-btn" type="button" data-action="h-niv" data-v="' + v + '">' + (en ? "Level " : "Niveau ") + v + " · " + esc(tr(HE.NIVEAUX[v])) + "</button>"; }).join("") + "</div></section>";
@@ -953,7 +953,7 @@
       : jeu === "rappel" ? (en ? "You remembered " + sc + " out of " + n + ". Now, let’s read the clock!" : "Tu t’es rappelé " + sc + " réponse" + (sc > 1 ? "s" : "") + " sur " + n + ". Maintenant, lisons l’horloge !")
       : (en ? "You got " + sc + " out of " + n + " right first time." : "Tu as réussi " + sc + " sur " + n + " du premier coup.");
     return '<section class="bilan"><img src="' + POSE_BILAN(JEUX_HEURE[jeu].perso, jeu === "mem" ? n : sc, n) + '" alt=""><h2>' + t("fini") + "</h2>" + (jeu === "mem" || jeu === "rappel" ? "" : '<p class="mi-score">' + sc + " / " + n + "</p>") + "<p>" + esc(typo(txt)) + "</p>" +
-      '<div class="coco-row">' + (jeu === "rappel" ? '<a class="coco-btn" href="#heure-aig">' + (en ? "Which hand?" : "Quelle aiguille ?") + "</a>" : '<button class="coco-btn" type="button" data-action="h-rejouer">' + t("rejouer") + "</button>") +
+      '<div class="coco-row">' + (jeu === "rappel" ? '<a class="coco-btn" href="#heure-aig">' + (en ? "Hours or minutes?" : "Heures ou minutes ?") + "</a>" : '<button class="coco-btn" type="button" data-action="h-rejouer">' + t("rejouer") + "</button>") +
       ((jeu === "lire" || jeu === "lire2") && JEUX_HEURE[jeu].niv.length > 1 ? '<button class="coco-btn coco-btn--secondaire" type="button" data-action="h-niveaux">' + (en ? "Change level" : "Changer de niveau") + "</button>" : "") +
       '<a class="coco-btn coco-btn--secondaire" href="#seq-heure">' + t("versSequence") + "</a></div></section>";
   }
@@ -988,7 +988,9 @@
     }
     if (a === "h-aiguille" && !HG.rep) {
       var qa = HG.qs[HG.i], ok = el.dataset.v === qa.t;
-      heFinir(ok, ok ? (en ? "That’s the right hand!" : "C’est la bonne aiguille !") : (en ? "This is the " + (qa.t === "hh" ? "long hand, for the minutes. The short hand shows the hours." : "short hand, for the hours. The long hand shows the minutes.") : "Celle-ci, c’est " + (qa.t === "hh" ? "la grande aiguille, celle des minutes. La petite aiguille indique les heures." : "la petite aiguille, celle des heures. La grande aiguille indique les minutes.")));
+      /* D-94 : on demande l'aiguille des heures ou des minutes (pas « petite » ou « grande ») ; le retour fait le lien avec la leçon GM5 */
+      heFinir(ok, ok ? (qa.t === "hh" ? (en ? "Yes! The <b>short hand</b> shows the <b>hours</b>." : "Oui ! La <b>petite aiguille</b> indique les <b>heures</b>.") : (en ? "Yes! The <b>long hand</b> shows the <b>minutes</b>." : "Oui ! La <b>grande aiguille</b> indique les <b>minutes</b>."))
+        : (qa.t === "hh" ? (en ? "This one shows the minutes. The hours are shown by the <b>short hand</b>." : "Celle-ci indique les minutes. Les heures sont indiquées par la <b>petite aiguille</b>.") : (en ? "This one shows the hours. The minutes are shown by the <b>long hand</b>." : "Celle-ci indique les heures. Les minutes sont indiquées par la <b>grande aiguille</b>.")));
       return;
     }
     if (a === "h-regle-h" && !HG.rep) { HG.h = ((HG.h + +el.dataset.v) % 12 + 12) % 12 || 12; HG.msg = ""; return; }
@@ -1123,6 +1125,64 @@
     else if (e.key === "p" || e.key === "P") { if (TB.run) TB.run.pause = !TB.run.pause; rendre(); }
     else if (e.key === "f" || e.key === "F") actionTbi("t-plein");
   });
+  /* ---------- fiches d'exercices à imprimer (D-94) : une par séquence, tirée au hasard, avec corrigé facultatif ---------- */
+  var EXF = null;
+  function boutonExos(seq) { return ensOuvert ? '<a class="coco-btn coco-btn--secondaire" href="#exos-' + seq + '"><svg class="ex-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 8V3h10v5M7 17H4v-7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v7h-3M7 14h10v7H7z"/></svg>' + (langue === "en" ? "Worksheet" : "Fiche d’exercices") + "</a>" : ""; }
+  var EXOS = {
+    heure: {
+      seq: "seq-heure", titre: function () { return tr(C.heure.titre); },
+      rappel: function (en) { return en ? "The <b class=\"hr-h\">short hand</b> shows the <b class=\"hr-h\">hours</b>. The <b class=\"hr-m\">long hand</b> shows the <b class=\"hr-m\">minutes</b>."
+        : "La <b class=\"hr-h\">petite aiguille</b> indique les <b class=\"hr-h\">heures</b>. La <b class=\"hr-m\">grande aiguille</b> indique les <b class=\"hr-m\">minutes</b>."; },
+      tirer: function () {
+        var R = HE.rint, P = HE.pk, heures = HE.shuf([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]), k = 0, h = function () { return heures[k++ % 12]; };
+        var lire = HE.shuf([[h(), 0], [h(), 30], [h(), 15], [h(), 45], [h(), P([5, 10, 20, 25])], [h(), P([35, 40, 50, 55])]]);
+        var lettres = HE.shuf([[h(), 15], [h(), 30], [h(), 45]]);
+        var dessin = HE.shuf([[h(), 0], [h(), 30], [h(), 15], [h(), 45], [h(), P([10, 20, 25, 35, 40, 50])]]).slice(0, 4);
+        var plus = HE.shuf([13, 14, 15, 16, 17]).slice(0, 2), moins = HE.shuf([18, 19, 20, 21, 22]).slice(0, 2);
+        return { lire: lire, lettres: lettres, dessin: dessin, conv: HE.shuf([{ s: "+", h: plus[0] }, { s: "+", h: plus[1] }, { s: "-", h: moins[0] }, { s: "-", h: moins[1] }]), pb: HE.PROBLEMES[R(0, HE.PROBLEMES.length - 1)] };
+      },
+      exos: function (d, en) {
+        var dig = function (h, m) { return en ? HE.H12(h) + ":" + HE.pad(m) : HE.H12(h) + " h" + (m ? " " + HE.pad(m) : ""); };
+        var mots = function (h, m) { return HE.cap((en ? HE.direEn(h, m) : HE.direFr(h, m)).replace(/ \(\d+ min\)$/, "")); };
+        var clk = function (h, m, sans) { return HE.horloge(h, m, { deco: true, sans: sans, cls: "ex-clk" }); };
+        var ligne = '<span class="ex-ligne"></span>';
+        return [
+          { c: en ? "Write the time shown on each clock." : "Écris l’heure indiquée par chaque horloge.",
+            q: '<div class="ex-grille">' + d.lire.map(function (x) { return "<div>" + clk(x[0], x[1]) + '<p class="ex-rep">' + (en ? ligne + " : " + ligne : ligne + " h " + ligne) + "</p></div>"; }).join("") + "</div>",
+            r: d.lire.map(function (x) { return dig(x[0], x[1]); }).join(" · ") },
+          { c: en ? "Write the time in words." : "Écris l’heure en lettres.",
+            q: '<div class="ex-liste">' + d.lettres.map(function (x) { return '<div class="ex-ligne-clk">' + clk(x[0], x[1]) + "<p>" + (en ? "It is " : "Il est ") + '<span class="ex-ligne ex-long"></span>.</p></div>'; }).join("") + "</div>",
+            r: d.lettres.map(function (x) { return mots(x[0], x[1]); }).join(" · ") },
+          { c: en ? "Draw the hands." : "Dessine les aiguilles.",
+            q: '<div class="ex-grille ex-quatre">' + d.dessin.map(function (x) { return "<div>" + clk(x[0], x[1], true) + '<p class="ex-rep"><b>' + dig(x[0], x[1]) + "</b></p></div>"; }).join("") + "</div>",
+            r: '<div class="ex-grille ex-quatre ex-petit">' + d.dessin.map(function (x) { return "<div>" + clk(x[0], x[1]) + "<p>" + dig(x[0], x[1]) + "</p></div>"; }).join("") + "</div>" },
+          { c: en ? "Write the 24-hour time." : "Complète.",
+            q: '<ul class="ex-conv">' + d.conv.map(function (x) {
+              if (en) return x.s === "+" ? "<li>" + (x.h - 12) + " p.m. → " + ligne + " : 00</li>" : "<li>" + x.h + ":00 → " + ligne + " p.m.</li>";
+              return x.s === "+" ? "<li>" + (x.h - 12) + " h de l’après-midi, c’est " + ligne + " h.</li>" : "<li>" + x.h + " h, c’est " + ligne + " h " + (x.h >= 18 ? "du soir" : "de l’après-midi") + ".</li>"; }).join("") + "</ul>",
+            r: d.conv.map(function (x) { return x.s === "+" ? (en ? x.h + ":00" : x.h + " h") : (en ? (x.h - 12) + " p.m." : (x.h - 12) + " h"); }).join(" · ") },
+          { c: en ? "Solve the problem." : "Résous le problème.",
+            q: '<div class="ex-ligne-clk">' + clk(d.pb.h, d.pb.m) + "<div><p>" + esc(typo(tr(d.pb))) + "</p><p>" + (en ? "Answer: " : "Réponse : ") + '<span class="ex-ligne ex-long"></span></p></div></div>',
+            r: esc(typo(HE.cap(tr(d.pb.o[d.pb.a])))) }
+        ];
+      }
+    }
+  };
+  function pageExos(seq) {
+    var X = EXOS[seq], en = langue === "en";
+    if (!EXF || EXF.seq !== seq) EXF = { seq: seq, d: X.tirer(), corrige: EXF ? EXF.corrige : false };
+    var ex = X.exos(EXF.d, en);
+    var tete = '<header class="ex-tete"><div><small>' + (en ? "Maths · Worksheet" : "Maths · Fiche d’exercices") + "</small><h1>" + esc(X.titre()) + '</h1></div><p class="ex-nom">' + (en ? "Name: " : "Prénom : ") + '<span class="ex-ligne"></span><br>' + (en ? "Date: " : "Date : ") + '<span class="ex-ligne"></span></p></header>' +
+      '<p class="ex-rappel"><b>' + (en ? "I remember" : "Je me rappelle") + "</b> " + X.rappel(en) + "</p>";
+    var corps = ex.map(function (e, i) { return '<section class="ex"><h2><span>' + (i + 1) + "</span>" + e.c + "</h2>" + e.q + "</section>"; }).join("");
+    var corrige = EXF.corrige ? '<section class="ex-corrige"><h2>' + (en ? "Answers" : "Corrigé") + "</h2><ol>" + ex.map(function (e) { return "<li>" + e.r + "</li>"; }).join("") + "</ol></section>" : "";
+    return '<div class="no-print ex-outils coco-row"><a class="coco-btn coco-btn--secondaire" href="#' + X.seq + '">← ' + (en ? "Back to the unit" : "Retour à la séquence") + '</a>' +
+      '<button class="coco-btn coco-btn--secondaire" type="button" data-action="ex-nouveau">' + (en ? "New worksheet" : "Nouvelle fiche") + "</button>" +
+      '<label class="ex-case"><input type="checkbox" data-action="ex-corrige"' + (EXF.corrige ? " checked" : "") + "> " + (en ? "Add the answers (on a separate page)" : "Ajouter le corrigé (sur une page à part)") + "</label>" +
+      '<button class="coco-btn" type="button" data-action="imprimer">' + (en ? "Print or save as PDF" : "Imprimer ou enregistrer en PDF") + "</button>" + choixLangue() + "</div>" +
+      '<p class="no-print ex-aide">' + (en ? "To get a PDF file: in the print window, choose “Save as PDF”. Each click on “New worksheet” draws new times." : "Pour obtenir un fichier PDF : dans la fenêtre d’impression, choisissez « Enregistrer au format PDF ». Chaque « Nouvelle fiche » tire d’autres heures.") + "</p>" +
+      '<article class="exos m-maths">' + tete + corps + "</article>" + (corrige ? '<article class="exos ex-page m-maths">' + corrige + "</article>" : "");
+  }
   function ficheHeure() {
     var li = function (a) { return a.map(function (x) { return "<li>" + x + "</li>"; }).join(""); };
     return '<div class="no-print coco-row"><a class="coco-btn coco-btn--secondaire" href="#ens-sequences">← Séquences d’apprentissage</a><a class="coco-btn" href="#tbi-heure">Au TBI</a><a class="coco-btn coco-btn--secondaire" href="#seq-heure">Voir la séquence</a><button class="coco-btn coco-btn--secondaire" type="button" data-action="imprimer">Imprimer la fiche</button></div>' +
@@ -1130,7 +1190,7 @@
       '<p class="f-source">Module du premier site de la classe, repris et rendu bilingue. Programmation : période 5, semaine 2 (du 2 au 6 novembre), séquence 2. Leçons : GM5 « Lire l’heure digitale » et GM5 « Lire l’heure avec aiguilles » (reçues le 06/11/2026) ; leçon anglaise (Read the time) non reçue.</p>' +
       encadreProgramme("heure") +
       '<section><h2>Les séances et les activités du site</h2><table class="f-table"><tbody>' + [
-        ["Séance 1", "Reconnaître les différentes aiguilles d’une horloge ; lire les heures piles sur le cadran.", "Je me rappelle · Quelle aiguille ? · Lis l’horloge (niveau 1)"],
+        ["Séance 1", "Reconnaître les différentes aiguilles d’une horloge ; lire les heures piles sur le cadran.", "Je me rappelle · Heures ou minutes ? · Lis l’horloge (niveau 1)"],
         ["Séance 2", "Lire les demi-heures ; lire les quarts d’heure (et quart, moins le quart) sur le cadran.", "Lis l’horloge (niveaux 2 et 3) · Règle l’horloge · Quelle heure est-il ? · Memory des heures"],
         ["Séance 3", "Lire les minutes multiples de 5 (jusqu’à « vingt-cinq », puis de « moins vingt-cinq » à « moins cinq »). Objectif ajusté aux repères du niveau 3 : la lecture de toutes les minutes n’y figure pas.", "Lis les minutes (niveaux 4 et 5) · Règle l’horloge · Quelle heure est-il ? · Memory des heures"],
         ["Séances 1 à 3", "Au TBI, en classe entière : découvrir la lecture de l’heure étape par étape, puis s’entraîner collectivement aux ardoises.", "Au TBI"],
@@ -1443,7 +1503,7 @@
       ensDomaine("m-maths", "Maths · Techniques opératoires", [ensLigne("nina", "La division en ligne", "Période 5, séquence 3 · deux problèmes ouverts", [["Voir la séquence", "#seq-division"]])].concat(PO.sequences.division.map(ensPO))) +
       ensDomaine("m-maths", "Maths · Grandeurs et mesures", [ensLigne("mei", "La monnaie et les prix", "Deux problèmes ouverts", [["Voir la séquence", "#seq-monnaie"]])].concat(PO.sequences.monnaie.map(ensPO)).concat([
         ensLigne("tehani", "Lire l’heure digitale", "« L’heure à l’ardoise » : 10 jeux collectifs au TBI pour les séances 1 à 3 (outil de la collègue, adapté)", [["Au TBI", JEU_DIGITAL], ["La fiche", "#fiche-digitale"], ["Voir la séquence", "#seq-digitale"]]),
-        ensLigne("coralie", "Lire l’heure à aiguilles", "Découverte guidée et jeu des ardoises au TBI ; leçon, 8 activités", [["Au TBI", "#tbi-heure"], ["La fiche", "#fiche-heure"], ["Voir la séquence", "#seq-heure"]])])) +
+        ensLigne("coralie", "Lire l’heure à aiguilles", "Découverte guidée et jeu des ardoises au TBI ; leçon, 8 activités", [["Au TBI", "#tbi-heure"], ["La fiche", "#fiche-heure"], ["Fiche d’exercices", "#exos-heure"], ["Voir la séquence", "#seq-heure"]])])) +
       ensDomaine("m-maths", "Maths · Résolution de problèmes", [
         ensLigne("adi", "Banque de problèmes (Vergnaud)", "217 problèmes classés par type, avec leurs schémas", [["Ouvrir la banque", "#banque"]]),
         ensLigne("waeko", "Lire un graphique en barres", "Leçon (OGD1), 4 jeux et problèmes", [["La fiche", "#fiche-diagrammes"], ["Voir la séquence", "#seq-diagrammes"]])]);
@@ -1591,7 +1651,7 @@
   /* ---------- routeur ---------- */
   var ROUTES = {
     accueil: pageAccueil, "seq-verbe": function () { return pageSequence("verbe"); }, "seq-mots": pageSequenceMots, "lecon-mots": pageLeconMots, "fiche-mots": ficheMots,
-    "seq-heure": pageSequenceHeure, "seq-digitale": pageSequenceDigitale, "ens-suivi": pageEnsSuivi, "ens-sequences": pageEnsSequences, "ens-formation": pageEnsFormation, "fiche-digitale": ficheDigitale, "seq-diagrammes": pageSequenceDiagrammes, "lecon-diagrammes": pageLeconDiagrammes, "fiche-diagrammes": ficheDiagrammes, "lecon-heure": function () { return pageLeconHeure(true); }, "maquette-retiens": function () { return pageLeconHeure(true); }, "fiche-heure": ficheHeure, "tbi-heure": pageTbiHeure,
+    "seq-heure": pageSequenceHeure, "seq-digitale": pageSequenceDigitale, "ens-suivi": pageEnsSuivi, "ens-sequences": pageEnsSequences, "ens-formation": pageEnsFormation, "fiche-digitale": ficheDigitale, "seq-diagrammes": pageSequenceDiagrammes, "lecon-diagrammes": pageLeconDiagrammes, "fiche-diagrammes": ficheDiagrammes, "lecon-heure": function () { return pageLeconHeure(true); }, "maquette-retiens": function () { return pageLeconHeure(true); }, "fiche-heure": ficheHeure, "exos-heure": function () { return pageExos("heure"); }, "tbi-heure": pageTbiHeure,
     "lecon-verbe": pageLecon, "jeu-verbe-decouvre": jeuDecouvre, "jeu-verbe-chasse": jeuChasse, enseignante: pageEnseignante, banque: pageBanque
   };
   C.matieres.forEach(function (m) { ROUTES[m.id] = function () { return pageMatiere(m.id); }; });
@@ -1620,11 +1680,11 @@
   document.addEventListener("keydown", function (e) { if (e.key === "Escape") fermerSousMenus(); });
   function rendre() {
     var r = route();
-    if (r !== derniere) { if (r === "jeu-verbe-decouvre") D = null; if (r === "jeu-verbe-chasse") H = null; if (/^po-/.test(r)) A = null; if (/^mots-/.test(r)) G = null; if (/^heure-/.test(r)) HG = null; if (/^diag-/.test(r)) GD = null; if (r === "tbi-heure") { clearInterval(TB.tid); TB.part = "menu"; } try { if (MO.peutParler) speechSynthesis.cancel(); } catch (x) {} if (/^classe-/.test(r)) { K = null; clearInterval(minuteur); } if (r === "lecon-verbe") L = { carte: {}, moment: "present", machine: 0, phrase: 0 }; window.scrollTo(0, 0); derniere = r; }
+    if (r !== derniere) { if (r === "jeu-verbe-decouvre") D = null; if (r === "jeu-verbe-chasse") H = null; if (/^po-/.test(r)) A = null; if (/^mots-/.test(r)) G = null; if (/^heure-/.test(r)) HG = null; if (/^diag-/.test(r)) GD = null; if (r === "tbi-heure") { clearInterval(TB.tid); TB.part = "menu"; } try { if (MO.peutParler) speechSynthesis.cancel(); } catch (x) {} if (/^classe-/.test(r)) { K = null; clearInterval(minuteur); } if (r === "lecon-verbe") L = { carte: {}, moment: "present", machine: 0, phrase: 0 }; if (/^exos-/.test(r)) EXF = null; window.scrollTo(0, 0); derniere = r; }
     document.documentElement.lang = langue;
     var ferme = !ensOuvert && !UNIQUE && ENS_ROUTES.test(r);
     document.body.classList.toggle("mode-classe", !ferme && /^classe-|^tbi-/.test(r));
-    document.body.classList.toggle("mode-papier", !ferme && /^(fiche|feuille)-/.test(r));
+    document.body.classList.toggle("mode-papier", !ferme && /^(fiche|feuille|exos)-/.test(r));
     app.innerHTML = ferme ? pageCode() : ROUTES[r]();
     if (ferme) { var ch = document.getElementById("ens-code"); if (ch) ch.focus(); }
     allerCible();
@@ -1650,6 +1710,8 @@
     else if (/^jr-/.test(a)) actionJr(a, el);
     else if (/^bq-/.test(a)) { if (a === "bq-reglages") e.preventDefault(); actionBanque(a, el); }
     else if (a === "imprimer") { try { window.print(); } catch (x) {} return; }
+    else if (a === "ex-nouveau") { if (EXF) EXF.d = EXOS[EXF.seq].tirer(); }
+    else if (a === "ex-corrige") { if (EXF) EXF.corrige = el.checked; }
     else if (/^l-/.test(a)) actionLecon(a, el);
     rendre();
     var focus = a === "a-verifier" && A && A.etape === "ecrit" ? document.querySelector("[data-ecrit]")

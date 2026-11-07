@@ -59,7 +59,7 @@
     var ha = o.ha !== undefined ? o.ha : (h % 12) * 30 + m / 2, ma = o.ma !== undefined ? o.ma : m * 6;
     return '<svg class="hr-clk' + (o.out ? " out" : "") + (o.cls ? " " + o.cls : "") + '" viewBox="' + (o.out ? "-112 -44 424 288" : "0 0 200 200") + '"' + (o.drag ? ' data-drag="' + o.drag + '"' : "") +
       (o.deco ? ' aria-hidden="true"' : ' role="img" aria-label="' + (o.en ? "Clock" : "Horloge à aiguilles") + '"') + '><circle cx="100" cy="100" r="96" class="hr-cf"/>' + s + (o.extra || "") + ex +
-      aiguille("hh", 44, 8, ha, o.act) + aiguille("mh", 70, 5, ma, o.act) + '<circle cx="100" cy="100" r="6" class="hr-cc"/>' + t2.replace(/class="(hr-cn|hr-cm)"/g, 'class="$1 hl"') + t2 + "</svg>";
+      (o.sans ? "" : aiguille("hh", 44, 8, ha, o.act) + aiguille("mh", 70, 5, ma, o.act)) + '<circle cx="100" cy="100" r="6" class="hr-cc"/>' + t2.replace(/class="(hr-cn|hr-cm)"/g, 'class="$1 hl"') + t2 + "</svg>";
   }
   /* secteur coloré : le quart de tour, le demi-tour… (découverte au TBI) */
   function secteur(m, kind) {
@@ -86,7 +86,17 @@
     while (os.length < 4) { var y = [rint(1, 12), pk(L.m)]; if (!vus[cle(y)]) { vus[cle(y)] = 1; os.push(y); } }
     var opts = shuf(os); return { h: h, m: m, s: L.s, opts: opts, bonne: opts.findIndex(function (x) { return x[0] === h && x[1] === m; }) };
   }
-  function questionsAiguille() { var q = []; for (var i = 0; i < 6; i++) q.push({ t: pk(["hh", "mh"]), h: rint(1, 12), m: pk([0, 15, 30, 45, 10, 20, 35, 50]) }); return q; }
+  /* « Heures ou minutes ? » (D-94) : les deux aiguilles sont toujours bien séparées (au moins 45°), pour qu'on puisse toucher chacune ;
+     autant de questions sur l'aiguille des heures que sur celle des minutes, dans un ordre mélangé */
+  function questionsAiguille() {
+    var q = [], types = shuf(["hh", "hh", "hh", "mh", "mh", "mh"]);
+    for (var i = 0; i < 6; i++) {
+      var h, m, ecart;
+      do { h = rint(1, 12); m = pk([0, 15, 30, 45, 10, 20, 35, 50]); ecart = Math.abs(((h % 12) * 30 + m / 2) - m * 6) % 360; ecart = Math.min(ecart, 360 - ecart); } while (ecart < 45);
+      q.push({ t: types[i], h: h, m: m });
+    }
+    return q;
+  }
   function heuresVariees(n) { var q = []; for (var i = 0; i < n; i++) q.push({ h: rint(1, 12), m: pk([0, 15, 30, 45, 5, 10, 20, 25, 35, 40, 50, 55]) }); return q; }
   function memory() {
     var ps = shuf([[3, 0], [8, 0], [5, 30], [10, 30], [2, 15], [7, 15], [4, 45], [11, 45], [6, 5], [9, 10], [1, 35], [12, 50]]).slice(0, 6);

@@ -93,8 +93,15 @@ window.COCO_CONTENU = {
           [{ fr: "Lire un graphique en barres", en: "Reading bar charts" }, "demo", "diagrammes"]
         ] }
       ] },
+    /* Anglais : les thèmes de l'enseignante, un par période, repris du premier site (D-94) ; séquences à venir */
     { id: "anglais", classe: "m-anglais", perso: "tao", nom: { fr: "Anglais", en: "English" },
-      sous: { fr: "Bientôt", en: "Coming soon" }, domaines: [] },
+      sous: { fr: "Un thème par période", en: "One theme per period" }, domaines: [
+        { nom: { fr: "P1 - Introduce yourself", en: "P1 - Introduce yourself" }, sequences: [] },
+        { nom: { fr: "P2 - Tastes and hobbies", en: "P2 - Tastes and hobbies" }, sequences: [] },
+        { nom: { fr: "P3 - Family and pets", en: "P3 - Family and pets" }, sequences: [] },
+        { nom: { fr: "P4 - Physical description", en: "P4 - Physical description" }, sequences: [] },
+        { nom: { fr: "P5 - The house", en: "P5 - The house" }, sequences: [] }
+      ] },
     { id: "qlm", classe: "m-qlm", perso: "wadra", nom: { fr: "Questionner le monde", en: "Discovering the world" },
       sous: { fr: "Bientôt", en: "Coming soon" }, domaines: [] }
   ],
