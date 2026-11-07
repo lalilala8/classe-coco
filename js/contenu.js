@@ -28,7 +28,11 @@ window.COCO_CONTENU = {
       sous: { fr: "Nombres · Calcul · Mesures · Géométrie", en: "Number · Calculation · Measures · Geometry" },
       domaines: [
         { nom: { fr: "Nombres", en: "Number" }, sequences: [
+          [{ fr: "Lire et écrire les nombres", en: "Reading and writing numbers" }],
           [{ fr: "Les nombres de 0 à 999", en: "Numbers from 0 to 999" }],
+          [{ fr: "Encadrer un nombre entre 2 dizaines ou 2 centaines", en: "Between two tens or two hundreds" }],
+          [{ fr: "Ranger et comparer des nombres", en: "Ordering and comparing numbers" }],
+          [{ fr: "La ligne graduée", en: "Number lines" }],
           [{ fr: "Les nombres de 1 000 à 9 999", en: "Numbers from 1,000 to 9,999" }]
         ] },
         { nom: { fr: "Calcul mental", en: "Mental maths" }, sequences: [
@@ -36,6 +40,9 @@ window.COCO_CONTENU = {
           [{ fr: "Compléments à 10", en: "Number bonds to 10" }],
           [{ fr: "Compléments à la dizaine supérieure", en: "Number bonds to the next ten" }],
           [{ fr: "Additionner trois nombres à un chiffre", en: "Adding three 1-digit numbers" }],
+          [{ fr: "Trouver des compléments cachés", en: "Finding hidden number bonds" }],
+          [{ fr: "Les compléments à 100", en: "Number bonds to 100" }],
+          [{ fr: "Les compléments à 1 000", en: "Number bonds to 1,000" }],
           [{ fr: "Arrondir un nombre", en: "Rounding numbers" }],
           [{ fr: "Estimer un ordre de grandeur", en: "Estimating" }],
           [{ fr: "Les doubles usuels", en: "Common doubles" }],
@@ -52,10 +59,14 @@ window.COCO_CONTENU = {
         ] },
         { nom: { fr: "Techniques opératoires", en: "Written methods" }, sequences: [
           [{ fr: "L'addition posée", en: "Column addition" }], [{ fr: "La soustraction posée", en: "Column subtraction" }],
-          [{ fr: "La multiplication", en: "Multiplication" }], [{ fr: "La division en ligne", en: "Division" }, "demo", "division"]
+          [{ fr: "La soustraction par cassage", en: "Subtracting by breaking numbers apart" }],
+          [{ fr: "La multiplication", en: "Multiplication" }], [{ fr: "La multiplication posée", en: "Column multiplication" }],
+          [{ fr: "La multiplication posée à deux chiffres", en: "Column multiplication by a 2-digit number" }],
+          [{ fr: "Diviser : grouper ou partager", en: "Dividing: grouping or sharing" }],
+          [{ fr: "La division en ligne", en: "Division" }, "demo", "division"]
         ] },
         { nom: { fr: "Grandeurs et mesures", en: "Measures" }, sequences: [
-          [{ fr: "Mesurer des longueurs", en: "Measuring length" }],
+          [{ fr: "Mesurer des longueurs", en: "Measuring length" }], [{ fr: "Convertir des longueurs", en: "Converting lengths" }],
           [{ fr: "La monnaie et les prix", en: "Money and prices" }, "demo", "monnaie"],
           [{ fr: "Mesurer des durées · l'heure digitale", en: "Time · digital clocks" }, "demo", "digitale"],
           [{ fr: "Mesurer des durées · l'heure à aiguilles", en: "Time · telling the time" }, "demo", "heure"],
@@ -67,12 +78,13 @@ window.COCO_CONTENU = {
           [{ fr: "Le triangle rectangle", en: "Right-angled triangles" }], [{ fr: "Le carré", en: "Squares" }],
           [{ fr: "Le rectangle", en: "Rectangles" }], [{ fr: "La reproduction sur quadrillage", en: "Copying shapes on a grid" }],
           [{ fr: "Le cercle", en: "Circles" }], [{ fr: "Droites et points alignés", en: "Lines and points in a line" }],
+          [{ fr: "Mesurer et tracer un segment", en: "Measuring and drawing a line segment" }],
           [{ fr: "Longueur et milieu d'un segment", en: "Length and midpoint of a line segment" }],
           [{ fr: "Droites perpendiculaires", en: "Perpendicular lines" }], [{ fr: "La symétrie axiale", en: "Line symmetry" }]
         ] },
         { nom: { fr: "Résolution de problèmes", en: "Problem solving" }, sequences: [
           [{ fr: "Banque de problèmes (Vergnaud)", en: "Problem bank (Vergnaud)" }, "demo", "#banque"],
-          [{ fr: "Lire un diagramme en barres", en: "Reading bar charts" }, "demo", "diagrammes"]
+          [{ fr: "Lire un graphique en barres", en: "Reading bar charts" }, "demo", "diagrammes"]
         ] }
       ] },
     { id: "anglais", classe: "m-anglais", perso: "tao", nom: { fr: "Anglais", en: "English" },
@@ -121,8 +133,8 @@ window.COCO_CONTENU = {
   /* ---------- Maths · résolution de problèmes : les diagrammes en barres (repère niveau 3, D-77) ---------- */
   diagrammes: {
     matiere: "maths",
-    titre: { fr: "Lire un diagramme en barres", en: "Reading bar charts" },
-    objectif: { fr: "Je sais lire un diagramme en barres et m'en servir pour résoudre un problème.", en: "I can read a bar chart and use it to solve a problem." }
+    titre: { fr: "Lire un graphique en barres", en: "Reading bar charts" },
+    objectif: { fr: "Je sais lire un graphique en barres et m'en servir pour résoudre un problème.", en: "I can read a bar chart and use it to solve a problem." }
   },
 
   /* ---------- Maths · P5 séquence 1 : lire l'heure digitale (jeux collectifs de la collègue, adaptés : D-73) ---------- */

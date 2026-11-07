@@ -9,21 +9,21 @@
 
   /* chaque contexte : titre, ce que compte l'axe, catégories (nom, « de … » pour les questions, pluriel anglais) */
   var CONTEXTES = [
-    { id: "fruits", titre: { fr: "Les fruits vendus au marché samedi", en: "Fruit sold at the market on Saturday" }, axe: { fr: "fruits", de: "de fruits", en: "pieces of fruit" },
+    { id: "fruits", titre: { fr: "Les fruits vendus au marché samedi", en: "Fruit sold at the market on Saturday" }, axe: { fr: "fruits", de: "de fruits", en: "pieces of fruit" }, axeX: { fr: "Fruits", en: "Fruit" },
       plus: { fr: "Quel fruit a été le plus vendu ?", en: "Which fruit sold the most?" }, moins: { fr: "Quel fruit a été le moins vendu ?", en: "Which fruit sold the least?" },
       prix: { fr: "une", en: "" },
       cats: [{ fr: "mangues", de: "de mangues", en: "mangoes", un: "Une mangue", unEn: "A mango" }, { fr: "avocats", de: "d'avocats", en: "avocados", un: "Un avocat", unEn: "An avocado" }, { fr: "papayes", de: "de papayes", en: "papayas", un: "Une papaye", unEn: "A papaya" },
              { fr: "ananas", de: "d'ananas", en: "pineapples", un: "Un ananas", unEn: "A pineapple" }, { fr: "noix de coco", de: "de noix de coco", en: "coconuts", un: "Une noix de coco", unEn: "A coconut" }] },
-    { id: "transport", titre: { fr: "Comment les élèves viennent à l'école", en: "How the pupils come to school" }, axe: { fr: "élèves", de: "d'élèves", en: "pupils" },
+    { id: "transport", titre: { fr: "Comment les élèves viennent à l'école", en: "How the pupils come to school" }, axe: { fr: "élèves", de: "d'élèves", en: "pupils" }, axeX: { fr: "Moyens de transport", en: "Transport" },
       plus: { fr: "Comment viennent le plus d'élèves ?", en: "How do most pupils come?" }, moins: { fr: "Comment viennent le moins d'élèves ?", en: "How do the fewest pupils come?" },
       cats: [{ fr: "à pied", de: "à pied", en: "on foot" }, { fr: "en bus", de: "en bus", en: "by bus" }, { fr: "en voiture", de: "en voiture", en: "by car" }, { fr: "à vélo", de: "à vélo", en: "by bike" }] },
-    { id: "sports", titre: { fr: "Le sport préféré des élèves", en: "The pupils' favourite sport" }, axe: { fr: "élèves", de: "d'élèves", en: "pupils" },
+    { id: "sports", titre: { fr: "Le sport préféré des élèves", en: "The pupils' favourite sport" }, axe: { fr: "élèves", de: "d'élèves", en: "pupils" }, axeX: { fr: "Sports", en: "Sports" },
       plus: { fr: "Quel sport est le plus aimé ?", en: "Which sport is the most popular?" }, moins: { fr: "Quel sport est le moins aimé ?", en: "Which sport is the least popular?" },
       cats: [{ fr: "football", de: "le football", en: "football" }, { fr: "natation", de: "la natation", en: "swimming" }, { fr: "va'a", de: "le va'a", en: "va'a" }, { fr: "volley-ball", de: "le volley-ball", en: "volleyball" }, { fr: "rugby", de: "le rugby", en: "rugby" }] },
-    { id: "peche", titre: { fr: "Les poissons pêchés par Papi Tao", en: "Fish caught by Grandad Tao" }, axe: { fr: "poissons", de: "de poissons", en: "fish" },
+    { id: "peche", titre: { fr: "Les poissons pêchés par Papi Tao", en: "Fish caught by Grandad Tao" }, axe: { fr: "poissons", de: "de poissons", en: "fish" }, axeX: { fr: "Jours", en: "Days" },
       plus: { fr: "Quel jour a-t-il pêché le plus de poissons ?", en: "On which day did he catch the most fish?" }, moins: { fr: "Quel jour a-t-il pêché le moins de poissons ?", en: "On which day did he catch the fewest fish?" },
       cats: [{ fr: "lundi", de: "lundi", en: "Monday" }, { fr: "mardi", de: "mardi", en: "Tuesday" }, { fr: "mercredi", de: "mercredi", en: "Wednesday" }, { fr: "jeudi", de: "jeudi", en: "Thursday" }, { fr: "vendredi", de: "vendredi", en: "Friday" }] },
-    { id: "oiseaux", titre: { fr: "Les oiseaux vus au parc des Grandes Fougères", en: "Birds seen at the Grandes Fougères park" }, axe: { fr: "oiseaux", de: "d'oiseaux", en: "birds" },
+    { id: "oiseaux", titre: { fr: "Les oiseaux vus au parc des Grandes Fougères", en: "Birds seen at the Grandes Fougères park" }, axe: { fr: "oiseaux", de: "d'oiseaux", en: "birds" }, axeX: { fr: "Oiseaux", en: "Birds" },
       plus: { fr: "Quel oiseau a-t-on vu le plus ?", en: "Which bird was seen the most?" }, moins: { fr: "Quel oiseau a-t-on vu le moins ?", en: "Which bird was seen the least?" },
       cats: [{ fr: "cagous", de: "de cagous", en: "kagus" }, { fr: "notous", de: "de notous", en: "notous" }, { fr: "perruches", de: "de perruches", en: "parakeets" }, { fr: "martins-pêcheurs", de: "de martins-pêcheurs", en: "kingfishers" }] }
   ];
@@ -144,7 +144,7 @@
     var en = !!opts.en, vals = opts.vals || d.vals, n = d.ctx.cats.length;
     var W = 420, G = 46, D = 12, Hh = 18, B = 44, H = 300, ph = H - Hh - B, pw = W - G - D;
     var y = function (v) { return Hh + ph - (v / d.max) * ph; }, col = pw / n, bw = Math.min(46, col * 0.58);
-    var s = '<svg class="dg" viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="' + esc((en ? d.ctx.titre.en : d.ctx.titre.fr) + (en ? " (bar chart)" : " (diagramme en barres)")) + '">';
+    var s = '<svg class="dg" viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="' + esc((en ? d.ctx.titre.en : d.ctx.titre.fr) + (en ? " (bar chart)" : " (graphique en barres)")) + '">';
     /* graduations et quadrillage, discrets */
     for (var g = 0; g <= d.max; g += d.pas) {
       var yy = y(g);

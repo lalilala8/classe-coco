@@ -552,14 +552,14 @@
       '<p class="f-source">Sources : délibération n° 127 du 13 janvier 2021, annexe 2 (programme du cycle 2, attendus p. 83 à 86) ; repères de progressivité du cycle 2, ' + esc(P.rp) + ".</p></section>";
   }
 
-  /* ---------- Maths : lire et construire des diagrammes en barres (D-77) ---------- */
+  /* ---------- Maths : lire et construire des graphiques en barres (D-77) ---------- */
   var DG = window.COCO_DONNEES;
   var JEUX_DIAG = {
     rappel: { perso: "vaka", etape: 1, n: 4, fr: "Je me rappelle", en: "I remember", dfr: "Je compare des nombres, je compte de 2 en 2 et de 5 en 5, je calcule un écart.", den: "I compare numbers, count in twos and fives, and find a difference." },
-    lire: { perso: "nina", etape: 1, n: 6, fr: "Lis le diagramme", en: "Read the bar chart", dfr: "Je lis une barre, je trouve la plus haute et la plus basse. Graduations de 1 en 1.", den: "I read a bar and find the tallest and the shortest one. The scale goes up in ones." },
-    lire2: { perso: "leo", etape: 2, n: 6, fr: "Lis les graduations", en: "Read the scale", dfr: "Je lis des diagrammes gradués de 2 en 2, de 5 en 5 et de 10 en 10.", den: "I read bar charts with scales in twos, fives and tens." },
-    construire: { perso: "tao", etape: 2, n: 3, fr: "Je construis le diagramme", en: "I build the bar chart", dfr: "Je monte chaque barre à la bonne hauteur, d’après le tableau.", den: "I make each bar the right height, using the table." },
-    prob: { perso: "waeko", etape: 3, n: 5, fr: "Problèmes avec un diagramme", en: "Bar chart problems", dfr: "Je prends les nombres dans le diagramme pour résoudre un problème.", den: "I take the numbers from the bar chart to solve a problem." }
+    lire: { perso: "nina", etape: 1, n: 6, fr: "Lis le graphique", en: "Read the bar chart", dfr: "Je lis une barre, je trouve la plus haute et la plus basse. Graduations de 1 en 1.", den: "I read a bar and find the tallest and the shortest one. The scale goes up in ones." },
+    lire2: { perso: "leo", etape: 2, n: 6, fr: "Lis les graduations", en: "Read the scale", dfr: "Je lis des graphiques gradués de 2 en 2, de 5 en 5 et de 10 en 10.", den: "I read bar charts with scales in twos, fives and tens." },
+    construire: { perso: "tao", etape: 2, n: 3, fr: "Je construis le graphique", en: "I build the bar chart", dfr: "Je monte chaque barre à la bonne hauteur, d’après le tableau.", den: "I make each bar the right height, using the table." },
+    prob: { perso: "waeko", etape: 3, n: 5, fr: "Problèmes avec un graphique", en: "Bar chart problems", dfr: "Je prends les nombres dans le graphique pour résoudre un problème.", den: "I take the numbers from the bar chart to solve a problem." }
   };
   var ETAPES_DIAG = { 1: "decouvre", 2: "entraine", 3: "reinvestis" };
   var GD = null;
@@ -573,7 +573,7 @@
   }
   function dgNom(d, k) { return langue === "en" ? d.ctx.cats[k].en : d.ctx.cats[k].fr; }
   function dgTitre(d) { return '<h3 class="dg-titre">' + esc(tr(d.ctx.titre)) + "</h3>"; }
-  function dgFigure(d, o) { o = o || {}; o.en = langue === "en"; return '<figure class="dg-fig">' + dgTitre(d) + '<p class="dg-legende">↑ ' + (langue === "en" ? "Number of " : "Nombre ") + esc(langue === "en" ? d.ctx.axe.en : d.ctx.axe.de) + "</p>" + DG.diagramme(d, o) + "</figure>"; }
+  function dgFigure(d, o) { o = o || {}; o.en = langue === "en"; return '<figure class="dg-fig">' + dgTitre(d) + '<p class="dg-legende">↑ ' + (langue === "en" ? "Number of " : "Nombre ") + esc(langue === "en" ? d.ctx.axe.en : d.ctx.axe.de) + "</p>" + DG.diagramme(d, o) + '<p class="dg-legende dg-legende-x">' + esc(tr(d.ctx.axeX)) + " →</p></figure>"; }
   function dgSuite(dernier) { return '<button class="coco-btn coco-btn--grand" type="button" data-action="g-suite">' + (dernier ? (langue === "en" ? "See my score" : "Voir mon score") : t("suivant")) + "</button>"; }
   function dgChoix(opts, juste, lib) {
     return '<div class="coco-row">' + opts.map(function (o, k) {
@@ -598,13 +598,12 @@
     var m = MATIERE.maths, en = langue === "en";
     var d = { ctx: DG.CONTEXTES[0], pas: 2, max: 20, vals: [14, 8, 11, 5, 16] };
     var parties = en ? [["1 · The title", "It tells you what the chart is about."], ["2 · The scale", "The numbers go up in steps: here, in twos. Look carefully at the step!"], ["3 · The bars", "One bar for each thing we count. The taller the bar, the bigger the number."], ["4 · The labels", "Under each bar: what we are counting."]]
-      : [["1 · Le titre", "Il dit de quoi parle le diagramme."], ["2 · Les graduations", "Les nombres montent avec un pas : ici, de 2 en 2. Regarde bien le pas !"], ["3 · Les barres", "Une barre pour chaque chose qu’on compte. Plus la barre est haute, plus le nombre est grand."], ["4 · Les noms sous les barres", "Ils disent ce qu’on compte."]];
-    var retiens = en ? ["A bar chart shows numbers with bars.", "To read a bar, I start at the top of the bar and follow the line across to the scale.", "If the top of the bar is between two numbers, I find the number in the middle: between 10 and 12, it is 11."]
-      : ["Un diagramme en barres montre des nombres avec des barres.", "Pour lire une barre, je pars du haut de la barre et je suis la ligne jusqu’aux nombres.", "Si le haut de la barre est entre deux graduations, je cherche le nombre du milieu : entre 10 et 12, c’est 11."];
+      : [["1 · Le titre", "Il dit de quoi parle le graphique."], ["2 · Les graduations", "Les nombres montent avec un pas : ici, de 2 en 2. Regarde bien le pas !"], ["3 · Les barres", "Une barre pour chaque chose qu’on compte. Plus la barre est haute, plus le nombre est grand."], ["4 · Les noms sous les barres", "Ils disent ce qu’on compte."]];
     return barre("maths") + hautJeu(m, "seq-diagrammes", { sous: tr(C.diagrammes.titre), titre: t("lecon") }, "") +
       '<section class="dg-lecon">' + dgFigure(d, { montre: 2 }) + '<ol class="dg-parties">' + parties.map(function (p) { return "<li><b>" + esc(typo(p[0])) + "</b><span>" + esc(typo(p[1])) + "</span></li>"; }).join("") +
       '<li class="dg-exemple"><b>' + (en ? "Example" : "Exemple") + "</b><span>" + (en ? "The papayas bar stops halfway between 10 and 12: <b>11 papayas</b> were sold." : "La barre des papayes s’arrête entre 10 et 12, au milieu : on a vendu <b>11 papayes</b>.") + "</span></li></ol></section>" +
-      '<section class="retiens m-maths"><img src="' + IMG("coralie") + '" alt=""><div><h3>' + (en ? "I remember" : "Je retiens") + "</h3>" + retiens.map(function (r) { return "<p>" + esc(typo(r)) + "</p>"; }).join("") + "</div></section>";
+      '<section class="retiens m-maths"><img src="' + IMG("coralie") + '" alt=""><div><h3>' + (en ? "I remember" : "Je retiens") + "</h3><p>" + (en ? "We can organise <b>information</b> in two ways: <b>the table</b> and <b>the bar chart</b>." : "On peut organiser des <b>informations</b> sous deux formes : <b>le tableau</b> et <b>le graphique en barres</b>.") + "</p>" +
+      '<div class="dg-deux"><table class="dg-table"><thead><tr><th>' + esc(tr(d.ctx.axeX)) + "</th><th>" + (en ? "Number of " + esc(d.ctx.axe.en) : "Nombre " + esc(d.ctx.axe.de)) + "</th></tr></thead><tbody>" + d.ctx.cats.map(function (_, k) { return "<tr><td>" + esc(dgNom(d, k)) + "</td><td>" + d.vals[k] + "</td></tr>"; }).join("") + "</tbody></table>" + dgFigure(d) + "</div></div></section>";
   }
   function jeuDiag(jeu) {
     var J = JEUX_DIAG[jeu], m = MATIERE.maths, en = langue === "en";
@@ -614,7 +613,7 @@
     if (GD.fin) return haut + dgBilan();
     var q = GD.qs[GD.i], consigne = "", zone = "", bas = "";
     if (jeu === "rappel") {
-      consigne = en ? "I remember what I need to read a <b>bar chart</b>." : "Je me rappelle ce qu’il faut pour lire un <b>diagramme en barres</b>.";
+      consigne = en ? "I remember what I need to read a <b>bar chart</b>." : "Je me rappelle ce qu’il faut pour lire un <b>graphique en barres</b>.";
       zone = '<p class="phrase">' + esc(typo(tr(q))) + "</p>" + dgChoix(q.o, q.a, function (o) { return o; });
     } else if (jeu === "lire" || jeu === "lire2") {
       var d = q.d;
@@ -628,13 +627,13 @@
       }
     } else if (jeu === "construire") {
       var dc = q, v = GD.v;
-      consigne = en ? "Build the bar chart: tap in each column to make the bar the right height." : "Construis le diagramme : touche dans chaque colonne pour monter la barre à la bonne hauteur.";
+      consigne = en ? "Build the bar chart: tap in each column to make the bar the right height." : "Construis le graphique : touche dans chaque colonne pour monter la barre à la bonne hauteur.";
       zone = '<table class="dg-table"><thead><tr><th></th><th>' + (en ? "Number" : "Nombre") + "</th></tr></thead><tbody>" + dc.ctx.cats.map(function (_, k) { return "<tr><th>" + esc(dgNom(dc, k)) + "</th><td>" + dc.vals[k] + "</td></tr>"; }).join("") + "</tbody></table>" +
         dgFigure(dc, { vals: v, construire: !GD.rep, revoir: GD.revoir }) +
         (GD.rep ? "" : '<div class="dg-reglages">' + dc.ctx.cats.map(function (_, k) { return '<div><span>' + esc(dgNom(dc, k)) + '</span><button class="coco-btn coco-btn--secondaire coco-btn--icone" type="button" data-action="g-moins" data-c="' + k + '" aria-label="' + (en ? "Lower" : "Baisser") + " " + esc(dgNom(dc, k)) + '">−</button><b>' + v[k] + '</b><button class="coco-btn coco-btn--secondaire coco-btn--icone" type="button" data-action="g-plus" data-c="' + k + '" aria-label="' + (en ? "Raise" : "Monter") + " " + esc(dgNom(dc, k)) + '">+</button></div>'; }).join("") + "</div>");
       bas = GD.rep ? "" : '<button class="coco-btn coco-btn--grand" type="button" data-action="g-ok">' + t("valider") + "</button>";
     } else if (jeu === "prob") {
-      consigne = en ? "Read the problem, find the numbers in the bar chart, then write your answer." : "Lis le problème, cherche les nombres dans le diagramme, puis écris ta réponse.";
+      consigne = en ? "Read the problem, find the numbers in the bar chart, then write your answer." : "Lis le problème, cherche les nombres dans le graphique, puis écris ta réponse.";
       zone = '<p class="phrase">' + esc(typo(tr(q))) + "</p>" + dgFigure(q.d) +
         '<p class="dg-saisie"><label for="dg-rep">' + (en ? "My answer:" : "Ma réponse :") + '</label><input id="dg-rep" type="text" inputmode="numeric" maxlength="5" autocomplete="off" data-g-champ value="' + esc(GD.saisie) + '"' + (GD.rep ? " disabled" : "") + ">" + (q.unite ? "<b>" + q.unite + "</b>" : "") + "</p>";
       bas = GD.rep ? "" : '<button class="coco-btn coco-btn--grand" type="button" data-action="g-rep">' + t("valider") + "</button>";
@@ -645,10 +644,10 @@
   function dgBilan() {
     var en = langue === "en", n = JEUX_DIAG[GD.jeu].n, sc = GD.score;
     marquerFait("diag-" + GD.jeu);
-    var txt = GD.jeu === "rappel" ? (en ? "You remembered " + sc + " out of " + n + ". Now, let’s read a bar chart!" : "Tu t’es rappelé " + sc + " réponse" + (sc > 1 ? "s" : "") + " sur " + n + ". Maintenant, lisons un diagramme !")
+    var txt = GD.jeu === "rappel" ? (en ? "You remembered " + sc + " out of " + n + ". Now, let’s read a bar chart!" : "Tu t’es rappelé " + sc + " réponse" + (sc > 1 ? "s" : "") + " sur " + n + ". Maintenant, lisons un graphique !")
       : (en ? "You got " + sc + " out of " + n + " right first time." : "Tu as réussi " + sc + " sur " + n + " du premier coup.");
     return '<section class="bilan"><img src="' + IMG("kakou") + '" alt=""><h2>' + t("fini") + "</h2>" + (GD.jeu === "rappel" ? "" : '<p class="mi-score">' + sc + " / " + n + "</p>") + "<p>" + esc(typo(txt)) + "</p>" +
-      '<div class="coco-row">' + (GD.jeu === "rappel" ? '<a class="coco-btn" href="#diag-lire">' + (en ? "Read the bar chart" : "Lis le diagramme") + "</a>" : '<button class="coco-btn" type="button" data-action="g-rejouer">' + t("rejouer") + "</button>") +
+      '<div class="coco-row">' + (GD.jeu === "rappel" ? '<a class="coco-btn" href="#diag-lire">' + (en ? "Read the bar chart" : "Lis le graphique") + "</a>" : '<button class="coco-btn" type="button" data-action="g-rejouer">' + t("rejouer") + "</button>") +
       '<a class="coco-btn coco-btn--secondaire" href="#seq-diagrammes">' + t("versSequence") + "</a></div></section>";
   }
   function actionDiag(a, el) {
@@ -683,7 +682,7 @@
     if (a === "g-ok") {
       var faux = q.vals.map(function (x, k) { return GD.v[k] === x ? -1 : k; }).filter(function (k) { return k >= 0; });
       if (!faux.length) { dgFinir(true, en ? "Every bar is the right height!" : "Toutes les barres sont à la bonne hauteur !"); return; }
-      if (GD.essais >= 1) { GD.v = q.vals.slice(); GD.revoir = null; dgFinir(false, en ? "Look: here is the bar chart, built from the table." : "Regarde : voici le diagramme construit d’après le tableau."); return; }
+      if (GD.essais >= 1) { GD.v = q.vals.slice(); GD.revoir = null; dgFinir(false, en ? "Look: here is the bar chart, built from the table." : "Regarde : voici le graphique construit d’après le tableau."); return; }
       GD.essais++; GD.revoir = faux;
       GD.msg = retour("revoir", t("pasEncore"), (en ? "Look again at the bar" + (faux.length > 1 ? "s" : "") + " for " : "Regarde encore " + (faux.length > 1 ? "les barres" : "la barre") + " : ") + "<b>" + faux.map(function (k) { return esc(dgNom(q, k)); }).join(", ") + "</b>. " + (en ? "Check the number in the table, then count the steps on the scale." : "Vérifie le nombre dans le tableau, puis compte les graduations."));
       return;
@@ -701,19 +700,19 @@
   function ficheDiagrammes() {
     var li = function (a) { return a.map(function (x) { return "<li>" + x + "</li>"; }).join(""); };
     return '<div class="no-print coco-row"><a class="coco-btn coco-btn--secondaire" href="#enseignante">← Espace enseignante</a><a class="coco-btn coco-btn--secondaire" href="#seq-diagrammes">Voir la séquence</a><button class="coco-btn coco-btn--secondaire" type="button" data-action="imprimer">Imprimer la fiche</button></div>' +
-      '<article class="fiche m-maths"><small>Maths · Résolution de problèmes · Organisation et gestion de données · CE2</small><h1>Lire un diagramme en barres</h1>' +
-      '<p class="f-source">Séquence créée le 07/11/2026 à la demande de l’enseignante, pour couvrir le repère « diagrammes en barres » (D-77). Leçon de classe non transmise : la leçon et « Je retiens » du site sont une proposition, à valider.</p>' +
+      '<article class="fiche m-maths"><small>Maths · Résolution de problèmes · Organisation et gestion de données · CE2</small><h1>Lire un graphique en barres</h1>' +
+      '<p class="f-source">Séquence créée le 07/11/2026 à la demande de l’enseignante, pour couvrir le repère « diagrammes en barres » (D-77). Leçon de classe : OGD1 « Le graphique en barres (ou histogramme) » ; « Je retiens » d’après OGD1 (D-83).</p>' +
       encadreProgramme("diagrammes") +
       '<section><h2>Les activités du site</h2><table class="f-table"><tbody>' + [
-        ["Revoir la leçon", "Les 4 éléments d’un diagramme (titre, graduations, barres, noms) ; lire une barre en suivant la ligne jusqu’aux nombres ; une valeur entre deux graduations."],
+        ["Revoir la leçon", "Les 4 éléments d’un graphique (titre, graduations, barres, noms) ; lire une barre en suivant la ligne jusqu’aux nombres ; une valeur entre deux graduations."],
         ["1 · Je me rappelle", "Comparer des nombres, compter de 2 en 2 et de 5 en 5, calculer un écart."],
-        ["1 · Lis le diagramme", "Graduations de 1 en 1 : lire la valeur d’une barre, trouver la plus haute et la plus basse."],
+        ["1 · Lis le graphique", "Graduations de 1 en 1 : lire la valeur d’une barre, trouver la plus haute et la plus basse."],
         ["2 · Lis les graduations", "Graduations de 2 en 2, de 5 en 5 et de 10 en 10, valeurs parfois entre deux graduations."],
-        ["2 · Je construis le diagramme", "Monter les barres d’après un tableau (graduations de 1 en 1, puis de 2 en 2)."],
-        ["3 · Problèmes avec un diagramme", "Total, écart, problème en deux étapes, prix (× 100 F), information inutile."]
+        ["2 · Je construis le graphique", "Monter les barres d’après un tableau (graduations de 1 en 1, puis de 2 en 2)."],
+        ["3 · Problèmes avec un graphique", "Total, écart, problème en deux étapes, prix (× 100 F), information inutile."]
       ].map(function (r) { return "<tr><th>" + r[0] + "</th><td>" + r[1] + "</td></tr>"; }).join("") + "</tbody></table></section>" +
       '<div class="f-deux"><section><h2>Les erreurs à guetter</h2><ul>' + li(["Lire le nombre de graduations au lieu de la valeur (graduations de 2, 5 ou 10).", "Lire la barre voisine : suivre la ligne avec la règle ou le doigt.", "Une valeur entre deux graduations : chercher le nombre du milieu.", "Prendre toutes les données d’un problème, même celle qui ne sert pas."]) + "</ul></section>" +
-      "<section><h2>Pour prolonger en classe</h2><ul>" + li(["Construire un diagramme avec les données de la classe (sport préféré, transport, anniversaires par mois), en lien avec «\u00a0Questionner le monde\u00a0».", "Comparer un tableau et un diagramme : lequel permet de voir plus vite le plus grand ?"]) + "</ul></section></div></article>";
+      "<section><h2>Pour prolonger en classe</h2><ul>" + li(["Construire un graphique avec les données de la classe (sport préféré, transport, anniversaires par mois), en lien avec «\u00a0Questionner le monde\u00a0».", "Comparer un tableau et un graphique : lequel permet de voir plus vite le plus grand ?"]) + "</ul></section></div></article>";
   }
 
   function ficheDigitale() {
@@ -1364,7 +1363,7 @@
         return '<div class="ens-pb"><img src="' + IMG(p.perso) + '" alt=""><div><b>' + esc(p.titre.fr) + "</b><small>« " + esc(p.question.fr) + ' »</small></div><div class="coco-row"><a class="coco-btn" href="#classe-' + id + '">Projeter en classe</a><a class="coco-btn coco-btn--secondaire" href="#fiche-' + id + '">La fiche</a><a class="coco-btn coco-btn--secondaire" href="#feuille-' + id + '">Feuille de recherche</a></div></div>';
       }).join("") + "</div></section>";
     }).join("");
-    seqs = '<section class="domaine"><h2>Maths · Lire un diagramme en barres</h2><div class="ens-liste"><div class="ens-pb"><img src="' + IMG("waeko") + '" alt=""><div><b>Les diagrammes en barres</b><small>Leçon, 4 jeux et problèmes, fiche avec « Programme et repères »</small></div><div class="coco-row"><a class="coco-btn" href="#fiche-diagrammes">Fiche</a><a class="coco-btn coco-btn--secondaire" href="#seq-diagrammes">Voir la séquence</a></div></div></div></section>' + seqs;
+    seqs = '<section class="domaine"><h2>Maths · Lire un graphique en barres</h2><div class="ens-liste"><div class="ens-pb"><img src="' + IMG("waeko") + '" alt=""><div><b>Les graphiques en barres</b><small>Leçon, 4 jeux et problèmes, fiche avec « Programme et repères »</small></div><div class="coco-row"><a class="coco-btn" href="#fiche-diagrammes">Fiche</a><a class="coco-btn coco-btn--secondaire" href="#seq-diagrammes">Voir la séquence</a></div></div></div></section>' + seqs;
     seqs = '<section class="domaine"><h2>Maths · Lire l’heure digitale</h2><div class="ens-liste"><div class="ens-pb"><img src="' + IMG("tehani") + '" alt=""><div><b>L’heure à l’ardoise</b><small>10 jeux collectifs au TBI pour les séances 1 à 3 (outil de la collègue, adapté)</small></div><div class="coco-row"><a class="coco-btn" href="' + JEU_DIGITAL + '">Au TBI</a><a class="coco-btn coco-btn--secondaire" href="#fiche-digitale">Fiche</a><a class="coco-btn coco-btn--secondaire" href="#seq-digitale">Voir la séquence</a></div></div></div></section>' + seqs;
     seqs = '<section class="domaine"><h2>Maths · Lire l’heure à aiguilles</h2><div class="ens-liste"><div class="ens-pb"><img src="' + IMG("coralie") + '" alt=""><div><b>Lire l’heure à aiguilles</b><small>Découverte guidée et jeu des ardoises au TBI ; leçon, 8 activités</small></div><div class="coco-row"><a class="coco-btn" href="#tbi-heure">Au TBI</a><a class="coco-btn coco-btn--secondaire" href="#fiche-heure">La fiche</a><a class="coco-btn coco-btn--secondaire" href="#seq-heure">Voir la séquence</a></div></div></div></section>' + seqs;
     seqs = '<section class="domaine"><h2>Français · Les mots invariables</h2><div class="ens-liste"><div class="ens-pb ens-pb--francais"><img src="' + IMG("coralie") + '" alt=""><div><b>Les mots invariables</b><small>7 activités, de « Je me rappelle » à la dictée sans erreur</small></div><div class="coco-row"><a class="coco-btn" href="#fiche-mots">La fiche</a><a class="coco-btn coco-btn--secondaire" href="#seq-mots">Voir la séquence</a></div></div></div></section>' + seqs;

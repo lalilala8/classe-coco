@@ -604,3 +604,9 @@ body.mode-classe .site { max-width: none; padding-block: 12px 24px; }
 @keyframes jr-cinq { 0% { opacity: 0; } 1%, 19% { opacity: 1; } 20%, 100% { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .jr *, .jr-carte { animation: none !important; } .jr-cinq:first-of-type { opacity: 1; } .jr-pas { transform: rotate(210deg); } }
 @media (max-width: 760px) { .jr-carte { grid-template-columns: 1fr; min-height: 0; } .jr-svg { max-width: 220px; } .jr-p { font-size: 20px; line-height: 29px; } .jr-haut img { width: 48px; } }
+.dg-legende-x { text-align: right; margin-top: -2px; }
+.dg-deux { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 20px; align-items: center; margin-top: 8px; }
+@media (max-width: 760px) { .dg-deux { grid-template-columns: 1fr; justify-items: center; } }
+.retiens .dg-titre { font: 600 20px/26px var(--font-texte); color: var(--encre); margin: 0; }
+.retiens .dg-legende { font-size: 15px; line-height: 20px; margin: 0; }
+.retiens .dg-deux .dg-fig { background: var(--carte); border-radius: var(--arrondi); padding: 12px; }
