@@ -532,7 +532,7 @@
     monnaie: { ref: "Mathématiques · Grandeurs et mesures (prix)", att: [ATT_GM[2]], comp: ["chercher", "modeliser", "calculer", "communiquer"], rp: "mathématiques p. 12 et 17",
       reperes: ["L’élève connaît et utilise la monnaie du pays (pièces de 1F, 2F, 5F, 10F, 20F, 50F, 100F, billets de 500F, 1000F) pour exprimer un prix, en lien avec les décompositions additives ou multiplicatives des nombres abordés.", "Il effectue des échanges en utilisant la monnaie, en lien avec les nombres abordés."],
       ex: "Exemple de situation donné par les repères (p. 12) : « Calculer mentalement sur les nombres 1, 2, 5, 10, 20, 50, 100 en lien avec la monnaie. »",
-      note: "Les pièces de 1 F et de 2 F ne circulent plus en Nouvelle-Calédonie : le site utilise les pièces de 5 F à 100 F (choix de l’enseignante, D\u201177)." },
+      note: "Les pièces de 1 F et de 2 F ne circulent plus en Nouvelle-Calédonie : le site utilise les pièces de 5 F à 200 F de la leçon GM1 (D\u201177, D\u201182)." },
     division: { ref: "Mathématiques · Nombres et calculs", att: ATT_NC, comp: ["chercher", "modeliser", "raisonner", "calculer", "communiquer"], rp: "mathématiques p. 7 et 11",
       reperes: ["Il consolide l’étude du sens de la division euclidienne par la résolution de problèmes de partage et de groupements dont l’énoncé implique la recherche du quotient et/ou du reste et/ou du quotient + 1.", "Il calcule le quotient et le reste d’une division euclidienne en utilisant les tables de multiplications, c’est-à-dire en posant l’égalité caractéristique suite à un partage ou une distribution et quand le quotient est compris dans la table du diviseur."] },
     diagrammes: { ref: "Mathématiques · Nombres et calculs (résolution de problèmes)", att: [ATT_NC[0]], comp: ["representer", "modeliser", "calculer"], rp: "mathématiques p. 7 et 8",
@@ -774,7 +774,67 @@
     var am = en ? "a.m.: " + mo + ":" + HE.pad(m) + " · p.m.: " + ap + ":" + HE.pad(m) + " (add 12 hours)." : "Le matin : " + mo + ":" + HE.pad(m) + ". L’après-midi ou le soir : " + ap + ":" + HE.pad(m) + " (on ajoute 12 h).";
     return '<p class="hr-dig">' + heDig(h, m) + '</p><p class="hr-dire">' + esc(typo(heDire(h, m))) + "</p>" + ex + '<p class="hr-rem">' + esc(typo(am)) + "</p>";
   }
-  function pageLeconHeure() {
+  /* ---------- « Je retiens » en cartes animées (maquette du 07/11/2026, à valider : D-81) ----------
+     Une idée par carte, une animation qui montre l'idée, les phrases de la leçon GM5 mot pour mot, découpées. */
+  var JR = { i: 0, tout: false };
+  function jrHorloge(cls, inner) { return '<svg class="jr-svg ' + cls + '" viewBox="0 0 220 ' + (cls === "jr-haut-plus" ? 252 : 220) + '" aria-hidden="true">' + inner + "</svg>"; }
+  function jrCadran(opts) {
+    opts = opts || {}; var s = '<circle cx="110" cy="110" r="100" class="jr-cadran"/>';
+    for (var k = 0; k < 60; k++) { var a = k * 6 * Math.PI / 180, r1 = k % 5 ? 92 : 86; s += '<line class="jr-grad' + (k % 5 ? "" : " jr-grad5") + '" x1="' + (110 + r1 * Math.sin(a)).toFixed(1) + '" y1="' + (110 - r1 * Math.cos(a)).toFixed(1) + '" x2="' + (110 + 99 * Math.sin(a)).toFixed(1) + '" y2="' + (110 - 99 * Math.cos(a)).toFixed(1) + '"/>'; }
+    if (!opts.sansChiffres) for (var h = 1; h <= 12; h++) { var b = h * 30 * Math.PI / 180; s += '<text class="jr-chiffre" x="' + (110 + 70 * Math.sin(b)).toFixed(1) + '" y="' + (110 - 70 * Math.cos(b) + 7).toFixed(1) + '" text-anchor="middle">' + h + "</text>"; }
+    return s;
+  }
+  function jrCartes(en) {
+    var H = function (x) { return '<b class="hr-h">' + x + "</b>"; }, M = function (x) { return '<b class="hr-m">' + x + "</b>"; };
+    var aiguilles = function (pa, gm) { return '<g class="' + pa + '"><line x1="110" y1="110" x2="110" y2="62" class="jr-pa"/></g><g class="' + gm + '"><line x1="110" y1="110" x2="110" y2="30" class="jr-gm"/></g><circle cx="110" cy="110" r="7" class="jr-axe"/>'; };
+    var petit = function (x, cls) { return '<g transform="translate(' + x + ' 0)"><circle cx="70" cy="70" r="62" class="jr-cadran"/>' + [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(function (h) { var a = h * 30 * Math.PI / 180; return '<line class="jr-grad5" x1="' + (70 + 54 * Math.sin(a)).toFixed(1) + '" y1="' + (70 - 54 * Math.cos(a)).toFixed(1) + '" x2="' + (70 + 61 * Math.sin(a)).toFixed(1) + '" y2="' + (70 - 61 * Math.cos(a)).toFixed(1) + '"/>'; }).join("") + '<g class="' + cls + '"><line x1="70" y1="70" x2="70" y2="30" class="jr-pa"/></g><circle cx="70" cy="70" r="5" class="jr-axe"/></g>'; };
+    var ecran = function (x, y, h, m) { return '<g transform="translate(' + x + " " + y + ')"><rect width="96" height="46" rx="10" class="jr-ecran"/><text x="48" y="32" text-anchor="middle" class="jr-dig"><tspan class="jr-dh">' + h + '</tspan>:<tspan class="jr-dm">' + m + "</tspan></text></g>"; };
+    var secteur = function (deb, fin, cls) { var a0 = (deb * 6 - 90) * Math.PI / 180, a1 = (fin * 6 - 90) * Math.PI / 180; return '<path class="' + cls + '" d="M110 110L' + (110 + 84 * Math.cos(a0)).toFixed(1) + " " + (110 + 84 * Math.sin(a0)).toFixed(1) + "A84 84 0 0 1 " + (110 + 84 * Math.cos(a1)).toFixed(1) + " " + (110 + 84 * Math.sin(a1)).toFixed(1) + 'Z"/>'; };
+    return [
+      { t: en ? "The hands" : "Les aiguilles",
+        svg: jrHorloge("", jrCadran() + aiguilles("jr-tourne-pa", "jr-tourne-gm")),
+        txt: en ? ["The " + H("short hand") + " shows the " + H("hours") + " (the 12 numbers).", "The " + M("long hand") + " shows the " + M("minutes") + " (the 60 marks)."]
+          : ["La " + H("petite aiguille") + " indique les " + H("heures") + " (représentées par les 12 chiffres).", "La " + M("grande aiguille") + " indique les " + M("minutes") + " (représentées par les 60 graduations)."] },
+      { t: en ? "One day: 24 hours" : "Une journée : 24 heures",
+        svg: '<svg class="jr-svg jr-large" viewBox="0 0 320 200" aria-hidden="true">' + petit(0, "jr-tour1") + petit(180, "jr-tour2") +
+          '<text x="70" y="168" text-anchor="middle" class="jr-leg">' + (en ? "1st turn of the face" : "1er tour du cadran") + '</text><text x="250" y="168" text-anchor="middle" class="jr-leg">' + (en ? "2nd turn of the face" : "2e tour du cadran") + '</text><text x="70" y="192" text-anchor="middle" class="jr-leg2">0h → 12h</text><text x="250" y="192" text-anchor="middle" class="jr-leg2">12h → 24h</text></svg>',
+        txt: en ? ["In one day there are " + H("24 hours") + ".", "Morning: from 0:00 to 12:00.", "Afternoon and evening: from 12:00 to 24:00."]
+          : ["Dans une journée, il y a " + H("24 heures") + ".", "Le matin : de 0h à 12h.", "L’après-midi et le soir : de 12h à 24h."] },
+      { t: en ? "Two ways to say the time" : "Deux façons de dire l’heure",
+        svg: '<svg class="jr-svg jr-large" viewBox="0 0 320 200" aria-hidden="true">' + ecran(10, 24, "4", "00") + '<g class="jr-fleche1"><path d="M116 47h70" class="jr-trait"/><path d="M178 39l10 8-10 8" class="jr-trait"/><text x="151" y="36" text-anchor="middle" class="jr-plus">+12h</text></g><g class="jr-apparait1">' + ecran(206, 24, "16", "00") + "</g>" +
+          ecran(10, 120, "14", "15") + '<g class="jr-fleche2"><path d="M116 143h70" class="jr-trait"/><path d="M178 135l10 8-10 8" class="jr-trait"/><text x="151" y="132" text-anchor="middle" class="jr-moins">−12h</text></g><g class="jr-apparait2">' + ecran(206, 120, "2", "15") + "</g>" +
+          '<text x="58" y="88" text-anchor="middle" class="jr-leg2">' + (en ? "in the afternoon" : "de l’après-midi") + '</text><text x="254" y="184" text-anchor="middle" class="jr-leg2 jr-apparait2">' + (en ? "in the afternoon" : "de l’après-midi") + "</text></svg>",
+        txt: en ? ["We can say afternoon and evening times in " + H("two ways") + ".", "4:00 in the afternoon → 16:00 (+12 h)", "14:15 → 2:15 in the afternoon (−12 h)"]
+          : ["On peut dire les heures de l’après-midi et du soir de " + H("deux façons") + ".", "4:00 de l’après-midi → 16:00 (+12h)", "14:15 → 2:15 de l’après-midi (−12h)"] },
+      { t: en ? "One hour: 60 minutes" : "Une heure : 60 minutes",
+        svg: jrHorloge("", jrCadran({ sansChiffres: true }) + secteur(0, 15, "jr-q jr-q1") + secteur(15, 30, "jr-q jr-q2") + secteur(30, 45, "jr-q jr-q3") + secteur(45, 60, "jr-reste") +
+          '<text x="150" y="80" class="jr-qt jr-q1">15</text><text x="150" y="150" class="jr-qt jr-q2">30</text><text x="62" y="150" class="jr-qt jr-q3">45</text><text x="117" y="44" class="jr-qt">60</text><circle cx="110" cy="110" r="5" class="jr-axe"/>'),
+        txt: en ? ["In one hour there are " + M("60 minutes") + ".", "15 min: " + M("quarter past") + " · 30 min: " + M("half past") + " · 45 min: " + M("quarter to"), "There is a quarter of an hour (15 min) left before the next hour."]
+          : ["Dans une heure, il y a " + M("60 minutes") + ".", "15min : " + M("et quart") + " · 30min : " + M("et demie") + " · 45min : " + M("moins le quart"), "Il reste un quart d’heure (15min) avant l’heure suivante."] },
+      { t: en ? "Extra: from “twenty-five to” to “five to”" : "En plus : de « moins 25 » à « moins 5 »", complement: true,
+        svg: jrHorloge("jr-haut-plus", jrCadran() + '<g class="jr-pas"><line x1="110" y1="110" x2="110" y2="30" class="jr-gm"/></g><circle cx="110" cy="110" r="7" class="jr-axe"/>' +
+          (en ? ["twenty-five to", "twenty to", "quarter to", "ten to", "five to"] : ["moins 25", "moins 20", "moins le quart", "moins 10", "moins 5"]).map(function (l, k) { return '<text x="110" y="244" text-anchor="middle" class="jr-cinq" style="animation-delay:' + (k * 1.6) + 's">' + l + "</text>"; }).join("")),
+        txt: en ? ["After half past, we say how many minutes are " + M("left") + " before the next hour."] : ["Après la demie, on dit combien de minutes il " + M("manque") + " avant l’heure suivante."],
+        note: en ? "Year 3 benchmarks (not in the class lesson)." : "Repères du niveau 3 (pas dans la leçon de classe)." }
+    ];
+  }
+  function jrSection() {
+    var en = langue === "en", C2 = jrCartes(en), n = C2.length, c = C2[JR.i];
+    var pastilles = '<ol class="jr-pastilles">' + C2.map(function (x, k) { return '<li><button type="button" data-action="jr-aller" data-v="' + k + '" aria-current="' + (k === JR.i) + '" aria-label="' + esc(x.t) + '">' + (k + 1) + "</button></li>"; }).join("") + "</ol>";
+    if (JR.tout) return '<section class="jr m-maths"><header class="jr-haut"><img src="' + IMG("coralie") + '" alt=""><h3>' + (en ? "I remember" : "Je retiens") + '</h3><button class="coco-btn coco-btn--secondaire" type="button" data-action="jr-tout">' + (en ? "Card by card" : "Carte par carte") + '</button></header><div class="jr-liste">' +
+      C2.map(function (x) { return '<div class="jr-mini' + (x.complement ? " jr-complement" : "") + '">' + x.svg + "<div><b>" + esc(x.t) + "</b>" + x.txt.map(function (p) { return "<p>" + typo(p) + "</p>"; }).join("") + "</div></div>"; }).join("") + "</div></section>";
+    return '<section class="jr m-maths"><header class="jr-haut"><img src="' + IMG("coralie") + '" alt=""><h3>' + (en ? "I remember" : "Je retiens") + "</h3>" + pastilles + "</header>" +
+      '<div class="jr-carte' + (c.complement ? " jr-complement" : "") + '" key="' + JR.i + '"><div class="jr-illu">' + c.svg + '</div><div class="jr-texte"><h4>' + esc(typo(c.t)) + "</h4>" + c.txt.map(function (p, k) { return '<p class="jr-p" style="animation-delay:' + (0.3 + k * 0.5) + 's">' + typo(p) + "</p>"; }).join("") + (c.note ? '<p class="jr-note">' + esc(typo(c.note)) + "</p>" : "") + "</div></div>" +
+      '<footer class="jr-bas"><button class="coco-btn coco-btn--secondaire" type="button" data-action="jr-prec"' + (JR.i === 0 ? " disabled" : "") + ">← " + (en ? "Back" : "Précédent") + '</button><button class="jr-lien" type="button" data-action="jr-tout">' + (en ? "See everything" : "Tout voir") + '</button><button class="coco-btn" type="button" data-action="jr-suiv"' + (JR.i === n - 1 ? " disabled" : "") + ">" + (en ? "Next" : "Suivant") + " →</button></footer></section>";
+  }
+  function actionJr(a, el) {
+    var n = jrCartes(langue === "en").length;
+    if (a === "jr-aller") JR.i = +el.dataset.v;
+    else if (a === "jr-prec") JR.i = Math.max(0, JR.i - 1);
+    else if (a === "jr-suiv") JR.i = Math.min(n - 1, JR.i + 1);
+    else if (a === "jr-tout") JR.tout = !JR.tout;
+  }
+  function pageLeconHeure(maquette) {
     var m = MATIERE.maths, en = langue === "en", B = function (l, v) { return '<button class="coco-btn coco-btn--secondaire" type="button" data-action="h-lec-m" data-v="' + v + '" aria-pressed="' + (LH.m === v) + '">' + l + "</button>"; };
     var boutons = en ? [["O’clock", 0], ["Quarter past", 15], ["Half past", 30], ["Quarter to", 45], ["Twenty-five to", 35], ["Twenty to", 40], ["Ten to", 50], ["Five to", 55]]
       : [["Heure pile", 0], ["Et quart", 15], ["Et demie", 30], ["Moins le quart", 45], ["Moins 25", 35], ["Moins 20", 40], ["Moins 10", 50], ["Moins 5", 55]];
@@ -795,7 +855,7 @@
         : '<p>La <b class="hr-h">petite aiguille</b> indique les <b class="hr-h">heures</b> (représentées par les 12 chiffres).</p><p>La <b class="hr-m">grande aiguille</b> indique les <b class="hr-m">minutes</b> (représentées par les 60 graduations).</p>') + "</div>" +
       '<div class="hr-rec"><div>' + HE.horloge(LH.h, LH.m, { drag: "lecon", out: true, en: en }) + '<p class="mi-indice">' + (en ? "Turn the long hand with your finger." : "Fais tourner la grande aiguille avec ton doigt.") + "</p></div>" +
       '<div><div id="hr-sortie">' + heSortie() + '</div><div class="coco-row hr-boutons">' + boutons.map(function (b) { return B(b[0], b[1]); }).join("") + '</div><div class="coco-row hr-boutons"><button class="coco-btn coco-btn--secondaire" type="button" data-action="h-lec-h" data-v="-1">' + (en ? "Hour −" : "Heure −") + '</button><button class="coco-btn coco-btn--secondaire" type="button" data-action="h-lec-h" data-v="1">' + (en ? "Hour +" : "Heure +") + "</button></div></div></div></section>" +
-      '<section class="retiens m-maths"><img src="' + IMG("coralie") + '" alt=""><div><h3>' + (en ? "I remember" : "Je retiens") + '</h3><div class="hr-cartes">' + cartes.map(function (c, k) { return '<div' + (k === 4 ? ' class="hr-complement"' : "") + "><b>" + esc(typo(c[0])) + "</b><p>" + esc(typo(c[1])) + "</p></div>"; }).join("") + "</div></div></section>" +
+      (maquette ? jrSection() : '<section class="retiens m-maths"><img src="' + IMG("coralie") + '" alt=""><div><h3>' + (en ? "I remember" : "Je retiens") + '</h3><div class="hr-cartes">' + cartes.map(function (c, k) { return '<div' + (k === 4 ? ' class="hr-complement"' : "") + "><b>" + esc(typo(c[0])) + "</b><p>" + esc(typo(c[1])) + "</p></div>"; }).join("") + "</div></div></section>") +
       '<div class="coco-row"><a class="coco-btn" href="#seq-heure">' + t("versSequence") + "</a></div>";
   }
   /* ---------- les jeux ---------- */
@@ -1445,7 +1505,7 @@
   /* ---------- routeur ---------- */
   var ROUTES = {
     accueil: pageAccueil, "seq-verbe": function () { return pageSequence("verbe"); }, "seq-mots": pageSequenceMots, "lecon-mots": pageLeconMots, "fiche-mots": ficheMots,
-    "seq-heure": pageSequenceHeure, "seq-digitale": pageSequenceDigitale, "fiche-digitale": ficheDigitale, "seq-diagrammes": pageSequenceDiagrammes, "lecon-diagrammes": pageLeconDiagrammes, "fiche-diagrammes": ficheDiagrammes, "lecon-heure": pageLeconHeure, "fiche-heure": ficheHeure, "tbi-heure": pageTbiHeure,
+    "seq-heure": pageSequenceHeure, "seq-digitale": pageSequenceDigitale, "fiche-digitale": ficheDigitale, "seq-diagrammes": pageSequenceDiagrammes, "lecon-diagrammes": pageLeconDiagrammes, "fiche-diagrammes": ficheDiagrammes, "lecon-heure": function () { return pageLeconHeure(false); }, "maquette-retiens": function () { return pageLeconHeure(true); }, "fiche-heure": ficheHeure, "tbi-heure": pageTbiHeure,
     "lecon-verbe": pageLecon, "jeu-verbe-decouvre": jeuDecouvre, "jeu-verbe-chasse": jeuChasse, enseignante: pageEnseignante, banque: pageBanque
   };
   C.matieres.forEach(function (m) { ROUTES[m.id] = function () { return pageMatiere(m.id); }; });
@@ -1484,6 +1544,7 @@
     else if (/^h-/.test(a)) actionHeure(a, el);
     else if (/^t-/.test(a)) actionTbi(a, el);
     else if (/^g-/.test(a)) actionDiag(a, el);
+    else if (/^jr-/.test(a)) actionJr(a, el);
     else if (/^bq-/.test(a)) { if (a === "bq-reglages") e.preventDefault(); actionBanque(a, el); }
     else if (a === "imprimer") { try { window.print(); } catch (x) {} return; }
     else if (/^l-/.test(a)) actionLecon(a, el);

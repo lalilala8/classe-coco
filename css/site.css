@@ -535,3 +535,72 @@ body.mode-classe .site { max-width: none; padding-block: 12px 24px; }
 /* titres KG Red Hands environ 12 % plus petits (D-79), sauf l'accueil (grand titre et cartes des matières) et le mode TBI */
 .coco-carte h3 { font-size: 23px; line-height: 27px; }
 .coco-retour h4 { font-size: 25px; line-height: 29px; }
+
+/* « Je retiens » en cartes animées (maquette, D-81) */
+.jr { background: var(--carte); border: var(--bord) solid var(--maths); border-radius: var(--arrondi-grand); padding: 18px 22px 20px; display: grid; gap: 14px; }
+.jr-haut { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.jr-haut img { width: 64px; height: auto; }
+.jr-haut h3 { font: 400 28px/32px var(--font-titre); color: var(--maths); margin: 0; flex: 1; }
+.jr-pastilles { display: flex; gap: 8px; list-style: none; margin: 0; padding: 0; }
+.jr-pastilles button { width: 40px; height: 40px; border-radius: 50%; border: 2.5px solid var(--maths); background: var(--carte); color: var(--maths); font: 600 18px/1 var(--font-texte); cursor: pointer; }
+.jr-pastilles button[aria-current="true"] { background: var(--maths); color: #fff; }
+.jr-carte { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 24px; align-items: center; background: var(--maths-clair); border-radius: var(--arrondi); padding: 18px; min-height: 300px; animation: jr-entre .35s ease-out; }
+.jr-carte.jr-complement { background: var(--lagon-clair); }
+.jr-illu { display: grid; place-items: center; }
+.jr-svg { width: 100%; max-width: 260px; height: auto; overflow: visible; }
+.jr-svg.jr-large { max-width: 340px; }
+.jr-texte h4 { font: 400 26px/30px var(--font-titre); color: var(--maths); margin: 0 0 10px; }
+.jr-complement .jr-texte h4 { color: var(--lagon-fonce); }
+.jr-p { font: 400 22px/32px var(--font-texte); margin: 0 0 8px; animation: jr-p .5s ease-out both; }
+.jr-note { font-size: 16px; color: var(--encre-douce); font-style: italic; margin: 8px 0 0; }
+.jr-bas { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.jr-lien { background: none; border: 0; font: 600 18px var(--font-texte); color: var(--lagon-texte); text-decoration: underline; cursor: pointer; min-height: 44px; }
+.jr-liste { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+.jr-mini { display: grid; grid-template-columns: 110px 1fr; gap: 12px; align-items: start; background: var(--maths-clair); border-radius: var(--arrondi); padding: 12px; }
+.jr-mini.jr-complement { background: var(--lagon-clair); }
+.jr-mini .jr-svg { max-width: 110px; }
+.jr-mini b { font: 400 21px/25px var(--font-titre); color: var(--maths); display: block; margin-bottom: 4px; }
+.jr-mini p { margin: 0 0 4px; font-size: 17px; line-height: 24px; }
+/* dessins */
+.jr-cadran { fill: #fff; stroke: var(--encre); stroke-width: 3; }
+.jr-grad { stroke: var(--heure-m, #1a5fa8); stroke-width: 1.4; }
+.jr-grad5 { stroke: var(--heure-m, #1a5fa8); stroke-width: 3; }
+.jr-chiffre { font: 700 19px var(--font-texte); fill: var(--heure-h, #c4301f); }
+.jr-pa { stroke: var(--heure-h, #c4301f); stroke-width: 8; stroke-linecap: round; }
+.jr-gm { stroke: var(--heure-m, #1a5fa8); stroke-width: 5; stroke-linecap: round; }
+.jr-axe { fill: var(--encre); }
+.jr-leg { font: 600 13px var(--font-texte); fill: var(--encre); }
+.jr-leg2 { font: 500 14px var(--font-texte); fill: var(--encre-douce); }
+.jr-ecran { fill: #fff; stroke: var(--encre); stroke-width: 3; }
+.jr-dig { font: 700 28px var(--font-texte); fill: var(--encre); }
+.jr-dh { fill: var(--heure-h, #c4301f); } .jr-dm { fill: var(--heure-m, #1a5fa8); }
+.jr-trait { fill: none; stroke: var(--encre); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.jr-plus, .jr-moins { font: 700 17px var(--font-texte); fill: var(--maths); }
+.jr-q { fill: #c9def4; stroke: #fff; stroke-width: 2; }
+.jr-reste { fill: none; stroke: var(--maths); stroke-width: 3; stroke-dasharray: 6 5; }
+.jr-qt { font: 700 17px var(--font-texte); fill: var(--heure-m, #1a5fa8); }
+.jr-cinq { font: 700 22px var(--font-texte); fill: var(--heure-m, #1a5fa8); opacity: 0; }
+/* animations : lentes, en boucle, coupées si l'appareil demande moins de mouvement */
+.jr-tourne-gm { transform-origin: 110px 110px; animation: jr-tour 5s linear infinite; }
+.jr-tourne-pa { transform-origin: 110px 110px; animation: jr-tour 60s linear infinite; }
+.jr-tour1, .jr-tour2 { transform-origin: 70px 70px; }
+.jr-tour1 { animation: jr-t1 8s linear infinite; } .jr-tour2 { animation: jr-t2 8s linear infinite; }
+.jr-fleche1, .jr-apparait1 { animation: jr-a1 6s ease infinite; } .jr-fleche2, .jr-apparait2 { animation: jr-a2 6s ease infinite; }
+.jr-q1 { animation: jr-s1 8s ease infinite; } .jr-q2 { animation: jr-s2 8s ease infinite; } .jr-q3 { animation: jr-s3 8s ease infinite; } .jr-reste { animation: jr-s4 8s ease infinite; }
+.jr-pas { transform-origin: 110px 110px; animation: jr-pas 8s steps(1) infinite; }
+.jr-cinq { animation: jr-cinq 8s linear infinite backwards; }
+@keyframes jr-entre { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes jr-p { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: none; } }
+@keyframes jr-tour { to { transform: rotate(360deg); } }
+@keyframes jr-t1 { 0% { transform: rotate(0); } 45%, 100% { transform: rotate(360deg); } }
+@keyframes jr-t2 { 0%, 50% { transform: rotate(0); } 95%, 100% { transform: rotate(360deg); } }
+@keyframes jr-a1 { 0%, 10% { opacity: 0; } 25%, 100% { opacity: 1; } }
+@keyframes jr-a2 { 0%, 45% { opacity: 0; } 60%, 100% { opacity: 1; } }
+@keyframes jr-s1 { 0%, 5% { opacity: 0; } 15%, 100% { opacity: 1; } }
+@keyframes jr-s2 { 0%, 25% { opacity: 0; } 35%, 100% { opacity: 1; } }
+@keyframes jr-s3 { 0%, 45% { opacity: 0; } 55%, 100% { opacity: 1; } }
+@keyframes jr-s4 { 0%, 65% { opacity: 0; } 75%, 100% { opacity: 1; } }
+@keyframes jr-pas { 0% { transform: rotate(210deg); } 20% { transform: rotate(240deg); } 40% { transform: rotate(270deg); } 60% { transform: rotate(300deg); } 80%, 100% { transform: rotate(330deg); } }
+@keyframes jr-cinq { 0% { opacity: 0; } 1%, 19% { opacity: 1; } 20%, 100% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .jr *, .jr-carte { animation: none !important; } .jr-cinq:first-of-type { opacity: 1; } .jr-pas { transform: rotate(210deg); } }
+@media (max-width: 760px) { .jr-carte { grid-template-columns: 1fr; min-height: 0; } .jr-svg { max-width: 220px; } .jr-p { font-size: 20px; line-height: 29px; } .jr-haut img { width: 48px; } }

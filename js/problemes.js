@@ -2,7 +2,7 @@
    Deux problèmes par séquence. Chaque problème existe en mode autonome (élève, iPad), en mode classe (TBI, 4 temps),
    en feuille de recherche à imprimer et en fiche enseignante. */
 (function () {
-  var PIECES = [5, 10, 20, 50, 100]; /* les pièces de 1 F et 2 F ne circulent plus en Nouvelle-Calédonie (enseignante, D-77) */
+  var PIECES = [5, 10, 20, 50, 100, 200]; /* pièces de la leçon GM1 ; celles de 1 F et 2 F ne circulent plus (D-77, D-82) */
   var FRUITS = [
     { id: "citron", fr: "un citron", en: "a lime", prix: 50 },
     { id: "coco", fr: "une noix de coco", en: "a coconut", prix: 100 },
@@ -64,7 +64,7 @@
           apprend: ["Composer une somme avec les pièces du pays de plusieurs façons (repère niveau 3 : la monnaie en lien avec les décompositions additives).",
                     "Calculer des sommes de pièces et contrôler un total.", "S'organiser pour trouver beaucoup de solutions."],
           pourquoi: ["Plus qu'un rappel : il faut composer une somme, pas seulement la compter.", "On apprend en cherchant : décompositions de 100, échanges de pièces.", "49 réponses possibles : chacun répond à son niveau, et les plus rapides peuvent chercher à toutes les trouver."],
-          materiel: ["Pièces factices de 5, 10, 20, 50 et 100 F", "Feuille de recherche (une par groupe)", "iPad pour le mode autonome"],
+          materiel: ["Pièces factices de 5, 10, 20, 50, 100 et 200 F", "Feuille de recherche (une par groupe)", "iPad pour le mode autonome"],
           temps: [
             ["Poser la question", "5 min", "Projette l'énoncé. Un élève le lit, 2 ou 3 autres le redisent avec leurs mots. Vérifie que tous ont compris que la pièce de 100 F seule ne compte pas. Ne donne aucune méthode.", "« Qui peut redire le problème avec ses mots ? »"],
             ["Chercher par 2 ou 3", "15 à 20 min", "Les groupes manipulent les pièces et notent leurs solutions. Observe et prends des notes pour l'évaluation. Un groupe bloque : coup de pouce. Un groupe a fini : une relance « Pour aller plus loin ».", "« Vous en avez une ? Trouvez-en une autre. »"],
@@ -76,7 +76,8 @@
             ["Le total ne fait pas 100 F (erreur de calcul).", "« Recompte en commençant par les plus grosses pièces. »"],
             ["La pièce de 100 F seule.", "« Relis le problème : combien de pièces au moins ? »"],
             ["La même solution écrite dans un autre ordre (50 + 20 + 20 + 10 et 20 + 50 + 10 + 20).", "« Est-ce vraiment une nouvelle façon ? Range tes pièces de la plus grosse à la plus petite. »"],
-            ["Une pièce qui n'existe pas (25 F, 200 F).", "« Cette pièce existe-t-elle ? Regarde les pièces de la boîte. »"]
+            ["Une pièce qui n'existe pas (25 F, 2 F).", "« Cette pièce existe-t-elle ? Regarde les pièces de la boîte. »"],
+            ["La pièce de 200 F : elle vaut plus que le jus.", "« Peux-tu payer 100 F avec une pièce de 200 F ? »"]
           ],
           niveaux: ["Total différent de 100 F, ou la pièce de 100 F seule.",
                     "Une seule solution juste ; pense qu'il n'y en a pas d'autre.",
