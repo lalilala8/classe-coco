@@ -73,14 +73,20 @@ window.COCO_CONTENU = {
           [{ fr: "Mesurer des masses", en: "Measuring mass" }], [{ fr: "Mesurer des capacités", en: "Measuring capacity" }]
         ] },
         { nom: { fr: "Espace et géométrie", en: "Geometry" }, sequences: [
-          [{ fr: "Se repérer", en: "Position and direction" }], [{ fr: "Se déplacer sur un quadrillage", en: "Moving on a grid" }],
-          [{ fr: "Les solides usuels", en: "3-D shapes" }], [{ fr: "Les polygones", en: "Polygons" }],
-          [{ fr: "Le triangle rectangle", en: "Right-angled triangles" }], [{ fr: "Le carré", en: "Squares" }],
-          [{ fr: "Le rectangle", en: "Rectangles" }], [{ fr: "La reproduction sur quadrillage", en: "Copying shapes on a grid" }],
-          [{ fr: "Le cercle", en: "Circles" }], [{ fr: "Droites et points alignés", en: "Lines and points in a line" }],
-          [{ fr: "Mesurer et tracer un segment", en: "Measuring and drawing a line segment" }],
-          [{ fr: "Longueur et milieu d'un segment", en: "Length and midpoint of a line segment" }],
-          [{ fr: "Droites perpendiculaires", en: "Perpendicular lines" }], [{ fr: "La symétrie axiale", en: "Line symmetry" }]
+          /* d'après le fichier de géométrie 2026 de l'enseignante (GEOM1 à GEOM12, D-86) ; « Les polygones » gardé en attente d'une leçon */
+          [{ fr: "Se repérer et se déplacer sur un quadrillage", en: "Position and direction on a grid" }],
+          [{ fr: "Points, droites et segments", en: "Points, lines and line segments" }],
+          [{ fr: "Mesurer, trouver le milieu et tracer un segment", en: "Measuring, finding the midpoint and drawing a line segment" }],
+          [{ fr: "Les angles droits", en: "Right angles" }],
+          [{ fr: "Les polygones", en: "Polygons" }],
+          [{ fr: "Triangles et triangles-rectangles", en: "Triangles and right-angled triangles" }],
+          [{ fr: "Les quadrilatères : le carré", en: "Quadrilaterals: the square" }],
+          [{ fr: "Les quadrilatères : le rectangle", en: "Quadrilaterals: the rectangle" }],
+          [{ fr: "Le cercle", en: "Circles" }],
+          [{ fr: "La reproduction sur quadrillage", en: "Copying shapes on a grid" }],
+          [{ fr: "La symétrie", en: "Line symmetry" }],
+          [{ fr: "Les solides", en: "3-D shapes" }],
+          [{ fr: "Cube et pavé droit", en: "Cubes and cuboids" }]
         ] },
         { nom: { fr: "Résolution de problèmes", en: "Problem solving" }, sequences: [
           [{ fr: "Banque de problèmes (Vergnaud)", en: "Problem bank (Vergnaud)" }, "demo", "#banque"],

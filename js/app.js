@@ -773,7 +773,7 @@
     var am = en ? "a.m.: " + mo + ":" + HE.pad(m) + " · p.m.: " + ap + ":" + HE.pad(m) + " (add 12 hours)." : "Le matin : " + mo + ":" + HE.pad(m) + ". L’après-midi ou le soir : " + ap + ":" + HE.pad(m) + " (on ajoute 12 h).";
     return '<p class="hr-dig">' + heDig(h, m) + '</p><p class="hr-dire">' + esc(typo(heDire(h, m))) + "</p>" + ex + '<p class="hr-rem">' + esc(typo(am)) + "</p>";
   }
-  /* ---------- « Je retiens » en cartes animées (maquette du 07/11/2026, à valider : D-81) ----------
+  /* ---------- « Je retiens » en cartes animées (validé le 07/11/2026 avec deux exemples sur la carte 3 : D-81, D-86) ----------
      Une idée par carte, une animation qui montre l'idée, les phrases de la leçon GM5 mot pour mot, découpées. */
   var JR = { i: 0, tout: false };
   function jrHorloge(cls, inner) { return '<svg class="jr-svg ' + cls + '" viewBox="0 0 220 ' + (cls === "jr-haut-plus" ? 252 : 220) + '" aria-hidden="true">' + inner + "</svg>"; }
@@ -1504,7 +1504,7 @@
   /* ---------- routeur ---------- */
   var ROUTES = {
     accueil: pageAccueil, "seq-verbe": function () { return pageSequence("verbe"); }, "seq-mots": pageSequenceMots, "lecon-mots": pageLeconMots, "fiche-mots": ficheMots,
-    "seq-heure": pageSequenceHeure, "seq-digitale": pageSequenceDigitale, "fiche-digitale": ficheDigitale, "seq-diagrammes": pageSequenceDiagrammes, "lecon-diagrammes": pageLeconDiagrammes, "fiche-diagrammes": ficheDiagrammes, "lecon-heure": function () { return pageLeconHeure(false); }, "maquette-retiens": function () { return pageLeconHeure(true); }, "fiche-heure": ficheHeure, "tbi-heure": pageTbiHeure,
+    "seq-heure": pageSequenceHeure, "seq-digitale": pageSequenceDigitale, "fiche-digitale": ficheDigitale, "seq-diagrammes": pageSequenceDiagrammes, "lecon-diagrammes": pageLeconDiagrammes, "fiche-diagrammes": ficheDiagrammes, "lecon-heure": function () { return pageLeconHeure(true); }, "maquette-retiens": function () { return pageLeconHeure(true); }, "fiche-heure": ficheHeure, "tbi-heure": pageTbiHeure,
     "lecon-verbe": pageLecon, "jeu-verbe-decouvre": jeuDecouvre, "jeu-verbe-chasse": jeuChasse, enseignante: pageEnseignante, banque: pageBanque
   };
   C.matieres.forEach(function (m) { ROUTES[m.id] = function () { return pageMatiere(m.id); }; });
