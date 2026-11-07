@@ -2,7 +2,7 @@
    Deux problèmes par séquence. Chaque problème existe en mode autonome (élève, iPad), en mode classe (TBI, 4 temps),
    en feuille de recherche à imprimer et en fiche enseignante. */
 (function () {
-  var PIECES = [1, 2, 5, 10, 20, 50, 100];
+  var PIECES = [5, 10, 20, 50, 100]; /* les pièces de 1 F et 2 F ne circulent plus en Nouvelle-Calédonie (enseignante, D-77) */
   var FRUITS = [
     { id: "citron", fr: "un citron", en: "a lime", prix: 50 },
     { id: "coco", fr: "une noix de coco", en: "a coconut", prix: 100 },
@@ -58,20 +58,20 @@
         retenir: { fr: "Une même somme peut se faire de beaucoup de façons. Pour en trouver beaucoup, je m'organise : je pars des grosses pièces, puis je remplace une pièce par d'autres de même valeur.",
                    en: "The same amount can be made in many ways. To find lots of them, I get organised: I start with the big coins, then I swap one coin for others worth the same." },
         exemple: "50 F = 20 F + 20 F + 10 F",
-        toutes: null, nbToutes: 4562,
+        toutes: null, nbToutes: 49,
         fiche: {
           source: "Adapté de Sullivan & Lilburn, « Activités ouvertes en mathématiques » (Chenelière, 2010), chapitre « L'argent », niveau débutant, question 1 (« Dans ma poche, il y a 75 ¢. Quelles pièces puis-je avoir ? »).",
           apprend: ["Composer une somme avec les pièces du pays de plusieurs façons (repère niveau 3 : la monnaie en lien avec les décompositions additives).",
                     "Calculer des sommes de pièces et contrôler un total.", "S'organiser pour trouver beaucoup de solutions."],
-          pourquoi: ["Plus qu'un rappel : il faut composer une somme, pas seulement la compter.", "On apprend en cherchant : décompositions de 100, échanges de pièces.", "Énormément de réponses possibles : chacun répond à son niveau."],
-          materiel: ["Pièces factices de 1, 2, 5, 10, 20, 50 et 100 F", "Feuille de recherche (une par groupe)", "iPad pour le mode autonome"],
+          pourquoi: ["Plus qu'un rappel : il faut composer une somme, pas seulement la compter.", "On apprend en cherchant : décompositions de 100, échanges de pièces.", "49 réponses possibles : chacun répond à son niveau, et les plus rapides peuvent chercher à toutes les trouver."],
+          materiel: ["Pièces factices de 5, 10, 20, 50 et 100 F", "Feuille de recherche (une par groupe)", "iPad pour le mode autonome"],
           temps: [
             ["Poser la question", "5 min", "Projette l'énoncé. Un élève le lit, 2 ou 3 autres le redisent avec leurs mots. Vérifie que tous ont compris que la pièce de 100 F seule ne compte pas. Ne donne aucune méthode.", "« Qui peut redire le problème avec ses mots ? »"],
             ["Chercher par 2 ou 3", "15 à 20 min", "Les groupes manipulent les pièces et notent leurs solutions. Observe et prends des notes pour l'évaluation. Un groupe bloque : coup de pouce. Un groupe a fini : une relance « Pour aller plus loin ».", "« Vous en avez une ? Trouvez-en une autre. »"],
             ["Mettre en commun", "15 min", "Chaque groupe donne une solution à tour de rôle. La classe donne son avis avant que tu vérifies. Puis « Ranger » : du moins de pièces au plus de pièces.", "« Comment le savez-vous ? Est-ce vraiment une nouvelle façon ? »"],
             ["Retenir", "5 à 10 min", "Faites ressortir la méthode : partir des grosses pièces et échanger une pièce contre d'autres de même valeur. Copie de la trace écrite.", ""]
           ],
-          reponses: "Il y a 4 562 façons (sans compter la pièce de 100 F seule) : impossible de toutes les trouver, c'est voulu. Avec peu de pièces : 2 pièces : 50 + 50. 3 pièces : aucune. 4 pièces : 50 + 20 + 20 + 10. 5 pièces : 50 + 20 + 20 + 5 + 5 ; 50 + 20 + 10 + 10 + 10 ; 20 × 5. 6 pièces : 50 + 20 + 10 + 10 + 5 + 5 ; 50 + 10 × 5 ; 20 × 4 + 10 + 10.",
+          reponses: "Avec les pièces de 5, 10, 20, 50 et 100 F, il y a 49 façons (sans compter la pièce de 100 F seule) : il faut s'organiser pour en trouver beaucoup, c'est voulu. Avec peu de pièces : 2 pièces : 50 + 50. 3 pièces : aucune. 4 pièces : 50 + 20 + 20 + 10. 5 pièces : 50 + 20 + 20 + 5 + 5 ; 50 + 20 + 10 + 10 + 10 ; 20 × 5. 6 pièces : 50 + 20 + 10 + 10 + 5 + 5 ; 50 + 10 × 5 ; 20 × 4 + 10 + 10.",
           erreurs: [
             ["Le total ne fait pas 100 F (erreur de calcul).", "« Recompte en commençant par les plus grosses pièces. »"],
             ["La pièce de 100 F seule.", "« Relis le problème : combien de pièces au moins ? »"],

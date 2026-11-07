@@ -71,7 +71,8 @@ window.COCO_CONTENU = {
           [{ fr: "Droites perpendiculaires", en: "Perpendicular lines" }], [{ fr: "La symétrie axiale", en: "Line symmetry" }]
         ] },
         { nom: { fr: "Résolution de problèmes", en: "Problem solving" }, sequences: [
-          [{ fr: "Banque de problèmes (Vergnaud)", en: "Problem bank (Vergnaud)" }, "demo", "#banque"]
+          [{ fr: "Banque de problèmes (Vergnaud)", en: "Problem bank (Vergnaud)" }, "demo", "#banque"],
+          [{ fr: "Lire un diagramme en barres", en: "Reading bar charts" }, "demo", "diagrammes"]
         ] }
       ] },
     { id: "anglais", classe: "m-anglais", perso: "tao", nom: { fr: "Anglais", en: "English" },
@@ -115,6 +116,13 @@ window.COCO_CONTENU = {
     objectif: { fr: "Je sais payer un prix avec les pièces et les billets du pays.", en: "I can pay a price with the coins and notes we use here." },
     pieces: [1, 2, 5, 10, 20, 50, 100],
     prix: 100, minPieces: 2, defiPieces: 6
+  },
+
+  /* ---------- Maths · résolution de problèmes : les diagrammes en barres (repère niveau 3, D-77) ---------- */
+  diagrammes: {
+    matiere: "maths",
+    titre: { fr: "Lire un diagramme en barres", en: "Reading bar charts" },
+    objectif: { fr: "Je sais lire un diagramme en barres et m'en servir pour résoudre un problème.", en: "I can read a bar chart and use it to solve a problem." }
   },
 
   /* ---------- Maths · P5 séquence 1 : lire l'heure digitale (jeux collectifs de la collègue, adaptés : D-73) ---------- */

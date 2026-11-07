@@ -27,7 +27,6 @@ body { min-height: 100vh; }
 .domaine-matiere { --mc: var(--c); --mcf: var(--cf); }
 .domaine.domaine-matiere h2 { display: flex; align-items: center; gap: 12px; color: var(--c); }
 .domaine-matiere h2::before { content: ""; flex: none; width: 14px; height: 14px; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 5px var(--cc); }
-.domaine-matiere h2::after { content: ""; flex: 1; height: 4px; border-radius: 4px; background: var(--cc); }
 .domaine-matiere .seq.est-bientot { border-color: color-mix(in srgb, var(--mc) 35%, var(--carte)); background: color-mix(in srgb, var(--cc) 35%, var(--carte)); }
 .domaine-matiere .seq.est-bientot small { color: var(--mcf); }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
@@ -487,3 +486,49 @@ body.mode-classe .site { max-width: none; padding-block: 12px 24px; }
 @media (max-width: 860px) { .hr-rec, .hr-tbi-dec, .hr-tbi-run { grid-template-columns: 1fr; } .hr-saisie span { min-width: 0; text-align: center; width: 100%; } }
 @media (prefers-reduced-motion: reduce) { .hr-tbi-barre i { transition: none; } }
 @media (max-width: 520px) { .barre .coco-langue button { font-size: 20px; min-width: 64px; } .domaine.domaine-matiere h2 { font-size: 28px; line-height: 32px; } }
+
+/* encadré « Programme et repères » des fiches enseignantes (D-77) */
+.f-prog { background: var(--lagon-clair); border: var(--bord) solid var(--lagon); border-radius: var(--arrondi-grand); padding: 16px 20px; display: grid; gap: 8px; break-inside: avoid; }
+.fiche .f-prog h2 { color: var(--lagon-fonce); }
+.f-prog h3 { font: 600 18px/24px var(--font-texte); color: var(--lagon-fonce); margin: 0 0 4px; }
+.f-prog ul { margin: 0; padding-left: 20px; }
+.f-prog li, .f-prog p { font-size: 16px; line-height: 23px; margin: 0 0 4px; }
+.f-prog-ref { font-weight: 600; color: var(--lagon-fonce); }
+.f-prog-note { background: var(--soutien-clair); border-radius: var(--arrondi-petit); padding: 6px 10px; }
+
+/* diagrammes en barres (D-77) : une seule couleur, quadrillage discret, bouts arrondis posés sur la ligne de base */
+.dg-fig { margin: 0; width: 100%; max-width: 560px; display: grid; gap: 4px; }
+.dg-titre { font: 600 20px/26px var(--font-texte); color: var(--encre); margin: 0; }
+.dg-legende { font-size: 15px; color: var(--encre-douce); text-align: left; margin: 0; }
+.dg { width: 100%; height: auto; display: block; overflow: visible; }
+.dg-grille { stroke: #dfe7ea; stroke-width: 1; }
+.dg-base, .dg-axe { stroke: var(--encre-douce); stroke-width: 1.5; }
+.dg-nb { font: 500 16px var(--font-texte); fill: var(--encre-douce); }
+.dg-cat { font: 500 16px var(--font-texte); fill: var(--encre); }
+.dg-val { font: 700 15px var(--font-texte); fill: var(--encre); }
+.dg-barre { fill: var(--lagon); }
+.dg-barre--vue { fill: var(--lagon-fonce); }
+.dg-barre--revoir { stroke: var(--soutien); stroke-width: 4; }
+.dg-lecture { stroke: var(--encre); stroke-width: 2; stroke-dasharray: 6 5; }
+.dg-point { fill: var(--encre); }
+.dg-case { fill: transparent; cursor: pointer; }
+.dg-case:hover { fill: rgba(15, 142, 159, .12); }
+.dg-zone { gap: 16px; }
+.dg-table { border-collapse: collapse; font-size: 18px; min-width: 240px; }
+.dg-table caption { font-weight: 600; margin-bottom: 6px; }
+.dg-table th, .dg-table td { border: 2px solid var(--lagon-clair); padding: 6px 14px; text-align: left; }
+.dg-table td { font: 700 22px/1 var(--font-lecture); text-align: center; }
+.dg-reglages { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 18px; }
+.dg-reglages div { display: flex; align-items: center; gap: 8px; }
+.dg-reglages span { font-size: 17px; color: var(--encre-douce); }
+.dg-reglages b { font: 700 22px/1 var(--font-lecture); min-width: 30px; text-align: center; }
+.dg-saisie { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 0; font-size: 20px; flex-wrap: wrap; }
+.dg-saisie input { width: 120px; height: var(--cible); border: var(--bord) solid var(--trait); border-radius: var(--arrondi-petit); font: 700 30px/1 var(--font-lecture); text-align: center; color: var(--encre); background: var(--carte); }
+.dg-saisie input:focus { border-color: var(--lagon); outline: none; }
+.dg-saisie b { font: 700 26px/1 var(--font-texte); }
+.dg-lecon { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 24px; align-items: center; background: var(--carte); border: var(--bord) solid var(--maths); border-radius: var(--arrondi-grand); padding: 20px; }
+.dg-parties { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.dg-parties li { display: grid; gap: 2px; }
+.dg-parties li > b { font: 400 22px/26px var(--font-titre); color: var(--maths); }
+.dg-parties .dg-exemple { background: var(--maths-clair); border-radius: var(--arrondi-petit); padding: 8px 12px; }
+@media (max-width: 860px) { .dg-lecon { grid-template-columns: 1fr; } }

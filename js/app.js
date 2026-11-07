@@ -490,8 +490,7 @@
     return '<div class="no-print coco-row"><a class="coco-btn coco-btn--secondaire" href="#enseignante">← Espace enseignante</a><a class="coco-btn" href="#seq-mots">Voir la séquence</a><button class="coco-btn coco-btn--secondaire" type="button" data-action="imprimer">Imprimer la fiche</button></div>' +
       '<article class="fiche m-francais"><small>Français · Étude de la langue · Orthographe lexicale · CE2</small><h1>Les mots invariables</h1>' +
       '<p class="f-source">Module « Mes mots invariables » du premier site de la classe, repris dans le nouveau site. Listes et familles : affiches « Mots-outils du CP-CE1 et mots invariables » (2026).</p>' +
-      '<div class="f-deux"><section><h2>Compétence et attendu</h2><ul>' + li(["Compétence travaillée : s'initier à l'orthographe lexicale (cycle 2, CE2, niveau de maîtrise 3).", "Attendu de fin de cycle : orthographier les mots les plus fréquents (notamment en situation scolaire) et les mots invariables mémorisés.", "Connaissances et compétences associées : mémoriser les principaux mots invariables ; regrouper des mots par séries (familles de mots, mots reliés par des analogies morphologiques)."]) + "</ul></section>" +
-      "<section><h2>Repères de progressivité (niveau 3)</h2><ul>" + li(["Mémoriser et restituer, grâce à des pratiques variées (épellation, copie, mise en mémoire), un corpus organisé de mots invariables : listes analogiques, listes thématiques.", "Reconnaître la partie commune de certains mots."]) + "</ul></section></div>" +
+      encadreProgramme("mots") +
       '<section><h2>La séquence sur le site</h2><table class="f-table"><tbody>' +
       [["Revoir la leçon", "Revoir les familles : repérer la partie commune (orange) et la lettre muette ou finale (jaune) d'un groupe de mots, comme sur les affiches."],
        ["1 · Je me rappelle", "Trois phrases à compléter avec les mots-outils du CP-CE1. En cas d'erreur, l'élève revoit la liste concernée."],
@@ -517,6 +516,210 @@
       carte("maths", "4 · " + t("ouvert") + " 2", t("bientot"), en ? "Half an hour of reading" : "La demi-heure de lecture", "adi", "", true);
     return barre("maths") + '<section class="entete m-maths"><img src="' + IMG(m.perso) + '" alt=""><div><h1>' + esc(tr(s.titre)) + "</h1><p>" + esc(tr(m.nom)) + " · " + (en ? "Measures" : "Grandeurs et mesures") + "</p></div></section>" +
       '<p class="objectif m-maths">' + t("objectif") + " <b>" + esc(tr(s.objectif)) + "</b></p>" + '<section class="etapes">' + cartes + "</section>";
+  }
+
+  /* ---------- encadré « Programme et repères » des fiches enseignantes (D-77) : citations mot pour mot ---------- */
+  var SOCLE = { 1: "D1 Les langages pour penser et communiquer", 2: "D2 Les méthodes et outils pour apprendre", 3: "D3 La formation de la personne et du citoyen", 4: "D4 Les systèmes naturels et les systèmes techniques", 5: "D5 Les représentations du monde et l’activité humaine" };
+  var COMP_M = { chercher: ["Chercher", [2, 4]], modeliser: ["Modéliser", [1, 2, 4]], representer: ["Représenter", [1, 5]], raisonner: ["Raisonner", [2, 3, 4]], calculer: ["Calculer", [4]], communiquer: ["Communiquer", [1, 3]] };
+  var ATT_GM = ["Comparer, estimer, mesurer des longueurs, des masses, des contenances, des durées.", "Utiliser le lexique, les unités, les instruments de mesures spécifiques de ces grandeurs.", "Résoudre des problèmes impliquant des longueurs, des masses, des contenances, des durées, des prix."];
+  var ATT_NC = ["Résoudre des problèmes en utilisant des nombres entiers et le calcul.", "Calculer avec des nombres entiers."];
+  var PROG = {
+    heure: { ref: "Mathématiques · Grandeurs et mesures (durées)", att: ATT_GM.slice(0, 2), comp: ["representer", "modeliser", "calculer"], rp: "mathématiques p. 10, 16 et 17",
+      reperes: ["Il indique l’heure sur un affichage à aiguilles (heure entière, demi-heure, « et quart », « moins le quart », multiples de 5 jusqu’à « vingt-cinq » et de « moins vingt-cinq » à « moins cinq »).", "Il connaît et utilise la relation : 1h=60min pour comparer des durées.", "Il connaît et utilise des rapports simples de durée : double, moitié, quart : exemple 1 demi-heure=30min ; 1 quart d’heure=15min ; multiples de 5 : pour utiliser les minutes.", "Il mémorise les multiples de 15 (en lien avec les durées) : 15 ; 30 ; 45 ; 60."] },
+    mots: { ref: "Français · Étude de la langue (orthographe lexicale)", att: ["Orthographier les mots les plus fréquents (notamment en situation scolaire) et les mots invariables mémorisés."], socle: [1, 2], comp: "Comprendre le fonctionnement de la langue : s’initier à l’orthographe lexicale.", rp: "français p. 31",
+      reperes: ["Il mémorise et restitue (grâce à des pratiques variées : épellation, copie, mise en mémoire…) un corpus organisé de mots invariables (listes analogiques : tôt, aussitôt, plutôt… ; listes thématiques, vocabulaire spatial : ici, là-bas, loin, près…).", "Il reconnaît la partie commune de certains mots."] },
+    monnaie: { ref: "Mathématiques · Grandeurs et mesures (prix)", att: [ATT_GM[2]], comp: ["chercher", "modeliser", "calculer", "communiquer"], rp: "mathématiques p. 12 et 17",
+      reperes: ["L’élève connaît et utilise la monnaie du pays (pièces de 1F, 2F, 5F, 10F, 20F, 50F, 100F, billets de 500F, 1000F) pour exprimer un prix, en lien avec les décompositions additives ou multiplicatives des nombres abordés.", "Il effectue des échanges en utilisant la monnaie, en lien avec les nombres abordés."],
+      ex: "Exemple de situation donné par les repères (p. 12) : « Calculer mentalement sur les nombres 1, 2, 5, 10, 20, 50, 100 en lien avec la monnaie. »",
+      note: "Les pièces de 1 F et de 2 F ne circulent plus en Nouvelle-Calédonie : le site utilise les pièces de 5 F à 100 F (choix de l’enseignante, D\u201177)." },
+    division: { ref: "Mathématiques · Nombres et calculs", att: ATT_NC, comp: ["chercher", "modeliser", "raisonner", "calculer", "communiquer"], rp: "mathématiques p. 7 et 11",
+      reperes: ["Il consolide l’étude du sens de la division euclidienne par la résolution de problèmes de partage et de groupements dont l’énoncé implique la recherche du quotient et/ou du reste et/ou du quotient + 1.", "Il calcule le quotient et le reste d’une division euclidienne en utilisant les tables de multiplications, c’est-à-dire en posant l’égalité caractéristique suite à un partage ou une distribution et quand le quotient est compris dans la table du diviseur."] },
+    diagrammes: { ref: "Mathématiques · Nombres et calculs (résolution de problèmes)", att: [ATT_NC[0]], comp: ["representer", "modeliser", "calculer"], rp: "mathématiques p. 7 et 8",
+      reperes: ["L’élève résout des problèmes nécessitant : plusieurs étapes ; la gestion de données numériques variées (utiles ou non à la résolution du problème) ; plusieurs opérations nécessitant par exemple l’exploration d’un tableau ou d’un graphique.", "L’élève lit des données numériques organisées sous forme de diagrammes en barres. Il exploite ces données pour répondre à des questions ou résoudre des problèmes."] }
+  };
+  PROG.digitale = { ref: PROG.heure.ref, att: PROG.heure.att, comp: PROG.heure.comp, rp: "mathématiques p. 16 et 17",
+    reperes: ["Il lit l’heure sur un affichage digital.", "Il repère des évènements de la journée en utilisant les heures, et les minutes.", "Il connaît et utilise la relation : 1h=60min pour comparer des durées."] };
+  function encadreProgramme(cle) {
+    var P = PROG[cle], li = function (a) { return a.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join(""); };
+    var socle = P.socle || [], comp = "";
+    if (Array.isArray(P.comp)) { comp = P.comp.map(function (c) { var x = COMP_M[c]; x[1].forEach(function (d) { if (socle.indexOf(d) < 0) socle.push(d); }); return x[0] + " (D" + x[1].join(", D") + ")"; }).join(" · "); }
+    else comp = P.comp;
+    socle.sort();
+    return '<section class="f-prog"><h2>Programme et repères</h2><p class="f-prog-ref">' + esc(P.ref) + " · Cycle 2, CE2 · niveau de maîtrise 3</p>" +
+      '<div class="f-deux"><div><h3>Attendus de fin de cycle 2</h3><ul>' + li(P.att) + "</ul></div><div><h3>Repères de progressivité (niveau 3)</h3><ul>" + P.reperes.map(function (r) { return "<li>« " + esc(r) + " »</li>"; }).join("") + "</ul></div></div>" +
+      "<p><b>Compétences travaillées :</b> " + esc(comp) + "</p><p><b>Domaines du socle :</b> " + esc(socle.map(function (d) { return SOCLE[d]; }).join(" ; ")) + "</p>" + (P.ex ? "<p>" + esc(P.ex) + "</p>" : "") + (P.note ? '<p class="f-prog-note">' + esc(P.note) + "</p>" : "") +
+      '<p class="f-source">Sources : délibération n° 127 du 13 janvier 2021, annexe 2 (programme du cycle 2, attendus p. 83 à 86) ; repères de progressivité du cycle 2, ' + esc(P.rp) + ".</p></section>";
+  }
+
+  /* ---------- Maths : lire et construire des diagrammes en barres (D-77) ---------- */
+  var DG = window.COCO_DONNEES;
+  var JEUX_DIAG = {
+    rappel: { perso: "vaka", etape: 1, n: 4, fr: "Je me rappelle", en: "I remember", dfr: "Je compare des nombres, je compte de 2 en 2 et de 5 en 5, je calcule un écart.", den: "I compare numbers, count in twos and fives, and find a difference." },
+    lire: { perso: "nina", etape: 1, n: 6, fr: "Lis le diagramme", en: "Read the bar chart", dfr: "Je lis une barre, je trouve la plus haute et la plus basse. Graduations de 1 en 1.", den: "I read a bar and find the tallest and the shortest one. The scale goes up in ones." },
+    lire2: { perso: "leo", etape: 2, n: 6, fr: "Lis les graduations", en: "Read the scale", dfr: "Je lis des diagrammes gradués de 2 en 2, de 5 en 5 et de 10 en 10.", den: "I read bar charts with scales in twos, fives and tens." },
+    construire: { perso: "tao", etape: 2, n: 3, fr: "Je construis le diagramme", en: "I build the bar chart", dfr: "Je monte chaque barre à la bonne hauteur, d’après le tableau.", den: "I make each bar the right height, using the table." },
+    prob: { perso: "waeko", etape: 3, n: 5, fr: "Problèmes avec un diagramme", en: "Bar chart problems", dfr: "Je prends les nombres dans le diagramme pour résoudre un problème.", den: "I take the numbers from the bar chart to solve a problem." }
+  };
+  var ETAPES_DIAG = { 1: "decouvre", 2: "entraine", 3: "reinvestis" };
+  var GD = null;
+  function dgDemarrer(jeu) {
+    GD = { jeu: jeu, i: 0, score: 0, rep: false, choix: -1, msg: "", essais: 0, fin: false, saisie: "" };
+    if (jeu === "rappel") GD.qs = DG.RAPPEL;
+    else if (jeu === "lire") GD.qs = DG.questionsLire(1, 6);
+    else if (jeu === "lire2") GD.qs = DG.questionsLire(2, 6);
+    else if (jeu === "construire") { GD.qs = DG.questionsConstruire(3); GD.v = GD.qs[0].vals.map(function () { return 0; }); }
+    else if (jeu === "prob") GD.qs = DG.problemes(5);
+  }
+  function dgNom(d, k) { return langue === "en" ? d.ctx.cats[k].en : d.ctx.cats[k].fr; }
+  function dgTitre(d) { return '<h3 class="dg-titre">' + esc(tr(d.ctx.titre)) + "</h3>"; }
+  function dgFigure(d, o) { o = o || {}; o.en = langue === "en"; return '<figure class="dg-fig">' + dgTitre(d) + '<p class="dg-legende">↑ ' + (langue === "en" ? "Number of " : "Nombre ") + esc(langue === "en" ? d.ctx.axe.en : d.ctx.axe.de) + "</p>" + DG.diagramme(d, o) + "</figure>"; }
+  function dgSuite(dernier) { return '<button class="coco-btn coco-btn--grand" type="button" data-action="g-suite">' + (dernier ? (langue === "en" ? "See my score" : "Voir mon score") : t("suivant")) + "</button>"; }
+  function dgChoix(opts, juste, lib) {
+    return '<div class="coco-row">' + opts.map(function (o, k) {
+      var cls = "coco-etiquette hr-choix" + (GD.rep && k === juste ? " est-juste" : GD.rep && k === GD.choix ? " est-revoir" : "");
+      return '<button class="' + cls + '" type="button" data-action="g-choix" data-v="' + k + '"' + (GD.rep ? " disabled" : "") + ">" + esc(typo(String(lib(o)))) + "</button>";
+    }).join("") + "</div>";
+  }
+  function dgFinir(ok, txt) {
+    var dernier = GD.i === JEUX_DIAG[GD.jeu].n - 1;
+    GD.rep = true; if (ok && GD.essais === 0) GD.score++;
+    GD.msg = retour(ok ? "bravo" : "revoir", ok ? t("bravo") : t("pasEncore"), txt, dgSuite(dernier));
+  }
+  function pageSequenceDiagrammes() {
+    var s = C.diagrammes, m = MATIERE.maths, en = langue === "en";
+    var cartes = Object.keys(JEUX_DIAG).map(function (id) { var J = JEUX_DIAG[id]; return carte("maths", J.etape + " · " + t(ETAPES_DIAG[J.etape]), en ? J.en : J.fr, en ? J.den : J.dfr, J.perso, "diag-" + id); }).join("");
+    return barre("maths") + '<section class="entete m-maths"><img src="' + IMG(m.perso) + '" alt=""><div><h1>' + esc(tr(s.titre)) + "</h1><p>" + esc(tr(m.nom)) + " · " + (en ? "Problem solving" : "Résolution de problèmes") + "</p></div></section>" +
+      '<p class="objectif m-maths">' + t("objectif") + " <b>" + esc(tr(s.objectif)) + "</b></p>" +
+      '<a class="coco-btn coco-btn--secondaire" href="#lecon-diagrammes" style="justify-self:start"><img src="' + PICTO("ampoule") + '" alt="">' + t("lecon") + "</a>" +
+      '<section class="etapes">' + cartes + "</section>";
+  }
+  function pageLeconDiagrammes() {
+    var m = MATIERE.maths, en = langue === "en";
+    var d = { ctx: DG.CONTEXTES[0], pas: 2, max: 20, vals: [14, 8, 11, 5, 16] };
+    var parties = en ? [["1 · The title", "It tells you what the chart is about."], ["2 · The scale", "The numbers go up in steps: here, in twos. Look carefully at the step!"], ["3 · The bars", "One bar for each thing we count. The taller the bar, the bigger the number."], ["4 · The labels", "Under each bar: what we are counting."]]
+      : [["1 · Le titre", "Il dit de quoi parle le diagramme."], ["2 · Les graduations", "Les nombres montent avec un pas : ici, de 2 en 2. Regarde bien le pas !"], ["3 · Les barres", "Une barre pour chaque chose qu’on compte. Plus la barre est haute, plus le nombre est grand."], ["4 · Les noms sous les barres", "Ils disent ce qu’on compte."]];
+    var retiens = en ? ["A bar chart shows numbers with bars.", "To read a bar, I start at the top of the bar and follow the line across to the scale.", "If the top of the bar is between two numbers, I find the number in the middle: between 10 and 12, it is 11."]
+      : ["Un diagramme en barres montre des nombres avec des barres.", "Pour lire une barre, je pars du haut de la barre et je suis la ligne jusqu’aux nombres.", "Si le haut de la barre est entre deux graduations, je cherche le nombre du milieu : entre 10 et 12, c’est 11."];
+    return barre("maths") + hautJeu(m, "seq-diagrammes", { sous: tr(C.diagrammes.titre), titre: t("lecon") }, "") +
+      '<section class="dg-lecon">' + dgFigure(d, { montre: 2 }) + '<ol class="dg-parties">' + parties.map(function (p) { return "<li><b>" + esc(typo(p[0])) + "</b><span>" + esc(typo(p[1])) + "</span></li>"; }).join("") +
+      '<li class="dg-exemple"><b>' + (en ? "Example" : "Exemple") + "</b><span>" + (en ? "The papayas bar stops halfway between 10 and 12: <b>11 papayas</b> were sold." : "La barre des papayes s’arrête entre 10 et 12, au milieu : on a vendu <b>11 papayes</b>.") + "</span></li></ol></section>" +
+      '<section class="retiens m-maths"><img src="' + IMG("coralie") + '" alt=""><div><h3>' + (en ? "I remember" : "Je retiens") + "</h3>" + retiens.map(function (r) { return "<p>" + esc(typo(r)) + "</p>"; }).join("") + "</div></section>";
+  }
+  function jeuDiag(jeu) {
+    var J = JEUX_DIAG[jeu], m = MATIERE.maths, en = langue === "en";
+    if (!GD || GD.jeu !== jeu) dgDemarrer(jeu);
+    var n = J.n, titre = { sous: tr(C.diagrammes.titre) + " · " + J.etape + " · " + t(ETAPES_DIAG[J.etape]), titre: en ? J.en : J.fr };
+    var haut = barre("maths") + hautJeu(m, "seq-diagrammes", titre, galets(n, GD.fin ? n : GD.i));
+    if (GD.fin) return haut + dgBilan();
+    var q = GD.qs[GD.i], consigne = "", zone = "", bas = "";
+    if (jeu === "rappel") {
+      consigne = en ? "I remember what I need to read a <b>bar chart</b>." : "Je me rappelle ce qu’il faut pour lire un <b>diagramme en barres</b>.";
+      zone = '<p class="phrase">' + esc(typo(tr(q))) + "</p>" + dgChoix(q.o, q.a, function (o) { return o; });
+    } else if (jeu === "lire" || jeu === "lire2") {
+      var d = q.d;
+      if (q.type === "valeur") {
+        consigne = en ? "What number does the <b>“" + esc(dgNom(d, q.k)) + "”</b> bar show?" : "Quel nombre la barre <b>« " + esc(dgNom(d, q.k)) + " »</b> indique-t-elle ?";
+        zone = (jeu === "lire2" ? '<p class="mi-indice">' + (en ? "The scale goes up in " + (d.pas === 2 ? "twos" : d.pas === 5 ? "fives" : "tens") + "." : "Les graduations vont de " + d.pas + " en " + d.pas + ".") + "</p>" : "") +
+          dgFigure(d, GD.rep ? { montre: q.k } : {}) + dgChoix(q.opts, q.opts.indexOf(d.vals[q.k]), function (o) { return o; });
+      } else {
+        consigne = esc(tr(d.ctx[q.type])).replace(/(plus|moins|most|least|fewest)/, "<b>$1</b>");
+        zone = dgFigure(d, GD.rep ? { montre: q.k } : {}) + dgChoix(d.ctx.cats.map(function (_, k) { return k; }), q.k, function (k) { return dgNom(d, k); });
+      }
+    } else if (jeu === "construire") {
+      var dc = q, v = GD.v;
+      consigne = en ? "Build the bar chart: tap in each column to make the bar the right height." : "Construis le diagramme : touche dans chaque colonne pour monter la barre à la bonne hauteur.";
+      zone = '<table class="dg-table"><thead><tr><th></th><th>' + (en ? "Number" : "Nombre") + "</th></tr></thead><tbody>" + dc.ctx.cats.map(function (_, k) { return "<tr><th>" + esc(dgNom(dc, k)) + "</th><td>" + dc.vals[k] + "</td></tr>"; }).join("") + "</tbody></table>" +
+        dgFigure(dc, { vals: v, construire: !GD.rep, revoir: GD.revoir }) +
+        (GD.rep ? "" : '<div class="dg-reglages">' + dc.ctx.cats.map(function (_, k) { return '<div><span>' + esc(dgNom(dc, k)) + '</span><button class="coco-btn coco-btn--secondaire coco-btn--icone" type="button" data-action="g-moins" data-c="' + k + '" aria-label="' + (en ? "Lower" : "Baisser") + " " + esc(dgNom(dc, k)) + '">−</button><b>' + v[k] + '</b><button class="coco-btn coco-btn--secondaire coco-btn--icone" type="button" data-action="g-plus" data-c="' + k + '" aria-label="' + (en ? "Raise" : "Monter") + " " + esc(dgNom(dc, k)) + '">+</button></div>'; }).join("") + "</div>");
+      bas = GD.rep ? "" : '<button class="coco-btn coco-btn--grand" type="button" data-action="g-ok">' + t("valider") + "</button>";
+    } else if (jeu === "prob") {
+      consigne = en ? "Read the problem, find the numbers in the bar chart, then write your answer." : "Lis le problème, cherche les nombres dans le diagramme, puis écris ta réponse.";
+      zone = '<p class="phrase">' + esc(typo(tr(q))) + "</p>" + dgFigure(q.d) +
+        '<p class="dg-saisie"><label for="dg-rep">' + (en ? "My answer:" : "Ma réponse :") + '</label><input id="dg-rep" type="text" inputmode="numeric" maxlength="5" autocomplete="off" data-g-champ value="' + esc(GD.saisie) + '"' + (GD.rep ? " disabled" : "") + ">" + (q.unite ? "<b>" + q.unite + "</b>" : "") + "</p>";
+      bas = GD.rep ? "" : '<button class="coco-btn coco-btn--grand" type="button" data-action="g-rep">' + t("valider") + "</button>";
+    }
+    return haut + bulle(J.perso, consigne) + '<section class="zone m-maths dg-zone">' + zone + "</section>" + '<div class="retour-zone">' + GD.msg + "</div>" +
+      (bas ? '<footer class="jeu-bas"><span></span>' + bas + "</footer>" : "");
+  }
+  function dgBilan() {
+    var en = langue === "en", n = JEUX_DIAG[GD.jeu].n, sc = GD.score;
+    marquerFait("diag-" + GD.jeu);
+    var txt = GD.jeu === "rappel" ? (en ? "You remembered " + sc + " out of " + n + ". Now, let’s read a bar chart!" : "Tu t’es rappelé " + sc + " réponse" + (sc > 1 ? "s" : "") + " sur " + n + ". Maintenant, lisons un diagramme !")
+      : (en ? "You got " + sc + " out of " + n + " right first time." : "Tu as réussi " + sc + " sur " + n + " du premier coup.");
+    return '<section class="bilan"><img src="' + IMG("kakou") + '" alt=""><h2>' + t("fini") + "</h2>" + (GD.jeu === "rappel" ? "" : '<p class="mi-score">' + sc + " / " + n + "</p>") + "<p>" + esc(typo(txt)) + "</p>" +
+      '<div class="coco-row">' + (GD.jeu === "rappel" ? '<a class="coco-btn" href="#diag-lire">' + (en ? "Read the bar chart" : "Lis le diagramme") + "</a>" : '<button class="coco-btn" type="button" data-action="g-rejouer">' + t("rejouer") + "</button>") +
+      '<a class="coco-btn coco-btn--secondaire" href="#seq-diagrammes">' + t("versSequence") + "</a></div></section>";
+  }
+  function actionDiag(a, el) {
+    if (!GD) return;
+    var en = langue === "en", jeu = GD.jeu, q = GD.qs[GD.i];
+    if (a === "g-rejouer") { dgDemarrer(jeu); return; }
+    if (a === "g-suite" && GD.rep) {
+      if (GD.i >= JEUX_DIAG[jeu].n - 1) { GD.fin = true; return; }
+      GD.i++; GD.rep = false; GD.choix = -1; GD.msg = ""; GD.essais = 0; GD.saisie = ""; GD.revoir = null;
+      if (jeu === "construire") GD.v = GD.qs[GD.i].vals.map(function () { return 0; });
+      return;
+    }
+    if (GD.rep) return;
+    if (a === "g-choix") {
+      var k = +el.dataset.v; GD.choix = k;
+      if (jeu === "rappel") { dgFinir(k === q.a, esc(typo(en ? q.len : q.lfr))); return; }
+      var d = q.d;
+      if (q.type === "valeur") {
+        var bon = q.opts[k] === d.vals[q.k];
+        dgFinir(bon, (en ? "The “" + esc(dgNom(d, q.k)) + "” bar stops at <b>" : "La barre « " + esc(dgNom(d, q.k)) + " » s’arrête à <b>") + d.vals[q.k] + "</b>." + (bon ? "" : " " + (en ? "Start at the top of the bar and follow the line across to the scale." : "Pars du haut de la barre et suis la ligne jusqu’aux nombres.")));
+      } else {
+        var ok = k === q.k;
+        dgFinir(ok, (en ? "The " + (q.type === "plus" ? "tallest" : "shortest") + " bar is <b>" : "La barre la plus " + (q.type === "plus" ? "haute" : "basse") + " est celle de <b>") + esc(dgNom(d, q.k)) + "</b> : " + d.vals[q.k] + "." + (ok ? "" : " " + (en ? "Compare the tops of the bars." : "Compare le haut des barres.")));
+      }
+      return;
+    }
+    if (a === "g-haut" || a === "g-plus" || a === "g-moins") {
+      var c = +el.dataset.c, dc = q;
+      GD.v[c] = a === "g-haut" ? +el.dataset.v : Math.max(0, Math.min(dc.max, GD.v[c] + (a === "g-plus" ? dc.pas : -dc.pas)));
+      GD.msg = ""; GD.revoir = null; return;
+    }
+    if (a === "g-ok") {
+      var faux = q.vals.map(function (x, k) { return GD.v[k] === x ? -1 : k; }).filter(function (k) { return k >= 0; });
+      if (!faux.length) { dgFinir(true, en ? "Every bar is the right height!" : "Toutes les barres sont à la bonne hauteur !"); return; }
+      if (GD.essais >= 1) { GD.v = q.vals.slice(); GD.revoir = null; dgFinir(false, en ? "Look: here is the bar chart, built from the table." : "Regarde : voici le diagramme construit d’après le tableau."); return; }
+      GD.essais++; GD.revoir = faux;
+      GD.msg = retour("revoir", t("pasEncore"), (en ? "Look again at the bar" + (faux.length > 1 ? "s" : "") + " for " : "Regarde encore " + (faux.length > 1 ? "les barres" : "la barre") + " : ") + "<b>" + faux.map(function (k) { return esc(dgNom(q, k)); }).join(", ") + "</b>. " + (en ? "Check the number in the table, then count the steps on the scale." : "Vérifie le nombre dans le tableau, puis compte les graduations."));
+      return;
+    }
+    if (a === "g-rep") {
+      var val = GD.saisie === "" ? NaN : +GD.saisie;
+      if (isNaN(val)) { GD.msg = retour("astuce", t("indice"), en ? "Write a number first." : "Écris d’abord un nombre."); return; }
+      if (val === q.rep) { dgFinir(true, (en ? "The answer is <b>" : "La réponse est <b>") + q.rep + (q.unite ? " " + q.unite : "") + "</b>."); return; }
+      if (GD.essais >= 1) { dgFinir(false, (en ? "The answer is <b>" : "La réponse est <b>") + q.rep + (q.unite ? " " + q.unite : "") + "</b>. " + esc(en ? q.aideEn : q.aideFr)); return; }
+      GD.essais++; GD.msg = retour("revoir", t("pasEncore"), esc(en ? q.aideEn : q.aideFr));
+    }
+  }
+  document.addEventListener("input", function (e) { var el = e.target; if (!el.dataset || el.dataset.gChamp === undefined || !GD) return; var v = el.value.replace(/\D/g, "").slice(0, 5); if (v !== el.value) el.value = v; GD.saisie = v; });
+  document.addEventListener("keydown", function (e) { if (e.key === "Enter" && e.target.dataset && e.target.dataset.gChamp !== undefined) { var b = document.querySelector('[data-action="g-rep"]'); if (b) b.click(); } });
+  function ficheDiagrammes() {
+    var li = function (a) { return a.map(function (x) { return "<li>" + x + "</li>"; }).join(""); };
+    return '<div class="no-print coco-row"><a class="coco-btn coco-btn--secondaire" href="#enseignante">← Espace enseignante</a><a class="coco-btn coco-btn--secondaire" href="#seq-diagrammes">Voir la séquence</a><button class="coco-btn coco-btn--secondaire" type="button" data-action="imprimer">Imprimer la fiche</button></div>' +
+      '<article class="fiche m-maths"><small>Maths · Résolution de problèmes · Organisation et gestion de données · CE2</small><h1>Lire un diagramme en barres</h1>' +
+      '<p class="f-source">Séquence créée le 07/11/2026 à la demande de l’enseignante, pour couvrir le repère « diagrammes en barres » (D-77). Leçon de classe non transmise : la leçon et « Je retiens » du site sont une proposition, à valider.</p>' +
+      encadreProgramme("diagrammes") +
+      '<section><h2>Les activités du site</h2><table class="f-table"><tbody>' + [
+        ["Revoir la leçon", "Les 4 éléments d’un diagramme (titre, graduations, barres, noms) ; lire une barre en suivant la ligne jusqu’aux nombres ; une valeur entre deux graduations."],
+        ["1 · Je me rappelle", "Comparer des nombres, compter de 2 en 2 et de 5 en 5, calculer un écart."],
+        ["1 · Lis le diagramme", "Graduations de 1 en 1 : lire la valeur d’une barre, trouver la plus haute et la plus basse."],
+        ["2 · Lis les graduations", "Graduations de 2 en 2, de 5 en 5 et de 10 en 10, valeurs parfois entre deux graduations."],
+        ["2 · Je construis le diagramme", "Monter les barres d’après un tableau (graduations de 1 en 1, puis de 2 en 2)."],
+        ["3 · Problèmes avec un diagramme", "Total, écart, problème en deux étapes, prix (× 100 F), information inutile."]
+      ].map(function (r) { return "<tr><th>" + r[0] + "</th><td>" + r[1] + "</td></tr>"; }).join("") + "</tbody></table></section>" +
+      '<div class="f-deux"><section><h2>Les erreurs à guetter</h2><ul>' + li(["Lire le nombre de graduations au lieu de la valeur (graduations de 2, 5 ou 10).", "Lire la barre voisine : suivre la ligne avec la règle ou le doigt.", "Une valeur entre deux graduations : chercher le nombre du milieu.", "Prendre toutes les données d’un problème, même celle qui ne sert pas."]) + "</ul></section>" +
+      "<section><h2>Pour prolonger en classe</h2><ul>" + li(["Construire un diagramme avec les données de la classe (sport préféré, transport, anniversaires par mois), en lien avec «\u00a0Questionner le monde\u00a0».", "Comparer un tableau et un diagramme : lequel permet de voir plus vite le plus grand ?"]) + "</ul></section></div></article>";
+  }
+
+  function ficheDigitale() {
+    return '<div class="no-print coco-row"><a class="coco-btn coco-btn--secondaire" href="#enseignante">← Espace enseignante</a><a class="coco-btn" href="' + JEU_DIGITAL + '">Au TBI</a><a class="coco-btn coco-btn--secondaire" href="#seq-digitale">Voir la séquence</a><button class="coco-btn coco-btn--secondaire" type="button" data-action="imprimer">Imprimer la fiche</button></div>' +
+      '<article class="fiche m-maths"><small>Maths · Grandeurs et mesures (durées) · CE2 · période 5, séquence 1</small><h1>Lire l’heure digitale</h1>' +
+      '<p class="f-source">Pour l’instant : les jeux collectifs « L’heure à l’ardoise » (séances 1 à 3), création de la collègue Teacher Nadège, adaptés pour la classe avec son accord (D-73). Leçon de classe : GM5 « Lire l’heure digitale ». Les autres étapes de la séquence sont à construire.</p>' +
+      encadreProgramme("digitale") + "</article>";
   }
 
   /* ---------- Maths : lire l'heure à aiguilles (module du v0 repris et rendu bilingue : D-64 à D-67) ---------- */
@@ -825,8 +1028,7 @@
     return '<div class="no-print coco-row"><a class="coco-btn coco-btn--secondaire" href="#enseignante">← Espace enseignante</a><a class="coco-btn" href="#tbi-heure">Au TBI</a><a class="coco-btn coco-btn--secondaire" href="#seq-heure">Voir la séquence</a><button class="coco-btn coco-btn--secondaire" type="button" data-action="imprimer">Imprimer la fiche</button></div>' +
       '<article class="fiche m-maths"><small>Maths · Grandeurs et mesures (durées) · Cycle 2, CE2, niveau de maîtrise 3</small><h1>Lire l’heure à aiguilles</h1>' +
       '<p class="f-source">Module du premier site de la classe, repris et rendu bilingue. Programmation : période 5, semaine 2 (du 2 au 6 novembre), séquence 2. Leçons : GM5 « Lire l’heure digitale » et GM5 « Lire l’heure avec aiguilles » (reçues le 06/11/2026) ; leçon anglaise (Read the time) non reçue.</p>' +
-      '<div class="f-deux"><section><h2>Attendus de fin de cycle</h2><ul>' + li(["Comparer, estimer, mesurer des longueurs, des masses, des contenances, des durées.", "Utiliser le lexique, les unités, les instruments de mesures spécifiques de ces grandeurs.", "Résoudre des problèmes impliquant des longueurs, des masses, des contenances, des durées, des prix."]) + "</ul><p><b>Compétences travaillées :</b> chercher, modéliser, représenter, raisonner, calculer, communiquer.</p></section>" +
-      "<section><h2>Repères de progressivité (niveau 3)</h2><ul>" + li(["Indiquer l’heure sur un affichage à aiguilles (heure entière, demi-heure, « et quart », « moins le quart », multiples de 5 jusqu’à « vingt-cinq » et de « moins vingt-cinq » à « moins cinq »).", "Connaître et utiliser la relation 1 h = 60 min pour comparer des durées.", "Connaître et utiliser des rapports simples de durée : 1 demi-heure = 30 min ; 1 quart d’heure = 15 min.", "Résoudre des problèmes de mesurage et de comparaison avec les unités usuelles de durée."]) + "</ul></section></div>" +
+      encadreProgramme("heure") +
       '<section><h2>Les séances et les activités du site</h2><table class="f-table"><tbody>' + [
         ["Séance 1", "Reconnaître les différentes aiguilles d’une horloge ; lire les heures piles sur le cadran.", "Je me rappelle · Quelle aiguille ? · Lis l’horloge (niveau 1)"],
         ["Séance 2", "Lire les demi-heures ; lire les quarts d’heure (et quart, moins le quart) sur le cadran.", "Lis l’horloge (niveaux 2 et 3) · Règle l’horloge · Quelle heure est-il ? · Memory des heures"],
@@ -1028,7 +1230,7 @@
       var rangees = K.tableau.filter(function (c) { return p.verifier(c.sol).ok; }).map(function (c) { return c.sol; });
       var vus = {}; rangees = rangees.filter(function (s) { var k = p.cle(s); if (vus[k]) return false; vus[k] = 1; return true; }).sort(p.ranger);
       var toutes = p.vueToutes ? p.vueToutes(vus, langue) : p.toutes ? '<h3>' + (en ? "All the answers" : "Toutes les réponses") + "</h3><ol>" + p.toutes.slice().sort(p.ranger).map(function (s) { var trouve = vus[p.cle(s)]; return '<li class="' + (trouve ? "trouve" : "") + '">' + esc(p.ecrire(s, langue)) + (trouve ? " <b>✓</b>" : "") + "</li>"; }).join("") + "</ol>"
-        : "<p>" + (en ? "There are " + p.nbToutes.toLocaleString("en-GB") + " ways in all: nobody can find them all, so we get organised!" : "Il y a " + p.nbToutes.toLocaleString("fr-FR") + " façons en tout : personne ne peut toutes les trouver, alors on s'organise !") + "</p>";
+        : "<p>" + (en ? "There are " + p.nbToutes.toLocaleString("en-GB") + " ways in all: to find lots of them, we get organised!" : "Il y a " + p.nbToutes.toLocaleString("fr-FR") + " façons en tout : pour en trouver beaucoup, on s'organise !") + "</p>";
       corps = '<div class="k-retient"><div class="retiens"><img src="' + IMG("coralie") + '" alt=""><div><h3>' + (en ? "We remember" : "On retient") + "</h3><p>" + esc(tr(p.retenir)) + '</p><p class="lecon-ex">' + esc(tr(p.exemple)) + "</p></div></div>" +
         '<section class="po-sol"><h3>' + (en ? "The class's ways, sorted" : "Les solutions de la classe, rangées") + "</h3>" + (rangees.length ? "<ol>" + rangees.map(function (s) { return "<li>" + esc(p.ecrire(s, langue)) + "</li>"; }).join("") + "</ol>" : '<p class="po-note">—</p>') + toutes + "</section></div>";
     }
@@ -1059,7 +1261,7 @@
   function poFeuille(id) {
     var p = po(id), s = C[p.sequence];
     var cases = ""; for (var i = 0; i < 8; i++) cases += '<div class="f-case"></div>';
-    var rappel = p.type === "pieces" ? "<p><b>Les pièces :</b> 1 F · 2 F · 5 F · 10 F · 20 F · 50 F · 100 F</p>"
+    var rappel = p.type === "pieces" ? "<p><b>Les pièces :</b> " + PO.PIECES.map(function (v) { return v + " F"; }).join(" · ") + "</p>"
       : p.type === "marche" ? "<p><b>Les prix :</b> " + PO.FRUITS.map(function (f) { return esc(f.fr) + " " + f.prix + " F"; }).join(" · ") + "</p>" : "";
     var zone = '<div class="f-cases">' + cases + "</div>";
     if (p.feuille) {
@@ -1081,7 +1283,7 @@
   function poFiche(id) {
     var p = po(id), f = p.fiche, s = C[p.sequence], li = function (a) { return a.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join(""); };
     return '<div class="no-print coco-row"><a class="coco-btn coco-btn--secondaire" href="#enseignante">← Espace enseignante</a><a class="coco-btn" href="#classe-' + id + '">Projeter en classe</a><a class="coco-btn coco-btn--secondaire" href="#feuille-' + id + '">Feuille de recherche</a><button class="coco-btn coco-btn--secondaire" type="button" data-action="imprimer">Imprimer la fiche</button></div>' +
-      '<article class="fiche m-maths"><small>Maths · ' + esc(s.titre.fr) + " · Problème ouvert · CE2 · 45 min environ · par 2 ou 3" + (f.moment ? " · " + esc(f.moment) : "") + "</small><h1>" + esc(p.titre.fr) + '</h1><p class="f-q">« ' + esc(p.question.fr) + " »</p><p>" + p.enonce.fr + '</p><p class="f-source">' + esc(f.source) + "</p>" +
+      '<article class="fiche m-maths"><small>Maths · ' + esc(s.titre.fr) + " · Problème ouvert · CE2 · 45 min environ · par 2 ou 3" + (f.moment ? " · " + esc(f.moment) : "") + "</small><h1>" + esc(p.titre.fr) + '</h1><p class="f-q">« ' + esc(p.question.fr) + " »</p><p>" + p.enonce.fr + '</p><p class="f-source">' + esc(f.source) + "</p>" + encadreProgramme(p.sequence) +
       '<div class="f-deux"><section><h2>Ce que les élèves apprennent</h2><ul>' + li(f.apprend) + "</ul></section><section><h2>Pourquoi c'est une bonne question</h2><ul>" + li(f.pourquoi) + "</ul></section></div>" +
       "<section><h2>Matériel</h2><ul>" + li(f.materiel) + "</ul></section>" +
       '<section><h2>Le déroulé en 4 temps</h2><ol class="f-temps">' + f.temps.map(function (x) { return "<li><b>" + esc(x[0]) + "</b> <i>" + esc(x[1]) + "</i><p>" + esc(x[2]) + "</p>" + (x[3] ? '<p class="f-dire">' + esc(x[3]) + "</p>" : "") + "</li>"; }).join("") + "</ol></section>" +
@@ -1101,7 +1303,8 @@
         return '<div class="ens-pb"><img src="' + IMG(p.perso) + '" alt=""><div><b>' + esc(p.titre.fr) + "</b><small>« " + esc(p.question.fr) + ' »</small></div><div class="coco-row"><a class="coco-btn" href="#classe-' + id + '">Projeter en classe</a><a class="coco-btn coco-btn--secondaire" href="#fiche-' + id + '">La fiche</a><a class="coco-btn coco-btn--secondaire" href="#feuille-' + id + '">Feuille de recherche</a></div></div>';
       }).join("") + "</div></section>";
     }).join("");
-    seqs = '<section class="domaine"><h2>Maths · Lire l’heure digitale</h2><div class="ens-liste"><div class="ens-pb"><img src="' + IMG("tehani") + '" alt=""><div><b>L’heure à l’ardoise</b><small>10 jeux collectifs au TBI pour les séances 1 à 3 (outil de la collègue, adapté)</small></div><div class="coco-row"><a class="coco-btn" href="' + JEU_DIGITAL + '">Au TBI</a><a class="coco-btn coco-btn--secondaire" href="#seq-digitale">Voir la séquence</a></div></div></div></section>' + seqs;
+    seqs = '<section class="domaine"><h2>Maths · Lire un diagramme en barres</h2><div class="ens-liste"><div class="ens-pb"><img src="' + IMG("waeko") + '" alt=""><div><b>Les diagrammes en barres</b><small>Leçon, 4 jeux et problèmes, fiche avec « Programme et repères »</small></div><div class="coco-row"><a class="coco-btn" href="#fiche-diagrammes">Fiche</a><a class="coco-btn coco-btn--secondaire" href="#seq-diagrammes">Voir la séquence</a></div></div></div></section>' + seqs;
+    seqs = '<section class="domaine"><h2>Maths · Lire l’heure digitale</h2><div class="ens-liste"><div class="ens-pb"><img src="' + IMG("tehani") + '" alt=""><div><b>L’heure à l’ardoise</b><small>10 jeux collectifs au TBI pour les séances 1 à 3 (outil de la collègue, adapté)</small></div><div class="coco-row"><a class="coco-btn" href="' + JEU_DIGITAL + '">Au TBI</a><a class="coco-btn coco-btn--secondaire" href="#fiche-digitale">Fiche</a><a class="coco-btn coco-btn--secondaire" href="#seq-digitale">Voir la séquence</a></div></div></div></section>' + seqs;
     seqs = '<section class="domaine"><h2>Maths · Lire l’heure à aiguilles</h2><div class="ens-liste"><div class="ens-pb"><img src="' + IMG("coralie") + '" alt=""><div><b>Lire l’heure à aiguilles</b><small>Découverte guidée et jeu des ardoises au TBI ; leçon, 8 activités</small></div><div class="coco-row"><a class="coco-btn" href="#tbi-heure">Au TBI</a><a class="coco-btn coco-btn--secondaire" href="#fiche-heure">La fiche</a><a class="coco-btn coco-btn--secondaire" href="#seq-heure">Voir la séquence</a></div></div></div></section>' + seqs;
     seqs = '<section class="domaine"><h2>Français · Les mots invariables</h2><div class="ens-liste"><div class="ens-pb ens-pb--francais"><img src="' + IMG("coralie") + '" alt=""><div><b>Les mots invariables</b><small>7 activités, de « Je me rappelle » à la dictée sans erreur</small></div><div class="coco-row"><a class="coco-btn" href="#fiche-mots">La fiche</a><a class="coco-btn coco-btn--secondaire" href="#seq-mots">Voir la séquence</a></div></div></div></section>' + seqs;
     return barre("") + '<section class="entete m-maths"><img src="' + IMG("coralie") + '" alt=""><div><h1>Espace enseignante</h1><p>Les problèmes ouverts : fiche, feuille de recherche et projection en classe.</p></div></section>' +
@@ -1241,12 +1444,13 @@
   /* ---------- routeur ---------- */
   var ROUTES = {
     accueil: pageAccueil, "seq-verbe": function () { return pageSequence("verbe"); }, "seq-mots": pageSequenceMots, "lecon-mots": pageLeconMots, "fiche-mots": ficheMots,
-    "seq-heure": pageSequenceHeure, "seq-digitale": pageSequenceDigitale, "lecon-heure": pageLeconHeure, "fiche-heure": ficheHeure, "tbi-heure": pageTbiHeure,
+    "seq-heure": pageSequenceHeure, "seq-digitale": pageSequenceDigitale, "fiche-digitale": ficheDigitale, "seq-diagrammes": pageSequenceDiagrammes, "lecon-diagrammes": pageLeconDiagrammes, "fiche-diagrammes": ficheDiagrammes, "lecon-heure": pageLeconHeure, "fiche-heure": ficheHeure, "tbi-heure": pageTbiHeure,
     "lecon-verbe": pageLecon, "jeu-verbe-decouvre": jeuDecouvre, "jeu-verbe-chasse": jeuChasse, enseignante: pageEnseignante, banque: pageBanque
   };
   C.matieres.forEach(function (m) { ROUTES[m.id] = function () { return pageMatiere(m.id); }; });
   Object.keys(JEUX_MOTS).forEach(function (j) { ROUTES["mots-" + j] = function () { return jeuMots(j); }; });
   Object.keys(JEUX_HEURE).forEach(function (j) { ROUTES["heure-" + j] = function () { return jeuHeure(j); }; });
+  Object.keys(JEUX_DIAG).forEach(function (j) { ROUTES["diag-" + j] = function () { return jeuDiag(j); }; });
   Object.keys(PO.sequences).forEach(function (sid) { ROUTES["seq-" + sid] = function () { return pageSequence(sid); }; });
   Object.keys(PO.problemes).forEach(function (id) {
     ROUTES["po-" + id] = function () { return poAutonome(id); };
@@ -1258,7 +1462,7 @@
   var derniere = "";
   function rendre() {
     var r = route();
-    if (r !== derniere) { if (r === "jeu-verbe-decouvre") D = null; if (r === "jeu-verbe-chasse") H = null; if (/^po-/.test(r)) A = null; if (/^mots-/.test(r)) G = null; if (/^heure-/.test(r)) HG = null; if (r === "tbi-heure") { clearInterval(TB.tid); TB.part = "menu"; } try { if (MO.peutParler) speechSynthesis.cancel(); } catch (x) {} if (/^classe-/.test(r)) { K = null; clearInterval(minuteur); } if (r === "lecon-verbe") L = { carte: {}, moment: "present", machine: 0, phrase: 0 }; window.scrollTo(0, 0); derniere = r; }
+    if (r !== derniere) { if (r === "jeu-verbe-decouvre") D = null; if (r === "jeu-verbe-chasse") H = null; if (/^po-/.test(r)) A = null; if (/^mots-/.test(r)) G = null; if (/^heure-/.test(r)) HG = null; if (/^diag-/.test(r)) GD = null; if (r === "tbi-heure") { clearInterval(TB.tid); TB.part = "menu"; } try { if (MO.peutParler) speechSynthesis.cancel(); } catch (x) {} if (/^classe-/.test(r)) { K = null; clearInterval(minuteur); } if (r === "lecon-verbe") L = { carte: {}, moment: "present", machine: 0, phrase: 0 }; window.scrollTo(0, 0); derniere = r; }
     document.documentElement.lang = langue;
     document.body.classList.toggle("mode-classe", /^classe-|^tbi-/.test(r));
     document.body.classList.toggle("mode-papier", /^(fiche|feuille)-/.test(r));
@@ -1278,6 +1482,7 @@
     else if (/^m-/.test(a)) actionMots(a, el);
     else if (/^h-/.test(a)) actionHeure(a, el);
     else if (/^t-/.test(a)) actionTbi(a, el);
+    else if (/^g-/.test(a)) actionDiag(a, el);
     else if (/^bq-/.test(a)) { if (a === "bq-reglages") e.preventDefault(); actionBanque(a, el); }
     else if (a === "imprimer") { try { window.print(); } catch (x) {} return; }
     else if (/^l-/.test(a)) actionLecon(a, el);
