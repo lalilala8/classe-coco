@@ -1321,3 +1321,61 @@ a.fo-carte:hover { background: var(--lagon-clair); }
 @media (max-width: 860px) { .ens-po-tiroir { margin-left: 20px; } }
 @media (max-width: 600px) { .ens-po-tiroir { margin-left: 12px; } .ens-po-tiroir > summary { font-size: 15px; } }
 @media print { .ens-po-tiroir > summary { border: 0; } }
+
+/* ---------- Suivi des élèves plus compact, avec les personnages ; étoiles de grammaire (D-123) ---------- */
+.et-classe { margin: 0; font-size: 17px; color: var(--encre-douce); }
+.et-familles { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(380px, 100%), 1fr)); gap: var(--espace-5, 16px); }
+.et-famille { --c: var(--maths); --c-fonce: var(--maths-fonce); display: flex; gap: 12px; align-items: center; background: var(--carte); border: var(--bord) solid var(--c); border-radius: var(--arrondi-grand); box-shadow: 0 var(--socle) 0 var(--c-fonce); padding: 10px 18px 14px 8px; }
+.et-famille--francais { --c: var(--francais); --c-fonce: var(--francais-fonce); }
+.et-famille-perso { width: 104px; height: 124px; object-fit: contain; object-position: bottom; flex: none; }
+.et-famille-corps { min-width: 0; }
+.et-famille h2 { margin: 0; font: 400 26px/1.15 var(--font-titre); color: var(--c); }
+.et-famille-etoiles { display: flex; flex-wrap: wrap; gap: 1px; margin: 4px 0 2px; }
+.et-famille-etoiles .et-etoile { width: 26px; height: 26px; margin: 0; }
+.et-famille p { margin: 0 0 10px; font-size: 16px; line-height: 1.35; color: var(--encre-douce); }
+.et-famille .coco-row { gap: 8px; }
+.et-famille .coco-btn { min-height: 44px; font-size: 16px; padding: 0 14px; }
+@media (max-width: 520px) { .et-famille-perso { width: 76px; height: 96px; } .et-famille h2 { font-size: 22px; } }
+
+/* bascule calcul / grammaire en haut des tableaux et des corrigés */
+.et-bascule { display: inline-flex; flex-wrap: wrap; gap: 4px; background: #fff; border: 2px solid var(--trait); border-radius: 999px; padding: 4px; }
+.et-bascule a { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 14px 0 4px; border-radius: 999px; text-decoration: none; font: 600 16px/1 var(--font-texte); color: var(--encre-douce); }
+.et-bascule img { width: 34px; height: 34px; object-fit: cover; object-position: top; border-radius: 50%; background: var(--papier); }
+.et-bascule a[aria-current] { color: #fff; }
+.et-bascule a.et-bascule-maths[aria-current] { background: var(--maths); }
+.et-bascule a.et-bascule-francais[aria-current] { background: var(--francais); }
+.et-bascule a:not([aria-current]):hover { background: var(--lagon-clair); }
+.et-intro { display: flex; gap: 12px; align-items: center; margin: 0; }
+.et-intro img { width: 72px; height: 84px; object-fit: contain; object-position: bottom; flex: none; }
+.et-intro p { margin: 0; background: #fff; border: 2px solid var(--trait); border-radius: 16px; padding: 10px 14px; font-size: 17px; line-height: 1.4; position: relative; }
+.ec-tete { position: relative; }
+.ec-tete .ec-perso { margin-left: auto; width: 74px; height: 80px; object-fit: contain; object-position: bottom; flex: none; }
+.ec-tete p small { display: block; margin-top: 2px; font: 500 15px/1.35 var(--font-texte); color: var(--encre-douce); }
+.ec-tete--fr { border-color: var(--francais-surligneur); }
+@media (max-width: 520px) { .et-intro img { width: 54px; height: 64px; } .ec-tete .ec-perso { width: 54px; height: 60px; } .et-bascule a { font-size: 14px; padding-right: 10px; } }
+
+/* corrigés des étoiles de grammaire : code couleur des leçons et du fichier de la classe */
+.ec-eval--fr { border-color: var(--francais); }
+.ec-eval--fr h2 { color: var(--francais); }
+.eg-liste { margin: 0; padding-left: 20px; display: grid; gap: 10px; }
+.eg-liste li { font: 500 19px/1.45 var(--font-lecture); }
+.eg-ph { display: block; }
+.eg-d { color: var(--gram-determinant); font-weight: 700; }
+.eg-n { color: var(--gram-nom); font-weight: 700; }
+.eg-a { color: var(--gram-adjectif); font-weight: 700; }
+.eg-v { color: var(--gram-verbe); font-weight: 700; }
+.eg-u { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+.eg-ph--etq { line-height: 1.2; }
+.eg-etq { display: inline-flex; flex-direction: column; align-items: center; vertical-align: top; }
+.eg-etq small { font: 700 14px/1.1 var(--font-texte); color: var(--encre); letter-spacing: .02em; }
+.eg-nb { font: 500 14px/1 var(--font-texte); color: var(--encre-douce); }
+.eg-rep { display: block; font: 700 15px/1.4 var(--font-texte); letter-spacing: .02em; }
+.ec-eval .eg-rep b { color: inherit; white-space: normal; }
+.ec-eval .eg-rep .eg-v { color: var(--gram-verbe); }
+.eg-gr { font-weight: 500; color: var(--encre-douce); margin-left: 6px; }
+.eg-gr b { color: var(--gram-verbe) !important; font-weight: 700; }
+.eg-art { margin: 10px 0 0; padding-top: 8px; border-top: 2px dashed var(--trait); font: 500 17px/1.6 var(--font-texte); }
+.eg-art span { color: var(--encre-douce); }
+.ec-eval .eg-art b { white-space: normal; }
+.ec-eval .eg-d { color: var(--gram-determinant); }
+.eg-insec { white-space: nowrap; }

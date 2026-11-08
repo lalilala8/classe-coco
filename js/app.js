@@ -2716,7 +2716,7 @@
   }
   document.addEventListener("toggle", function (e) { var d = e.target; if (!d.classList || !(d.classList.contains("ens-tiroir") || d.classList.contains("ens-po-tiroir"))) return; ENS_TIROIRS[d.dataset.tiroir] = d.open; ensTiroirsGarder(); }, true);
   function pageEnseignante() {
-    var n = { "ens-suivi": "Bientôt", "ens-sequences": "8 séquences", "ens-formation": Object.keys(FO.fiches).filter(function (c) { return !FO.fiches[c].vide; }).length + " fiches" };
+    var n = { "ens-suivi": "Étoiles de calcul et de grammaire", "ens-sequences": "8 séquences", "ens-formation": Object.keys(FO.fiches).filter(function (c) { return !FO.fiches[c].vide; }).length + " fiches" };
     return ensEntete("") + '<section class="ens-dossiers">' + ENS_DOSSIERS.map(function (d) {
       return '<a class="ens-dossier" href="#' + d.id + '">' + DOSSIER_SVG + "<b>" + d.t + "</b><small>" + d.d + '</small><span class="ens-compte">' + n[d.id] + "</span></a>";
     }).join("") + "</section>";
@@ -2772,8 +2772,8 @@
      ========================================================================================== */
   var ETOILES = [["Blanche", "#ffffff", "Addition posée"], ["Jaune", "#f7f06a", "Addition posée"], ["Orange", "#f6a878", "Soustraction posée"], ["Rouge", "#f26565", "Soustraction posée"],
     ["Verte", "#94e8a0", "Multiplication à 1 chiffre"], ["Bleue", "#6fd6f4", "Multiplication à 1 chiffre"], ["Mauve", "#c2a6f2", "Multiplication à 2 chiffres"], ["Rose", "#f56fb6", "Multiplication à 2 chiffres"], ["Noire", "#bdbdbd", "Division"]];
-  var ET = { sel: null, liste: false, msg: "" };
-  function etDonnees() { var d = lire("etoiles", null); if (!d || !d.eleves) d = { eleves: [], val: {}, sauve: "" }; d.val = d.val || {}; return d; }
+  var ET = { sel: null, liste: false, msg: "", type: "calcul" };
+  function etDonnees() { var d = lire("etoiles", null); if (!d || !d.eleves) d = { eleves: [], val: {}, sauve: "" }; d.val = d.val || {}; d.gram = d.gram || {}; return d; }
   function etEcrire(d) { ecrire("etoiles", d); }
   function etAujourdhui() { var j = new Date(); return j.getFullYear() + "-" + HE.pad(j.getMonth() + 1) + "-" + HE.pad(j.getDate()); }
   function etCourt(iso) { var p = iso.split("-"); return p[2] + "/" + p[1]; }
@@ -2784,16 +2784,97 @@
     return '<svg class="et-etoile' + (vide ? " et-vide" : "") + (grande ? " et-grande" : "") + '" viewBox="0 0 100 100" aria-hidden="true"><path class="et-forme" d="' + ET_FORME + '" style="fill:' + c + '"/></svg>';
   }
 
-  function etNiveau(d, id) { var v = d.val[id] || {}; for (var k = 0; k < ETOILES.length; k++) if (!v[k]) return k; return ETOILES.length; }
-  function pageEnsEtoiles() {
-    var d = etDonnees(), n = d.eleves.length;
-    var outils = '<div class="coco-row no-print et-outils"><a class="coco-btn coco-btn--secondaire" href="#ens-suivi">← Suivi des élèves</a>' +
-      '<a class="coco-btn coco-btn--secondaire" href="#ens-corriges">Corrigés des évaluations</a>' +
+  /* ---------- Étoiles de grammaire (D-123) : fichier de la classe « Étoiles de grammaire » [CLASSE] (9 étoiles, mêmes couleurs que les étoiles de calcul ;
+     6 entraînements et 3 évaluations chacune). Corrigés des évaluations rédigés par Claude [PROPOSITION], dans la présentation des corrections
+     du fichier (déterminants en bleu, noms en rose avec NP / NC, adjectifs en vert et nom souligné, verbe en rouge). Le fichier ne contient
+     pas la correction des évaluations. Ordre choisi par l’enseignante : rose = futur, noire = imparfait (comme la progression) ; être et avoir au 3e groupe (CONJ3). Balises : [d:mot] déterminant, [n:mot|NC] nom, [a:mot] adjectif, [u:mot] nom qualifié, [v:mot] verbe. ---------- */
+  var ET_GRAM_SOUS = ["Déterminants", "Noms", "Adjectifs", "Passé, présent, futur", "Verbe", "Présent", "Passé composé", "Futur", "Imparfait"];
+  var ETOILES_GRAM = ETOILES.map(function (e, k) { return [e[0], e[1], ET_GRAM_SOUS[k]]; });
+  var ET_GRAM = [
+    { t: "Les déterminants", k: "det", c: "Recopie les phrases, colorie en bleu les déterminants. Puis écris sur ton cahier les articles définis et les articles indéfinis.",
+      ev: [{ p: ["[d:Cette] fois, tu prendras [d:l’]autre chemin.", "[d:Mes] stylos sont dans [d:la] trousse de Louis.", "[d:Un] jour, je deviendrai [d:une] artiste.", "[d:Tes] cousins sont [d:des] garçons polis."], art: ["l’ la", "un une des"] },
+        { p: ["[d:Ma] mère a préparé [d:un] délicieux flan.", "[d:Ton] père travaille dans [d:l’]armée.", "Il a [d:une] peur incontrôlée [d:des] oiseaux.", "[d:Ce] monstre et [d:cette] fillette sont amis."], art: ["l’", "un une des"] },
+        { p: ["Hier, [d:mon] cousin a partagé [d:notre] repas.", "Sur [d:la] table, il y avait [d:son] plat préféré.", "C’était [d:un] ragoût avec [d:des] carottes.", "Et pour [d:le] dessert : [d:une] tarte à [d:l’]abricot."], art: ["la le l’", "un des une"] }] },
+    { t: "Les noms", k: "nom", c: "Recopie les phrases, colorie en rose les noms. Puis écris sous les noms : NP (nom propre) ou NC (nom commun).",
+      ev: [{ p: ["La [n:police|NC] a arrêté le [n:tueur|NC] à [n:Miami|NP].", "Mes [n:parents|NC] partent à [n:Hawaï|NP] pour les [n:vacances|NC].", "Ton [n:chien|NC] a détruit mon beau [n:jardin|NC] !", "[n:Lisa|NP] m’a offert ce magnifique [n:cadeau|NC], c’est ma [n:couleur|NC] préférée !"] },
+        { p: ["Mes [n:amis|NC] ont un [n:appartement|NC] à [n:Brisbane|NP].", "Le [n:cousin|NC] de [n:Louis|NP] adore les [n:gâteaux|NC] à la [n:crème|NC].", "Tous les [n:soirs|NC], je fais mes [n:devoirs|NC].", "La [n:veste|NC] de [n:Nicolas|NP] est tachée de [n:chocolat|NC]."] },
+        { p: ["J’ai laissé mes [n:claquettes|NC] sur la [n:plage|NC] à [n:Poé|NP].", "Les [n:fenêtres|NC] de l’[n:immeuble|NC] ont été nettoyées ce [n:matin|NC].", "Nous avons regardé notre [n:série|NC] préférée sur [n:Netflix|NP].", "[n:Paul|NP] a garé sa [n:voiture|NC] dans le [n:parking|NC]."] }] },
+    { t: "Les adjectifs", k: "adj", c: "Recopie les phrases. Colorie en vert les ADJECTIFS.",
+      ev: [{ p: ["Cendrillon portait de [a:belles] [u:pantoufles] [a:transparentes].", "La princesse avait une [u:peau] [a:pâle] et une [u:bouche] [a:rouge] comme le sang.", "L’[u:ogre] [a:terrifiant] se jeta sur l’[u:enfant] [a:apeuré].", "L’[a:effrayante] [u:sorcière] chevauchait son [a:vieux] [u:balai] dans la [u:nuit] [a:sombre]."] },
+        { p: ["Chaque nuit, le [a:gros] [u:chat] [a:noir] dormait sur le [u:tapis] [a:troué].", "Hier, j’ai mangé une [u:pomme] [a:rouge] et [a:sucrée].", "Contrairement à moi, mes [u:frères] sont [a:sages] et [a:calmes].", "Cette [a:magnifique] [u:maison] est [a:propre] et [a:agréable]."] },
+        { p: ["La [a:petite] [u:fille] portait toujours un [u:chaperon] [a:rouge].", "Le [u:loup] [a:cruel] attendait dans la [a:sombre] [u:forêt].", "La [a:pauvre] [u:grand-mère] [a:malade] dormait dans son lit.", "Le [u:chasseur] [a:rusé] et [a:courageux] ouvrit le [u:ventre] [a:tendu] du loup."] }] },
+    { t: "Passé, présent, futur", k: "temps", c: "Recopie chaque phrase puis indique leur temps (passé, présent ou futur).",
+      ev: [{ p: [["Je rangerai ma chambre ce soir.", "FUTUR"], ["Maman prépare une soupe à l’oignon.", "PRÉSENT"], ["Nous avons éteint la lumière.", "PASSÉ"], ["Les feuilles tombent des arbres.", "PRÉSENT"]] },
+        { p: [["Le mécanicien réparera la voiture.", "FUTUR"], ["Hier, la neige a recouvert tout le jardin.", "PASSÉ"], ["Vous choisirez un livre à la bibliothèque.", "FUTUR"], ["Nous écoutons le chant des oiseaux.", "PRÉSENT"]] },
+        { p: [["L’avion a décollé avec du retard.", "PASSÉ"], ["Le loup se cachait derrière le buisson.", "PASSÉ"], ["Tu chercheras tes clés dans ton sac.", "FUTUR"], ["Je finis de manger mon goûter.", "PRÉSENT"]] }] },
+    { t: "Le verbe", k: "verbe", c: "Recopie les phrases, colorie le VERBE en rouge, écris son infinitif et son groupe.",
+      ev: [{ p: [["Mes amis [v:déjeunent] avec moi.", "DÉJEUNER", 1], ["J’[v:étendrai] mes vêtements plus tard.", "ÉTENDRE", 3], ["Nous lui [v:souhaitons] une belle journée.", "SOUHAITER", 1], ["Mon chat [v:grossit] à vue d’œil !", "GROSSIR", 2]] },
+        { p: [["Les hommes [v:dormaient] dans les grottes.", "DORMIR", 3], ["Ils [v:chassaient] les animaux sauvages.", "CHASSER", 1], ["Les femmes [v:cueillaient] des baies.", "CUEILLIR", 3], ["Les petits [v:grandissaient] paisiblement.", "GRANDIR", 2]] },
+        { p: [["Plus tard, je [v:serai] archéologue.", "ÊTRE", 3], ["Je [v:découvrirai] des fossiles !", "DÉCOUVRIR", 3], ["Ces dinosaures [v:peuplaient] la Terre.", "PEUPLER", 1], ["Une météorite [v:frappa] notre planète.", "FRAPPER", 1]] }] },
+    { t: "Le présent", k: "conj", c: "Recopie et conjugue le verbe entre parenthèses au présent.",
+      ev: [{ p: ["Tu ([v:brosses]) les chevaux.", "Vous ([v:prenez]) du congé.", "Ce tiroir ([v:reste]) toujours coincé.", "Les princesses ([v:viennent]) au bal.", "Nous ([v:allons]) chez le médecin."] },
+        { p: ["On ne ([v:dérange]) pas la chambre.", "Je ([v:fais]) de mon mieux chaque jour.", "La maison ([v:prend]) de la valeur.", "Tom et Lucas ([v:discutent]) à la récré.", "Tu ([v:peux]) m’accompagner."] },
+        { p: ["Nous ([v:disons]) la même chose.", "Elles ([v:observent]) l’éclipse.", "Wendy ([v:accroche]) sa casquette.", "Tes frères ([v:voient]) mieux avec des lunettes.", "Je ([v:veux]) être millionnaire."] }] },
+    { t: "Le passé composé", k: "conj", c: "Recopie et conjugue le verbe entre parenthèses au passé composé.",
+      ev: [{ p: ["Vous ([v:avez avoué]) le crime.", "Elles ([v:sont allées]) se cacher dans les grottes.", "Je ([v:suis arrivée]) la première.", "Emma ([v:a fait]) de beaux progrès.", "Tu ([v:as dansé]) toute la soirée !"] },
+        { p: ["Nous ([v:avons plié]) nos vêtements.", "Tu ([v:as caché]) ton trésor sur cette île.", "Paul ([v:a pris]) deux tickets de cinéma.", "Mes copines ([v:sont venues]) me voir.", "Je ([v:suis allé]/[v:allée]) en Espagne."] },
+        { p: ["Il ([v:a gagné]) le premier prix.", "Vous ([v:avez préparé]) une surprise.", "Elles ([v:ont dit]) des mensonges.", "Nina ([v:est entrée]) par cette porte.", "Mes frères ([v:sont restés]) toute la semaine."] }] },
+    { t: "Le futur", k: "conj", c: "Recopie et conjugue le verbe entre parenthèses au futur.",
+      ev: [{ p: ["Je ([v:ferai]) de mon mieux, promis !", "Tu n’([v:oublieras]) pas ton parapluie.", "Les élèves ([v:entreront]) par le portail.", "La maîtresse les ([v:saluera]) gentiment.", "Nous ([v:prendrons]) le déjeuner à la cantine."] },
+        { p: ["Vous ([v:irez]) voir le film samedi prochain.", "On ([v:sera]) sur la première rangée.", "J’([v:achèterai]) du popcorn et de l’eau.", "Le son ([v:se diffusera]) dans toute la salle.", "Les spectateurs ([v:viendront]) en nombre."] },
+        { p: ["Nous ([v:ferons]) une sortie à la piscine.", "Les enfants ([v:porteront]) leur bonnet.", "Théo ne ([v:verra]) pas bien sous l’eau.", "Vous ([v:sauterez]) du plongeoir.", "Tu ([v:pourras]) faire du toboggan !"] }] },
+    { t: "L’imparfait", k: "conj", c: "Recopie et conjugue le verbe entre parenthèses à l’imparfait.",
+      ev: [{ p: ["Mon papi ([v:jouait]) aux osselets.", "Mes parents n’([v:avaient]) pas de jouets.", "Nous ([v:venions]) de déménager.", "On ([v:faisait]) des gâteaux au chocolat.", "Je ([v:racontais]) des blagues près du feu."] },
+        { p: ["Tu ([v:étais]) au chômage.", "Vous ([v:preniez]) un raccourci.", "Lucas ([v:faisait]) des roulades sur le tatami.", "Nous ([v:partagions]) la même chambre.", "Mes amis ([v:tricotaient]) des pulls."] },
+        { p: ["J’([v:allais]) au cinéma chaque lundi.", "Lilou ([v:ramassait]) les feuilles mortes.", "Elles ([v:voyaient]) souvent leurs amies.", "Vous ([v:vouliez]) toujours dormir tôt.", "Les voisins ([v:râlaient]) à cause du bruit."] }] }
+  ];
+  function egPhrase(s) {
+    return s.replace(/\[([dnavu]):([^\]|]+)(?:\|([^\]]+))?\]([.,!?]*)/g, function (_, t, mot, etq, ponct) {
+      var m = '<span class="eg-' + t + '">' + mot + "</span>";
+      return etq ? '<span class="eg-insec"><span class="eg-etq">' + m + "<small>" + etq + "</small></span>" + ponct + "</span>" : m + ponct;
+    });
+  }
+  function egGroupes(g) { return '<span class="eg-gr">' + ["1<sup>er</sup>", "2<sup>ème</sup>", "3<sup>ème</sup>"].map(function (x, k) { return k + 1 === g ? "<b>" + x + "</b>" : "<span>" + x + "</span>"; }).join(" – ") + "</span>"; }
+  function egItem(e, x) {
+    if (e.k === "temps") return '<li><span class="eg-ph">' + egPhrase(x[0]) + '</span><b class="eg-rep">' + x[1] + "</b></li>";
+    if (e.k === "verbe") return '<li><span class="eg-ph">' + egPhrase(x[0]) + '</span><span class="eg-rep"><b class="eg-v">' + x[1] + "</b> " + egGroupes(x[2]) + "</span></li>";
+    if (e.k === "nom") return '<li><span class="eg-ph eg-ph--etq">' + egPhrase(x) + ' <small class="eg-nb">(' + x.match(/\[n:/g).length + ")</small></span></li>";
+    return '<li><span class="eg-ph">' + egPhrase(x) + "</span></li>";
+  }
+  function pageEnsCorrigesGram() {
+    var k = ET_CORR, s = ETOILES_GRAM[k], e = ET_GRAM[k];
+    return ensEntete("Corrigés des étoiles de grammaire") +
+      '<div class="coco-row et-outils">' + etBascule("grammaire", "corr") + '<a class="coco-btn coco-btn--secondaire" href="#ens-etoiles-grammaire">← Tableau de suivi</a></div>' +
+      etChoix(ETOILES_GRAM, k) +
+      '<div class="ec-tete ec-tete--fr">' + etEtoile(s[1], false, true) + "<p><b>Étoile " + s[0].toLowerCase() + "</b> · " + e.t + '<small>« ' + e.c + " »</small></p>" +
+      '<img class="ec-perso" src="' + POSE("leo", "reflechit") + '" alt=""></div>' +
+      '<div class="ec-evals">' + e.ev.map(function (v, i) {
+        return '<section class="ec-eval ec-eval--fr"><h2>Évaluation ' + (i + 1) + '</h2><ul class="eg-liste">' + v.p.map(function (x) { return egItem(e, x); }).join("") + "</ul>" +
+          (v.art ? '<p class="eg-art"><span>articles définis :</span> <b class="eg-d">' + v.art[0] + '</b><br><span>articles indéfinis :</span> <b class="eg-d">' + v.art[1] + "</b></p>" : "") + "</section>"; }).join("") + "</div>";
+  }
+
+  /* deux fichiers d'étoiles (D-123) : même liste d'élèves, un tableau chacun (d.val pour le calcul, d.gram pour la grammaire) */
+  var ET_TYPES = {
+    calcul: { titre: "Étoiles de calcul", liste: ETOILES, cle: "val", suivi: "ens-etoiles", corr: "ens-corriges", perso: "mei", mat: "maths", resume: "De l’addition posée à la division" },
+    grammaire: { titre: "Étoiles de grammaire", liste: ETOILES_GRAM, cle: "gram", suivi: "ens-etoiles-grammaire", corr: "ens-corriges-grammaire", perso: "leo", mat: "francais", resume: "Des déterminants à l’imparfait" }
+  };
+  function etT() { return ET_TYPES[ET.type] || ET_TYPES.calcul; }
+  function etBascule(type, page) {
+    return '<nav class="et-bascule" aria-label="Choisir les étoiles">' + ["calcul", "grammaire"].map(function (t) { var T = ET_TYPES[t];
+      return '<a class="et-bascule-' + T.mat + '" href="#' + (page === "corr" ? T.corr : T.suivi) + '"' + (t === type ? ' aria-current="page"' : "") + "><img src=\"" + POSE(T.perso, "presente") + '" alt="">' + T.titre + "</a>"; }).join("") + "</nav>";
+  }
+  function etChoix(liste, k) { return '<div class="ec-etoiles" role="group" aria-label="Choisir l’étoile">' + liste.map(function (e, i) { return '<button type="button" class="ec-choix" data-action="et-corr" data-v="' + i + '" aria-pressed="' + (i === k) + '">' + etEtoile(e[1]) + "<span>" + e[0] + "</span></button>"; }).join("") + "</div>"; }
+  function etNiveau(d, id) { var T = etT(), v = d[T.cle][id] || {}; for (var k = 0; k < T.liste.length; k++) if (!v[k]) return k; return T.liste.length; }
+  function pageEnsEtoiles(type) {
+    ET.type = type || "calcul";
+    var d = etDonnees(), n = d.eleves.length, T = etT(), V = d[T.cle];
+    var outils = '<div class="no-print et-haut">' + etBascule(ET.type, "suivi") + '</div><div class="coco-row no-print et-outils"><a class="coco-btn coco-btn--secondaire" href="#ens-suivi">← Suivi des élèves</a>' +
+      '<a class="coco-btn coco-btn--secondaire" href="#' + T.corr + '">Corrigés des évaluations</a>' +
       '<button class="coco-btn coco-btn--secondaire" type="button" data-action="et-liste" aria-pressed="' + ET.liste + '">' + (ET.liste ? "Fermer la liste" : "Gérer la liste des élèves") + "</button>" +
       '<button class="coco-btn coco-btn--secondaire" type="button" data-action="imprimer"' + (n ? "" : " disabled") + ">Imprimer le tableau</button>" +
       '<button class="coco-btn coco-btn--secondaire" type="button" data-action="et-sauver"' + (n ? "" : " disabled") + ">Sauvegarder</button>" +
       '<label class="coco-btn coco-btn--secondaire et-restaurer">Restaurer<input type="file" accept=".json,application/json" id="et-fichier" hidden></label></div>' +
-      '<p class="no-print et-note">Ces informations restent <b>sur cet appareil</b> (rien n’est envoyé en ligne). Pensez à <b>sauvegarder</b> de temps en temps : le fichier permet aussi de retrouver le tableau sur un autre appareil. ' +
+      '<p class="no-print et-note">Ces informations restent <b>sur cet appareil</b> (rien n’est envoyé en ligne). La liste des élèves est la même pour les étoiles de calcul et de grammaire. Pensez à <b>sauvegarder</b> de temps en temps : le fichier garde les deux tableaux et permet de les retrouver sur un autre appareil. ' +
       (d.sauve ? "Dernière sauvegarde : " + etLong(d.sauve) + "." : "<b>Aucune sauvegarde pour l’instant.</b>") + "</p>" + (ET.msg ? '<div class="no-print">' + ET.msg + "</div>" : "");
     var liste = "";
     if (ET.liste || !n) liste = '<section class="et-liste no-print"><h2>La liste des élèves</h2>' +
@@ -2803,31 +2884,31 @@
       '<p class="et-note">Les prénoms se modifient directement dans les cases. Retirer un élève efface aussi ses étoiles.</p></section>';
     var tableau = "";
     if (n) {
-      tableau = '<div class="et-cadre"><table class="et-tab"><thead><tr><th scope="col">Élève</th>' + ETOILES.map(function (e) { return '<th scope="col">' + etEtoile(e[1]) + "<b>" + e[0] + "</b><span>" + e[2].replace("Multiplication", "Multipl.") + "</span></th>"; }).join("") + "</tr></thead><tbody>" +
-        d.eleves.map(function (e) { var v = d.val[e.id] || {}, niv = etNiveau(d, e.id);
-          return '<tr><th scope="row">' + esc(e.nom) + "</th>" + ETOILES.map(function (s, k) { var date = v[k], sel = ET.sel && ET.sel.id === e.id && ET.sel.k === k;
+      tableau = '<div class="et-cadre"><table class="et-tab"><thead><tr><th scope="col">Élève</th>' + T.liste.map(function (e) { return '<th scope="col">' + etEtoile(e[1]) + "<b>" + e[0] + "</b><span>" + e[2].replace("Multiplication", "Multipl.") + "</span></th>"; }).join("") + "</tr></thead><tbody>" +
+        d.eleves.map(function (e) { var v = V[e.id] || {}, niv = etNiveau(d, e.id);
+          return '<tr><th scope="row">' + esc(e.nom) + "</th>" + T.liste.map(function (s, k) { var date = v[k], sel = ET.sel && ET.sel.id === e.id && ET.sel.k === k;
             return '<td class="' + (k === niv ? "et-niveau" : "") + (sel ? " et-sel" : "") + '"><button type="button" class="et-case" data-action="et-etoile" data-id="' + e.id + '" data-k="' + k + '" aria-label="' + esc(e.nom) + " · étoile " + s[0].toLowerCase() + (date ? " · validée le " + etLong(date) : " · non validée") + '">' + etEtoile(s[1], !date) +
               (date ? "<small>" + etCourt(date) + "</small>" : k === niv ? '<small class="et-a-valider">à valider</small>' : "<small></small>") + "</button></td>"; }).join("") + "</tr>"; }).join("") +
-        '<tr class="et-total"><th scope="row">Classe</th>' + ETOILES.map(function (s, k) { var c = d.eleves.filter(function (e) { return (d.val[e.id] || {})[k]; }).length; return "<td>" + c + " / " + n + "</td>"; }).join("") + "</tr></tbody></table></div>";
+        '<tr class="et-total"><th scope="row">Classe</th>' + T.liste.map(function (s, k) { var c = d.eleves.filter(function (e) { return (V[e.id] || {})[k]; }).length; return "<td>" + c + " / " + n + "</td>"; }).join("") + "</tr></tbody></table></div>";
     }
     var panneau = "";
-    if (ET.sel) { var el = d.eleves.filter(function (x) { return x.id === ET.sel.id; })[0], s = ETOILES[ET.sel.k], dt = el && (d.val[el.id] || {})[ET.sel.k];
+    if (ET.sel) { var el = d.eleves.filter(function (x) { return x.id === ET.sel.id; })[0], s = T.liste[ET.sel.k], dt = el && (V[el.id] || {})[ET.sel.k];
       if (el && dt) panneau = '<div class="et-panneau no-print" role="dialog" aria-label="Étoile validée"><div>' + etEtoile(s[1], false, true) + "<p><b>" + esc(el.nom) + " · étoile " + s[0].toLowerCase() + "</b> (" + s[2].toLowerCase() + ")<br>Validée le " + etLong(dt) + ".</p></div>" +
         '<label>Changer la date : <input type="date" id="et-date" value="' + dt + '" max="' + etAujourdhui() + '"></label><div class="coco-row"><button class="coco-btn" type="button" data-action="et-date-ok">Enregistrer la date</button><button class="coco-btn coco-btn--secondaire" type="button" data-action="et-retirer">Retirer la validation</button><button class="coco-btn coco-btn--secondaire" type="button" data-action="et-fermer">Fermer</button></div></div>'; }
-    return ensEntete("Étoiles de calcul") + '<p class="no-print et-intro">Je touche l’étoile de l’élève : elle se colore et la date du jour s’écrit dessous. L’étoile à travailler est surlignée en jaune. Je touche une étoile déjà validée pour changer sa date ou la retirer.</p>' +
-      outils + liste + '<h2 class="et-titre-impr">Suivi des étoiles de calcul · ' + etLong(etAujourdhui()) + "</h2>" + tableau + panneau;
+    return ensEntete(T.titre) + outils + '<div class="no-print et-intro et-intro--' + T.mat + '"><img src="' + POSE(T.perso, "content") + '" alt=""><p>Je touche l’étoile de l’élève : elle se colore et la date du jour s’écrit dessous. L’étoile à travailler est surlignée en jaune. Je touche une étoile déjà validée pour changer sa date ou la retirer.</p></div>' +
+      liste + '<h2 class="et-titre-impr">Suivi des ' + T.titre.toLowerCase() + " · " + etLong(etAujourdhui()) + "</h2>" + tableau + panneau;
   }
   function actionEtoiles(a, el) {
-    var d = etDonnees(); ET.msg = "";
+    var d = etDonnees(), V = d[etT().cle]; ET.msg = "";
     if (a === "et-corr") { ET_CORR = +el.dataset.v; ET_POSE = {}; return; }
     if (a === "et-pose") { ET_POSE[el.dataset.v] = !ET_POSE[el.dataset.v]; return; }
     if (a === "et-etoile") {
-      var id = el.dataset.id, k = +el.dataset.k; d.val[id] = d.val[id] || {};
-      if (d.val[id][k]) ET.sel = { id: id, k: k };
-      else { d.val[id][k] = etAujourdhui(); ET.sel = null; etEcrire(d); }
+      var id = el.dataset.id, k = +el.dataset.k; V[id] = V[id] || {};
+      if (V[id][k]) ET.sel = { id: id, k: k };
+      else { V[id][k] = etAujourdhui(); ET.sel = null; etEcrire(d); }
     } else if (a === "et-fermer") ET.sel = null;
-    else if (a === "et-retirer" && ET.sel) { if (window.confirm("Retirer cette étoile validée ?")) { delete (d.val[ET.sel.id] || {})[ET.sel.k]; etEcrire(d); ET.sel = null; } }
-    else if (a === "et-date-ok" && ET.sel) { var v = (document.getElementById("et-date") || {}).value; if (/^\d{4}-\d{2}-\d{2}$/.test(v || "")) { d.val[ET.sel.id][ET.sel.k] = v; etEcrire(d); ET.sel = null; } }
+    else if (a === "et-retirer" && ET.sel) { if (window.confirm("Retirer cette étoile validée ?")) { delete (V[ET.sel.id] || {})[ET.sel.k]; etEcrire(d); ET.sel = null; } }
+    else if (a === "et-date-ok" && ET.sel) { var v = (document.getElementById("et-date") || {}).value; if (/^\d{4}-\d{2}-\d{2}$/.test(v || "")) { V[ET.sel.id][ET.sel.k] = v; etEcrire(d); ET.sel = null; } }
     else if (a === "et-liste") ET.liste = !ET.liste;
     else if (a === "et-ajouter") {
       var noms = ((document.getElementById("et-nouveaux") || {}).value || "").split(/\n|,|;/).map(function (x) { return x.trim(); }).filter(Boolean);
@@ -2835,12 +2916,12 @@
       if (noms.length) { etEcrire(d); ET.liste = false; ET.msg = retour("bravo", "C’est fait", noms.length + " élève" + (noms.length > 1 ? "s ajoutés" : " ajouté") + " à la liste."); }
     }
     else if (a === "et-trier") { d.eleves.sort(function (x, y) { return x.nom.localeCompare(y.nom, "fr"); }); etEcrire(d); }
-    else if (a === "et-suppr") { var e = d.eleves.filter(function (x) { return x.id === el.dataset.v; })[0]; if (e && window.confirm("Retirer " + e.nom + " de la liste ? Ses étoiles seront effacées.")) { d.eleves = d.eleves.filter(function (x) { return x !== e; }); delete d.val[e.id]; etEcrire(d); } }
+    else if (a === "et-suppr") { var e = d.eleves.filter(function (x) { return x.id === el.dataset.v; })[0]; if (e && window.confirm("Retirer " + e.nom + " de la liste ? Ses étoiles de calcul et de grammaire seront effacées.")) { d.eleves = d.eleves.filter(function (x) { return x !== e; }); delete d.val[e.id]; delete d.gram[e.id]; etEcrire(d); } }
     else if (a === "et-sauver") {
       d.sauve = etAujourdhui(); etEcrire(d);
-      try { var blob = new Blob([JSON.stringify({ type: "coco-etoiles", version: 1, eleves: d.eleves, val: d.val, sauve: d.sauve }, null, 1)], { type: "application/json" }), url = URL.createObjectURL(blob), lien = document.createElement("a");
-        lien.href = url; lien.download = "etoiles-de-calcul-" + d.sauve + ".json"; document.body.appendChild(lien); lien.click(); setTimeout(function () { URL.revokeObjectURL(url); lien.remove(); }, 500);
-        ET.msg = retour("bravo", "Sauvegardé", "Le fichier « etoiles-de-calcul-" + d.sauve + ".json » est dans vos téléchargements. Gardez-le précieusement."); }
+      try { var blob = new Blob([JSON.stringify({ type: "coco-etoiles", version: 2, eleves: d.eleves, val: d.val, gram: d.gram, sauve: d.sauve }, null, 1)], { type: "application/json" }), url = URL.createObjectURL(blob), lien = document.createElement("a");
+        lien.href = url; lien.download = "etoiles-calcul-et-grammaire-" + d.sauve + ".json"; document.body.appendChild(lien); lien.click(); setTimeout(function () { URL.revokeObjectURL(url); lien.remove(); }, 500);
+        ET.msg = retour("bravo", "Sauvegardé", "Le fichier « etoiles-calcul-et-grammaire-" + d.sauve + ".json » (étoiles de calcul et de grammaire) est dans vos téléchargements. Gardez-le précieusement."); }
       catch (x) { ET.msg = retour("revoir", "Pas encore…", "Cet appareil n’a pas permis le téléchargement. Essayez depuis le site en ligne, dans Safari ou Chrome."); }
     }
   }
@@ -2852,8 +2933,8 @@
       var r = new FileReader();
       r.onload = function () {
         try { var j = JSON.parse(r.result); if (j.type !== "coco-etoiles" || !Array.isArray(j.eleves)) throw 0;
-          if (window.confirm("Remplacer le tableau de cet appareil par celui du fichier (" + j.eleves.length + " élèves, sauvegardé le " + (j.sauve ? etLong(j.sauve) : "?") + ") ?")) { etEcrire({ eleves: j.eleves, val: j.val || {}, sauve: j.sauve || "" }); ET.msg = retour("bravo", "Restauré", "Le tableau du fichier est maintenant sur cet appareil."); ET.sel = null; rendre(); } }
-        catch (x) { ET.msg = retour("revoir", "Pas encore…", "Ce fichier n’est pas une sauvegarde des étoiles de calcul."); rendre(); }
+          if (window.confirm("Remplacer le tableau de cet appareil par celui du fichier (" + j.eleves.length + " élèves, sauvegardé le " + (j.sauve ? etLong(j.sauve) : "?") + ") ?")) { etEcrire({ eleves: j.eleves, val: j.val || {}, gram: j.gram || etDonnees().gram, sauve: j.sauve || "" }); ET.msg = retour("bravo", "Restauré", "Le tableau du fichier est maintenant sur cet appareil."); ET.sel = null; rendre(); } }
+        catch (x) { ET.msg = retour("revoir", "Pas encore…", "Ce fichier n’est pas une sauvegarde des étoiles."); rendre(); }
       };
       r.readAsText(el.files[0]);
     }
@@ -2933,15 +3014,23 @@
   function pageEnsCorriges() {
     var k = ET_CORR, s = ETOILES[k];
     return ensEntete("Corrigés des étoiles de calcul") +
-      '<div class="coco-row et-outils"><a class="coco-btn coco-btn--secondaire" href="#ens-etoiles">← Suivi des étoiles</a></div>' +
-      '<div class="ec-etoiles" role="group" aria-label="Choisir l’étoile">' + ETOILES.map(function (e, i) { return '<button type="button" class="ec-choix" data-action="et-corr" data-v="' + i + '" aria-pressed="' + (i === k) + '">' + etEtoile(e[1]) + "<span>" + e[0] + "</span></button>"; }).join("") + "</div>" +
-      '<div class="ec-tete">' + etEtoile(s[1], false, true) + "<p><b>Étoile " + s[0].toLowerCase() + "</b> · " + s[2] + "</p></div>" +
+      '<div class="coco-row et-outils">' + etBascule("calcul", "corr") + '<a class="coco-btn coco-btn--secondaire" href="#ens-etoiles">← Tableau de suivi</a></div>' +
+      etChoix(ETOILES, k) +
+      '<div class="ec-tete">' + etEtoile(s[1], false, true) + "<p><b>Étoile " + s[0].toLowerCase() + "</b> · " + s[2] + "</p>" + '<img class="ec-perso" src="' + POSE("mei", "reflechit") + '" alt=""></div>' +
       '<div class="ec-evals">' + ET_EVAL[k].map(function (ops, i) { return '<section class="ec-eval"><h2>Évaluation ' + (i + 1) + "</h2><ol>" + ops.map(function (op, j) { var cle = i + "-" + j, ouvert = ET_POSE[cle], div = op.indexOf(":") >= 0; return "<li>" + etResultat(op) + (div ? "" : '<button type="button" class="ec-voir" data-action="et-pose" data-v="' + cle + '" aria-expanded="' + !!ouvert + '">' + (ouvert ? "Cacher le calcul posé" : "Voir le calcul posé") + "</button>" + (ouvert ? etPose(op) : "")) + "</li>"; }).join("") + "</ol></section>"; }).join("") + "</div>";
   }
+  /* Suivi des élèves (D-123) : un bloc compact par fichier d'étoiles, avec le personnage de la matière (Méi en maths, Léo en français) */
+  function etFamille(type) {
+    var T = ET_TYPES[type], d = etDonnees(), V = d[T.cle], n = d.eleves.length, v = 0;
+    d.eleves.forEach(function (e) { v += Object.keys(V[e.id] || {}).length; });
+    return '<article class="et-famille et-famille--' + T.mat + '"><img class="et-famille-perso" src="' + POSE(T.perso, "presente") + '" alt=""><div class="et-famille-corps"><h2>' + T.titre + "</h2>" +
+      '<div class="et-famille-etoiles" aria-hidden="true">' + T.liste.map(function (e) { return etEtoile(e[1]); }).join("") + "</div>" +
+      "<p>" + T.resume + " · " + (n ? v + " étoile" + (v > 1 ? "s validées" : " validée") : "tableau à remplir") + '</p><div class="coco-row"><a class="coco-btn" href="#' + T.suivi + '">Tableau de suivi</a><a class="coco-btn coco-btn--secondaire" href="#' + T.corr + '">Corrigés</a></div></div></article>';
+  }
   function pageEnsSuivi() {
-    var d = etDonnees(), n = d.eleves.length, v = 0; d.eleves.forEach(function (e) { v += Object.keys(d.val[e.id] || {}).length; });
-    return ensEntete("Suivi des élèves") + '<section class="ens-dossiers ens-suivi-liste"><a class="ens-dossier et-dossier" href="#ens-etoiles">' + etEtoile("#f7f06a", false, true) + "<h2>Étoiles de calcul</h2><p>" + (n ? n + " élève" + (n > 1 ? "s" : "") + " · " + v + " étoile" + (v > 1 ? "s validées" : " validée") : "Les 9 étoiles, de la blanche à la noire : à remplir") + "</p></a>" +
-      '<a class="ens-dossier et-dossier" href="#ens-corriges">' + etEtoile("#bdbdbd", false, true) + "<h2>Corrigés des étoiles</h2><p>Les 3 évaluations de chaque étoile, avec les résultats</p></a></section>" +
+    var n = etDonnees().eleves.length;
+    return ensEntete("Suivi des élèves") + '<p class="et-classe">' + (n ? "<b>" + n + " élève" + (n > 1 ? "s" : "") + "</b> dans la liste (la même pour les deux fichiers d’étoiles)." : "La liste des élèves se remplit dans un des deux tableaux de suivi ; elle sert aux deux.") + "</p>" +
+      '<section class="et-familles">' + etFamille("calcul") + etFamille("grammaire") + "</section>" +
       '<section class="ens-vide ens-vide--petit"><p>Le suivi des résultats des activités du site viendra avec la <b>base en ligne</b> (D-93) : réussites par activité, bilans par séquence, repères pour le livret scolaire unique.</p></section>';
   }
   /* Espace enseignante › Formation (D-114) : organisé comme le sommaire des notes de l’enseignante (Lexique, Didactique générale,
@@ -3113,7 +3202,7 @@
   /* ---------- routeur ---------- */
   var ROUTES = {
     accueil: pageAccueil, "seq-verbe": function () { return pageSequence("verbe"); }, "seq-mots": pageSequenceMots, "lecon-mots": pageLeconMots, "fiche-mots": ficheMots,
-    "seq-heure": pageSequenceHeure, "seq-digitale": pageSequenceDigitale, "ens-suivi": pageEnsSuivi, "ens-etoiles": pageEnsEtoiles, "ens-corriges": pageEnsCorriges, "ens-sequences": pageEnsSequences, "ens-formation": pageEnsFormation, "fiche-digitale": ficheDigitale, "seq-diagrammes": pageSequenceDiagrammes, "lecon-diagrammes": pageLeconDiagrammes, "fiche-diagrammes": ficheDiagrammes, "fiche-masses": ficheMasses, "fiche-verbe": ficheVerbe, "fiche-division": ficheDivision, "fiche-monnaie": ficheMonnaie, "lecon-heure": function () { return pageLeconHeure(true); }, "maquette-retiens": function () { return pageLeconHeure(true); }, "fiche-heure": ficheHeure, "exos-heure": function () { return pageExos("heure"); }, "lecon-digitale": pageLeconDigitale, "lecon-division": pageLeconDivision, "lecon-monnaie": pageLeconMonnaie, "lecon-masses": pageLeconMasses, "exos-verbe": function () { return pageExos("verbe"); }, "exos-mots": function () { return pageExos("mots"); },
+    "seq-heure": pageSequenceHeure, "seq-digitale": pageSequenceDigitale, "ens-suivi": pageEnsSuivi, "ens-etoiles": function () { return pageEnsEtoiles("calcul"); }, "ens-etoiles-grammaire": function () { return pageEnsEtoiles("grammaire"); }, "ens-corriges": pageEnsCorriges, "ens-corriges-grammaire": pageEnsCorrigesGram, "ens-sequences": pageEnsSequences, "ens-formation": pageEnsFormation, "fiche-digitale": ficheDigitale, "seq-diagrammes": pageSequenceDiagrammes, "lecon-diagrammes": pageLeconDiagrammes, "fiche-diagrammes": ficheDiagrammes, "fiche-masses": ficheMasses, "fiche-verbe": ficheVerbe, "fiche-division": ficheDivision, "fiche-monnaie": ficheMonnaie, "lecon-heure": function () { return pageLeconHeure(true); }, "maquette-retiens": function () { return pageLeconHeure(true); }, "fiche-heure": ficheHeure, "exos-heure": function () { return pageExos("heure"); }, "lecon-digitale": pageLeconDigitale, "lecon-division": pageLeconDivision, "lecon-monnaie": pageLeconMonnaie, "lecon-masses": pageLeconMasses, "exos-verbe": function () { return pageExos("verbe"); }, "exos-mots": function () { return pageExos("mots"); },
     "exos-monnaie": function () { return pageExos("monnaie"); }, "exos-division": function () { return pageExos("division"); }, "exos-masses": function () { return pageExos("masses"); }, "exos-digitale": function () { return pageExos("digitale"); }, "exos-diagrammes": function () { return pageExos("diagrammes"); }, "tbi-heure": pageTbiHeure,
     "lecon-verbe": pageLecon, "jeu-verbe-decouvre": jeuDecouvre, "jeu-verbe-chasse": jeuChasse, enseignante: pageEnseignante, banque: pageBanque
   };
@@ -3146,12 +3235,12 @@
   document.addEventListener("keydown", function (e) { if (e.key === "Escape") fermerSousMenus(); });
   function rendre() {
     var r = route();
-    if (r !== derniere) { if (r === "jeu-verbe-decouvre") D = null; if (r === "jeu-verbe-chasse") H = null; if (/^po-/.test(r)) A = null; if (/^mots-/.test(r)) G = null; if (/^heure-/.test(r)) HG = null; if (/^diag-/.test(r)) GD = null; if (r === "tbi-heure") { clearInterval(TB.tid); TB.part = "menu"; } if (/^tbi-/.test(r) && TQ) { clearInterval(TQ.tid); TQ = null; } try { if (MO.peutParler) speechSynthesis.cancel(); } catch (x) {} if (/^classe-/.test(r)) { K = null; clearInterval(minuteur); } if (r === "lecon-verbe") L = { carte: {}, moment: "present", machine: 0, phrase: 0 }; if (/^exos-/.test(r)) EXF = null; if (/^qz-/.test(r)) QZ = null; if (r === "ens-etoiles") ET = { sel: null, liste: false, msg: "" }; if (/^lecon-/.test(r)) { LX = {}; JR = { i: 0, tout: false }; } window.scrollTo(0, 0); derniere = r; }
+    if (r !== derniere) { if (r === "jeu-verbe-decouvre") D = null; if (r === "jeu-verbe-chasse") H = null; if (/^po-/.test(r)) A = null; if (/^mots-/.test(r)) G = null; if (/^heure-/.test(r)) HG = null; if (/^diag-/.test(r)) GD = null; if (r === "tbi-heure") { clearInterval(TB.tid); TB.part = "menu"; } if (/^tbi-/.test(r) && TQ) { clearInterval(TQ.tid); TQ = null; } try { if (MO.peutParler) speechSynthesis.cancel(); } catch (x) {} if (/^classe-/.test(r)) { K = null; clearInterval(minuteur); } if (r === "lecon-verbe") L = { carte: {}, moment: "present", machine: 0, phrase: 0 }; if (/^exos-/.test(r)) EXF = null; if (/^qz-/.test(r)) QZ = null; if (r === "ens-etoiles" || r === "ens-etoiles-grammaire") ET = { sel: null, liste: false, msg: "", type: r === "ens-etoiles" ? "calcul" : "grammaire" }; if (/^ens-corriges/.test(r) && !/^ens-corriges/.test(derniere)) { ET_CORR = 0; ET_POSE = {}; } if (/^lecon-/.test(r)) { LX = {}; JR = { i: 0, tout: false }; } window.scrollTo(0, 0); derniere = r; }
     document.documentElement.lang = langue;
     var ferme = !ensOuvert && !UNIQUE && ENS_ROUTES.test(r);
     document.body.classList.toggle("mode-classe", !ferme && /^classe-|^tbi-/.test(r));
     document.body.classList.toggle("mode-papier", !ferme && /^(fiche|feuille|exos)-/.test(r));
-    document.body.classList.toggle("mode-etoiles", !ferme && r === "ens-etoiles");
+    document.body.classList.toggle("mode-etoiles", !ferme && (r === "ens-etoiles" || r === "ens-etoiles-grammaire"));
     app.innerHTML = ferme ? pageCode() : ROUTES[r]();
     if (ferme) { var ch = document.getElementById("ens-code"); if (ch) ch.focus(); }
     allerCible();
