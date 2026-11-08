@@ -96,7 +96,9 @@
         return '<div class="onglet-groupe ' + m.classe + '">' + lien + '<button type="button" class="onglet-ouvrir" data-action="sous-menu" aria-expanded="false" aria-label="' + (langue === "en" ? "Sections: " : "Rubriques : ") + nom + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>' +
           '<div class="sous-menu">' + m.domaines.map(function (d, k) { return '<a href="#' + m.id + '" data-action="aller" data-route="' + m.id + '" data-cible="dom-' + m.id + "-" + k + '"><i></i>' + esc(tr(d.nom)) + "</a>"; }).join("") + "</div></div>";
       }).join("");
-    return '<header class="barre"><nav class="coco-onglets" aria-label="Menu">' + onglets + "</nav>" + choixLangue() + "</header>";
+    /* bandeau « Espace enseignante » (D-118) : une fine ligne au-dessus du menu, seulement quand l’espace a été ouvert avec le code dans ce navigateur */
+    var bandeau = ensOuvert ? '<div class="ens-bandeau"><a href="#enseignante"' + (actif === "enseignante" ? ' aria-current="page"' : "") + ">" + DOSSIER_SVG.replace('class="ens-dossier-ic"', 'class="ens-bandeau-ic"') + (langue === "en" ? "Teacher area" : "Espace enseignante") + '</a><button type="button" class="ens-bandeau-verrou" data-action="ens-verrouiller">' + CADENAS + (langue === "en" ? "Lock" : "Verrouiller") + "</button></div>" : "";
+    return bandeau + '<header class="barre"><nav class="coco-onglets" aria-label="Menu">' + onglets + "</nav>" + choixLangue() + "</header>";
   }
   function choixLangue() {
     return '<div class="coco-langue" role="group" aria-label="' + t("langue") + '">' +
@@ -1985,6 +1987,205 @@
   jrCartesVerbe.persos = [["tehani", "presente"], ["vaka", "reflechit"], ["nina", "idee"]];
   jrCartesMots.persos = [["waeko", "presente"], ["dylan", "reflechit"], ["nina", "victoire"]];
   jrCartesDiagrammes.persos = [["waeko", "presente"], ["nina", "reflechit"], ["tao", "idee"]];
+  /* ==========================================================================================
+     Mode « Au TBI » des séquences (D-117), sur le modèle de l’heure à aiguilles : 1. découverte guidée, 2. jeu des ardoises.
+     Découverte : chaque carte « Je retiens » de la leçon devient une étape ; la classe répond d’abord à une question
+     (écrite par Claude [PROPOSITION]), puis « On découvre » montre la phrase de la leçon.
+     Ardoises : questions tirées des activités de la séquence ; la question s’affiche en grand, minuteur, « Ardoises levées », « On corrige ».
+     ========================================================================================== */
+  /* Questions d’ardoise du verbe (CONJ2) [PROPOSITION] : trouver le verbe conjugué (forme négative pour vérifier), état ou action.
+     [phrase, verbe, 2 autres mots de la phrase, forme négative, infinitif si le verbe exprime un état] — les phrases restent en français (D-27). */
+  var TQ_VERBES = [
+    ["Le soleil brille sur la plage.", "brille", ["soleil", "plage"], "Le soleil ne brille pas sur la plage."],
+    ["Nina mange la mangue.", "mange", ["Nina", "mangue"], "Nina ne mange pas la mangue."],
+    ["Les enfants jouent dans la cour.", "jouent", ["enfants", "cour"], "Les enfants ne jouent pas dans la cour."],
+    ["Kakou court dans la forêt.", "court", ["Kakou", "forêt"], "Kakou ne court pas dans la forêt."],
+    ["Margouille dort sous une feuille.", "dort", ["Margouille", "feuille"], "Margouille ne dort pas sous une feuille."],
+    ["Le bus arrive à l’école.", "arrive", ["bus", "école"], "Le bus n’arrive pas à l’école."],
+    ["Les oiseaux chantent le matin.", "chantent", ["oiseaux", "matin"], "Les oiseaux ne chantent pas le matin."],
+    ["Papi Tao lance sa ligne.", "lance", ["Papi", "ligne"], "Papi Tao ne lance pas sa ligne."],
+    ["Méi range ses cahiers.", "range", ["Méi", "cahiers"], "Méi ne range pas ses cahiers."],
+    ["Les élèves écoutent la maîtresse.", "écoutent", ["élèves", "maîtresse"], "Les élèves n’écoutent pas la maîtresse."],
+    ["La cloche sonne à midi.", "sonne", ["cloche", "midi"], "La cloche ne sonne pas à midi."],
+    ["Wadra arrose le jardin.", "arrose", ["Wadra", "jardin"], "Wadra n’arrose pas le jardin."],
+    ["La mer est calme.", "est", ["mer", "calme"], "La mer n’est pas calme.", "être"],
+    ["Tao semble fatigué.", "semble", ["Tao", "fatigué"], "Tao ne semble pas fatigué.", "sembler"],
+    ["Vaka paraît content.", "paraît", ["Vaka", "content"], "Vaka ne paraît pas content.", "paraître"],
+    ["Le chien est sage.", "est", ["chien", "sage"], "Le chien n’est pas sage.", "être"],
+    ["Les mangues semblent mûres.", "semblent", ["mangues", "mûres"], "Les mangues ne semblent pas mûres.", "sembler"]
+  ];
+  function tqPhrase(s) { return '<p class="tq-phrases"><span>' + s + "</span></p>"; }
+  function tqVerbe() {
+    var tous = HE.shuf(TQ_VERBES), etat = tous.filter(function (x) { return x[4]; }).slice(0, 2), action = tous.filter(function (x) { return !x[4]; }).slice(0, 2), pris = etat.concat(action);
+    var qs = tous.filter(function (x) { return pris.indexOf(x) < 0; }).map(function (x) {
+      var o = HE.shuf([x[1]].concat(x[2])), apo = /n’/.test(x[3]);
+      return { t: "choix", c: { fr: "Quel est le verbe conjugué ?", en: "Which word is the conjugated verb?" }, z: function () { return tqPhrase(x[0]); }, o: o, a: o.indexOf(x[1]),
+        ex: { fr: "Je mets la phrase à la forme négative : « " + x[3] + " » Le verbe est entre ne et pas : « " + x[1] + " »." + (apo ? " Devant une voyelle, ne devient n’." : ""),
+          en: "I make the sentence negative: « " + x[3] + " » The verb is between ne and pas: « " + x[1] + " »." + (apo ? " Before a vowel, ne becomes n’." : "") } };
+    });
+    return qs.concat(pris.map(function (x) {
+      return { t: "choix", c: { fr: "Dans cette phrase, le verbe « " + x[1] + " » exprime…", en: "In this sentence, the verb « " + x[1] + " » expresses…" }, z: function () { return tqPhrase(x[0]); },
+        o: [{ fr: "un état", en: "a state" }, { fr: "une action", en: "an action" }], a: x[4] ? 0 : 1,
+        ex: x[4] ? { fr: "« " + x[1] + " » vient du verbe " + x[4] + " : il exprime un état (être, sembler, paraître).", en: "« " + x[1] + " » comes from the verb " + x[4] + ": it expresses a state (être, sembler, paraître)." }
+          : { fr: "« " + x[1] + " » dit ce qui se passe, ce que l’on fait : il exprime une action.", en: "« " + x[1] + " » tells us what happens, what someone or something does: it expresses an action." } };
+    }));
+  }
+  /* Questions d’ardoise des mots invariables : les outils du v0 (lettres cachées, mot bien écrit, mot manquant), sur la liste choisie */
+  function tqMotsReglage(B) { return "<h3>" + (langue === "en" ? "Word list" : "Liste de mots") + '</h3><div class="coco-row">' + MO.GROUPS.map(function (g) { return B("liste", g.id, esc(g.name)); }).join("") + "</div>"; }
+  function tqMots(cfg) {
+    var sel = {}; MO.FAMS.forEach(function (f) { if (f.group.id === (cfg.liste || "g1")) sel[f.id] = 1; });
+    var pool = HE.shuf(MO.pool(sel)), qs = [], mot = function (m) { return '<span class="mi-mot">' + MO.html(m) + "</span>"; };
+    var ex = function (p) { return { fr: "On écrit « " + p + " ».", en: "We write « " + p + " »." }; };
+    pool.slice(0, 4).forEach(function (x) { var h = MO.hiddenPart(x.m), o = HE.shuf([h.seg].concat(MO.segOptions(h)));
+      qs.push({ t: "choix", c: { fr: "Quelles lettres manquent ?", en: "Which letters are missing?" }, z: function (en, voir) { return voir ? mot(x.m) : '<span class="mi-mot">' + h.beforeH + '<span class="tq-trou">…</span>' + h.afterH + "</span>"; },
+        o: o.map(function (v) { return v === "" ? { fr: "(aucune lettre)", en: "(no letter)" } : v; }), a: o.indexOf(h.seg), ex: ex(x.p) }); });
+    pool.slice(4, 8).forEach(function (x) { var o = HE.shuf([x.p].concat(MO.misspell(x.p, 2)));
+      qs.push({ t: "choix", c: { fr: "Quel mot est bien écrit ?", en: "Which word is spelt correctly?" }, z: function (en, voir) { return voir ? mot(x.m) : ""; }, o: o, a: o.indexOf(x.p), ex: ex(x.p) }); });
+    HE.shuf(MO.gapPool(sel)).slice(0, 4).forEach(function (q) { var o = HE.shuf([q.p].concat(q.opts)), debut = q.sent.indexOf("___") === 0, w = debut ? q.p.charAt(0).toUpperCase() + q.p.slice(1) : q.p;
+      qs.push({ t: "choix", c: { fr: "Quel mot complète la phrase ?", en: "Which word completes the sentence?" }, z: function (en, voir) { return tqPhrase(esc(q.sent).replace("___", voir ? "<b>" + esc(w) + "</b>" : '<span class="tq-trou">…</span>')); },
+        o: o, a: o.indexOf(q.p), ex: { fr: q.sent.replace("___", w), en: q.sent.replace("___", w) } }); });
+    return qs;
+  }
+  /* Questions d’ardoise du graphique en barres : « Lis le graphique » (niveaux 1 et 2) et « Problèmes » */
+  function tqDiagD() { return { ctx: DG.CONTEXTES[0], pas: 2, max: 20, vals: [14, 8, 11, 5, 16] }; }
+  function tqNb(n, en) { return en ? Number(n).toLocaleString("en-GB") : exMille(n); }
+  function tqDiag() {
+    var lire = DG.questionsLire(1, 3).concat(DG.questionsLire(2, 3)).map(function (q) {
+      var d = q.d, c = d.ctx.cats, v = d.vals[q.k], fig = function (en, voir) { return dgFigure(d, voir ? { montre: q.k } : {}); };
+      var grad = d.pas > 1 ? { fr: " Les graduations vont de " + d.pas + " en " + d.pas + ".", en: " The scale goes up in " + (d.pas === 2 ? "twos" : d.pas === 5 ? "fives" : "tens") + "." } : { fr: "", en: "" };
+      if (q.type === "valeur") return { t: "choix", c: { fr: "Quel nombre la barre <b>« " + esc(c[q.k].fr) + " »</b> indique-t-elle ?", en: "What number does the <b>“" + esc(c[q.k].en) + "”</b> bar show?" }, z: fig, o: q.opts, a: q.opts.indexOf(v),
+        ex: { fr: "Je suis le haut de la barre jusqu’à l’axe : " + v + "." + grad.fr, en: "I follow the top of the bar across to the axis: " + v + "." + grad.en } };
+      var haut = q.type === "plus";
+      return { t: "choix", c: d.ctx[q.type], z: fig, o: c.map(function (x) { return { fr: x.fr, en: x.en }; }), a: q.k,
+        ex: { fr: "La barre la plus " + (haut ? "haute" : "basse") + " est celle de " + c[q.k].fr + " : " + v + ".", en: "The " + (haut ? "tallest" : "shortest") + " bar is " + c[q.k].en + ": " + v + "." } };
+    });
+    var prob = DG.problemes(4).map(function (q) {
+      var k = q.calc, f = function (en) { var n = k.n.map(function (x) { return tqNb(x, en); }); return (k.op === "×" ? n[0] + " × " + n[1] + " F" : n.join(" " + k.op + " ")) + " = " + tqNb(q.rep, en) + (q.unite ? " F" : "") + "."; };
+      return { t: "champs", c: { fr: q.fr, en: q.en }, z: function () { return dgFigure(q.d); }, champs: [{ k: "v", apres: q.unite ? " F" : "" }], r: { v: q.rep },
+        ex: { fr: (q.inutile ? "Une information ne sert pas. " : "") + f(false), en: (q.inutile ? "One piece of information is not needed. " : "") + f(true) } };
+    });
+    return lire.concat(prob);
+  }
+  var TBI_SEQ = {
+    masses: { src: jrCartesMasses, mat: "maths", jeux: ["unite", "convertir", "comparer", "probleme"],
+      questions: [
+        { fr: "Comment savoir combien pèse un objet ?", en: "How can we find out how much an object weighs?", illu: function (en) { return pesee("sucre", "?", "", en ? "a bag of sugar" : "un paquet de sucre"); } },
+        { fr: "Qu’est-ce qui pèse à peu près 1 gramme ?", en: "What weighs about 1 gram?", illu: function (en) { return '<span class="tq-choix-obj">' + [["trombone", "un trombone", "a paper clip"], ["riz", "un paquet de riz", "a bag of rice"], ["camion", "un camion", "a lorry"]].map(function (o) { return "<span>" + OBJ_M[o[0]] + "<small>" + (en ? o[2] : o[1]) + "</small></span>"; }).join("") + "</span>"; } },
+        { fr: "Ces fruits pèsent 4… Ce camion pèse 5… Quelles unités ?", en: "This fruit weighs 4… This lorry weighs 5… Which units?", illu: function (en) { return pesee("fruits", "4", "?", en ? "this fruit" : "ces fruits") + pesee("camion", "5", "?", en ? "this lorry" : "ce camion"); } },
+        { fr: "Combien de grammes dans un kilogramme ? Combien de kilogrammes dans une tonne ?", en: "How many grams in a kilogram? How many kilograms in a tonne?", illu: function (en) { return pesee("sucre", "1", "kg", en ? "a bag of sugar" : "un paquet de sucre") + '<span class="tq-egal">= … g</span>'; } },
+        { fr: "4 kg, c’est combien de grammes ? Et 1 kg 500 g ?", en: "4 kg is how many grams? And 1 kg 500 g?", illu: function (en) { return pesee("sucre4", "4", "kg", en ? "4 bags of sugar" : "4 paquets de sucre") + '<span class="tq-egal">= … g</span>'; } }] },
+    /* ---------- D-117 étendu : les 5 autres séquences. Questions de découverte et questions d’ardoise du verbe [PROPOSITION] ;
+       les autres questions d’ardoise viennent des activités existantes (division, monnaie), des outils du v0 (mots invariables) et des jeux du graphique. ---------- */
+    division: { src: jrCartesDivision, mat: "maths", jeux: ["grouper", "calcule", "reste"],
+      questions: [
+        { fr: "Noah a 24 sucres d’orge. Il prépare des sachets de 4. Combien de sachets pourra-t-il faire ?", en: "Noah has 24 lollipops. He makes bags of 4. How many bags can he make?", illu: function () { return '<div class="tq-tas">' + lxPoints(24) + "</div>"; } },
+        { fr: "Amy a 27 billes. Elle les partage avec Lana et Evaël. Combien de billes aura chaque fille ?", en: "Amy has 27 marbles. She shares them with Lana and Evaël. How many marbles will each girl get?", illu: function () { return '<div class="tq-tas">' + lxPoints(27) + '</div><div class="lx-sacs">' + ["Amy", "Lana", "Evaël"].map(function (p) { return '<span class="lx-part"><span class="lx-sac tq-vide">?</span><small>' + p + "</small></span>"; }).join("") + "</div>"; } },
+        { fr: "Amaury a 43 cupcakes à ranger par boîtes de 5. Combien de boîtes pourra-t-il faire ? En restera-t-il ?", en: "Amaury has 43 cupcakes to put in boxes of 5. How many boxes can he make? Will any be left over?", illu: function () { return '<div class="tq-tas">' + lxPoints(43) + "</div>"; } },
+        { fr: "43 = (5 x 8) + 3 : comment s’appelle chacun de ces nombres ?", en: "43 = (5 × 8) + 3: what do we call each of these numbers?", illu: function (en) { return '<div class="lx-illu lx-mots-div">' + ["43", "5", "8", "3"].map(function (n, k) { return (k === 1 ? "<span>= (</span>" : k === 2 ? "<span>" + (en ? "×" : "x") + "</span>" : k === 3 ? "<span>) +</span>" : "") + "<span><b>" + n + "</b><small>?</small></span>"; }).join("") + "</div>"; } }] },
+    monnaie: { src: jrCartesMonnaie, mat: "maths", jeux: ["compter", "marche"],
+      questions: [
+        { fr: "Quels billets utilise-t-on en Nouvelle-Calédonie ?", en: "Which notes do we use in New Caledonia?", illu: function () { return '<div class="lx-illu lx-wrap">' + [0, 1, 2, 3].map(function () { return '<span class="po-billet">?<small>F</small></span>'; }).join("") + "</div>"; } },
+        { fr: "Et quelles pièces ? Quelle est la plus petite ?", en: "And which coins? Which is the smallest?", illu: function () { return '<div class="lx-illu lx-wrap">' + [0, 1, 2, 3, 4, 5].map(function () { return '<span class="po-piece po-piece--grande">?<small>F</small></span>'; }).join("") + "</div>"; } },
+        { fr: "Comment faire 6 875 F avec des billets et des pièces ?", en: "How can we make 6,875 F with notes and coins?", illu: function (en) { return '<b class="lx-somme tq-grand">' + (en ? "6,875 F" : "6 875 F") + "</b>"; } }] },
+    verbe: { src: jrCartesVerbe, mat: "francais", pool: tqVerbe,
+      questions: [
+        { fr: "Quel mot dit ce que fait la mère ? Quel mot dit comment est Sarah ?", en: "Which word tells us what the mother does? Which word tells us how Sarah is?", illu: function () { return '<p class="tq-phrases"><span>Sarah est malade.</span><span>Sa mère appelle le médecin.</span></p>'; } },
+        { fr: "Hier, aujourd’hui, demain : quel mot change dans la phrase ?", en: "Yesterday, today, tomorrow: which word changes in the sentence?", illu: function () { return '<p class="tq-phrases"><span>Hier, Sarah était malade.</span><span>Aujourd’hui, Sarah est malade.</span><span>Demain, Sarah sera malade.</span></p>'; } },
+        { fr: "Comment être sûr que « tombe » est le verbe de la phrase ?", en: "How can we be sure that « tombe » is the verb of the sentence?", illu: function () { return '<p class="tq-phrases"><span>La pluie tombe sur la forêt.</span></p>'; } }] },
+    mots: { src: jrCartesMots, mat: "francais", pool: tqMots, reglage: tqMotsReglage,
+      questions: [
+        { fr: "Le mot « souvent » change-t-il ?", en: "Does the word « souvent » change?", illu: function () { return '<p class="tq-phrases"><span>Kakou court souvent.</span><span>Les cagous courent souvent.</span><span>Kakou courait souvent.</span></p>'; } },
+        { fr: "Observe ces mots. Que remarques-tu ?", en: "Look at these words. What do you notice?", illu: function () { return '<p class="tq-phrases tq-mots">' + [[1, 1], [2, 2], [3, 1]].map(function (x) { return "<span>" + MO.GROUPS[x[0]].fams[x[1]].words.map(MO.plain).join(" · ") + "</span>"; }).join("") + "</p>"; } },
+        { fr: "Comment apprendre ce mot pour bien l’écrire ?", en: "How can we learn this word so we can spell it?", illu: function () { return '<span class="mi-mot">bientôt</span>'; } }] },
+    diagrammes: { src: jrCartesDiagrammes, mat: "maths", pool: tqDiag,
+      questions: [
+        { fr: "La classe a compté ses fruits préférés. Comment ranger ces informations pour bien les lire ?", en: "The class counted their favourite fruits. How can we organise this information so it is easy to read?", illu: function () { var d = tqDiagD(); return '<p class="tq-vrac">' + [3, 0, 4, 1, 2].map(function (k) { return "<span>" + esc(dgNom(d, k)) + " : " + d.vals[k] + "</span>"; }).join("") + "</p>"; } },
+        { fr: "Dans un tableau, qu’écrit-on sur chaque ligne ?", en: "In a table, what do we write on each line?", illu: function (en) { var d = tqDiagD(); return '<table class="dg-table jr-table"><thead><tr><th>' + esc(tr(d.ctx.axeX)) + "</th><th>" + (en ? "Number of " + esc(d.ctx.axe.en) : "Nombre " + esc(d.ctx.axe.de)) + "</th></tr></thead><tbody>" + d.vals.map(function () { return "<tr><td>…</td><td>…</td></tr>"; }).join("") + "</tbody></table>"; } },
+        { fr: "Dans un graphique en barres, que nous dit la hauteur d’une barre ?", en: "In a bar chart, what does the height of a bar tell us?", illu: function (en) { return jrGraphique(tqDiagD(), en).replace(/jr-barre"/g, 'jr-barre jr-fixe"'); } }] }
+  };
+  var TQ = null;
+  function tqInit(seq) { if (!TQ || TQ.seq !== seq) TQ = { seq: seq, part: "menu", step: 0, vu: false, cfg: { n: 8, t: 30, liste: "g1" }, run: null, tid: null }; }
+  function pageTbiSeq(seq) {
+    tqInit(seq);
+    var S = TBI_SEQ[seq], en = langue === "en", P = TQ.part, m = MATIERE[S.mat], cartes = S.src(en), titreSeq = tr(C[seq].titre);
+    var haut = '<header class="k-haut"><div class="coco-row"><button class="coco-btn coco-btn--secondaire" type="button" data-action="tq-retour">← ' + (P === "menu" ? (en ? "Teacher area" : "Espace enseignante") : (en ? "Whiteboard menu" : "Menu du TBI")) + "</button>" +
+      (P === "run" ? '<button class="coco-btn coco-btn--secondaire" type="button" data-action="tq-pause">' + (TQ.run && TQ.run.pause ? (en ? "Resume" : "Reprendre") : "Pause") + "</button>" : "") +
+      '<button class="coco-btn coco-btn--secondaire" type="button" data-action="tq-plein">' + (en ? "Full screen" : "Plein écran") + "</button>" + choixLangue() + '</div><p class="tq-titre">' + esc(titreSeq) + "</p></header>";
+    var corps = "";
+    if (P === "menu") {
+      corps = bulle("coralie", en ? "We discover the lesson together, then we practise with our boards!" : "On découvre la leçon ensemble, puis on s’entraîne aux ardoises !") +
+        '<section class="etapes"><button class="coco-carte coco-carte--' + S.mat + ' tq-carte" type="button" data-action="tq-dec"><span class="coco-carte-vignette"><img src="' + POSE("coralie", "idee") + '" alt=""></span><span><span class="coco-carte-etape">1 · ' + (en ? "To discover" : "Pour découvrir") + "</span><b>" + (en ? "Guided discovery" : "La découverte guidée") + "</b><small>" + cartes.length + (en ? " steps: a question for the class, then the lesson." : " étapes : une question à la classe, puis la leçon.") + "</small></span></button>" +
+        '<button class="coco-carte coco-carte--' + S.mat + ' tq-carte" type="button" data-action="tq-setup"><span class="coco-carte-vignette"><img src="' + POSE("kakou", "victoire") + '" alt=""></span><span><span class="coco-carte-etape">2 · ' + (en ? "To practise" : "Pour s’entraîner") + "</span><b>" + (en ? "Show me your boards" : "Le jeu des ardoises") + "</b><small>" + (en ? "Questions from the activities, on the boards." : "Les questions des activités, aux ardoises.") + "</small></span></button></section>" +
+        '<p class="po-note">' + (en ? "Space or right arrow: next. Left arrow: back. P: pause. F: full screen. Esc: back." : "Espace ou flèche droite : suite. Flèche gauche : retour. P : pause. F : plein écran. Échap : retour.") + "</p>";
+    } else if (P === "dec") {
+      var c = cartes[TQ.step], P2 = (S.src.persos || [])[TQ.step] || ["coralie", "presente"], q = S.questions[TQ.step];
+      corps = '<div class="tq-dec ' + m.classe + (TQ.vu ? "" : " tq-dec--question") + '">' + (TQ.vu ? '<div class="tq-illu">' + c.svg + "</div>" : q.illu ? '<div class="tq-illu tq-illu--q">' + q.illu(en) + "</div>" : "") + '<div class="tq-droite">' +
+        '<div class="tq-bulle"><img src="' + POSE(P2[0], TQ.vu ? P2[1] : "reflechit") + '" alt=""><div><h2>' + esc(typo(c.t)) + '</h2><p class="tq-question">' + esc(typo(tr(q))) + "</p></div></div>" +
+        (TQ.vu ? '<div class="tq-lecon">' + c.txt.map(function (p, k) { return '<p class="jr-p" style="animation-delay:' + (0.1 + k * 0.45) + 's">' + typo(p) + "</p>"; }).join("") + "</div>"
+          : '<button class="coco-btn coco-btn--grand" type="button" data-action="tq-voir">' + (en ? "Let’s find out" : "On découvre") + "</button>") + "</div></div>" +
+        '<div class="hr-tbi-nav"><button class="coco-btn coco-btn--secondaire" type="button" data-action="tq-prec"' + (TQ.step === 0 && !TQ.vu ? " disabled" : "") + ">← " + (en ? "Back" : "Précédent") + '</button><ol class="coco-progression">' + cartes.map(function (_, k) { return '<li class="' + (k < TQ.step || (k === TQ.step && TQ.vu) ? "is-fait" : k === TQ.step ? "is-encours" : "") + '"></li>'; }).join("") + '</ol><button class="coco-btn" type="button" data-action="tq-suite">' + (!TQ.vu ? (en ? "Let’s find out" : "On découvre") : TQ.step === cartes.length - 1 ? (en ? "Finish" : "Terminer") : (en ? "Next" : "Suivant")) + " →</button></div>";
+    } else if (P === "setup") {
+      var cf = TQ.cfg, B = function (g, v, l) { return '<button class="coco-btn coco-btn--secondaire" type="button" data-action="tq-cfg" data-k="' + g + '" data-v="' + v + '" aria-pressed="' + (cf[g] === v) + '">' + l + "</button>"; };
+      corps = bulle("margouille", en ? "Choose the settings, then start the game!" : "Choisis les réglages, puis lance le jeu !") + '<section class="zone ' + m.classe + ' hr-reglages"><h3>' + (en ? "Number of questions" : "Nombre de questions") + '</h3><div class="coco-row">' + [5, 8, 10].map(function (k) { return B("n", k, k); }).join("") +
+        "</div>" + (S.reglage ? S.reglage(B) : "") + "<h3>" + (en ? "Time to write" : "Temps pour écrire") + '</h3><div class="coco-row">' + [[0, en ? "No timer" : "Sans minuteur"], [15, "15 s"], [30, "30 s"], [45, "45 s"], [60, "1 min"]].map(function (x) { return B("t", x[0], x[1]); }).join("") +
+        '</div><button class="coco-btn coco-btn--grand" type="button" data-action="tq-lancer">' + (en ? "Let’s go!" : "C’est parti !") + "</button></section>";
+    } else if (P === "run") {
+      var r = TQ.run, qq = r.qs[r.i], voir = r.phase === "voir", zone = qq.z ? qq.z(en, voir) : "";
+      if (qq.t === "choix") zone += '<ol class="tq-options">' + qq.o.map(function (o, k) { return '<li class="' + (voir && k === qq.a ? "est-juste" : voir ? "tq-pale" : "") + '"><b>' + "ABCDEF".charAt(k) + "</b> " + esc(typo(qzT(o))) + "</li>"; }).join("") + "</ol>";
+      else if (qq.t === "champs") zone += '<p class="tq-champs">' + qq.champs.map(function (f) { var av = en && f.avantEn !== undefined ? f.avantEn : (f.avant || ""), v = qq.r[f.k];
+        return (f.sep ? "<span>" + esc(f.sep) + "</span>" : "") + (av ? "<span>" + esc(av) + "</span>" : "") + '<span class="tq-trou' + (voir ? " vu" : "") + '">' + (voir ? (typeof v === "number" ? tqNb(v, en) : exMille(v)) : "…") + "</span>" + (f.apres ? "<span>" + esc(qzT(f.apres)) + "</span>" : ""); }).join("") + "</p>";
+      var bas = r.phase === "ecrit" ? '<p class="tq-consigne">' + (en ? "Write your answer on your board." : "Écris ta réponse sur ton ardoise.") + "</p>" + (r.t ? '<div class="hr-tbi-barre"><i id="tq-barre" style="width:' + (r.reste / r.t * 100).toFixed(1) + '%"></i></div><p class="tq-temps" id="tq-temps">' + Math.ceil(r.reste) + " s</p>" : "")
+        : r.phase === "leve" ? '<p class="tq-consigne tq-leve">' + (en ? "Boards up!" : "Ardoises levées !") + "</p>"
+        : '<div class="tq-correction">' + retour("bravo", en ? "Let’s correct" : "On corrige", typo(qzT(qq.ex))) + "</div>";
+      corps = '<p class="mi-indice">' + t("question")(r.i + 1, r.qs.length) + '</p><section class="tq-run ' + m.classe + '"><div class="tq-enonce">' + qzT(qq.c) + "</div>" + zone + bas + "</section>" +
+        '<div class="hr-tbi-nav"><span></span><button class="coco-btn coco-btn--grand" type="button" data-action="tq-suite">' + (r.phase === "ecrit" ? (en ? "Boards up" : "Ardoises levées") : r.phase === "leve" ? (en ? "Let’s correct" : "On corrige") : r.i === r.qs.length - 1 ? (en ? "Finish" : "Terminer") : (en ? "Next question" : "Question suivante")) + " →</button></div>";
+    } else corps = '<section class="bilan"><img src="' + POSE("coralie", "victoire") + '" alt=""><h2>' + (en ? "Well done, everyone!" : "Bravo à toute la classe !") + '</h2><div class="coco-row"><button class="coco-btn" type="button" data-action="tq-lancer">' + t("rejouer") + '</button><button class="coco-btn coco-btn--secondaire" type="button" data-action="tq-retour">' + (en ? "Whiteboard menu" : "Menu du TBI") + "</button></div></section>";
+    return '<div class="hr-tbi tq">' + haut + corps + "</div>";
+  }
+  function tqMinuteur() {
+    clearInterval(TQ.tid); var r = TQ.run; if (!r || !r.t || r.phase !== "ecrit") return;
+    TQ.tid = setInterval(function () {
+      var r = TQ && TQ.run; if (!r || TQ.part !== "run" || r.phase !== "ecrit" || r.pause) return;
+      r.reste = Math.max(0, r.reste - 0.25); var el = document.getElementById("tq-temps"), b = document.getElementById("tq-barre");
+      if (el) el.textContent = Math.ceil(r.reste) + " s"; if (b) b.style.width = (r.reste / r.t * 100) + "%";
+      if (r.reste <= 0) { clearInterval(TQ.tid); r.phase = "leve"; rendre(); }
+    }, 250);
+  }
+  function tqLancer() {
+    var S = TBI_SEQ[TQ.seq], pool = [];
+    if (S.pool) pool = S.pool(TQ.cfg); else S.jeux.forEach(function (j) { pool = pool.concat(QUIZ[TQ.seq].jeux[j].gen()); });
+    TQ.run = { i: 0, qs: HE.shuf(pool).slice(0, TQ.cfg.n), phase: "ecrit", t: TQ.cfg.t, reste: TQ.cfg.t, pause: false }; TQ.part = "run"; tqMinuteur();
+  }
+  function tqSuite() {
+    var n = TBI_SEQ[TQ.seq].src(langue === "en").length;
+    if (TQ.part === "dec") { if (!TQ.vu) TQ.vu = true; else if (TQ.step >= n - 1) { TQ.part = "menu"; TQ.step = 0; TQ.vu = false; } else { TQ.step++; TQ.vu = false; } }
+    else if (TQ.part === "run") { var r = TQ.run;
+      if (r.phase === "ecrit") { r.phase = "leve"; clearInterval(TQ.tid); }
+      else if (r.phase === "leve") r.phase = "voir";
+      else { r.i++; if (r.i >= r.qs.length) { TQ.part = "fin"; clearInterval(TQ.tid); } else { r.phase = "ecrit"; r.reste = r.t; tqMinuteur(); } } }
+  }
+  function tqPrec() { if (TQ.part !== "dec") return; if (TQ.vu) TQ.vu = false; else if (TQ.step > 0) { TQ.step--; TQ.vu = true; } }
+  function tqRetour() { clearInterval(TQ.tid); if (TQ.part === "menu") location.hash = "ens-sequences"; else { TQ.part = "menu"; TQ.step = 0; TQ.vu = false; } }
+  function actionTq(a, el) {
+    if (a === "tq-dec") { TQ.part = "dec"; TQ.step = 0; TQ.vu = false; }
+    else if (a === "tq-setup") TQ.part = "setup";
+    else if (a === "tq-cfg") TQ.cfg[el.dataset.k] = isNaN(+el.dataset.v) ? el.dataset.v : +el.dataset.v;
+    else if (a === "tq-lancer") tqLancer();
+    else if (a === "tq-voir") TQ.vu = true;
+    else if (a === "tq-suite") tqSuite();
+    else if (a === "tq-prec") tqPrec();
+    else if (a === "tq-retour") tqRetour();
+    else if (a === "tq-pause") { if (TQ.run) TQ.run.pause = !TQ.run.pause; }
+    else if (a === "tq-plein") { try { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen(); } catch (x) {} }
+  }
+  document.addEventListener("keydown", function (e) {
+    var r = route(); if (!/^tbi-/.test(r) || r === "tbi-heure" || !TQ) return; var tg = e.target; if (tg && /INPUT|TEXTAREA|SELECT/.test(tg.tagName)) return;
+    if (e.key === " " || e.key === "ArrowRight") { if (TQ.part === "dec" || TQ.part === "run") { e.preventDefault(); tqSuite(); rendre(); } }
+    else if (e.key === "ArrowLeft") { e.preventDefault(); tqPrec(); rendre(); }
+    else if (e.key === "Escape") { tqRetour(); rendre(); }
+    else if (e.key === "p" || e.key === "P") { if (TQ.run) TQ.run.pause = !TQ.run.pause; rendre(); }
+    else if (e.key === "f" || e.key === "F") actionTq("tq-plein");
+  });
   function lxLecon(seq, sous, blocs, src) {
     var m = MATIERE.maths, en = langue === "en";
     return barre("maths") + hautJeu(m, "seq-" + seq, { sous: sous, titre: t("lecon") }) +
@@ -2039,6 +2240,22 @@
       '<div class="coco-row"><button class="coco-btn" type="button" data-action="lx-somme">' + (en ? "Another amount" : "Une autre somme") + "</button>" + (s !== 6875 ? '<button class="coco-btn coco-btn--secondaire" type="button" data-action="lx-somme0">' + (en ? "Back to the lesson example" : "Revenir à l’exemple de la leçon") + "</button>" : "") + "</div>";
     return lxLecon("monnaie", tr(C.monnaie.titre), [[en ? "The money of New Caledonia" : "La monnaie calédonienne", bloc1], [en ? "Splitting an amount" : "Décomposer une somme", bloc2]], jrCartesMonnaie);
   }
+  /* Objets dessinés pour les masses (D-117) : style pictogramme (trait encre, aplats), dessinés pour le site (pas de banque d’images).
+     Chaque objet est posé sur une balance de cuisine ; le camion, sur un pont-bascule. */
+  var OBJ_M = {
+    trombone: '<svg class="obj obj--trombone" viewBox="0 0 60 30" aria-hidden="true"><path d="M8 20h38a6 6 0 0 0 0-12H14a4 4 0 0 0 0 8h28" fill="none" stroke="#5d6b7e" stroke-width="3.5" stroke-linecap="round"/></svg>',
+    sucre: '<svg class="obj" viewBox="0 0 70 64" aria-hidden="true"><path d="M8 14h54v46H8z" fill="#fff" stroke="#1d2744" stroke-width="3" stroke-linejoin="round"/><path d="M8 14l8-10h38l8 10" fill="#e8eef7" stroke="#1d2744" stroke-width="3" stroke-linejoin="round"/><rect x="8" y="26" width="54" height="20" fill="#2456a6"/><text x="35" y="40" text-anchor="middle" font-family="Fredoka, sans-serif" font-weight="700" font-size="12" fill="#fff">SUCRE</text><text x="35" y="57" text-anchor="middle" font-family="Fredoka, sans-serif" font-weight="700" font-size="10" fill="#1d2744">1 kg</text></svg>',
+    riz: '<svg class="obj" viewBox="0 0 64 70" aria-hidden="true"><path d="M14 10c6-6 30-6 36 0l4 52c-8 6-36 6-44 0z" fill="#fbf3dc" stroke="#1d2744" stroke-width="3" stroke-linejoin="round"/><path d="M14 10c8 5 28 5 36 0" fill="none" stroke="#1d2744" stroke-width="3"/><rect x="16" y="30" width="32" height="18" rx="3" fill="#c0262d"/><text x="32" y="43" text-anchor="middle" font-family="Fredoka, sans-serif" font-weight="700" font-size="11" fill="#fff">RIZ</text></svg>',
+    fruits: '<svg class="obj obj--large" viewBox="0 0 100 60" aria-hidden="true"><path d="M8 30h84l-10 26H18z" fill="#c99a5b" stroke="#1d2744" stroke-width="3" stroke-linejoin="round"/><ellipse cx="32" cy="24" rx="15" ry="11" fill="#f2a227" stroke="#1d2744" stroke-width="2.5"/><ellipse cx="58" cy="22" rx="15" ry="11" fill="#e35d2b" stroke="#1d2744" stroke-width="2.5"/><path d="M62 30c8-18 26-20 30-14-8 0-16 6-22 16z" fill="#f6d33c" stroke="#1d2744" stroke-width="2.5" stroke-linejoin="round"/><path d="M18 44h64M22 52h56" stroke="#8a6534" stroke-width="2"/></svg>',
+    camion: '<svg class="obj obj--camion" viewBox="0 0 140 70" aria-hidden="true"><rect x="4" y="8" width="88" height="42" rx="4" fill="#0f8e9f" stroke="#1d2744" stroke-width="3"/><path d="M92 22h24l16 16v12H92z" fill="#c0262d" stroke="#1d2744" stroke-width="3" stroke-linejoin="round"/><path d="M100 26h14l10 10h-24z" fill="#d5f1f4" stroke="#1d2744" stroke-width="2"/><circle cx="24" cy="56" r="10" fill="#1d2744"/><circle cx="24" cy="56" r="4" fill="#cfd6df"/><circle cx="70" cy="56" r="10" fill="#1d2744"/><circle cx="70" cy="56" r="4" fill="#cfd6df"/><circle cx="114" cy="56" r="10" fill="#1d2744"/><circle cx="114" cy="56" r="4" fill="#cfd6df"/></svg>'
+  };
+  OBJ_M.sucre4 = '<span class="obj-pile">' + OBJ_M.sucre + OBJ_M.sucre + OBJ_M.sucre + OBJ_M.sucre + "</span>";
+  /* un objet posé sur la balance : la balance affiche v et u (« ? » tant qu’on ne sait pas) */
+  function pesee(obj, v, u, lib) {
+    var objet = OBJ_M[obj] || "";
+    if (obj === "camion") return '<span class="pesee pesee--pont"><span class="pesee-objet">' + objet + '</span><span class="pont"><span class="pont-plateau"></span><span class="pont-ecran">' + v + ' <i class="' + (u === "?" ? "po-bal-efface" : "") + '">' + u + "</i></span></span>" + (lib ? "<small>" + lib + "</small>" : "") + "</span>";
+    return '<span class="pesee"><span class="pesee-objet">' + objet + "</span>" + PO.balance(v, u) + (lib ? "<small>" + lib + "</small>" : "") + "</span>";
+  }
   /* ---------- Leçon GM8 « Les mesures de masses » (D-110) : phrases de la leçon mot pour mot ---------- */
   function lxMille(n, en) { return en ? n.toLocaleString("en-GB") : exMille(n).replace(/ /g, " "); }
   var LX_PESEE = [
@@ -2050,7 +2267,7 @@
   function pageLeconMasses() {
     var en = langue === "en", P = LX_PESEE.filter(function (x) { return x.id === LX.pese; })[0], E = LX.ex || { a: 4, b: 5, c: 1, d: 500 }, vu = LX.vu || {};
     var bloc1 = "<p>" + (en ? "To find out the weight of an object, how much it weighs, we measure its <b>mass</b> with a <b>scale</b>." : "Pour connaître le poids d’un objet, combien il pèse, on mesure sa <b>masse</b> à l’aide d’une <b>balance</b>.") + "</p>" +
-      '<div class="lx-pesee"><div class="lx-pesee-bal">' + PO.balance(P ? P.v : "0", P ? P.u : "g") + '<p class="lx-pesee-txt">' + (P ? esc(tr(P.phr)) : (en ? "Put something on the scale." : "Pose quelque chose sur la balance.")) + "</p></div>" +
+      '<div class="lx-pesee"><div class="lx-pesee-bal">' + (P ? pesee(P.id, P.v, P.u) : PO.balance("0", "g")) + '<p class="lx-pesee-txt">' + (P ? esc(tr(P.phr)) : (en ? "Put something on the scale." : "Pose quelque chose sur la balance.")) + "</p></div>" +
       '<div class="po-etal">' + LX_PESEE.map(function (x) { return '<button class="po-fruit' + (P === x ? " is-choisi" : "") + '" type="button" data-action="lx-pese" data-v="' + x.id + '" aria-pressed="' + (P === x) + '"><span>' + esc(x[en ? "en" : "fr"]) + "</span></button>"; }).join("") + "</div></div>";
     var bloc2 = "<p>" + (en ? "The basic unit is the <b>gram (g)</b>. 1 gram is the weight of a paper clip!" : "L’unité de référence est le <b>gramme (g)</b>. 1 gramme, c’est le poids d’un trombone !") + "</p><p>" +
       (en ? "To give bigger masses, we use the <b>kilogram</b> and/or the <b>tonne</b>." : "Pour exprimer des mesures de masses plus grandes on utilise le <b>kilogramme</b> et/ou la <b>tonne</b>.") + "</p>" +
@@ -2067,14 +2284,14 @@
   }
   /* « Je retiens » : la leçon GM8 mot pour mot, découpée (en anglais : traduction, en attendant une leçon anglaise) */
   function jrCartesMasses(en) {
-    var B = function (v, u, lib, k) { return lxPop('<span class="lx-pesee-mini">' + PO.balance(v, u) + "<small>" + lib + "</small></span>", k); };
+    var B = function (v, u, lib, k, obj) { return lxPop('<span class="lx-pesee-mini">' + pesee(obj, v, u, lib) + "</span>", k); };
     var eg = function (a, b, k) { return lxPop('<span class="lx-eg"><b>' + a + "</b> = <b>" + b + "</b></span>", k); };
     return [
-      { t: en ? "The scale" : "La balance", svg: '<div class="lx-illu">' + B("1", "kg", en ? "a bag of sugar" : "un paquet de sucre", 0) + "</div>",
+      { t: en ? "The scale" : "La balance", svg: '<div class="lx-illu">' + B("1", "kg", en ? "a bag of sugar" : "un paquet de sucre", 0, "sucre") + "</div>",
         txt: [en ? "To find out the weight of an object, how much it weighs, we measure its mass with a scale." : "Pour connaître le poids d’un objet, combien il pèse, on mesure sa masse à l’aide d’une balance."] },
-      { t: en ? "The gram" : "Le gramme", svg: '<div class="lx-illu">' + B("1", "g", en ? "a paper clip" : "un trombone", 0) + "</div>",
+      { t: en ? "The gram" : "Le gramme", svg: '<div class="lx-illu">' + B("1", "g", en ? "a paper clip" : "un trombone", 0, "trombone") + "</div>",
         txt: en ? ["The basic unit is the gram (g).", "1 gram is the weight of a paper clip!"] : ["L’unité de référence est le gramme (g).", "1 gramme, c’est le poids d’un trombone !"] },
-      { t: en ? "The kilogram and the tonne" : "Le kilogramme et la tonne", svg: '<div class="lx-illu">' + B("4", "kg", en ? "this fruit" : "ces fruits", 0) + B("5", "t", en ? "this lorry" : "ce camion", 2) + "</div>",
+      { t: en ? "The kilogram and the tonne" : "Le kilogramme et la tonne", svg: '<div class="lx-illu">' + B("4", "kg", en ? "this fruit" : "ces fruits", 0, "fruits") + B("5", "t", en ? "this lorry" : "ce camion", 2, "camion") + "</div>",
         txt: en ? ["To give bigger masses, we use the kilogram and/or the tonne.", "This fruit weighs 4 kg.", "This lorry weighs 5 t."] : ["Pour exprimer des mesures de masses plus grandes on utilise le kilogramme et/ou la tonne.", "Ces fruits pèsent 4 kg.", "Ce camion pèse 5 t."] },
       { t: en ? "1 kg = 1,000 g · 1 t = 1,000 kg" : "1 kg = 1 000 g · 1 t = 1 000 kg", svg: '<div class="lx-illu lx-col">' + eg("1 kg", lxMille(1000, en) + " g", 0) + eg("1 t", lxMille(1000, en) + " kg", 2) + "</div>",
         txt: ["1 kg = " + lxMille(1000, en) + " g", "1 t = " + lxMille(1000, en) + " kg"] },
@@ -2462,7 +2679,7 @@
   var DOSSIER_SVG = '<svg class="ens-dossier-ic" viewBox="0 0 64 52" aria-hidden="true"><path d="M4 10a5 5 0 0 1 5-5h15l6 6h25a5 5 0 0 1 5 5v27a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z" class="ens-d-fond"/><path d="M4 18h56v25a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z" class="ens-d-face"/></svg>';
   var CADENAS = '<svg class="ens-cadenas" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></svg>';
   function pageCode() {
-    return barre("") + '<section class="entete ens-entete"><img src="' + IMG("coralie-avatar") + '" alt=""><div><h1>Espace enseignante</h1><p>Cet espace est réservé à la maîtresse.</p></div></section>' +
+    return barre("enseignante") + '<section class="entete ens-entete"><img src="' + IMG("coralie-avatar") + '" alt=""><div><h1>Espace enseignante</h1><p>Cet espace est réservé à la maîtresse.</p></div></section>' +
       '<form class="ens-code" data-ens-form novalidate><label for="ens-code">' + CADENAS + "Code d’accès</label>" +
       '<div class="ens-code-ligne"><input id="ens-code" type="password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="go"><button class="coco-btn" type="submit">Entrer</button></div>' +
       '<p class="ens-code-msg" role="status" aria-live="polite"></p></form>' +
@@ -2476,7 +2693,7 @@
     msg.classList.add("est-visible"); champ.value = ""; champ.focus();
   });
   function ensEntete(sous) {
-    return barre("") + '<section class="entete ens-entete"><img src="' + IMG("coralie") + '" alt=""><div><h1>Espace enseignante</h1>' +
+    return barre("enseignante") + '<section class="entete ens-entete"><img src="' + IMG("coralie") + '" alt=""><div><h1>Espace enseignante</h1>' +
       (sous ? '<p class="ens-fil"><a href="#enseignante">Espace enseignante</a> › ' + esc(sous) + "</p>" : "<p>Trois dossiers pour préparer, suivre et se former.</p>") + "</div>" +
       '<button class="coco-btn coco-btn--secondaire ens-verrou" type="button" data-action="ens-verrouiller">' + CADENAS + "Verrouiller</button></section>";
   }
@@ -2517,16 +2734,16 @@
     var F = "ens-pb--francais", nQ = function (seq) { return QUIZ[seq] ? Object.keys(QUIZ[seq].jeux).length : 0; };
     return ensEntete("Séquences d’apprentissage") +
       '<p class="ens-legende">Pour chaque séquence, toujours les mêmes boutons : <b>Fiche enseignante</b>, La leçon, Fiche d’exercices, Au TBI, Voir la séquence. Un bouton grisé « À venir » montre ce qui reste à construire.</p>' +
-      ensDomaine("m-francais", "Français · Grammaire et conjugaison", [ensSeq("verbe", "tehani", "Le verbe", "CONJ2", 2 + nQ("verbe"), "", F)]) +
-      ensDomaine("m-francais", "Français · Orthographe", [ensSeq("mots", "sari", "Les mots invariables", "affiches 2026", Object.keys(JEUX_MOTS).length, "", F)]) +
-      ensDomaine("m-maths", "Maths · Techniques opératoires", [ensSeq("division", "nina", "La division en ligne", "CAL7 et CAL8", nQ("division"), "")]) +
+      ensDomaine("m-francais", "Français · Grammaire et conjugaison", [ensSeq("verbe", "tehani", "Le verbe", "CONJ2", 2 + nQ("verbe"), ROUTES["tbi-verbe"] ? "#tbi-verbe" : "", F)]) +
+      ensDomaine("m-francais", "Français · Orthographe", [ensSeq("mots", "sari", "Les mots invariables", "affiches 2026", Object.keys(JEUX_MOTS).length, ROUTES["tbi-mots"] ? "#tbi-mots" : "", F)]) +
+      ensDomaine("m-maths", "Maths · Techniques opératoires", [ensSeq("division", "nina", "La division en ligne", "CAL7 et CAL8", nQ("division"), ROUTES["tbi-division"] ? "#tbi-division" : "")]) +
       ensDomaine("m-maths", "Maths · Grandeurs et mesures", [
-        ensSeq("monnaie", "mei", "La monnaie et les prix", "GM1", nQ("monnaie"), ""),
+        ensSeq("monnaie", "mei", "La monnaie et les prix", "GM1", nQ("monnaie"), ROUTES["tbi-monnaie"] ? "#tbi-monnaie" : ""),
         ensSeq("digitale", "tehani", "Lire l’heure digitale", "GM5", nQ("digitale"), JEU_DIGITAL),
         ensSeq("heure", "coralie", "Lire l’heure à aiguilles", "GM5", Object.keys(JEUX_HEURE).length, "#tbi-heure"),
-        ensSeq("masses", "sari", "Mesurer des masses", "GM8", nQ("masses"), "")]) +
+        ensSeq("masses", "sari", "Mesurer des masses", "GM8", nQ("masses"), ROUTES["tbi-masses"] ? "#tbi-masses" : "")]) +
       ensDomaine("m-maths", "Maths · Résolution de problèmes", [
-        ensSeq("diagrammes", "waeko", "Lire un graphique en barres", "OGD1", Object.keys(JEUX_DIAG).length, ""),
+        ensSeq("diagrammes", "waeko", "Lire un graphique en barres", "OGD1", Object.keys(JEUX_DIAG).length, ROUTES["tbi-diagrammes"] ? "#tbi-diagrammes" : ""),
         ensLigne("adi", "Banque de problèmes (Vergnaud)", "217 problèmes classés par type, avec leurs schémas", [["Ouvrir la banque", "#banque"]])]);
   }
 
@@ -2888,6 +3105,7 @@
   Object.keys(JEUX_HEURE).forEach(function (j) { ROUTES["heure-" + j] = function () { return jeuHeure(j); }; });
   Object.keys(JEUX_DIAG).forEach(function (j) { ROUTES["diag-" + j] = function () { return jeuDiag(j); }; });
   Object.keys(PO.sequences).forEach(function (sid) { ROUTES["seq-" + sid] = function () { return pageSequence(sid); }; });
+  Object.keys(TBI_SEQ).forEach(function (sq) { ROUTES["tbi-" + sq] = function () { return pageTbiSeq(sq); }; });
   Object.keys(FO.fiches).concat(["sullivan"]).forEach(function (c) { if (c === "sullivan" || !FO.fiches[c].vide) ROUTES["ens-form-" + c] = function () { return pageFormationFiche(c); }; });
   Object.keys(PO.problemes).forEach(function (id) {
     ROUTES["po-" + id] = function () { return poAutonome(id); };
@@ -2911,7 +3129,7 @@
   document.addEventListener("keydown", function (e) { if (e.key === "Escape") fermerSousMenus(); });
   function rendre() {
     var r = route();
-    if (r !== derniere) { if (r === "jeu-verbe-decouvre") D = null; if (r === "jeu-verbe-chasse") H = null; if (/^po-/.test(r)) A = null; if (/^mots-/.test(r)) G = null; if (/^heure-/.test(r)) HG = null; if (/^diag-/.test(r)) GD = null; if (r === "tbi-heure") { clearInterval(TB.tid); TB.part = "menu"; } try { if (MO.peutParler) speechSynthesis.cancel(); } catch (x) {} if (/^classe-/.test(r)) { K = null; clearInterval(minuteur); } if (r === "lecon-verbe") L = { carte: {}, moment: "present", machine: 0, phrase: 0 }; if (/^exos-/.test(r)) EXF = null; if (/^qz-/.test(r)) QZ = null; if (r === "ens-etoiles") ET = { sel: null, liste: false, msg: "" }; if (/^lecon-/.test(r)) { LX = {}; JR = { i: 0, tout: false }; } window.scrollTo(0, 0); derniere = r; }
+    if (r !== derniere) { if (r === "jeu-verbe-decouvre") D = null; if (r === "jeu-verbe-chasse") H = null; if (/^po-/.test(r)) A = null; if (/^mots-/.test(r)) G = null; if (/^heure-/.test(r)) HG = null; if (/^diag-/.test(r)) GD = null; if (r === "tbi-heure") { clearInterval(TB.tid); TB.part = "menu"; } if (/^tbi-/.test(r) && TQ) { clearInterval(TQ.tid); TQ = null; } try { if (MO.peutParler) speechSynthesis.cancel(); } catch (x) {} if (/^classe-/.test(r)) { K = null; clearInterval(minuteur); } if (r === "lecon-verbe") L = { carte: {}, moment: "present", machine: 0, phrase: 0 }; if (/^exos-/.test(r)) EXF = null; if (/^qz-/.test(r)) QZ = null; if (r === "ens-etoiles") ET = { sel: null, liste: false, msg: "" }; if (/^lecon-/.test(r)) { LX = {}; JR = { i: 0, tout: false }; } window.scrollTo(0, 0); derniere = r; }
     document.documentElement.lang = langue;
     var ferme = !ensOuvert && !UNIQUE && ENS_ROUTES.test(r);
     document.body.classList.toggle("mode-classe", !ferme && /^classe-|^tbi-/.test(r));
@@ -2940,6 +3158,7 @@
     else if (/^qz-/.test(a)) actionQZ(a, el);
     else if (/^lx-/.test(a)) actionLX(a, el);
     else if (/^et-/.test(a)) actionEtoiles(a, el);
+    else if (/^tq-/.test(a)) actionTq(a, el);
     else if (/^t-/.test(a)) actionTbi(a, el);
     else if (/^g-/.test(a)) actionDiag(a, el);
     else if (/^jr-/.test(a)) actionJr(a, el);

@@ -1166,3 +1166,117 @@ a.fo-carte:hover { background: var(--lagon-clair); }
 .fo-fiche { border-color: var(--lagon); } .fo-fiche h1 { color: var(--lagon-fonce); } .fo-fiche p { margin: 6px 0; } .fo-fiche ul, .fo-fiche ol { margin: 4px 0 8px; } .fo-fiche h3 { color: var(--lagon-fonce); margin-top: 16px; } .fo-site h2 { color: var(--lagon-fonce); }
 /* fiches de Français en bleu (D-115) */
 .fiche.m-francais { border-color: var(--francais); } .fiche.m-francais h1 { color: var(--francais); } .fiche.m-francais h2 { color: var(--francais-fonce); } .fiche.m-francais .f-prog h2 { color: var(--lagon-fonce); } .fiche.m-francais .f-table th { background: var(--francais-clair); }
+
+/* Mode « Au TBI » des séquences (D-117) : découverte guidée + jeu des ardoises, lisible de loin */
+.tq-titre { margin: 0; font: 400 26px/1.2 var(--font-titre); color: var(--encre); }
+.tq-carte .coco-carte-vignette img { width: 96px; height: auto; }
+.tq-dec { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; align-items: center; background: var(--carte); border: var(--bord) solid var(--c, var(--maths)); border-radius: var(--arrondi-grand); padding: 24px; min-height: 420px; }
+.tq-illu { display: grid; place-items: center; }
+.tq-illu .jr-svg { max-width: 420px; }
+.tq-illu .lx-illu { zoom: 1.35; }
+.tq-bulle { display: grid; grid-template-columns: 130px 1fr; gap: 16px; align-items: center; }
+.tq-bulle img { width: 130px; height: auto; }
+.tq-bulle h2 { margin: 0 0 6px; font: 400 32px/1.15 var(--font-titre); color: var(--c, var(--maths)); }
+.tq-question { font: 600 28px/1.35 var(--font-texte); margin: 0; }
+.tq-lecon { margin-top: 18px; background: var(--cc, var(--maths-clair)); border-radius: var(--arrondi); padding: 14px 18px; }
+.tq-lecon .jr-p { font-size: 28px; line-height: 40px; }
+.tq-droite > .coco-btn { margin-top: 20px; }
+.tq-run { background: var(--carte); border: var(--bord) solid var(--c, var(--maths)); border-radius: var(--arrondi-grand); padding: 24px 28px; display: grid; gap: 16px; justify-items: center; text-align: center; min-height: 380px; align-content: center; }
+.tq-enonce { font: 600 34px/1.35 var(--font-texte); max-width: 1000px; }
+.tq-run .lx-illu, .tq-run .qz-reveil, .tq-run .qz-bourse { zoom: 1.4; }
+.tq-options { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; }
+.tq-options li { font: 700 30px/1.2 var(--font-lecture); border: 3px solid var(--trait); border-radius: var(--arrondi); padding: 12px 22px; background: #fff; }
+.tq-options li b { display: inline-grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: var(--lagon); color: #fff; font: 700 22px/1 var(--font-texte); margin-right: 8px; vertical-align: middle; }
+.tq-options li.est-juste { border-color: var(--reussite); background: var(--reussite-clair); }
+.tq-options li.tq-pale { opacity: .45; }
+.tq-champs { font: 700 38px/1.5 var(--font-lecture); margin: 0; }
+.tq-trou { display: inline-block; min-width: 90px; border-bottom: 4px dashed var(--soutien-fonce); margin: 0 6px; }
+.tq-trou.vu { border-bottom-style: solid; border-color: var(--reussite); color: var(--reussite); }
+.tq-consigne { font: 600 26px/1.3 var(--font-texte); color: var(--encre-douce); margin: 0; }
+.tq-leve { font: 400 44px/1.2 var(--font-titre); color: var(--lagon-fonce); }
+.tq-temps { font: 700 26px/1 var(--font-texte); margin: 0; }
+.tq-correction { width: 100%; max-width: 1000px; text-align: left; }
+.tq-correction .coco-retour p { font-size: 26px; line-height: 36px; }
+@media (max-width: 860px) { .tq-dec { grid-template-columns: 1fr; } .tq-bulle { grid-template-columns: 80px 1fr; } .tq-bulle img { width: 80px; } .tq-question, .tq-lecon .jr-p { font-size: 22px; line-height: 30px; } .tq-enonce { font-size: 24px; } .tq-options li { font-size: 22px; } .tq-champs { font-size: 28px; } .tq-illu .lx-illu, .tq-run .lx-illu, .tq-run .qz-reveil, .tq-run .qz-bourse { zoom: 1; } }
+.tq-dec--question { grid-template-columns: 1fr; justify-items: center; text-align: left; }
+.tq-dec--question .tq-droite { max-width: 1000px; display: grid; justify-items: center; gap: 10px; }
+.tq-dec--question .tq-bulle { grid-template-columns: 170px 1fr; } .tq-dec--question .tq-bulle img { width: 170px; }
+.tq-dec--question .tq-question { font-size: 38px; line-height: 1.3; }
+.tq-illu .po-balance { max-width: 300px; } .tq-illu .lx-pesee-mini .po-balance { max-width: 260px; } .tq-illu .lx-eg { font-size: 40px; }
+@media (max-width: 860px) { .tq-dec--question .tq-bulle { grid-template-columns: 80px 1fr; } .tq-dec--question .tq-bulle img { width: 80px; } .tq-dec--question .tq-question { font-size: 24px; } }
+.tq-carte > span:last-child { display: grid; gap: 4px; text-align: left; } .tq-carte b { font: 400 30px/1.15 var(--font-titre); color: var(--c, var(--maths)); } .tq-carte small { font-size: 19px; color: var(--encre-douce); } .tq-carte { min-height: 150px; }
+
+/* Masses : objets dessinés posés sur la balance (D-117) */
+.pesee { display: inline-grid; justify-items: center; gap: 0; vertical-align: bottom; }
+.pesee .pesee-objet { display: flex; justify-content: center; align-items: flex-end; margin-bottom: -6px; position: relative; z-index: 1; }
+.pesee .obj { width: 64px; height: auto; display: block; }
+.pesee .obj--trombone { width: 54px; }
+.pesee .obj--large { width: 96px; }
+.obj-pile { display: grid; grid-template-columns: repeat(2, 46px); gap: 0 2px; }
+.obj-pile .obj { width: 46px; }
+.pesee .po-balance { max-width: 170px; }
+.pesee small { font: 600 16px/1.3 var(--font-texte); margin-top: 4px; }
+.pesee--pont .obj--camion { width: 170px; }
+.pont { display: grid; justify-items: center; width: 200px; }
+.pont-plateau { display: block; width: 200px; height: 14px; background: #8b97a8; border: 3px solid #1d2744; border-radius: 4px; }
+.pont-ecran { margin-top: 6px; font: 700 26px/1 var(--font-lecture); color: #fff; background: #1d2744; border-radius: 8px; padding: 6px 14px; }
+.pont-ecran i { font-style: normal; color: #bfe3e8; font-size: 22px; }
+.pont-ecran i.po-bal-efface { color: var(--soutien); }
+.lx-pesee-mini .pesee .po-balance { max-width: 150px; }
+.tq-illu--q { display: flex; flex-wrap: wrap; gap: 30px; justify-content: center; align-items: flex-end; }
+.tq-illu--q .pesee .obj { width: 110px; } .tq-illu--q .pesee .obj--large { width: 150px; } .tq-illu--q .pesee .po-balance { max-width: 240px; } .tq-illu--q .pesee--pont .obj--camion { width: 230px; } .tq-illu--q .pont, .tq-illu--q .pont-plateau { width: 260px; }
+.tq-illu--q .obj-pile { grid-template-columns: repeat(2, 72px); } .tq-illu--q .obj-pile .obj { width: 72px; }
+.tq-illu--q small { font-size: 22px; }
+.tq-choix-obj { display: flex; gap: 40px; align-items: flex-end; flex-wrap: wrap; justify-content: center; }
+.tq-choix-obj > span { display: grid; justify-items: center; gap: 8px; }
+.tq-choix-obj .obj { width: 120px; height: auto; } .tq-choix-obj .obj--trombone { width: 100px; } .tq-choix-obj .obj--camion { width: 210px; }
+.tq-choix-obj small { font: 600 22px/1.2 var(--font-texte); }
+.tq-egal { font: 700 46px/1 var(--font-lecture); align-self: center; }
+.tq-illu .pesee .obj { width: 100px; } .tq-illu .pesee .po-balance { max-width: 230px; } .tq-illu .lx-pesee-mini .pesee .po-balance { max-width: 200px; }
+.lx-pesee-bal .pesee .obj { width: 80px; } .lx-pesee-bal .pesee .obj--large { width: 110px; } .lx-pesee-bal .pesee--pont .obj--camion { width: 180px; }
+@media (max-width: 860px) { .tq-illu--q .pesee .obj { width: 70px; } .tq-illu--q .pesee .po-balance { max-width: 160px; } .tq-choix-obj { gap: 16px; } .tq-choix-obj .obj { width: 70px; } .tq-choix-obj .obj--camion { width: 120px; } .tq-illu--q .pont, .tq-illu--q .pont-plateau { width: 160px; } .tq-illu--q .pesee--pont .obj--camion { width: 140px; } }
+
+/* Onglet « Espace enseignante » (D-118) : visible quand l’espace est ouvert ; titre en encre comme la page */
+.barre .coco-onglet--ens { --c: var(--encre); color: var(--encre); }
+.barre .coco-onglet--ens .onglet-dossier { width: 40px; height: auto; }
+.onglet-dossier .ens-d-fond { fill: var(--lagon-fonce); } .onglet-dossier .ens-d-face { fill: var(--lagon); }
+.onglet-court { display: none; }
+@media (max-width: 600px) { .onglet-long { display: none; } .onglet-court { display: inline; } .barre .coco-onglet--ens .onglet-dossier { width: 32px; } }
+.onglet-long { display: none; } .onglet-court { display: inline; }
+.barre .coco-onglet--ens .onglet-court { display: none; }
+.barre .coco-onglet--ens { padding: 0 4px; }
+.barre .coco-onglet--ens .onglet-dossier { width: 44px; }
+.ens-bandeau { display: flex; justify-content: flex-end; align-items: center; gap: 12px; margin: -8px 0 2px; font: 600 15px/1 var(--font-texte); }
+.ens-bandeau a { display: inline-flex; align-items: center; gap: 8px; color: var(--encre); text-decoration: none; padding: 3px 11px; border-radius: 999px; background: var(--lagon-clair); border: 1.5px solid var(--lagon); min-height: 30px; }
+.ens-bandeau a:hover, .ens-bandeau a[aria-current="page"] { background: var(--lagon); color: #fff; }
+.ens-bandeau-ic { width: 19px; height: auto; }
+.ens-bandeau a[aria-current="page"] .ens-d-face { fill: #fff; }
+.ens-bandeau-verrou { display: inline-flex; align-items: center; gap: 6px; background: none; border: 0; font: inherit; color: var(--encre-douce); cursor: pointer; min-height: 30px; }
+.ens-bandeau-verrou .ens-cadenas { width: 15px; height: 15px; }
+@media (max-width: 600px) { .ens-bandeau { justify-content: space-between; font-size: 14px; margin: 0 0 4px; } }
+/* Mode TBI des 5 autres séquences (D-117) : illustrations des questions de découverte et des ardoises */
+.tq-tas { display: flex; flex-wrap: wrap; gap: 8px; max-width: 420px; justify-content: center; padding: 12px; border: 2px dashed var(--trait); border-radius: 14px; }
+.tq-tas .lx-pt { width: 18px; height: 18px; }
+.tq-illu--q .lx-sacs { justify-content: center; }
+.lx-sac.tq-vide { display: inline-grid; place-items: center; min-width: 70px; min-height: 60px; font: 700 28px/1 var(--font-texte); color: var(--encre-douce); }
+.tq-grand { font-size: 56px; }
+.tq-phrases { display: grid; gap: 10px; justify-items: center; margin: 0; font: 600 34px/1.35 var(--font-lecture); }
+.tq-phrases b { color: var(--reussite); }
+.tq-mots { font-size: 28px; }
+.tq-vrac { display: flex; flex-wrap: wrap; gap: 14px 22px; justify-content: center; max-width: 520px; margin: 0; }
+.tq-vrac span { font: 600 26px/1.2 var(--font-lecture); background: #fff; border: 2px solid var(--trait); border-radius: 12px; padding: 6px 14px; }
+.tq-vrac span:nth-child(odd) { transform: rotate(-4deg); } .tq-vrac span:nth-child(even) { transform: rotate(3deg); }
+.tq-illu--q .dg-table { font-size: 20px; }
+.tq-run .dg-fig { width: min(560px, 100%); }
+.tq-run .mi-mot .tq-trou { min-width: 60px; margin: 0 4px; }
+@media (max-width: 860px) { .tq-phrases { font-size: 22px; } .tq-mots { font-size: 18px; } .tq-grand { font-size: 36px; } .tq-vrac span { font-size: 18px; } .tq-run .mi-mot { font-size: 26px; } }
+@media (max-width: 600px) { .tq .hr-tbi-nav .coco-progression { order: 3; width: 100%; justify-content: center; margin: 0; } }
+/* Ardoises avec un graphique : le graphique à gauche, les réponses à droite, pour que tout tienne sur l’écran du TBI */
+@media (min-width: 861px) {
+  .tq-run:has(> .dg-fig) { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); align-items: center; min-height: 0; }
+  .tq-run:has(> .dg-fig) > .tq-enonce { grid-column: 1 / -1; }
+  .tq-run:has(> .dg-fig) > .dg-fig { grid-column: 1; grid-row: 2 / span 5; width: 100%; }
+  .tq-run:has(> .dg-fig) > :not(.tq-enonce):not(.dg-fig) { grid-column: 2; }
+}
+.tq-run .tq-phrases { font-size: 42px; padding: 10px 26px; background: var(--papier); border-radius: var(--arrondi); }
+.hr-reglages.m-francais .coco-btn[aria-pressed="true"] { border-color: var(--francais); background: var(--francais-clair); }

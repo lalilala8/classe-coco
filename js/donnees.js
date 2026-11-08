@@ -101,18 +101,18 @@
       var d = tirer({ ctx: m === "prix" ? "fruits" : m === "trois" ? "peche" : null, pas: 2, niveaux: 10, min: 2 }), c = d.ctx.cats, v = d.vals, L = c.length;
       var o = melange(c.map(function (_, k) { return k; })), a = o[0], b = o[1];
       if (v[a] < v[b]) { var x = a; a = b; b = x; }
-      if (m === "total") return { d: d, rep: somme(v), fr: "Combien " + d.ctx.axe.de + " y a-t-il en tout ?", en: "How many " + d.ctx.axe.en + " are there in all?",
+      if (m === "total") return { d: d, rep: somme(v), calc: { op: "+", n: v.slice() }, fr: "Combien " + d.ctx.axe.de + " y a-t-il en tout ?", en: "How many " + d.ctx.axe.en + " are there in all?",
         aideFr: "Lis chaque barre, puis additionne les " + L + " nombres.", aideEn: "Read each bar, then add the " + L + " numbers." };
-      if (m === "ecart") { var e = ecart(d.ctx, c[a], c[b]); return { d: d, rep: v[a] - v[b], fr: e.fr, en: e.en,
+      if (m === "ecart") { var e = ecart(d.ctx, c[a], c[b]); return { d: d, rep: v[a] - v[b], calc: { op: "−", n: [v[a], v[b]] }, fr: e.fr, en: e.en,
         aideFr: "Lis les deux barres, puis cherche l'écart : le plus grand nombre moins le plus petit.", aideEn: "Read the two bars, then find the difference: the bigger number minus the smaller one." }; }
-      if (m === "trois") return { d: d, rep: v[0] + v[1] + v[2], fr: "Combien de poissons Papi Tao a-t-il pêchés du lundi au mercredi ?", en: "How many fish did Grandad Tao catch from Monday to Wednesday?",
+      if (m === "trois") return { d: d, rep: v[0] + v[1] + v[2], calc: { op: "+", n: [v[0], v[1], v[2]] }, fr: "Combien de poissons Papi Tao a-t-il pêchés du lundi au mercredi ?", en: "How many fish did Grandad Tao catch from Monday to Wednesday?",
         aideFr: "Lis les barres de lundi, mardi et mercredi, puis additionne.", aideEn: "Read the bars for Monday, Tuesday and Wednesday, then add them up." };
-      if (m === "prix") { var k = [0, 2, 3, 4][hasard(0, 3)]; return { d: d, rep: v[k] * 100, unite: "F",
+      if (m === "prix") { var k = [0, 2, 3, 4][hasard(0, 3)]; return { d: d, rep: v[k] * 100, unite: "F", calc: { op: "×", n: [v[k], 100] },
         fr: c[k].un + " coûte 100 F. Combien le marchand a-t-il gagné avec les " + c[k].fr + " ?", en: c[k].unEn + " costs 100 F. How much money did the stallholder make from the " + c[k].en + "?",
         aideFr: "Lis la barre des " + c[k].fr + ", puis multiplie par 100 F.", aideEn: "Read the " + c[k].en + " bar, then multiply by 100 F." }; }
       /* une information ne sert pas */
       var q = deuxEnTout(d.ctx, c[Math.min(a, b)], c[Math.max(a, b)]), inu = INUTILE[d.ctx.id];
-      return { d: d, rep: v[a] + v[b], fr: inu.fr + " " + q.fr, en: inu.en + " " + q.en, inutile: true,
+      return { d: d, rep: v[a] + v[b], calc: { op: "+", n: [v[Math.min(a, b)], v[Math.max(a, b)]] }, fr: inu.fr + " " + q.fr, en: inu.en + " " + q.en, inutile: true,
         aideFr: "Une information ne sert à rien ! Cherche seulement les deux barres de la question.", aideEn: "One piece of information is not needed! Only look for the two bars in the question." };
     });
   }
@@ -134,7 +134,8 @@
      construire (colonnes cliquables, data-action="g-haut"), valeurs (écrire le nombre au-dessus des barres : leçon seulement),
      revoir (indices des barres à revoir, entourées en jaune) */
   function couper(txt, n) {
-    var mots = txt.split(" "), l = [], cur = "";
+    var mots = [], l = [], cur = "";
+    txt.split(" ").forEach(function (m) { var i = m.indexOf("-"); if (m.length > n && i > 0) mots.push(m.slice(0, i + 1), m.slice(i + 1)); else mots.push(m); }); /* « martins-pêcheurs » : coupé après le trait d’union */
     mots.forEach(function (m) { if ((cur + " " + m).trim().length > n && cur) { l.push(cur); cur = m; } else cur = (cur + " " + m).trim(); });
     if (cur) l.push(cur); return l;
   }
