@@ -2703,6 +2703,18 @@
   }
   function ensPO(id) { var p = po(id); return ensLigne(p.perso, esc(p.titre.fr), "Problème ouvert · « " + esc(p.question.fr) + " »", [["Projeter en classe", "#classe-" + id], ["La fiche", "#fiche-" + id], ["Feuille de recherche", "#feuille-" + id]]); }
   function ensDomaine(cls, titre, lignes) { return '<section class="domaine domaine-matiere ' + cls + '"><h2>' + titre + '</h2><div class="ens-liste">' + lignes.join("") + "</div></section>"; }
+  /* « Séquences d’apprentissage » en tiroirs (D-122) : chaque sous-domaine est fermé et s’ouvre d’un clic ;
+     les tiroirs ouverts sont retenus dans l’onglet (sessionStorage), pour les retrouver au retour d’une fiche. */
+  var ENS_TIROIRS = (function () { try { return JSON.parse(sessionStorage.getItem("coco-tiroirs") || "{}"); } catch (e) { return {}; } })();
+  function ensTiroirsGarder() { try { sessionStorage.setItem("coco-tiroirs", JSON.stringify(ENS_TIROIRS)); } catch (e) {} }
+  function ensTiroir(cls, titre, lignes) {
+    var html = lignes.join(""), noms = [], nSeq = 0, nPO = (html.match(/class="ens-pb ens-po/g) || []).length;
+    html.replace(/<div class="ens-pb( ens-seq)?(?![^"]*ens-po)[^"]*"><img[^>]*><div><b>([^<]*)<\/b>/g, function (_, seq, nom) { noms.push(nom); if (seq) nSeq++; return _; });
+    var compte = [nSeq ? nSeq + " séquence" + (nSeq > 1 ? "s" : "") : "", nPO ? nPO + " problème" + (nPO > 1 ? "s" : "") + " ouvert" + (nPO > 1 ? "s" : "") : "", noms.length > nSeq ? (noms.length - nSeq) + " outil" + (noms.length - nSeq > 1 ? "s" : "") : ""].filter(Boolean).join(" · ");
+    return '<details class="domaine domaine-matiere ens-tiroir ' + cls + '" data-tiroir="' + esc(titre) + '"' + (ENS_TIROIRS[titre] ? " open" : "") + '><summary><span class="ens-tiroir-tete"><h2>' + titre + '</h2><small>' + compte + '</small></span><span class="ens-tiroir-noms">' +
+      noms.map(function (n, k) { return '<button type="button" data-action="ens-tiroir-aller" data-k="' + k + '">' + n + "</button>"; }).join("") + '</span><span class="ens-tiroir-fleche" aria-hidden="true"></span></summary><div class="ens-liste">' + html + "</div></details>";
+  }
+  document.addEventListener("toggle", function (e) { var d = e.target; if (!d.classList || !(d.classList.contains("ens-tiroir") || d.classList.contains("ens-po-tiroir"))) return; ENS_TIROIRS[d.dataset.tiroir] = d.open; ensTiroirsGarder(); }, true);
   function pageEnseignante() {
     var n = { "ens-suivi": "Bientôt", "ens-sequences": "8 séquences", "ens-formation": Object.keys(FO.fiches).filter(function (c) { return !FO.fiches[c].vide; }).length + " fiches" };
     return ensEntete("") + '<section class="ens-dossiers">' + ENS_DOSSIERS.map(function (d) {
@@ -2726,23 +2738,28 @@
       ensBouton("Voir la séquence", "#seq-" + seq)
     ].join("");
     var ligne = '<div class="ens-pb ens-seq' + (cls ? " " + cls : "") + '"><img src="' + IMG(img) + '" alt=""><div><b>' + titre + "</b><small>" + sous + '</small></div><div class="coco-row ens-boutons">' + boutons + "</div></div>";
-    return ligne + (PO.sequences[seq] || []).map(function (id, k) { var p = po(id);
+    var pos = (PO.sequences[seq] || []).map(function (id, k) { var p = po(id);
       return '<div class="ens-pb ens-po' + (cls ? " " + cls : "") + '"><img src="' + IMG(p.perso) + '" alt=""><div><b>' + esc(p.titre.fr) + "</b><small>Problème ouvert " + (k + 1) + " · « " + esc(p.question.fr) + ' »</small></div><div class="coco-row ens-boutons">' +
         ensBouton("Fiche enseignante", "#fiche-" + id, true) + ensBouton("Au TBI", "#classe-" + id) + ensBouton("Feuille de recherche", "#feuille-" + id) + "</div></div>"; }).join("");
+    if (!nbPO) return ligne;
+    /* D-122 : les problèmes ouverts sont repliés sous leur séquence */
+    return ligne + '<details class="ens-po-tiroir' + (cls ? " " + cls : "") + '" data-tiroir="po-' + seq + '"' + (ENS_TIROIRS["po-" + seq] ? " open" : "") + '><summary><span class="ens-po-fleche" aria-hidden="true"></span><b>' + nbPO + " problème" + (nbPO > 1 ? "s" : "") + " ouvert" + (nbPO > 1 ? "s" : "") + "</b><span>" +
+      (PO.sequences[seq] || []).map(function (id) { return esc(po(id).titre.fr); }).join(" · ") + '</span></summary><div class="ens-po-liste">' + pos + "</div></details>";
   }
   function pageEnsSequences() {
     var F = "ens-pb--francais", nQ = function (seq) { return QUIZ[seq] ? Object.keys(QUIZ[seq].jeux).length : 0; };
     return ensEntete("Séquences d’apprentissage") +
-      '<p class="ens-legende">Pour chaque séquence, toujours les mêmes boutons : <b>Fiche enseignante</b>, La leçon, Fiche d’exercices, Au TBI, Voir la séquence. Un bouton grisé « À venir » montre ce qui reste à construire.</p>' +
-      ensDomaine("m-francais", "Français · Grammaire et conjugaison", [ensSeq("verbe", "tehani", "Le verbe", "CONJ2", 2 + nQ("verbe"), ROUTES["tbi-verbe"] ? "#tbi-verbe" : "", F)]) +
-      ensDomaine("m-francais", "Français · Orthographe", [ensSeq("mots", "sari", "Les mots invariables", "affiches 2026", Object.keys(JEUX_MOTS).length, ROUTES["tbi-mots"] ? "#tbi-mots" : "", F)]) +
-      ensDomaine("m-maths", "Maths · Techniques opératoires", [ensSeq("division", "nina", "La division en ligne", "CAL7 et CAL8", nQ("division"), ROUTES["tbi-division"] ? "#tbi-division" : "")]) +
-      ensDomaine("m-maths", "Maths · Grandeurs et mesures", [
+      '<p class="ens-legende">Pour chaque séquence, toujours les mêmes boutons : <b>Fiche enseignante</b>, La leçon, Fiche d’exercices, Au TBI, Voir la séquence. Un bouton grisé « À venir » montre ce qui reste à construire. Touchez un sous-domaine pour l’ouvrir.</p>' +
+      '<div class="coco-row ens-tiroirs-boutons"><button class="coco-btn coco-btn--secondaire" type="button" data-action="ens-tiroirs" data-v="1">Tout ouvrir</button><button class="coco-btn coco-btn--secondaire" type="button" data-action="ens-tiroirs" data-v="0">Tout fermer</button></div>' +
+      ensTiroir("m-francais", "Français · Grammaire et conjugaison", [ensSeq("verbe", "tehani", "Le verbe", "CONJ2", 2 + nQ("verbe"), ROUTES["tbi-verbe"] ? "#tbi-verbe" : "", F)]) +
+      ensTiroir("m-francais", "Français · Orthographe", [ensSeq("mots", "sari", "Les mots invariables", "affiches 2026", Object.keys(JEUX_MOTS).length, ROUTES["tbi-mots"] ? "#tbi-mots" : "", F)]) +
+      ensTiroir("m-maths", "Maths · Techniques opératoires", [ensSeq("division", "nina", "La division en ligne", "CAL7 et CAL8", nQ("division"), ROUTES["tbi-division"] ? "#tbi-division" : "")]) +
+      ensTiroir("m-maths", "Maths · Grandeurs et mesures", [
         ensSeq("monnaie", "mei", "La monnaie et les prix", "GM1", nQ("monnaie"), ROUTES["tbi-monnaie"] ? "#tbi-monnaie" : ""),
         ensSeq("digitale", "tehani", "Lire l’heure digitale", "GM5", nQ("digitale"), JEU_DIGITAL),
         ensSeq("heure", "coralie", "Lire l’heure à aiguilles", "GM5", Object.keys(JEUX_HEURE).length, "#tbi-heure"),
         ensSeq("masses", "sari", "Mesurer des masses", "GM8", nQ("masses"), ROUTES["tbi-masses"] ? "#tbi-masses" : "")]) +
-      ensDomaine("m-maths", "Maths · Résolution de problèmes", [
+      ensTiroir("m-maths", "Maths · Résolution de problèmes", [
         ensSeq("diagrammes", "waeko", "Lire un graphique en barres", "OGD1", Object.keys(JEUX_DIAG).length, ROUTES["tbi-diagrammes"] ? "#tbi-diagrammes" : ""),
         ensLigne("adi", "Banque de problèmes (Vergnaud)", "217 problèmes classés par type, avec leurs schémas", [["Ouvrir la banque", "#banque"]])]);
   }
@@ -3144,6 +3161,11 @@
   document.addEventListener("click", function (e) {
     var el = e.target.closest("[data-action]"); if (!el) return;
     var a = el.dataset.action;
+    if (a === "ens-tiroir-aller") { e.preventDefault(); var dt = el.closest(".ens-tiroir"), cible = dt.querySelectorAll(":scope > .ens-liste > .ens-pb")[+el.dataset.k];
+      dt.open = true; ENS_TIROIRS[dt.dataset.tiroir] = true; ensTiroirsGarder();
+      if (cible) { cible.scrollIntoView({ behavior: "smooth", block: "center" }); cible.classList.remove("ens-flash"); void cible.offsetWidth; cible.classList.add("ens-flash"); }
+      return; }
+    if (a === "ens-tiroirs") { document.querySelectorAll(".ens-tiroir, .ens-po-tiroir").forEach(function (d) { d.open = el.dataset.v === "1"; ENS_TIROIRS[d.dataset.tiroir] = d.open; }); ensTiroirsGarder(); return; }
     if (a === "ens-verrouiller") { ensOuvert = false; try { sessionStorage.removeItem("coco-ens"); } catch (x) {} location.hash = "accueil"; return; }
     if (a === "sous-menu") { var g = el.closest(".onglet-groupe"), ouvert = !g.classList.contains("est-ouvert"); fermerSousMenus(); g.classList.toggle("est-ouvert", ouvert); el.setAttribute("aria-expanded", String(ouvert)); return; }
     if (a === "aller") { e.preventDefault(); cibleScroll = el.dataset.cible; fermerSousMenus(); if (location.hash !== "#" + el.dataset.route) location.hash = el.dataset.route; else allerCible(); return; }
