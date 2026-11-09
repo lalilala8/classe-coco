@@ -2341,6 +2341,9 @@
         return (f.sep ? '<span class="qz-sep">' + esc(f.sep) + "</span>" : "") + (avant ? "<span>" + esc(avant) + "</span>" : "") +
           '<input class="qz-champ" type="text" inputmode="numeric" autocomplete="off" data-qz="' + f.k + '" value="' + esc(QZ.val[f.k] || "") + '"' + (QZ.rep ? " disabled" : "") + ' aria-label="' + (en ? "answer" : "réponse") + '">' + (f.apres ? "<span>" + esc(qzT(f.apres)) + "</span>" : ""); }).join("") + "</p>";
       bas = QZ.rep ? "" : '<button class="coco-btn coco-btn--grand" type="button" data-action="qz-valider">' + t("valider") + "</button>";
+    } else if (q.t === "ecrire") {
+      zone += '<p class="qz-champs qz-ecrire">' + (q.avant ? "<span>" + esc(q.avant) + "</span>" : "") + '<input class="qz-champ qz-champ--mot" type="text" inputmode="text" autocapitalize="off" autocorrect="off" spellcheck="false" autocomplete="off" data-qz="v" value="' + esc(QZ.val.v || "") + '"' + (QZ.rep ? " disabled" : "") + ' aria-label="' + (en ? "answer" : "réponse") + '">' + (q.apres ? "<span>" + esc(q.apres) + "</span>" : "") + "</p>";
+      bas = QZ.rep ? "" : '<button class="coco-btn coco-btn--grand" type="button" data-action="qz-valider">' + t("valider") + "</button>";
     } else if (q.t === "pieces") {
       var somme = QZ.sel.reduce(function (a, v) { return a + v; }, 0);
       zone += '<p class="qz-legende">' + (en ? "In my hand:" : "Dans ma main :") + "</p>" + '<div class="qz-main">' + (QZ.sel.length ? QZ.sel.map(function (v, k) { return qzArgent(v, QZ.rep ? "" : "qz-retirer", k); }).join("") : '<span class="qz-vide">' + (en ? "Tap the coins and notes below." : "Touche les pièces et les billets en dessous.") + "</span>") + "</div>" +
@@ -2378,6 +2381,9 @@
         if (vide) { QZ.msg = retour("astuce", t("astuce"), en ? "Fill in every box before you check." : "Remplis toutes les cases avant de valider."); return; }
         var juste = q.champs.every(function (f) { return +QZ.val[f.k] === q.r[f.k]; });
         qzFinir(juste, typo(qzT(q.ex)));
+      } else if (q.t === "ecrire") {
+        if (!QZ.val.v || !String(QZ.val.v).trim()) { QZ.msg = retour("astuce", t("astuce"), en ? "Write the verb before you check." : "Écris le verbe avant de valider."); return; }
+        qzFinir(q.r.some(function (x) { return ipNorm(x) === ipNorm(QZ.val.v); }), typo(qzT(q.ex)));
       } else if (q.t === "pieces") {
         var s = QZ.sel.reduce(function (x, v) { return x + v; }, 0);
         if (s === q.cible) qzFinir(true, (en ? "You paid exactly " : "Tu as payé juste ") + exMille(s) + " F" + (en ? ": " : " : ") + QZ.sel.join(" F + ") + " F.");
@@ -2716,12 +2722,12 @@
     else if (e.key === "p" || e.key === "P") { if (TQ.run) TQ.run.pause = !TQ.run.pause; rendre(); }
     else if (e.key === "f" || e.key === "F") actionTq("tq-plein");
   });
-  function lxLecon(seq, sous, blocs, src) {
-    var m = MATIERE.maths, en = langue === "en";
-    return barre("maths") + hautJeu(m, "seq-" + seq, { sous: sous, titre: t("lecon") }) +
+  function lxLecon(seq, sous, blocs, src, mat) {
+    mat = mat || "maths"; var m = MATIERE[mat], en = langue === "en";
+    return barre(mat) + hautJeu(m, "seq-" + seq, { sous: sous, titre: t("lecon") }) +
       bulle("coralie", en ? "Let's look at the lesson together. Tap, try and watch!" : "On revoit la leçon ensemble. Touche, essaie et observe !") +
-      blocs.map(function (b, k) { return '<section class="lecon-bloc m-maths"><h3><span class="lecon-num">' + (k + 1) + "</span>" + b[0] + "</h3>" + b[1] + "</section>"; }).join("") +
-      jrSection(src) + '<div class="coco-row"><a class="coco-btn" href="#seq-' + seq + '">' + t("versSequence") + "</a></div>";
+      blocs.map(function (b, k) { return '<section class="lecon-bloc m-' + mat + '"><h3><span class="lecon-num">' + (k + 1) + "</span>" + b[0] + "</h3>" + b[1] + "</section>"; }).join("") +
+      jrSection(src, mat) + '<div class="coco-row"><a class="coco-btn" href="#seq-' + seq + '">' + t("versSequence") + "</a></div>";
   }
   function pageLeconDigitale() {
     var en = langue === "en", h = LX.h === undefined ? 16 : LX.h;
@@ -2845,6 +2851,9 @@
     else if (a === "lx-voir") { LX.vu = LX.vu || {}; LX.vu[el.dataset.v] = true; }
     else if (a === "lx-autre") { LX.ex = { a: HE.rint(2, 9), b: HE.rint(2, 9), c: HE.rint(1, 4), d: HE.pk([100, 200, 250, 300, 400, 600, 750, 800]) }; LX.vu = {}; }
     else if (a === "lx-ex0") { LX.ex = null; LX.vu = {}; }
+    else if (a === "lx-ip1") LX.ip1 = el.dataset.v;
+    else if (a === "lx-ip3") LX.ip3 = el.dataset.v;
+    else if (a === "lx-ipt") LX.ipt = !LX.ipt;
   }
   function exSauver() { var m = lire("fiches", {}); m[EXF.seq] = { n: EXF.n, opt: EXF.opt, niv: EXF.niv }; ecrire("fiches", m); }
   /* même numéro + même niveau = mêmes exercices ; les 3 niveaux d’un même numéro sont différents */
@@ -3259,7 +3268,7 @@
   }
   document.addEventListener("toggle", function (e) { var d = e.target; if (!d.classList || !(d.classList.contains("ens-tiroir") || d.classList.contains("ens-po-tiroir"))) return; ENS_TIROIRS[d.dataset.tiroir] = d.open; ensTiroirsGarder(); }, true);
   function pageEnseignante() {
-    var n = { "ens-suivi": "Étoiles de calcul et de grammaire", "ens-sequences": "8 séquences", "ens-formation": Object.keys(FO.fiches).filter(function (c) { return !FO.fiches[c].vide; }).length + " fiches" };
+    var n = { "ens-suivi": "Étoiles de calcul et de grammaire", "ens-sequences": "9 séquences", "ens-formation": Object.keys(FO.fiches).filter(function (c) { return !FO.fiches[c].vide; }).length + " fiches" };
     return ensEntete("") + '<section class="ens-dossiers">' + ENS_DOSSIERS.map(function (d) {
       return '<a class="ens-dossier" href="#' + d.id + '">' + DOSSIER_SVG + "<b>" + d.t + "</b><small>" + d.d + '</small><span class="ens-compte">' + n[d.id] + "</span></a>";
     }).join("") + "</section>";
@@ -3294,7 +3303,7 @@
     return ensEntete("Séquences d’apprentissage") +
       '<p class="ens-legende">Pour chaque séquence, toujours les mêmes boutons : <b>Fiche enseignante</b>, La leçon, Fiche d’exercices, Au TBI, Voir la séquence. Un bouton grisé « À venir » montre ce qui reste à construire. Touchez un sous-domaine pour l’ouvrir.</p>' +
       '<div class="coco-row ens-tiroirs-boutons"><button class="coco-btn coco-btn--secondaire" type="button" data-action="ens-tiroirs" data-v="1">Tout ouvrir</button><button class="coco-btn coco-btn--secondaire" type="button" data-action="ens-tiroirs" data-v="0">Tout fermer</button></div>' +
-      ensTiroir("m-francais", "Français · Grammaire et conjugaison", [ensSeq("verbe", "tehani", "Le verbe", "CONJ2", 2 + nQ("verbe"), ROUTES["tbi-verbe"] ? "#tbi-verbe" : "", F)]) +
+      ensTiroir("m-francais", "Français · Grammaire et conjugaison", [ensSeq("verbe", "tehani", "Le verbe", "CONJ2", 2 + nQ("verbe"), ROUTES["tbi-verbe"] ? "#tbi-verbe" : "", F), ensSeq("imparfait", "leo", "L’imparfait", "CONJ13 et CONJ14", nQ("imparfait"), ROUTES["tbi-imparfait"] ? "#tbi-imparfait" : "", F)]) +
       ensTiroir("m-francais", "Français · Orthographe", [ensSeq("mots", "sari", "Les mots invariables", "affiches 2026", Object.keys(JEUX_MOTS).length, ROUTES["tbi-mots"] ? "#tbi-mots" : "", F)]) +
       ensTiroir("m-maths", "Maths · Techniques opératoires", [ensSeq("division", "nina", "La division en ligne", "CAL7 et CAL8", nQ("division"), ROUTES["tbi-division"] ? "#tbi-division" : "")]) +
       ensTiroir("m-maths", "Maths · Grandeurs et mesures", [
@@ -3754,11 +3763,255 @@
     bqVerifier(+el.dataset.bq); rendre();
   });
 
+  /* ==========================================================================================
+     Séquence « L’imparfait » (demande de l’enseignante, 09/11/2026) [PROPOSITION]
+     Leçons de classe CONJ13 « L’imparfait des verbes du 1er groupe » et CONJ14 « L’imparfait » (2023, à jour) : phrases reprises mot pour mot [CLASSE].
+     Programmation P5 de la classe, semaines 3 et 4 (du 9 au 20 novembre 2026) : objectifs opérationnels des séances [CLASSE].
+     Compagnon : Léo (choix de l’enseignante). Code des leçons : verbe et terminaisons en rouge, pronoms en violet.
+     Les textes et les phrases d’exercices sont écrits pour le site [PROPOSITION].
+     ========================================================================================== */
+  var IP_T = ["ais", "ais", "ait", "ions", "iez", "aient"];
+  var IP_PRON = ["je", "tu", "il, elle, on", "nous", "vous", "ils, elles"];
+  /* radical et complément pour les phrases d’exercices */
+  var IP_V = {
+    jouer: ["jou", "au ballon"], chanter: ["chant", "une chanson"], danser: ["dans", "sur la plage"], marcher: ["march", "jusqu’à l’école"], regarder: ["regard", "les étoiles"],
+    parler: ["parl", "avec la maîtresse"], habiter: ["habit", "à Nouméa"], écouter: ["écout", "une histoire"], aimer: ["aim", "les mangues"], porter: ["port", "un chapeau"],
+    sauter: ["saut", "dans les vagues"], préparer: ["prépar", "un gâteau"],
+    être: ["ét", "à la plage"], avoir: ["av", "un chien"], aller: ["all", "à l’école"], venir: ["ven", "à la fête"], vouloir: ["voul", "un vélo"], prendre: ["pren", "le bus"],
+    dire: ["dis", "bonjour"], pouvoir: ["pouv", "nager"], voir: ["voy", "la mer"], faire: ["fais", "un dessin"]
+  };
+  var IP_G1 = ["jouer", "chanter", "danser", "marcher", "regarder", "parler", "habiter", "écouter", "aimer", "porter", "sauter", "préparer"];
+  var IP_EA = ["être", "avoir"], IP_IRR = ["aller", "venir", "vouloir", "prendre", "dire", "pouvoir", "voir", "faire"];
+  var IP_LECON = ["chanter", "être", "venir", "aller", "avoir", "vouloir", "prendre", "dire", "pouvoir", "voir", "faire"]; /* les verbes de CONJ14, dans l’ordre de la leçon */
+  var IP_SUJ = [[["Je"], 0], [["Tu"], 1], [["Léo", "Méi", "Kakou", "On", "Il", "Elle"], 2], [["Nous"], 3], [["Vous"], 4], [["Les enfants", "Mes cousins", "Tehani et Nina", "Ils", "Elles"], 5]];
+  function ipForme(v, p) { return IP_V[v][0] + IP_T[p]; }
+  function ipVoy(s) { return /^[aeéèêiouyh]/i.test(s); }
+  function ipJe(f, maj) { return ipVoy(f) ? (maj ? "J’" : "j’") : (maj ? "Je " : "je "); }
+  /* le pronom écrit devant la forme (« j’ » devant une voyelle) */
+  function ipPron(p, f) { return p === 0 ? ipJe(f).trim() : IP_PRON[p]; }
+  function ipCol(v, p) { return esc(IP_V[v][0]) + '<span class="coco-term">' + IP_T[p] + "</span>"; }
+  function ipPronCol(p, f) { return '<span class="ip-pron">' + esc(ipPron(p, f)) + "</span>"; }
+  /* tableau de conjugaison : pronom en violet, radical, terminaison en rouge ; o.pop = apparition ligne par ligne */
+  function ipTable(v, o) {
+    o = o || {};
+    return '<table class="ip-table"><caption>' + esc(v) + "</caption>" + IP_T.map(function (_, p) { var f = ipForme(v, p), apo = p === 0 && ipVoy(f), lig = '<td class="ip-tp' + (apo ? " ip-apo" : "") + '">' + ipPronCol(p, f) + "</td><td" + (apo ? ' class="ip-apo2"' : "") + ">" + ipCol(v, p) + "</td>"; /* « j’étais » sans espace */
+      return "<tr" + (o.pop ? ' class="ip-ligne" style="animation-delay:' + (0.2 + p * 0.3) + 's"' : "") + ">" + lig + "</tr>"; }).join("") + "</table>";
+  }
+  /* une phrase : sujet + verbe à l’imparfait + complément */
+  function ipSujet(p) { var s = IP_SUJ.filter(function (x) { return x[1] === p; })[0][0]; return HE.pk(s); }
+  function ipPhrase(v, p, suj, forme) { var f = forme || ipForme(v, p); suj = suj || ipSujet(p); return (suj === "Je" ? ipJe(f, true) : suj + " ") + f + " " + IP_V[v][1] + "."; }
+  /* petits textes (contes, souvenirs) : les verbes à l’imparfait sont entre crochets ; {…} = verbe au présent (niveau 3) [PROPOSITION] */
+  var IP_TEXTES = [
+    "Il [était] une fois une sorcière. Elle [habitait] dans une grotte. Elle [avait] un grand chapeau noir. Le soir, elle [préparait] des potions.",
+    "Autrefois, Papi Tao [pêchait] dans le lagon. Il [partait] tôt le matin. Les poissons [nageaient] autour de sa pirogue.",
+    "Quand j’[étais] petit, je [jouais] sur la plage. Mes cousins [construisaient] des châteaux de sable. Nous [mangions] des mangues.",
+    "Le cagou [vivait] dans la forêt. Il [cherchait] des vers sous les feuilles. Ses plumes [étaient] grises.",
+    "Hier soir, il [pleuvait]. Les enfants [restaient] à la maison. Ils [regardaient] un film et ils [riaient]."
+  ];
+  var IP_TEXTES3 = [
+    "Aujourd’hui, Léo {habite} à Nouméa. Avant, il [habitait] à Lifou. Il [allait] à l’école à pied et il [nageait] souvent. Maintenant, il {prend} le bus.",
+    "Ce matin, Méi {lit} un conte. Dans ce conte, une princesse [vivait] dans un château. Elle [avait] un dragon. Méi {adore} cette histoire !",
+    "Quand ma grand-mère [était] petite, elle [faisait] ses devoirs à la bougie. Elle [allait] chercher l’eau à la rivière. Aujourd’hui, nous {avons} l’électricité."
+  ];
+  function ipTexteMots(s) { /* pour le jeu « mots » : liste des mots et index des verbes à l’imparfait */
+    var mots = [], v = [];
+    s.split(" ").forEach(function (w) { var m = w.match(/^(.*?)\[([^\]]+)\](.*)$/); if (m) { v.push(mots.length); mots.push(m[1] + m[2] + m[3]); } else mots.push(w.replace(/[{}]/g, "")); });
+    return { mots: mots, v: v };
+  }
+  function ipVerbesDe(s) { return (s.match(/\[([^\]]+)\]/g) || []).map(function (x) { return x.slice(1, -1); }); }
+  function ipNorm(s) { return String(s || "").trim().toLowerCase().replace(/[’`´]/g, "'").replace(/\s+/g, " ").replace(/\.$/, ""); }
+
+  C.imparfait = { matiere: "francais", titre: { fr: "L’imparfait", en: "The imparfait" }, objectif: { fr: "Je sais reconnaître et conjuguer les verbes à l’imparfait.", en: "I can recognise and conjugate verbs in the imparfait." } };
+
+  /* ---------- activités (moteur commun) ---------- */
+  QUIZ.imparfait = { matiere: "francais", jeux: {
+    rappel: { perso: "leo", etape: 0, fr: "Je me rappelle", en: "I remember", dfr: "Passé, présent, futur ; le radical ; les pronoms.", den: "Past, present, future; the stem; pronouns.",
+      gen: function () { return [
+        { t: "choix", c: { fr: "« Hier, il pleuvait. » Cette phrase parle…", en: "« Hier, il pleuvait. » This sentence is about…" }, o: [{ fr: "du passé", en: "the past" }, { fr: "du présent", en: "the present" }, { fr: "du futur", en: "the future" }], a: 0,
+          ex: { fr: "« Hier » : c’est déjà passé. L’action s’est déjà déroulée (leçon CONJ1).", en: "« Hier » (yesterday): it has already happened (lesson CONJ1)." } },
+        { t: "choix", c: { fr: "Quel est le <b>radical</b> du verbe « chanter » ?", en: "What is the <b>stem</b> of the verb « chanter »?" }, o: [{ fr: "chant-", en: "chant-" }, { fr: "chanter", en: "chanter" }, { fr: "-er", en: "-er" }], a: 0,
+          ex: { fr: "chanter = chant- + -er : le radical est « chant- », -er est la marque de l’infinitif (leçon CONJ3).", en: "chanter = chant- + -er: the stem is « chant- » (lesson CONJ3)." } },
+        { t: "choix", c: { fr: "Quel pronom remplace « Tehani et Nina » ?", en: "Which pronoun replaces « Tehani et Nina »?" }, o: [{ fr: "elles", en: "elles" }, { fr: "nous", en: "nous" }, { fr: "elle", en: "elle" }], a: 0,
+          ex: { fr: "Tehani et Nina : deux filles, c’est « elles ».", en: "Tehani and Nina: two girls, so « elles »." } }
+      ]; } },
+    texte: { perso: "leo", etape: 1, fr: "Il était une fois…", en: "Once upon a time…", dfr: "Je trouve les verbes à l’imparfait dans un texte.", den: "I find the verbs in the imparfait in a text.",
+      gen: function () { return HE.shuf(IP_TEXTES).slice(0, 4).map(function (s) { var x = ipTexteMots(s), vs = ipVerbesDe(s);
+        return { t: "mots", mots: x.mots, v: x.v, c: { fr: "Touche les <b>" + x.v.length + " verbes à l’imparfait</b> du texte, puis valide.", en: "Tap the <b>" + x.v.length + " verbs in the imparfait</b> in the text, then check." },
+          ex: { fr: "Les verbes à l’imparfait : " + vs.join(", ") + ". Ils se terminent par ais, ait, ions, iez ou aient.", en: "The verbs in the imparfait: " + vs.join(", ") + ". They end in ais, ait, ions, iez or aient." } }; }); } },
+    pronom: { perso: "leo", etape: 2, fr: "Le bon pronom", en: "The right pronoun", dfr: "J’associe le verbe au pronom qui correspond.", den: "I match the verb with the right pronoun.",
+      gen: function () { var vs = HE.shuf(IP_G1.slice(0, 6).concat(IP_EA, IP_IRR)).slice(0, 8);
+        return vs.map(function (v, k) { var p = [3, 4, 5, 2, 0, 1, 3, 5][k], f = ipForme(v, p), bons = { 0: "je", 1: "tu", 2: "il", 3: "nous", 4: "vous", 5: "ils" };
+          var opts = p === 0 || p === 1 ? ["je", "tu", "nous"] : p === 2 || p === 5 ? ["il", "ils", "vous"] : ["nous", "vous", "tu"];
+          if (p === 0 && ipVoy(f)) opts = ["j’", "tu", "nous"];
+          var bon = p === 0 && ipVoy(f) ? "j’" : bons[p], o = HE.shuf(opts);
+          return { t: "choix", c: { fr: "Quel pronom va avec « … <b>" + f + "</b> » ?", en: "Which pronoun goes with « … <b>" + f + "</b> »?" }, o: o.map(function (x) { return { fr: x, en: x }; }), a: o.indexOf(bon),
+            ex: { fr: "« " + IP_T[p] + " » va avec " + IP_PRON[p] + " : " + ipPron(p, f) + (p === 0 && ipVoy(f) ? "" : " ") + f + ".", en: "« " + IP_T[p] + " » goes with " + IP_PRON[p] + ": " + ipPron(p, f) + (p === 0 && ipVoy(f) ? "" : " ") + f + "." } }; }); } },
+    terminaison: { perso: "leo", etape: 2, fr: "La bonne terminaison", en: "The right ending", dfr: "Je choisis la terminaison qui va avec le sujet.", den: "I choose the ending that goes with the subject.",
+      gen: function () { var vs = HE.shuf(IP_G1.concat(IP_EA, IP_IRR)).slice(0, 8);
+        return vs.map(function (v, k) { var p = HE.rint(0, 5), suj = ipSujet(p), f = ipForme(v, p), rad = IP_V[v][0];
+          var pieges = { 0: ["ait", "aient"], 1: ["ait", "ai"], 2: ["ais", "aient"], 3: ["iez", "ont"], 4: ["ions", "ez"], 5: ["ait", "ent"] }[p];
+          var o = HE.shuf([IP_T[p]].concat(pieges)), deb = (suj === "Je" ? ipJe(f, true) : suj + " ") + rad;
+          return { t: "choix", c: { fr: "Complète : « <b>" + deb + "…</b> " + IP_V[v][1] + ". »", en: "Complete: « <b>" + deb + "…</b> " + IP_V[v][1] + ". »" }, o: o.map(function (x) { return { fr: x, en: x }; }), a: o.indexOf(IP_T[p]),
+            ex: { fr: ipPhrase(v, p, suj) + " Avec « " + suj.toLowerCase().replace(/^je$/, "je") + " », la terminaison est « " + IP_T[p] + " ».", en: ipPhrase(v, p, suj) + " With « " + suj + " », the ending is « " + IP_T[p] + " »." } }; }); } },
+    ecrire: { perso: "leo", etape: 2, fr: "J’écris le verbe", en: "I write the verb", dfr: "J’écris le verbe à l’imparfait.", den: "I write the verb in the imparfait.",
+      gen: function () { var vs = HE.shuf(IP_G1.slice(0, 8)).slice(0, 3).concat(HE.shuf(IP_EA.concat(IP_IRR)).slice(0, 5));
+        return HE.shuf(vs).map(function (v) { var p = HE.rint(0, 5), suj = ipSujet(p), f = ipForme(v, p);
+          return { t: "ecrire", c: { fr: "Écris le verbe <b>" + v + "</b> à l’imparfait.", en: "Write the verb <b>" + v + "</b> in the imparfait." }, avant: suj === "Je" ? ipJe(f, true).trim() : suj, apres: IP_V[v][1] + ".", r: [f],
+            ex: { fr: ipPhrase(v, p, suj) + " (radical « " + IP_V[v][0] + " » + terminaison « " + IP_T[p] + " »)", en: ipPhrase(v, p, suj) + " (stem « " + IP_V[v][0] + " » + ending « " + IP_T[p] + " »)" } }; }); } },
+    transposer: { perso: "leo", etape: 3, fr: "Je change le sujet", en: "I change the subject", dfr: "Je réécris la phrase avec un autre sujet.", den: "I rewrite the sentence with another subject.",
+      gen: function () { var vs = HE.shuf(IP_G1.slice(0, 8).concat(IP_EA, IP_IRR)).slice(0, 6), paires = [[2, 5], [0, 3], [1, 4], [5, 2], [3, 0], [2, 3]];
+        return vs.map(function (v, k) { var a = paires[k][0], b = paires[k][1], sa = ipSujet(a), sb = ipSujet(b), fb = ipForme(v, b);
+          return { t: "ecrire", c: { fr: "Réécris la phrase avec le sujet « " + sb + " ».", en: "Rewrite the sentence with the subject « " + sb + " »." }, z: function () { return '<p class="qz-phrase">' + esc(ipPhrase(v, a, sa)) + "</p>"; },
+            avant: sb === "Je" ? ipJe(fb, true).trim() : sb, apres: IP_V[v][1] + ".", r: [fb],
+            ex: { fr: ipPhrase(v, b, sb) + " Le sujet change, donc la terminaison change : « " + IP_T[b] + " ».", en: ipPhrase(v, b, sb) + " The subject changes, so the ending changes: « " + IP_T[b] + " »." } }; }); } }
+  } };
+
+  /* ---------- la leçon ---------- */
+  var IP_CONTE = "Il [était] une fois une sorcière. Elle [habitait] dans une grotte. Elle [avait] un grand chapeau noir et elle [préparait] des potions.";
+  function ipConte(montrer) { return '<p class="ip-conte">' + esc(IP_CONTE).replace(/\[([^\]]+)\]/g, function (_, v) { return montrer ? '<span class="v-marque">' + v + "</span>" : v; }) + "</p>"; }
+  function ipChoixVerbes(liste, action, sel) { return '<div class="coco-row ip-choix">' + liste.map(function (v) { return '<button class="coco-etiquette' + (v === sel ? " est-choisi" : "") + '" type="button" data-action="' + action + '" data-v="' + v + '" aria-pressed="' + (v === sel) + '">' + esc(v) + "</button>"; }).join("") + "</div>"; }
+  function ipTerms() { return '<p class="ip-terms">' + IP_T.map(function (x) { return '<span class="coco-term">' + x + "</span>"; }).join(" – ") + "</p>"; }
+  function pageLeconImparfait() {
+    var en = langue === "en", v1 = LX.ip1 || "jouer", v3 = LX.ip3 || "chanter";
+    var bloc1 = "<p>L’imparfait est un temps du passé qui est utilisé pour décrire des lieux ou des personnes. On l’emploie souvent dans les contes : <b>Il était une fois…</b></p>" + ipConte(LX.ipt) +
+      '<div class="coco-row"><button class="coco-btn' + (LX.ipt ? " coco-btn--secondaire" : "") + '" type="button" data-action="lx-ipt">' + (LX.ipt ? (en ? "Hide the verbs" : "Cacher les verbes") : (en ? "Show the verbs" : "Montrer les verbes")) + "</button></div>";
+    var bloc2 = "<p>Pour conjuguer les verbes du 1er groupe à l’imparfait, garde le <b>radical</b> et ajoute les <b>terminaisons</b> suivantes :</p>" + ipTerms() +
+      ipChoixVerbes(IP_G1.slice(0, 8), "lx-ip1", v1) + '<div class="ip-tables" key="' + v1 + '">' + ipTable(v1, { pop: true }) + "</div>" +
+      '<p class="mi-indice">' + (en ? "Choose a verb: the stem stays the same, only the ending changes." : "Choisis un verbe : le radical ne change pas, seule la terminaison change.") + "</p>";
+    var bloc3 = "<p>Voici les verbes que tu dois savoir conjuguer à l’imparfait en CE2. Les terminaisons sont les mêmes pour chaque pronom personnel.</p>" +
+      '<p class="ip-terms ip-terms--pron">' + IP_T.map(function (x, p) { return '<span><span class="ip-pron">' + IP_PRON[p] + "</span> : " + '<span class="coco-term">' + x + "</span></span>"; }).join("") + "</p>" +
+      ipChoixVerbes(IP_LECON, "lx-ip3", v3) + '<div class="ip-tables" key="' + v3 + '">' + ipTable(v3, { pop: true }) + "</div>";
+    return lxLecon("imparfait", tr(C.imparfait.titre), [[en ? "A past tense" : "Un temps du passé", bloc1], [en ? "Verbs of the 1st group" : "Les verbes du 1er groupe", bloc2], [en ? "The verbs to know" : "Les verbes à connaître", bloc3]], jrCartesImparfait, "francais");
+  }
+  /* « Je retiens » : leçons CONJ13 et CONJ14 mot pour mot, découpées ; les phrases restent en français en mode anglais */
+  function jrCartesImparfait(en) {
+    var mini = function (liste, k0) { return '<div class="ip-minis">' + liste.map(function (v, k) { return lxPop(ipTable(v), k0 + k); }).join("") + "</div>"; };
+    return [
+      { t: en ? "A past tense" : "Un temps du passé", svg: '<div class="lx-illu lx-col jr-phrases">' + lxPop('<span class="jr-ph">Il <span class="v-marque">était</span> une fois…</span>', 0) + lxPop('<span class="jr-ph">Elle <span class="v-marque">habitait</span> dans une grotte.</span>', 2) + "</div>",
+        txt: ["L’imparfait est un temps du passé qui est utilisé pour décrire des lieux ou des personnes.", "On l’emploie souvent dans les contes : <b>Il était une fois…</b>"] },
+      { t: en ? "Verbs of the 1st group" : "Les verbes du 1er groupe", svg: '<div class="lx-illu">' + ipTable("jouer", { pop: true }) + "</div>",
+        txt: ["Pour conjuguer les verbes du 1er groupe à l’imparfait, garde le radical et ajoute les terminaisons suivantes :", IP_T.map(function (x) { return '<span class="coco-term">' + x + "</span>"; }).join(" – ")] },
+      { t: en ? "The same endings" : "Les mêmes terminaisons", svg: '<div class="lx-illu">' + jrCycle([ipTable("chanter"), ipTable("être"), ipTable("venir")]) + "</div>",
+        txt: ["Les terminaisons sont les mêmes pour chaque pronom personnel.", IP_T.slice(0, 3).map(function (x, p) { return IP_PRON[p] + " : <b class=\"coco-term\">" + x + "</b>"; }).join(" · "), IP_T.slice(3).map(function (x, p) { return IP_PRON[p + 3] + " : <b class=\"coco-term\">" + x + "</b>"; }).join(" · ")] },
+      { t: en ? "Être and avoir" : "Être et avoir", svg: mini(["être", "avoir"], 0),
+        txt: ["Voici les verbes que tu dois savoir conjuguer à l’imparfait en CE2.", "j’étais, tu étais, il était, nous étions, vous étiez, ils étaient", "j’avais, tu avais, il avait, nous avions, vous aviez, ils avaient"] },
+      { t: en ? "Aller, venir, vouloir, prendre" : "Aller, venir, vouloir, prendre", svg: mini(["aller", "venir", "vouloir", "prendre"], 0),
+        txt: ["j’allais · je venais · je voulais · je prenais", "nous allions · nous venions · nous voulions · nous prenions"] },
+      { t: en ? "Dire, pouvoir, voir, faire" : "Dire, pouvoir, voir, faire", svg: mini(["dire", "pouvoir", "voir", "faire"], 0),
+        txt: ["je disais · je pouvais · je voyais · je faisais", "nous disions · nous pouvions · nous voyions · nous faisions"] }
+    ];
+  }
+  jrCartesImparfait.persos = [["leo", "presente"], ["leo", "reflechit"], ["leo", "idee"], ["leo", "content"], ["leo", "reflechit"], ["leo", "victoire"]];
+
+  /* ---------- mode « Au TBI » : découverte guidée, puis ardoises ---------- */
+  function tqImparfait() {
+    var qs = [], vs = HE.shuf(IP_G1.slice(0, 8).concat(IP_EA, IP_IRR));
+    vs.slice(0, 6).forEach(function (v) { var p = HE.rint(0, 5), suj = ipSujet(p), f = ipForme(v, p);
+      qs.push({ t: "champs", c: { fr: "Écris le verbe <b>" + v + "</b> à l’imparfait.", en: "Write the verb <b>" + v + "</b> in the imparfait." }, champs: [{ k: "v", avant: suj === "Je" ? ipJe(f, true).trim() : suj, apres: IP_V[v][1] + "." }], r: { v: f },
+        ex: { fr: ipPhrase(v, p, suj), en: ipPhrase(v, p, suj) } }); });
+    vs.slice(6, 12).forEach(function (v) { var p = HE.rint(0, 5), f = ipForme(v, p), o = HE.shuf([IP_T[p]].concat(HE.shuf(["ais", "ait", "ions", "iez", "aient"].filter(function (x) { return x !== IP_T[p]; })).slice(0, 2))); /* 3 terminaisons différentes */
+      qs.push({ t: "choix", c: { fr: "Quelle terminaison ? « " + (p === 0 ? ipJe(f, true) : IP_PRON[p].split(",")[0].replace(/^./, function (c) { return c.toUpperCase(); }) + " ") + IP_V[v][0] + "… »", en: "Which ending? « " + (p === 0 ? ipJe(f, true) : IP_PRON[p].split(",")[0] + " ") + IP_V[v][0] + "… »" },
+        o: o.map(function (x) { return { fr: x, en: x }; }), a: o.indexOf(IP_T[p]), ex: { fr: ipPron(p, f) + (p === 0 && ipVoy(f) ? "" : " ") + f, en: ipPron(p, f) + (p === 0 && ipVoy(f) ? "" : " ") + f } }); });
+    return HE.shuf(qs);
+  }
+  TBI_SEQ.imparfait = { src: jrCartesImparfait, mat: "francais", pool: tqImparfait,
+    questions: [
+      { fr: "Quand se passe cette histoire ? Quels mots le montrent ?", en: "When does this story happen? Which words show it?", illu: function () { return '<p class="tq-phrases"><span>Il était une fois une sorcière.</span><span>Elle habitait dans une grotte.</span></p>'; } },
+      { fr: "Observez : qu’est-ce qui ne change pas ? Qu’est-ce qui change ?", en: "Look: what stays the same? What changes?", illu: function () { return '<p class="tq-phrases"><span>je jouais · tu jouais · il jouait</span><span>nous jouions · vous jouiez · ils jouaient</span></p>'; } },
+      { fr: "Comparez ces verbes. Que remarquez-vous à la fin ?", en: "Compare these verbs. What do you notice at the end?", illu: function () { return '<p class="tq-phrases"><span>je chantais · j’étais · je venais</span><span>nous chantions · nous étions · nous venions</span></p>'; } },
+      { fr: "Comment conjuguer être et avoir à l’imparfait ?", en: "How do we conjugate être and avoir in the imparfait?", illu: function () { return '<p class="tq-phrases"><span>Hier, j’… content.</span><span>Hier, j’… un chien.</span></p>'; } },
+      { fr: "Et aller, venir, vouloir, prendre ?", en: "What about aller, venir, vouloir, prendre?", illu: function () { return '<p class="tq-phrases"><span>Autrefois, nous … à l’école à pied.</span></p>'; } },
+      { fr: "Et dire, pouvoir, voir, faire ?", en: "What about dire, pouvoir, voir, faire?", illu: function () { return '<p class="tq-phrases"><span>Quand j’étais petit, je … des dessins.</span></p>'; } }] };
+
+  /* ---------- fiche enseignante ---------- */
+  PROG.imparfait = { ref: "Français · Étude de la langue (orthographe grammaticale : le verbe)", att: PROG.verbe.att, socle: [1, 2],
+    comp: "Mémoriser le présent, l’imparfait, le futur, le passé composé pour : être et avoir ; les verbes du premier groupe ; les verbes irréguliers du 3e groupe (faire, aller, dire, venir, pouvoir, voir, vouloir, prendre). Distinguer temps simples et temps composés.", rp: "français p. 34 et 35",
+    reperes: ["Il identifie le radical et la terminaison.", "En appui sur l’oralisation correcte des formes verbales, il consolide l’orthographe du présent, de l’imparfait, du futur et du passé composé pour les verbes du 1er groupe et les verbes irréguliers du 3e groupe : faire, aller, dire, venir, pouvoir, voir, vouloir, prendre ainsi que « être » et « avoir ».", "Il repère par regroupements les formes verbales identiques (exemple : prendre, venir et vouloir ont les mêmes terminaisons au futur).", "Il distingue temps simples et temps composés."] };
+  function ficheImparfait() {
+    return ficheSeq({ seq: "imparfait", mat: "francais", prog: "imparfait", dom: "Français · Étude de la langue (grammaire et conjugaison)", tbi: "#tbi-imparfait",
+      source: "Programmation périodique P5 de la classe : « L’imparfait », semaines 3 et 4 (du 9 au 20 novembre 2026). Leçons de classe : CONJ13 « L’imparfait des verbes du 1er groupe » et CONJ14 « L’imparfait » (2023). « La chanson de l’imparfait » de la classe, chantée en classe.",
+      seances: [
+        ["Séance 1", "L’élève identifie dans un texte les verbes conjugués à l’imparfait. L’élève mémorise les terminaisons de l’imparfait à partir de « La chanson de l’imparfait ».", "Je me rappelle · Revoir la leçon (bloc 1 : « Il était une fois… ») · Il était une fois… · Au TBI (découverte)"],
+        ["Séance 2", "L’élève conjugue à l’oral les verbes des 1er et 3ème groupes à l’imparfait.", "Revoir la leçon (blocs 2 et 3, tableaux à faire défiler) · Au TBI (ardoises)"],
+        ["Séance 3", "L’élève conjugue à l’écrit les verbes des 1er et 3ème groupes à l’imparfait.", "J’écris le verbe"],
+        ["Séances 4 et 5 (exercices bilan et évaluation)", "L’élève est capable d’associer un de ces verbes conjugué à l’imparfait au pronom personnel qui correspond. L’élève choisit, selon le sujet, la bonne terminaison de ces verbes conjugués à l’imparfait. L’élève est capable de conjuguer à l’écrit ces verbes à l’imparfait. L’élève sera capable de transposer des phrases en modifiant le sujet et la terminaison de ces verbes à l’imparfait.", "Le bon pronom · La bonne terminaison · Je change le sujet · Fiche d’exercices en 3 niveaux (corrigé, correction au TBI)"]],
+      erreurs: ["Écrire « je jouait » ou « il jouais » : ais, ais, ait se prononcent pareil ; faire chercher le sujet et redire la chanson de l’imparfait. [PROPOSITION]",
+        "Confondre « il jouait » et « ils jouaient » (même son) : le pluriel prend « aient ». [PROPOSITION]",
+        "Oublier le i de « nous jouions », « vous jouiez » ; pour voir : « nous voyions », « vous voyiez » (y puis i). [PROPOSITION]",
+        "Changer le radical : le radical ne change pas (« je chantais », « nous chantions »). [PROPOSITION]",
+        "Oublier « j’ » devant une voyelle : « j’étais », « j’avais », « j’allais ». [PROPOSITION]"],
+      conseils: ["Code des leçons : le verbe et les terminaisons en rouge, les pronoms en violet.", "En mode anglais, les consignes passent en anglais mais les phrases restent en français.", "La fiche d’exercices existe en 3 niveaux (★, ★★, ★★★), avec les mêmes objectifs ; le même numéro redonne les mêmes exercices, pour corriger au TBI.", "Les étoiles de grammaire de la classe : l’étoile noire porte sur l’imparfait.", "« La chanson de l’imparfait » se chante en classe ; ses paroles ne sont pas reprises sur le site (droits d’auteur). Vidéo indiquée par l’enseignante : https://www.youtube.com/watch?v=LyJhmm35tlI"],
+      prolonger: ["Réinvestissement de la programmation (séances 7 et 8 du futur) : faire rédiger la suite d’un conte à l’imparfait, puis relire en tenant compte des remarques (majuscules, points, accords sujet-verbe).", "Comparer l’imparfait et le futur : mêmes verbes irréguliers, mêmes regroupements (repère CC6)."],
+      sources: "Sources : programmation périodique P5 de la classe, leçons CONJ13 et CONJ14 de la classe, programmes de Nouvelle-Calédonie 2021, repères de progressivité de la DENC (cycle 2, français, p. 34 et 35)." });
+  }
+
+  /* ---------- fiche d’exercices en 3 niveaux ---------- */
+  function ipSouligne(s) { return esc(s).replace(/\[([^\]]+)\]/g, function (_, v) { return exC(v); }).replace(/[{}]/g, ""); }
+  function ipTrouPron(p, f) { return p === 2 ? "il, elle ou on" : p === 5 ? "ils ou elles" : ipPron(p, f); }
+  EXOS.imparfait = { seq: "seq-imparfait", matiere: "francais", titre: function () { return tr(C.imparfait.titre); },
+    rappel: function (en) { return (en ? "In the imparfait, the endings are the same for every verb: " : "À l’imparfait, les terminaisons sont les mêmes pour tous les verbes : ") + IP_T.map(function (x, p) { return IP_PRON[p] + " <b class=\"coco-term\">" + x + "</b>"; }).join(" · ") + "."; },
+    tirer: function () { var vs = HE.shuf(IP_G1.slice(0, 8)).slice(0, 2).concat(HE.shuf(IP_EA.concat(IP_IRR)).slice(0, 5));
+      return { texte: HE.pk(IP_TEXTES), pron: HE.shuf(IP_G1.concat(IP_EA, IP_IRR)).slice(0, 4).map(function (v, k) { var p = [0, 3, 5, 1][k]; return [v, p]; }),
+        term: vs.slice(0, 6).map(function (v) { var p = HE.rint(0, 5); return [v, p, ipSujet(p)]; }), conj: [HE.pk(IP_G1.slice(0, 8)), HE.pk(IP_IRR)], trans: HE.shuf(IP_G1.slice(0, 8).concat(IP_EA, IP_IRR)).slice(0, 2) }; },
+    exos: function (d, en) {
+      return [
+        { c: en ? "Underline the verbs in the imparfait." : "Souligne les verbes à l’imparfait.", q: '<p class="ex-fr ex-texte">' + exG(ipSouligne(d.texte), "soul") + "</p>", r: ipVerbesDe(d.texte).map(function (v) { return "<b>" + esc(v) + "</b>"; }).join(" · ") },
+        { c: en ? "Write the pronoun." : "Écris le pronom qui convient.", q: '<ul class="ex-fr ex-conv">' + d.pron.map(function (x) { var f = ipForme(x[0], x[1]); return "<li>" + exT(esc(ipTrouPron(x[1], f))) + " " + esc(f) + "</li>"; }).join("") + "</ul>", r: d.pron.map(function (x) { var f = ipForme(x[0], x[1]); return esc(ipTrouPron(x[1], f)) + " " + esc(f); }).join(" · ") },
+        { c: en ? "Complete with the right ending." : "Complète avec la bonne terminaison.", q: '<ul class="ex-fr ex-conv">' + d.term.map(function (x) { var f = ipForme(x[0], x[1]), deb = (x[2] === "Je" ? ipJe(f, true) : x[2] + " ") + IP_V[x[0]][0]; return "<li>" + esc(deb) + exT(IP_T[x[1]]) + " " + esc(IP_V[x[0]][1]) + ".</li>"; }).join("") + "</ul>", r: d.term.map(function (x) { return esc(ipForme(x[0], x[1])); }).join(" · ") },
+        { c: en ? "Conjugate in the imparfait." : "Conjugue à l’imparfait.", q: '<div class="ex-deux-col ex-fr">' + d.conj.map(function (v) { return "<div><b>" + esc(v) + "</b>" + [0, 3, 5].map(function (p) { var f = ipForme(v, p); return "<p>" + esc(ipPron(p, f).split(",")[0]) + (p === 0 && ipVoy(f) ? "" : " ") + exT(esc(f)) + "</p>"; }).join("") + "</div>"; }).join("") + "</div>",
+          r: d.conj.map(function (v) { return [0, 3, 5].map(function (p) { var f = ipForme(v, p); return ipPron(p, f).split(",")[0] + (p === 0 && ipVoy(f) ? "" : " ") + f; }).join(", "); }).join(" — ") },
+        { c: en ? "Rewrite the sentence with « Nous »." : "Réécris la phrase avec « Nous ».", q: '<ul class="ex-fr ex-conv ex-une-col">' + d.trans.map(function (v) { return "<li>" + esc(ipPhrase(v, 2, "Léo")) + "<br>" + exT(esc(ipPhrase(v, 3, "Nous")), true) + "</li>"; }).join("") + "</ul>", r: d.trans.map(function (v) { return esc(ipPhrase(v, 3, "Nous")); }).join(" · ") }
+      ];
+    } };
+  exNiveaux("imparfait", [
+    "L’élève identifie dans un texte les verbes conjugués à l’imparfait.",
+    "L’élève mémorise les terminaisons de l’imparfait à partir de « La chanson de l’imparfait ».",
+    "L’élève conjugue à l’écrit les verbes des 1er et 3ème groupes à l’imparfait.",
+    "L’élève est capable d’associer un de ces verbes conjugué à l’imparfait au pronom personnel qui correspond.",
+    "L’élève choisit, selon le sujet, la bonne terminaison de ces verbes conjugués à l’imparfait.",
+    "L’élève est capable de conjuguer à l’écrit ces verbes à l’imparfait.",
+    "L’élève sera capable de transposer des phrases en modifiant le sujet et la terminaison de ces verbes à l’imparfait."
+  ], {
+    but: "Verbes du 1er groupe, être et avoir ; le tableau des terminaisons est rappelé ; entourer le bon pronom ; conjuguer un verbe du 1er groupe à toutes les personnes.",
+    rappel: function (en) { return (en ? "Keep the stem and add the endings: " : "Je garde le radical et j’ajoute les terminaisons : ") + "je jou<b class=\"coco-term\">ais</b> · tu jou<b class=\"coco-term\">ais</b> · il jou<b class=\"coco-term\">ait</b> · nous jou<b class=\"coco-term\">ions</b> · vous jou<b class=\"coco-term\">iez</b> · ils jou<b class=\"coco-term\">aient</b>"; },
+    tirer: function () { var g = HE.shuf(IP_G1.slice(0, 8)).concat(HE.shuf(IP_EA));
+      return { texte: HE.pk(IP_TEXTES.filter(function (s) { return ipVerbesDe(s).length <= 4; })), pron: g.slice(0, 4).map(function (v, k) { var p = [3, 0, 5, 4][k]; var o = p === 0 || p === 3 ? ["je", "nous"] : p === 5 ? ["il", "ils"] : ["vous", "tu"]; return [v, p, HE.shuf(o)]; }),
+        term: HE.shuf(g).slice(0, 4).map(function (v) { var p = HE.rint(0, 5); return [v, p, ipSujet(p)]; }), conj: HE.pk(IP_G1.slice(0, 8)) }; },
+    exos: function (d, en) {
+      return [
+        { c: en ? "Underline the verbs in the imparfait." : "Souligne les verbes à l’imparfait.", q: '<p class="ex-fr ex-texte">' + exG(ipSouligne(d.texte), "soul") + "</p>", r: ipVerbesDe(d.texte).map(function (v) { return "<b>" + esc(v) + "</b>"; }).join(" · ") },
+        { c: en ? "Circle the right pronoun." : "Entoure le bon pronom.", q: '<ul class="ex-fr ex-conv">' + d.pron.map(function (x) { var f = ipForme(x[0], x[1]), bon = x[1] === 0 ? "je" : ["je", "tu", "il", "nous", "vous", "ils"][x[1]];
+            var o = x[2].map(function (y) { return y === "je" && ipVoy(f) ? "j’" : y; }), b = bon === "je" && ipVoy(f) ? "j’" : bon;
+            return "<li>" + exG("( " + o.map(function (y) { return y === b ? exC(esc(y)) : esc(y); }).join(" / ") + " )", "cercle") + " " + esc(f) + "</li>"; }).join("") + "</ul>",
+          r: d.pron.map(function (x) { var f = ipForme(x[0], x[1]); return esc(ipPron(x[1], f).split(",")[0]) + (x[1] === 0 && ipVoy(f) ? "" : " ") + esc(f); }).join(" · ") },
+        { c: en ? "Complete with the right ending." : "Complète avec la bonne terminaison.", q: '<ul class="ex-fr ex-conv">' + d.term.map(function (x) { var f = ipForme(x[0], x[1]), deb = (x[2] === "Je" ? ipJe(f, true) : x[2] + " ") + IP_V[x[0]][0]; return "<li>" + esc(deb) + exT(IP_T[x[1]]) + " " + esc(IP_V[x[0]][1]) + ".</li>"; }).join("") + "</ul>", r: d.term.map(function (x) { return esc(ipForme(x[0], x[1])); }).join(" · ") },
+        { c: en ? "Conjugate the verb « " + d.conj + " » in the imparfait." : "Conjugue le verbe « " + d.conj + " » à l’imparfait.", q: '<ul class="ex-fr ex-conv">' + IP_T.map(function (_, p) { var f = ipForme(d.conj, p); return "<li>" + esc(ipPron(p, f)) + (p === 0 && ipVoy(f) ? "" : " ") + esc(IP_V[d.conj][0]) + exT(IP_T[p]) + "</li>"; }).join("") + "</ul>",
+          r: IP_T.map(function (_, p) { var f = ipForme(d.conj, p); return esc(ipPron(p, f)) + (p === 0 && ipVoy(f) ? "" : " ") + esc(f); }).join(" · ") }
+      ];
+    }
+  }, "Les 11 verbes de la leçon ; souligner, écrire le pronom, la terminaison selon le sujet, conjuguer deux verbes, réécrire deux phrases avec « Nous ».", {
+    but: "Repérer l’imparfait parmi d’autres temps ; écrire le verbe entre parenthèses, sans aide ; transformer un petit texte en changeant le sujet ; écrire deux phrases à l’imparfait.",
+    rappel: EXOS.imparfait.rappel,
+    tirer: function () { var vs = HE.shuf(IP_G1.slice(0, 8)).slice(0, 2).concat(HE.shuf(IP_EA.concat(IP_IRR)).slice(0, 4));
+      return { texte: HE.pk(IP_TEXTES3), paren: HE.shuf(vs).map(function (v) { var p = HE.rint(0, 5); return [v, p, ipSujet(p)]; }), trans: HE.shuf(IP_EA.concat(IP_IRR, IP_G1.slice(0, 8))).slice(0, 3) }; },
+    exos: function (d, en) {
+      return [
+        { c: en ? "Underline only the verbs in the imparfait." : "Souligne seulement les verbes à l’imparfait.", q: '<p class="ex-fr ex-texte">' + exG(ipSouligne(d.texte), "soul") + "</p>", r: ipVerbesDe(d.texte).map(function (v) { return "<b>" + esc(v) + "</b>"; }).join(" · ") + (en ? " (the other verbs are in the present)" : " (les autres verbes sont au présent)") },
+        { c: en ? "Write the verb in brackets in the imparfait." : "Écris le verbe entre parenthèses à l’imparfait.", q: '<ul class="ex-fr ex-conv">' + d.paren.map(function (x) { var f = ipForme(x[0], x[1]); return "<li>" + esc(x[2] === "Je" ? (ipVoy(f) ? "J’" : "Je") : x[2]) + " (" + esc(x[0]) + ") " + exT(esc(f)) + " " + esc(IP_V[x[0]][1]) + ".</li>"; }).join("") + "</ul>", r: d.paren.map(function (x) { return esc(ipForme(x[0], x[1])); }).join(" · ") },
+        { c: en ? "Rewrite the text with « Nous » instead of « Je »." : "Réécris le texte avec « Nous » à la place de « Je ».", q: '<p class="ex-fr">' + d.trans.map(function (v) { return esc(ipPhrase(v, 0, "Je")); }).join(" ") + '</p><p class="ex-fr ex-invente">' + exT(esc(d.trans.map(function (v) { return ipPhrase(v, 3, "Nous"); }).join(" ")), true) + EXLL + "</p>",
+          r: esc(d.trans.map(function (v) { return ipPhrase(v, 3, "Nous"); }).join(" ")) },
+        { c: en ? "Write two sentences in the imparfait to describe the witch’s cave." : "Écris deux phrases à l’imparfait pour décrire la grotte de la sorcière.", q: '<p class="ex-invente">' + EXLL + EXLL + "</p>",
+          r: en ? "Answers will vary: check the subject, the stem and the ending (ais, ait, aient…)." : "Réponses variées : vérifier le sujet, le radical et la terminaison (ais, ait, aient…)." }
+      ];
+    }
+  });
+
   /* ---------- routeur ---------- */
   var ROUTES = {
     accueil: pageAccueil, "seq-verbe": function () { return pageSequence("verbe"); }, "seq-mots": pageSequenceMots, "lecon-mots": pageLeconMots, "fiche-mots": ficheMots,
     "seq-heure": pageSequenceHeure, "seq-digitale": pageSequenceDigitale, "ens-suivi": pageEnsSuivi, "ens-etoiles": function () { return pageEnsEtoiles("calcul"); }, "ens-etoiles-grammaire": function () { return pageEnsEtoiles("grammaire"); }, "ens-corriges": pageEnsCorriges, "ens-corriges-grammaire": pageEnsCorrigesGram, "ens-sequences": pageEnsSequences, "ens-formation": pageEnsFormation, "fiche-digitale": ficheDigitale, "seq-diagrammes": pageSequenceDiagrammes, "lecon-diagrammes": pageLeconDiagrammes, "fiche-diagrammes": ficheDiagrammes, "fiche-masses": ficheMasses, "fiche-verbe": ficheVerbe, "fiche-division": ficheDivision, "fiche-monnaie": ficheMonnaie, "lecon-heure": function () { return pageLeconHeure(true); }, "maquette-retiens": function () { return pageLeconHeure(true); }, "fiche-heure": ficheHeure, "exos-heure": function () { return pageExos("heure"); }, "lecon-digitale": pageLeconDigitale, "lecon-division": pageLeconDivision, "lecon-monnaie": pageLeconMonnaie, "lecon-masses": pageLeconMasses, "exos-verbe": function () { return pageExos("verbe"); }, "exos-mots": function () { return pageExos("mots"); },
     "exos-monnaie": function () { return pageExos("monnaie"); }, "exos-division": function () { return pageExos("division"); }, "exos-masses": function () { return pageExos("masses"); }, "exos-digitale": function () { return pageExos("digitale"); }, "exos-diagrammes": function () { return pageExos("diagrammes"); }, "tbi-heure": pageTbiHeure,
+    "seq-imparfait": function () { return pageSequence("imparfait"); }, "lecon-imparfait": pageLeconImparfait, "fiche-imparfait": ficheImparfait, "exos-imparfait": function () { return pageExos("imparfait"); },
     "lecon-verbe": pageLecon, "jeu-verbe-decouvre": jeuDecouvre, "jeu-verbe-chasse": jeuChasse, enseignante: pageEnseignante, banque: pageBanque
   };
   C.matieres.forEach(function (m) { ROUTES[m.id] = function () { return pageMatiere(m.id); }; });
@@ -3860,7 +4113,7 @@
     var b = document.querySelector('[data-action="' + (el.dataset.mode === "k" ? "k-tableau" : "a-proposer") + '"]'); if (b) b.disabled = !pret(po(S.id), S.sel);
     if (S === A && A.msg) { A.msg = ""; var rz = document.querySelector(".retour-zone"); if (rz) rz.innerHTML = ""; }
   });
-  document.addEventListener("input", function (e) { var el = e.target; if (!el.dataset || el.dataset.qz === undefined || !QZ) return; var v = el.value.replace(/[^\d]/g, "").slice(0, 5); if (v !== el.value) el.value = v; QZ.val[el.dataset.qz] = v; });
+  document.addEventListener("input", function (e) { var el = e.target; if (!el.dataset || el.dataset.qz === undefined || !QZ) return; if (el.classList.contains("qz-champ--mot")) { QZ.val[el.dataset.qz] = el.value.slice(0, 40); return; } var v = el.value.replace(/[^\d]/g, "").slice(0, 5); if (v !== el.value) el.value = v; QZ.val[el.dataset.qz] = v; });
   document.addEventListener("keydown", function (e) { if (e.key === "Enter" && e.target.dataset && e.target.dataset.qz !== undefined) { var b = document.querySelector('[data-action="qz-valider"]'); if (b) b.click(); } });
   document.addEventListener("change", function (e) { if (e.target.id === "ex-liste" && EXF) { EXF.opt = e.target.value; EXF.n = exNouveauNum(); exTirer(); rendre(); } });
   /* correction au TBI (D-104) : flèches pour changer d'exercice, Entrée dans le numéro de fiche, Entrée ou espace sur une case */

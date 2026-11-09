@@ -1418,3 +1418,28 @@ a.fo-carte:hover { background: var(--lagon-clair); }
 @media print { .ex-etoiles { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
 .ex-familles.ex-familles3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 @media (max-width: 700px) { .ex-familles.ex-familles3 { grid-template-columns: 1fr; } }
+
+/* ---------- L’imparfait (proposition du 09/11/2026) : pronoms en violet, terminaisons en rouge (code des leçons) ---------- */
+.ip-pron { color: var(--gram-pronom); font-weight: 700; }
+.ip-table { border-collapse: collapse; font: 600 22px/1.35 var(--font-lecture); background: #fff; border-radius: 12px; }
+.ip-table caption { font: 700 16px/1.2 var(--font-texte); color: var(--encre-douce); padding: 4px 0; caption-side: top; }
+.ip-table td { padding: 2px 10px; }
+.ip-table td.ip-tp { text-align: right; }
+.ip-tables { display: flex; justify-content: center; padding: 8px 0; }
+.ip-minis { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.ip-minis .ip-table { font-size: 16px; }
+.ip-terms { font: 700 28px/1.4 var(--font-lecture); text-align: center; margin: 8px 0; }
+.ip-terms--pron { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 22px; font-size: 22px; }
+.ip-conte { font: 500 24px/1.6 var(--font-lecture); background: #fff; border-radius: 12px; padding: 12px 16px; margin: 8px 0; }
+.ip-choix { justify-content: center; margin: 8px 0; }
+.ip-choix .coco-etiquette.est-choisi { background: var(--francais); color: #fff; }
+.qz-phrase { font: 600 26px/1.4 var(--font-lecture); text-align: center; margin: 0 0 12px; }
+.qz-champ.qz-champ--mot { width: 230px; }
+.qz-ecrire { font-size: 26px; }
+@media (max-width: 600px) { .ip-table { font-size: 18px; } .ip-terms { font-size: 22px; } .ip-conte { font-size: 20px; } .qz-champ.qz-champ--mot { width: 170px; } .qz-ecrire, .qz-phrase { font-size: 21px; } }
+.ip-ligne { animation: jr-entre .45s ease-out both; }
+@media (prefers-reduced-motion: reduce) { .ip-ligne { animation: none; } }
+.ip-choix .coco-etiquette { font-size: 19px; padding: 6px 12px; min-height: 44px; }
+.ip-minis .jr-pop { display: inline-block; }
+.ip-table td.ip-apo { padding-right: 0; }
+.ip-table td.ip-apo2 { padding-left: 0; }

@@ -15,7 +15,7 @@ window.COCO_CONTENU = {
           ["Le passé composé avec avoir"], ["Le passé composé avec être"],
           ["Le futur : être, avoir et 1er groupe"], ["Le futur : verbes irréguliers"],
           ["Les compléments de phrase"], ["Les compléments du verbe"],
-          ["L'imparfait : être, avoir et 1er groupe"], ["L'imparfait : verbes irréguliers"]
+          ["L’imparfait", "demo", "imparfait"] /* les deux lignes des progressions réunies en une séquence, comme la programmation P5 (choix de l’enseignante, 09/11/2026) */
         ] },
         { nom: { fr: "Orthographe", en: "Spelling" }, sequences: [
           ["Les mots invariables", "demo", "mots"], ["Les correspondances graphèmes-phonèmes"], ["Les accords particuliers"]
