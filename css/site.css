@@ -1382,3 +1382,39 @@ a.fo-carte:hover { background: var(--lagon-clair); }
 .ec-eval .eg-art b { white-space: normal; }
 .ec-eval .eg-d { color: var(--gram-determinant); }
 .eg-insec { white-space: nowrap; }
+
+/* ---------- fiches d’exercices en 3 niveaux (proposition du 09/11/2026) ---------- */
+.ex-niveaux { display: inline-flex; border: 2px solid var(--lagon); border-radius: var(--arrondi-pilule); overflow: hidden; background: #fff; }
+.ex-niv { font: 600 16px/1 var(--font-texte); color: var(--lagon-texte); background: none; border: 0; padding: 0 14px; min-height: var(--cible-min); cursor: pointer; }
+.ex-niv + .ex-niv { border-left: 2px solid var(--lagon); }
+.ex-niv.est-actif { background: var(--lagon); color: #fff; }
+.ex-niv:focus-visible { outline: 3px solid var(--lagon-fonce); outline-offset: -3px; }
+.ex-objectifs { margin: 0 0 var(--espace-4); background: var(--carte); border: 2px dashed var(--lagon); border-radius: var(--arrondi-moyen, 14px); padding: 10px 16px; color: var(--encre-douce); }
+.ex-objectifs summary { font-weight: 600; color: var(--lagon-texte); cursor: pointer; min-height: 32px; display: flex; align-items: center; }
+.ex-objectifs ul { margin: 6px 0; padding-left: 22px; }
+.ex-objectifs p { margin: 6px 0 2px; }
+.ex-exemple { margin: 0 0 8px; padding: 6px 12px; background: var(--soutien-clair, #fff6d6); border-radius: 8px; font-size: .95em; }
+.ex-brouillon { height: 90px; border: 2px dashed var(--encre-douce); border-radius: 10px; margin: 8px 0; opacity: .6; }
+.ex-dv-sit li { line-height: 1.7; }
+@media print { .ex-brouillon { height: 24mm; } .ex-exemple { background: none; border: 1px solid #999; } }
+.ex-moyen .ex-ligne { min-width: 170px; }
+.ex-sit-choix { display: flex; justify-content: space-between; gap: 4px 16px; align-items: baseline; }
+.ex-gp { white-space: nowrap; }
+@media (max-width: 700px) { .ex-sit-choix { flex-direction: column; } }
+.ex-voc1 ul { display: flex !important; flex-wrap: wrap; gap: 6px 24px; padding-left: 0; list-style: none; }
+@media print {
+  .ex-dv-sit li { line-height: 1.45; }
+  .ex-moyen .ex-ligne { min-width: 42mm; }
+  .ex-brouillon { height: 18mm; margin: 4px 0; }
+  .ex-exemple { margin-bottom: 4px; padding: 3px 10px; }
+}
+.ex-voc1 { display: flex; gap: 8px 28px; align-items: center; flex-wrap: wrap; }
+.ex-voc1 .ex-egalite { margin: 0; }
+@media print { .ex-dv-sit li { line-height: 1.35; } .ex-dv-sit { gap: 6px; } .ex-brouillon { height: 15mm; } }
+.ex-dv > p { margin: 6px 0; }
+@media print { .ex-dv > p { margin: 3px 0; } .ex-dv .ex-sachets { margin: 4px 0; } .ex-dv .ex-letchis { margin: 2px 0; } }
+.ex-etoiles { letter-spacing: 1px; white-space: nowrap; }
+.ex-niv .ex-etoiles { font-size: .9em; margin-left: 2px; }
+@media print { .ex-etoiles { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+.ex-familles.ex-familles3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 700px) { .ex-familles.ex-familles3 { grid-template-columns: 1fr; } }

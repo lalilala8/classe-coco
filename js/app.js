@@ -1581,6 +1581,536 @@
     }
   };
   Object.keys(EXOS2).forEach(function (k) { EXOS[k] = EXOS2[k]; });
+  /* ---------- Fiches d'exercices en 3 niveaux (demande de l’enseignante, 09/11/2026) [PROPOSITION] ----------
+     Mêmes objectifs opérationnels pour les 3 niveaux (programmation P5 de la classe), difficulté croissante :
+     niveau 1 = petits nombres et aides (exemple, dessin, choix) ; niveau 2 = attendu de la classe ; niveau 3 = sans aide, plusieurs étapes.
+     X.niveaux[0..2] remplace rappel, tirer et exos ; X.objectifs = objectifs de la programmation, cités mot pour mot. */
+  var EX_NIV_NOM = ["Niveau 1", "Niveau 2", "Niveau 3"], EX_NIV_EN = ["Level 1", "Level 2", "Level 3"];
+  /* repère discret du niveau sur la fiche imprimée : 1, 2 ou 3 étoiles (choix de l’enseignante, 09/11/2026) */
+  function exEtoiles(n) { return '<span class="ex-etoiles" aria-label="' + EX_NIV_NOM[n - 1] + '">' + new Array(n + 1).join("★") + "</span>"; }
+  function exX(X) { if (!X.niveaux) return X; var N = X.niveaux[(EXF && EXF.niv ? EXF.niv : 2) - 1], o = {}; Object.keys(X).forEach(function (k) { o[k] = X[k]; }); Object.keys(N).forEach(function (k) { o[k] = N[k]; }); return o; }
+  /* division : situations de partage (p) et de groupement (g), leçon CAL7 « Diviser : grouper ou partager » */
+  var DV_SIT = [
+    { t: "p", fr: "Nina partage {t} coquillages entre {b} amis, en parts égales. Combien de coquillages pour chacun ?", en: "Nina shares {t} shells equally between {b} friends. How many shells does each friend get?", u: ["coquillages", "shells"], o: ["coquillages", "shells"] },
+    { t: "p", fr: "La maîtresse distribue {t} crayons sur {b} tables, autant sur chaque table. Combien de crayons par table ?", en: "The teacher hands out {t} pencils to {b} tables, the same number on each table. How many pencils per table?", u: ["crayons", "pencils"], o: ["crayons", "pencils"] },
+    { t: "p", fr: "Tao partage {t} letchis dans {b} sachets, en parts égales. Combien de letchis dans chaque sachet ?", en: "Tao shares {t} lychees equally into {b} bags. How many lychees are there in each bag?", u: ["letchis", "lychees"], o: ["letchis", "lychees"] },
+    { t: "p", fr: "{t} élèves se répartissent en {b} équipes égales. Combien d’élèves dans chaque équipe ?", en: "{t} pupils split into {b} equal teams. How many pupils are there in each team?", u: ["élèves", "pupils"], o: ["élèves", "pupils"], nr: true },
+    { t: "g", fr: "Méi range {t} œufs dans des boîtes de {b}. Combien de boîtes remplit-elle ?", en: "Méi puts {t} eggs into boxes of {b}. How many boxes does she fill?", u: ["boîtes", "boxes"], o: ["œufs", "eggs"] },
+    { t: "g", fr: "Avec {t} enfants, on forme des équipes de {b}. Combien d’équipes forme-t-on ?", en: "With {t} children, we make teams of {b}. How many teams do we make?", u: ["équipes", "teams"], o: ["enfants", "children"], nr: true },
+    { t: "g", fr: "Wadra met {t} mangues dans des sacs de {b} mangues. Combien de sacs remplit-il ?", en: "Wadra puts {t} mangoes into bags of {b} mangoes. How many bags does he fill?", u: ["sacs", "bags"], o: ["mangues", "mangoes"] },
+    { t: "g", fr: "Dylan colle {t} images dans son album, {b} par page. Combien de pages remplit-il ?", en: "Dylan sticks {t} pictures in his album, {b} on each page. How many pages does he fill?", u: ["pages", "pages"], o: ["images", "pictures"] }
+  ];
+  /* espacement resserré des exercices de division (une page A4 par niveau) */
+  function dvQ(L) { return L.map(function (e) { e.q = '<div class="ex-dv">' + e.q + "</div>"; return e; }); }
+  function dvSit(s, t, b, en) { return typo((en ? s.en : s.fr).replace("{t}", t).replace("{b}", b)); }
+  /* autant de situations de partage que de groupement, mélangées ; nr = situation qui n’a pas de sens avec un reste */
+  function dvSits(n, bMin, bMax, qMax, reste, qMin) {
+    var ok = function (s) { return !(reste && s.nr); }, P = HE.shuf(DV_SIT.filter(function (s) { return s.t === "p" && ok(s); })), G = HE.shuf(DV_SIT.filter(function (s) { return s.t === "g" && ok(s); })), L = [];
+    for (var i = 0; i < n; i++) { var s = i % 2 ? G[i >> 1] : P[i >> 1], b = HE.rint(bMin, bMax), q = HE.rint(qMin || 2, qMax); L.push({ s: s, b: b, q: q, t: b * q }); }
+    return HE.shuf(L);
+  }
+  function dvDivs(n, bMin, bMax, qMin, qMax) { var L = [], k = 0; while (L.length < n && k++ < 200) { var b = HE.rint(bMin, bMax), q = HE.rint(qMin, qMax); if (!L.some(function (x) { return x[1] === b && x[2] === q; })) L.push([b * q, b, q]); } return L; }
+  function dvReste(bMin, bMax, qMin, qMax) { var b = HE.rint(bMin, bMax), q = HE.rint(qMin, qMax), r = HE.rint(1, b - 1); return [b * q + r, b, q, r]; }
+  function dvChoix(s, en) { var g = en ? "I group" : "Je groupe", p = en ? "I share" : "Je partage"; return '<span class="ex-gp">' + exG((s.t === "g" ? exC(g) : g) + '<span class="ex-sep">/</span>' + (s.t === "p" ? exC(p) : p), "cercle") + "</span>"; }
+  var DV_OBJ = [
+    "L’élève est capable d’identifier une situation de groupement ou de partage.",
+    "L’élève est capable d’écrire la division en ligne et la multiplication à trou qui correspondent à la situation rencontrée.",
+    "Lorsqu’il écrit sa division en ligne ou sa multiplication à trou, l’élève utilise à bon escient les notions de quotient, diviseur, dividende, et reste.",
+    "L’élève est capable de résoudre un problème simple relevant de la division en ligne avec ou sans reste."
+  ];
+  EXOS.division.objectifs = DV_OBJ;
+  EXOS.division.niveaux = [
+    { /* niveau 1 : tables de 2 à 5, quotient jusqu’à 5 pour dessiner, sans reste ; exemples et choix */
+      but: "Petits nombres (tables de 2 à 5), sans reste ; un partage à dessiner, des choix à entourer, un exemple pour le vocabulaire.",
+      rappel: function (en) { return en ? "<b>Group:</b> in 24, how many 4s? 24 = 4 × 6 and 24 ÷ 4 = 6. <b>Share:</b> 27 shared into 3: 27 = 3 × 9 and 27 ÷ 3 = 9."
+        : "<b>Grouper</b> : dans 24, combien de fois 4 ? 24 = 4 × 6 et 24 : 4 = 6. <b>Partager</b> : 27 partagé en 3 : 27 = 3 × 9 et 27 : 3 = 9."; },
+      tirer: function () { var b0 = HE.rint(2, 3), q0 = HE.rint(3, 5), sits = dvSits(3, 2, 5, 5, false, 3);
+        /* le problème prend une situation de groupement qui n’est pas déjà dans l’exercice 2 */
+        var libre = HE.shuf(DV_SIT.filter(function (s) { return s.t === "g" && !sits.some(function (x) { return x.s === s; }); }))[0], b = HE.rint(2, 4), q = HE.rint(3, 5);
+        return { partage: [b0 * q0, b0, q0], sits: sits, trous: dvDivs(4, 2, 5, 2, 10), voc: dvDivs(1, 3, 5, 3, 9)[0], pb: { s: libre, b: b, q: q, t: b * q } }; },
+      exos: function (d, en) {
+        var div = en ? " ÷ " : " : ", p = d.partage, v = d.voc, pb = d.pb;
+        return dvQ([
+          { c: en ? "Share the " + p[0] + " lychees equally into " + p[1] + " bags. Draw them, then complete." : "Partage les " + p[0] + " letchis dans " + p[1] + " sachets, en parts égales. Dessine-les, puis complète.",
+            q: '<p class="ex-letchis">' + new Array(p[0] + 1).join('<span class="ex-rond"></span>') + "</p>" + exS('<div class="ex-sachets">' + new Array(p[1] + 1).join('<span class="ex-sachet"></span>') + "</div>", '<div class="ex-sachets">' + new Array(p[1] + 1).join('<span class="ex-sachet tb-plein">' + new Array(p[2] + 1).join('<span class="ex-rond"></span>') + "</span>") + "</div>") +
+              "<p>" + p[0] + " = " + p[1] + " × " + exT(String(p[2])) + " &nbsp; " + p[0] + div + p[1] + " = " + exT(String(p[2])) + "</p>",
+            r: p[0] + " = " + p[1] + " × " + p[2] + " · " + p[0] + div + p[1] + " = " + p[2] },
+          { c: en ? "Do I group or do I share? Circle." : "Est-ce que je groupe ou est-ce que je partage ? Entoure.",
+            q: '<ol class="ex-conv ex-une-col ex-dv-sit">' + d.sits.map(function (x) { return '<li><span class="ex-sit-choix"><span>' + esc(dvSit(x.s, x.t, x.b, en)) + "</span>" + dvChoix(x.s, en) + "</span></li>"; }).join("") + "</ol>",
+            r: d.sits.map(function (x) { return x.s.t === "g" ? (en ? "group" : "je groupe") : (en ? "share" : "je partage"); }).join(" · ") },
+          { c: en ? "Complete the missing-number multiplication, then the division." : "Complète la multiplication à trou, puis la division.",
+            q: '<ul class="ex-conv">' + d.trous.map(function (x) { return "<li>" + x[0] + " = " + x[1] + " × " + exT(String(x[2])) + " &nbsp;→&nbsp; " + x[0] + div + x[1] + " = " + exT(String(x[2])) + "</li>"; }).join("") + "</ul>",
+            r: d.trous.map(function (x) { return x[0] + div + x[1] + " = " + x[2]; }).join(" · ") },
+          { c: en ? "Look at the example, then complete." : "Regarde l’exemple, puis complète.",
+            q: '<p class="ex-exemple">' + (en ? "Example: 12 ÷ 3 = 4 → the dividend is 12, the divisor is 3, the quotient is 4." : "Exemple : 12 : 3 = 4 → le dividende est 12, le diviseur est 3, le quotient est 4.") + '</p><div class="ex-voc1"><p class="ex-egalite">' + v[0] + div + v[1] + " = " + v[2] + '</p><ul class="ex-conv ex-une-col">' +
+              (en ? ["The dividend is ", "The divisor is ", "The quotient is "] : ["Le dividende est ", "Le diviseur est ", "Le quotient est "]).map(function (s, i) { return "<li>" + s + exT(String(v[i])) + ".</li>"; }).join("") + "</ul></div>",
+            r: (en ? "dividend " : "dividende ") + v[0] + (en ? " · divisor " : " · diviseur ") + v[1] + " · quotient " + v[2] },
+          { c: en ? "Solve the problem. You can draw." : "Résous le problème. Tu peux dessiner.",
+            q: "<p>" + esc(dvSit(pb.s, pb.t, pb.b, en)) + '</p><div class="ex-brouillon"></div><p>' + pb.t + " = " + pb.b + " × " + exT(String(pb.q)) + " &nbsp; " + pb.t + div + pb.b + " = " + exT(String(pb.q)) + " &nbsp; " + (en ? "Answer: " : "Réponse : ") + '<span class="ex-moyen">' + exT(pb.q + " " + pb.s.u[en ? 1 : 0]) + "</span></p>",
+            r: pb.t + div + pb.b + " = " + pb.q + " · " + pb.q + " " + pb.s.u[en ? 1 : 0] }
+        ]);
+      }
+    },
+    { /* niveau 2 : attendu de la classe, tables de 2 à 6, avec et sans reste */
+      but: "Attendu de la classe : tables de 2 à 6, divisions avec et sans reste, vocabulaire sans exemple, un problème avec reste.",
+      rappel: EXOS.division.rappel,
+      tirer: function () { return { sits: dvSits(3, 2, 6, 9), calc: dvDivs(6, 2, 6, 2, 10), restes: [dvReste(3, 6, 2, 9), dvReste(3, 6, 2, 9), dvReste(3, 6, 2, 9)], vocab: dvReste(3, 6, 3, 9), pb: dvReste(3, 6, 3, 9) }; },
+      exos: function (d, en) {
+        var div = en ? " ÷ " : " : ", v = d.vocab, pb = d.pb;
+        return dvQ([
+          { c: en ? "Do I group or do I share? Circle, then write the multiplication and the division." : "Est-ce que je groupe ou est-ce que je partage ? Entoure, puis écris la multiplication à trou et la division.",
+            q: '<ol class="ex-conv ex-une-col ex-dv-sit">' + d.sits.map(function (x) { return "<li>" + esc(dvSit(x.s, x.t, x.b, en)) + "<br>" + dvChoix(x.s, en) + '<span class="ex-sep"></span>' + '<span class="ex-moyen">' + exT(x.t + " = " + x.b + " × " + x.q) + "</span> &nbsp; " + '<span class="ex-moyen">' + exT(x.t + div + x.b + " = " + x.q) + "</span>" + "</li>"; }).join("") + "</ol>",
+            r: d.sits.map(function (x) { return (x.s.t === "g" ? (en ? "group" : "je groupe") : (en ? "share" : "je partage")) + " : " + x.t + " = " + x.b + " × " + x.q + ", " + x.t + div + x.b + " = " + x.q; }).join(" · ") },
+          { c: en ? "Work out." : "Calcule.",
+            q: '<ul class="ex-conv ex-trois-col">' + d.calc.map(function (x) { return "<li>" + x[0] + div + x[1] + " = " + exT(String(x[2])) + "</li>"; }).join("") + "</ul>",
+            r: d.calc.map(function (x) { return x[0] + div + x[1] + " = " + x[2]; }).join(" · ") },
+          { c: en ? "Divide, then complete the equality with the remainder." : "Divise, puis complète l’égalité avec le reste.",
+            q: '<ul class="ex-conv ex-une-col">' + d.restes.map(function (x) { return "<li>" + (en ? "I divide " + x[0] + " by " + x[1] + ": " : "Je divise " + x[0] + " par " + x[1] + " : ") + x[0] + " = (" + x[1] + " × " + exT(String(x[2])) + ") + " + exT(String(x[3])) + "</li>"; }).join("") + "</ul>",
+            r: d.restes.map(function (x) { return x[0] + " = (" + x[1] + " × " + x[2] + ") + " + x[3]; }).join(" · ") },
+          { c: en ? "Complete with the right number." : "Complète avec le bon nombre.",
+            q: '<p class="ex-egalite">' + v[0] + " = (" + v[1] + " × " + v[2] + ") + " + v[3] + '</p><ul class="ex-conv">' + (en ? ["The dividend is ", "The divisor is ", "The quotient is ", "The remainder is "] : ["Le dividende est ", "Le diviseur est ", "Le quotient est ", "Le reste est "]).map(function (s, i) { return "<li>" + s + exT(String(v[i])) + ".</li>"; }).join("") + "</ul>",
+            r: (en ? "dividend " : "dividende ") + v[0] + (en ? " · divisor " : " · diviseur ") + v[1] + " · quotient " + v[2] + (en ? " · remainder " : " · reste ") + v[3] },
+          { c: en ? "Solve the problem." : "Résous le problème.",
+            q: "<p>" + (en ? "Nina has " + pb[0] + " shells. She puts them in boxes of " + pb[1] + ". How many boxes can she fill? How many shells are left?" : "Nina a " + pb[0] + " coquillages. Elle les range dans des boîtes de " + pb[1] + ". Combien de boîtes peut-elle remplir ? Combien de coquillages reste-t-il ?") + "</p><p>" + '<span class="ex-moyen">' + exT(pb[0] + " = (" + pb[1] + " × " + pb[2] + ") + " + pb[3]) + "</span> &nbsp; " + (en ? "She fills " : "Elle remplit ") + exT(String(pb[2])) + (en ? " boxes. There are " : " boîtes. Il reste ") + exT(String(pb[3])) + (en ? " shells left." : " coquillages.") + "</p>",
+            r: pb[0] + " = (" + pb[1] + " × " + pb[2] + ") + " + pb[3] + " · " + (en ? pb[2] + " boxes, " + pb[3] + " left" : pb[2] + " boîtes, il reste " + pb[3] + " coquillages") }
+        ]);
+      }
+    },
+    { /* niveau 3 : tables jusqu’à 8, avec reste, sans aide ; vocabulaire à l’envers, égalités à vérifier, problème « quotient + 1 » (repère du niveau 3) */
+      but: "Tables jusqu’à 8, avec reste et sans aide ; retrouver le dividende, vérifier une égalité (le reste plus petit que le diviseur), un problème en plusieurs questions (quotient + 1).",
+      rappel: function (en) { return en ? "43 = (5 × 8) + 3: 43 is the dividend, 5 the divisor, 8 the quotient and 3 the remainder. The remainder is always smaller than the divisor."
+        : "43 = (5 × 8) + 3 : 43 est le dividende, 5 le diviseur, 8 le quotient et 3 le reste. Le reste est toujours plus petit que le diviseur."; },
+      tirer: function () {
+        var sits = dvSits(2, 3, 8, 9, true).map(function (x) { var r = HE.rint(1, x.b - 1); x.r = r; x.t = x.b * x.q + r; return x; });
+        var restes = [dvReste(6, 8, 3, 9), dvReste(6, 8, 3, 9), dvReste(4, 8, 4, 9), dvReste(4, 8, 4, 9)];
+        var qui = [dvReste(4, 8, 4, 9), dvReste(4, 8, 4, 9)];
+        var juste = [dvReste(4, 8, 3, 9), dvReste(4, 7, 3, 8), dvReste(4, 7, 3, 8)].map(function (x, i) { if (!i) return { e: x, ok: true }; var b = x[1], q = x[2] - 1, r = x[3] + b; return { e: [x[0], b, q, r], ok: false, bon: x }; });
+        return { sits: sits, restes: restes, qui: qui, juste: HE.shuf(juste), pb: dvReste(5, 8, 4, 8) };
+      },
+      exos: function (d, en) {
+        var div = en ? " ÷ " : " : ", pb = d.pb, eg = function (x) { return x[0] + " = (" + x[1] + " × " + x[2] + ") + " + x[3]; };
+        var oui = en ? "yes" : "oui", non = en ? "no" : "non";
+        return dvQ([
+          { c: en ? "Do I group or do I share? Circle, then write the equality and answer." : "Est-ce que je groupe ou est-ce que je partage ? Entoure, puis écris l’égalité et réponds.",
+            q: '<ol class="ex-conv ex-une-col ex-dv-sit">' + d.sits.map(function (x) { return "<li>" + esc(dvSit(x.s, x.t, x.b, en)) + (en ? " How many " + x.s.o[1] + " are left?" : " Combien de " + x.s.o[0] + " reste-t-il ?") + "<br>" + dvChoix(x.s, en) + '<span class="ex-sep"></span>' + '<span class="ex-moyen">' + exT(x.t + " = (" + x.b + " × " + x.q + ") + " + x.r) + "</span><br>" + (en ? "Answer: " : "Réponse : ") + exT(x.q + " " + x.s.u[en ? 1 : 0] + (en ? ", " + x.r + " " + x.s.o[1] + " left" : ", il reste " + x.r + " " + x.s.o[0]), true) + "</li>"; }).join("") + "</ol>",
+            r: d.sits.map(function (x) { return x.t + " = (" + x.b + " × " + x.q + ") + " + x.r; }).join(" · ") },
+          { c: en ? "Divide. Write the equality, then the quotient and the remainder." : "Divise. Écris l’égalité, puis le quotient et le reste.",
+            q: '<ul class="ex-conv ex-une-col">' + d.restes.map(function (x) { return "<li>" + (en ? "I divide " + x[0] + " by " + x[1] + ": " : "Je divise " + x[0] + " par " + x[1] + " : ") + x[0] + " = (" + x[1] + " × " + exT(String(x[2])) + ") + " + exT(String(x[3])) + " &nbsp; " + (en ? "quotient " : "quotient ") + exT(String(x[2])) + (en ? " remainder " : " reste ") + exT(String(x[3])) + "</li>"; }).join("") + "</ul>",
+            r: d.restes.map(eg).join(" · ") },
+          { c: en ? "Who am I?" : "Qui suis-je ?",
+            q: '<ul class="ex-conv ex-une-col">' + d.qui.map(function (x) { return "<li>" + (en ? "My divisor is " + x[1] + ", my quotient is " + x[2] + " and my remainder is " + x[3] + ". I am the dividend: " : "Mon diviseur est " + x[1] + ", mon quotient est " + x[2] + " et mon reste est " + x[3] + ". Je suis le dividende : ") + exT(String(x[0])) + "</li>"; }).join("") + "</ul>",
+            r: d.qui.map(eg).join(" · ") },
+          { c: en ? "Is the remainder smaller than the divisor? Circle. If not, write the right equality." : "Le reste est-il bien plus petit que le diviseur ? Entoure. Sinon, écris la bonne égalité.",
+            q: '<ul class="ex-conv ex-une-col">' + d.juste.map(function (x) { return "<li>" + (en ? "I divide " + x.e[0] + " by " + x.e[1] + ": " : "Je divise " + x.e[0] + " par " + x.e[1] + " : ") + eg(x.e) + " &nbsp; " + exG((x.ok ? exC(oui) : oui) + '<span class="ex-sep">/</span>' + (x.ok ? non : exC(non)), "cercle") + " &nbsp; " + '<span class="ex-moyen">' + (x.ok ? exT("—") : exT(eg(x.bon))) + "</span>" + "</li>"; }).join("") + "</ul>",
+            r: d.juste.map(function (x) { return x.ok ? eg(x.e) + (en ? " (right)" : " (juste)") : eg(x.bon); }).join(" · ") },
+          { c: en ? "Solve the problem." : "Résous le problème.",
+            q: "<p>" + (en ? "Tao has " + pb[0] + " lychees. He puts them in bags of " + pb[1] + "." : "Tao a " + pb[0] + " letchis. Il les met dans des sachets de " + pb[1] + ".") + "</p><ol class=\"ex-conv ex-une-col\"><li>" + (en ? "How many bags can he fill? " : "Combien de sachets peut-il remplir ? ") + exT(String(pb[2])) + "</li><li>" + (en ? "How many lychees are left? " : "Combien de letchis reste-t-il ? ") + exT(String(pb[3])) + "</li><li>" + (en ? "How many bags does he need to put away all the lychees? " : "Combien de sachets lui faut-il pour ranger tous les letchis ? ") + exT(String(pb[2] + 1)) + "</li></ol>",
+            r: eg(pb) + " · " + (en ? pb[2] + " full bags, " + pb[3] + " left, " + (pb[2] + 1) + " bags needed" : pb[2] + " sachets pleins, il reste " + pb[3] + " letchis, il faut " + (pb[2] + 1) + " sachets") }
+        ]);
+      }
+    }
+  ];
+  /* ---------- 3 niveaux pour les 7 autres séquences (validés sur le modèle de la division, 09/11/2026) [PROPOSITION] ----------
+     Le niveau 2 reste la fiche d’origine (attendu de la classe) ; les niveaux 1 et 3 sont écrits ici.
+     Objectifs : programmation P5 de l’enseignante pour l’heure digitale, l’heure à aiguilles et les masses (mot pour mot) ;
+     objectifs proposés d’après les leçons et validés pour le verbe, les mots invariables, la monnaie et le graphique en barres. */
+  function exNiveaux(seq, objectifs, n1, but2, n3) { EXOS[seq].objectifs = objectifs; EXOS[seq].niveaux = [n1, { but: but2 }, n3]; }
+  function exListe(L, f, cls) { return '<ul class="ex-conv ' + (cls || "") + '">' + L.map(function (x, i) { return "<li>" + f(x, i) + "</li>"; }).join("") + "</ul>"; }
+  var exNu = function (m) { return m.replace(/[.,!?…]+$/, ""); };
+
+  /* ===== Le verbe (leçon CONJ2) ===== */
+  /* phrases où le verbe n’est pas le 2e ou le 3e mot (niveau 3) [PROPOSITION] */
+  var EX_PHRASES3 = [{ mots: ["Dans", "le", "lagon,", "les", "tortues", "nagent."], v: 5, neg: "Dans le lagon, les tortues ne nagent pas." },
+    { mots: ["Ce", "matin,", "Méi", "prépare", "un", "gâteau."], v: 3, neg: "Ce matin, Méi ne prépare pas un gâteau." },
+    { mots: ["Sous", "le", "cocotier,", "Dylan", "lit", "une", "histoire."], v: 4, neg: "Sous le cocotier, Dylan ne lit pas une histoire." },
+    { mots: ["À", "la", "récréation,", "les", "élèves", "courent."], v: 5, neg: "À la récréation, les élèves ne courent pas." },
+    { mots: ["Le", "petit", "chien", "de", "Vaka", "aboie", "fort."], v: 5, neg: "Le petit chien de Vaka n’aboie pas fort." },
+    { mots: ["Les", "grands", "arbres", "de", "la", "forêt", "semblent", "immenses."], v: 6, neg: "Les grands arbres de la forêt ne semblent pas immenses." }];
+  /* petits textes : les verbes conjugués sont entre crochets [PROPOSITION] */
+  var EX_TEXTES = ["Le soir, Wadra [rentre] à la maison. Il [prend] une douche. Sa maman [prépare] le repas.",
+    "Kakou [vit] dans la forêt. Il [est] gris. Il [cherche] des vers sous les feuilles.",
+    "Les enfants [arrivent] à la plage. Tao [plonge] dans l’eau. Nina [semble] heureuse.",
+    "Ce matin, il [pleut] sur Nouméa. Les élèves [restent] en classe. La maîtresse [lit] une histoire."];
+  function vbSouligne(x) { return x.mots.map(function (m, j) { return j === x.v ? exC(esc(exNu(m))) + esc(m.slice(exNu(m).length)) : esc(m); }).join(" "); }
+  function vbEtat(L, en) { return '<ul class="ex-fr ex-deux-col">' + L.map(function (x) { return "<li>" + exS('<span class="ex-boite"></span>', '<span class="ex-boite tb-lettre">' + (en ? (x[1] === "E" ? "S" : "A") : (x[1] === "E" ? "É" : "A")) + "</span>", true) + " " + esc(x[0]) + "</li>"; }).join("") + "</ul>"; }
+  function vbEtatR(L, en) { return L.map(function (x) { return en ? (x[1] === "E" ? "S" : "A") : (x[1] === "E" ? "É" : "A"); }).join(" · "); }
+  function vbSujet(x) { return /^(Il|Nous)$/.test(x[0]) ? x[0].toLowerCase() : x[0]; }
+  exNiveaux("verbe", [
+    "L’élève est capable de reconnaître si un verbe exprime un état (être, sembler, paraître) ou une action.",
+    "L’élève est capable de trouver le verbe conjugué dans une phrase en la mettant à la forme négative (ne… pas).",
+    "L’élève est capable de repérer que le verbe change selon le temps de la phrase (passé, présent, futur)."
+  ], {
+    but: "Phrases courtes ; la forme négative est donnée pour trouver le verbe ; un seul exemple de « hier, aujourd’hui, demain » ; les verbes d’état sont rappelés.",
+    rappel: function (en) { return en ? "To find the conjugated verb, I make the sentence negative: the verb is between <span class=\"coco-negation\">ne</span> and <span class=\"coco-negation\">pas</span>! The rain falls → The rain does not fall."
+      : "Pour trouver le verbe conjugué, je mets la phrase à la <b>forme négative</b> : le verbe est entre <span class=\"coco-negation\">ne</span> et <span class=\"coco-negation\">pas</span> ! La pluie tombe → La pluie <span class=\"coco-negation\">ne</span> tombe <span class=\"coco-negation\">pas</span>."; },
+    tirer: function () { var ch = HE.shuf(C.verbe.chasse.concat(EX_PHRASES).filter(function (x) { return x.mots.length <= 6; }));
+      return { neg: ch.slice(0, 3), soul: ch.slice(3, 6), temps: HE.pk(EX_TEMPS), etat: HE.shuf(HE.shuf(EX_ETAT.filter(function (x) { return x[1] === "E"; })).slice(0, 2).concat(HE.shuf(EX_ETAT.filter(function (x) { return x[1] === "A"; })).slice(0, 2))) }; },
+    exos: function (d, en) {
+      var negC = function (x) { var v = exNu(x.mots[x.v]), i = x.neg.indexOf(" " + v + " "); if (i < 0) i = x.neg.indexOf("'" + v + " "); if (i < 0) i = x.neg.indexOf("’" + v + " "); return i < 0 ? esc(x.neg) : esc(x.neg.slice(0, i + 1)) + exC(esc(v)) + esc(x.neg.slice(i + 1 + v.length)); };
+      var t = d.temps, s = vbSujet(t);
+      return [
+        { c: en ? "The sentence is negative. Circle the word between ne and pas: it is the verb." : "La phrase est à la forme négative. Entoure le mot entre ne et pas : c’est le verbe.",
+          q: '<ol class="ex-fr ex-phrases">' + d.neg.map(function (x) { return "<li>" + esc(x.mots.join(" ")) + " → " + exG(negC(x), "cercle") + "</li>"; }).join("") + "</ol>",
+          r: d.neg.map(function (x) { return "<b>" + esc(exNu(x.mots[x.v])) + "</b>"; }).join(" · ") },
+        { c: en ? "Underline the conjugated verb." : "Souligne le verbe conjugué.",
+          q: '<ol class="ex-fr ex-phrases">' + d.soul.map(function (x) { return "<li>" + exG(vbSouligne(x), "soul") + "</li>"; }).join("") + "</ol>",
+          r: d.soul.map(function (x) { return "<b>" + esc(exNu(x.mots[x.v])) + "</b>"; }).join(" · ") },
+        { c: en ? "Circle the word that changes. It is the verb." : "Entoure le mot qui change. C’est le verbe.",
+          q: '<ul class="ex-fr ex-temps">' + [["Hier", 1], ["Aujourd’hui", 2], ["Demain", 3]].map(function (u) { return "<li>" + exG(u[0] + ", " + esc(s) + " " + exC(t[u[1]]) + " " + esc(t[4]), "cverbe") + "</li>"; }).join("") + "</ul>",
+          r: t[1] + ", " + t[2] + ", " + t[3] },
+        { c: en ? "State or action? Write S (state) or A (action). State verbs: to be, to seem, to look." : "État ou action ? Écris É ou A. Les verbes d’état : être, sembler, paraître.",
+          q: vbEtat(d.etat, en), r: vbEtatR(d.etat, en) }
+      ];
+    }
+  }, "Fiche d’origine : souligner le verbe, passer à la forme négative, « hier, aujourd’hui, demain », état ou action, inventer une phrase.", {
+    but: "Phrases plus longues où le verbe est loin du début ; écrire le verbe au passé et au futur ; trouver tous les verbes d’un petit texte.",
+    rappel: EXOS.verbe.rappel,
+    tirer: function () { var ch = HE.shuf(EX_PHRASES3);
+      return { soul: ch.slice(0, 3), neg: ch.slice(3, 6), temps: HE.shuf(EX_TEMPS).slice(0, 2), etat: HE.shuf(EX_ETAT).slice(0, 6), texte: HE.pk(EX_TEXTES) }; },
+    exos: function (d, en) {
+      var negE = function (x) { var v = exNu(x.mots[x.v]), i = x.neg.indexOf(" " + v + " "); if (i < 0) i = x.neg.indexOf("’" + v + " ") ; return i < 0 ? esc(x.neg) : esc(x.neg.slice(0, i + 1)) + '<span class="tb-verbe">' + esc(v) + "</span>" + esc(x.neg.slice(i + 1 + v.length)); };
+      var txt = esc(d.texte).replace(/\[([^\]]+)\]/g, function (_, v) { return exC(v); });
+      return [
+        { c: en ? "Underline the conjugated verb in each sentence." : "Souligne le verbe conjugué dans chaque phrase.",
+          q: '<ol class="ex-fr ex-phrases">' + d.soul.map(function (x) { return "<li>" + exG(vbSouligne(x), "soul") + "</li>"; }).join("") + "</ol>",
+          r: d.soul.map(function (x) { return "<b>" + esc(exNu(x.mots[x.v])) + "</b>"; }).join(" · ") },
+        { c: en ? "Write each sentence with ne … pas, then circle the verb." : "Écris chaque phrase avec ne … pas, puis entoure le verbe.",
+          q: '<ol class="ex-fr ex-phrases ex-neg">' + d.neg.map(function (x) { return "<li>" + esc(x.mots.join(" ")) + "<br>" + exT(negE(x), true) + "</li>"; }).join("") + "</ol>",
+          r: d.neg.map(function (x) { return esc(x.neg); }).join(" · ") },
+        { c: en ? "Write the verb for yesterday and for tomorrow." : "Écris le verbe pour hier et pour demain.",
+          q: '<ul class="ex-fr ex-temps">' + d.temps.map(function (x) { var s = vbSujet(x); return "<li>Aujourd’hui, " + esc(s) + " " + x[2] + " " + esc(x[4]) + "<br>Hier, " + esc(s) + " " + exT(x[1]) + " " + esc(x[4]) + " &nbsp; Demain, " + esc(s) + " " + exT(x[3]) + " " + esc(x[4]) + "</li>"; }).join("") + "</ul>",
+          r: d.temps.map(function (x) { return x[1] + " · " + x[3]; }).join(" — ") },
+        { c: en ? "State or action? Write S (state) or A (action)." : "État ou action ? Écris É ou A.", q: vbEtat(d.etat, en), r: vbEtatR(d.etat, en) },
+        { c: en ? "Underline all the conjugated verbs in the text." : "Souligne tous les verbes conjugués du texte.",
+          q: '<p class="ex-fr ex-texte">' + exG(txt, "soul") + "</p>", r: (d.texte.match(/\[([^\]]+)\]/g) || []).map(function (v) { return "<b>" + esc(v.slice(1, -1)) + "</b>"; }).join(" · ") }
+      ];
+    }
+  });
+
+  /* ===== Les mots invariables (affiches 2026) ===== */
+  function moTirer(g) { var fams = MO.FAMS.filter(function (f) { return f.group.id === (g || "g1"); }), sel = {}; fams.forEach(function (f) { sel[f.id] = 1; }); return { fams: fams, sel: sel, pool: HE.shuf(MO.pool(sel)) }; }
+  function moCle(k) { return MO.plain(k).replace(/^-/, "… ").replace(/-$/, " …"); }
+  function moPhrases(L, en) { return '<ul class="ex-fr ex-phrases">' + L.map(function (x) { return "<li>" + exG(esc(x.s).split("___").join("( " + x.o.map(function (o) { return o === x.w ? exC(esc(o)) : esc(o); }).join(" / ") + " )"), "cercle") + "</li>"; }).join("") + "</ul>"; }
+  function moChoix(L) { return '<ul class="ex-fr ex-choix">' + L.map(function (x) { return "<li>" + exG(x.o.map(function (o) { return o === x.p ? exC(esc(o)) : esc(o); }).join('<span class="ex-sep">/</span>\u200b'), "cercle") + "</li>"; }).join("") + "</ul>"; }
+  function moDictee(L, en) { return { c: en ? "Word dictation: write the words your teacher reads." : "Dictée de mots : écris les mots que dit la maîtresse.", q: '<ol class="ex-dictee ex-deux-col-ol">' + L.map(function (x) { return "<li>" + exT(MO.html(x.m), true) + "</li>"; }).join("") + "</ol>", r: (en ? "Words to read aloud: " : "Mots à dicter : ") + L.map(function (x) { return MO.html(x.m); }).join(" · ") }; }
+  exNiveaux("mots", [
+    "L’élève est capable d’orthographier correctement les mots invariables de ses listes.",
+    "L’élève est capable de reconnaître la partie commune des mots d’une même famille (tôt, aussitôt, plutôt).",
+    "L’élève est capable de choisir le mot invariable qui convient pour compléter une phrase."
+  ], {
+    but: "Moins de mots ; deux propositions au lieu de trois ; une famille dont on écrit la partie commune ; une dictée de 4 mots.",
+    rappel: EXOS.mots.rappel,
+    tirer: function (g) { var T = moTirer(g), P = T.pool, f3 = HE.shuf(T.fams.filter(function (f) { return f.words.length >= 3; }));
+      return { trous: P.slice(0, 4).map(function (x) { return { m: x.m, h: MO.hiddenPart(x.m) }; }), choix: P.slice(4, 8).map(function (x) { return { p: x.p, o: HE.shuf([x.p].concat(MO.misspell(x.p, 1))) }; }),
+        phrases: HE.shuf(MO.gapPool(T.sel)).slice(0, 3).map(function (q) { return { w: q.p, s: q.sent, o: HE.shuf([q.p, HE.pk(q.opts)]) }; }), famille: f3[0] ? { key: f3[0].key, words: f3[0].words } : null, dictee: HE.shuf(P).slice(0, 4) }; },
+    exos: function (d, en) {
+      var ex = [{ c: en ? "Fill in the missing letters." : "Complète les lettres qui manquent.", q: '<ul class="ex-fr ex-mots">' + d.trous.map(function (x) { return "<li>" + esc(x.h.before) + exT(esc(x.h.seg)) + esc(x.h.after) + "</li>"; }).join("") + "</ul>", r: d.trous.map(function (x) { return MO.html(x.m); }).join(" · ") },
+        { c: en ? "Circle the word that is spelt correctly." : "Entoure le mot bien écrit.", q: moChoix(d.choix), r: d.choix.map(function (x) { return esc(x.p); }).join(" · ") }];
+      if (d.phrases.length >= 2) ex.push({ c: en ? "Circle the right word to complete the sentence." : "Entoure le mot qui complète la phrase.", q: moPhrases(d.phrases, en), r: d.phrases.map(function (x) { return esc(x.w); }).join(" · ") });
+      if (d.famille) ex.push({ c: en ? "These words are from the same family. Write their common part." : "Ces mots sont de la même famille. Écris leur partie commune.",
+        q: '<p class="ex-fr ex-banque">' + d.famille.words.map(function (w) { return esc(MO.plain(w)); }).join(" · ") + "</p><p>" + (en ? "Common part: " : "Partie commune : ") + exT(esc(moCle(d.famille.key))) + "</p>", r: esc(moCle(d.famille.key)) });
+      ex.push(moDictee(d.dictee, en));
+      return ex;
+    }
+  }, "Fiche d’origine : lettres qui manquent, mot bien écrit parmi trois, mot qui complète la phrase, deux familles à ranger, dictée de 6 mots.", {
+    but: "Quatre propositions pour le mot bien écrit ; une banque de mots commune pour compléter les phrases ; trois familles à ranger ; une dictée de 8 mots.",
+    rappel: EXOS.mots.rappel,
+    tirer: function (g) { var T = moTirer(g), P = T.pool, cleP = function (f) { return MO.plain(f.key).replace(/-/g, ""); }, f3 = HE.shuf(T.fams.filter(function (f) { return f.words.length >= 3; })), fs = [];
+      f3.forEach(function (f) { if (fs.length < 3 && fs.every(function (h) { return cleP(f).indexOf(cleP(h)) < 0 && cleP(h).indexOf(cleP(f)) < 0; })) fs.push(f); });
+      var ph = HE.shuf(MO.gapPool(T.sel)).slice(0, 4), autres = HE.shuf(P.filter(function (x) { return !ph.some(function (q) { return q.p === x.p; }); })).slice(0, 2);
+      return { choix: P.slice(0, 4).map(function (x) { return { p: x.p, o: HE.shuf([x.p].concat(MO.misspell(x.p, 3))) }; }), phrases: ph.map(function (q) { return { w: q.p, s: q.sent }; }),
+        banque: HE.shuf(ph.map(function (q) { return q.p; }).concat(autres.map(function (x) { return x.p; }))), familles: fs.map(function (f) { return { key: f.key, words: f.words }; }), dictee: HE.shuf(P).slice(0, 8) }; },
+    exos: function (d, en) {
+      var ex = [{ c: en ? "Circle the word that is spelt correctly." : "Entoure le mot bien écrit.", q: moChoix(d.choix), r: d.choix.map(function (x) { return esc(x.p); }).join(" · ") }];
+      if (d.phrases.length >= 2) ex.push({ c: en ? "Complete each sentence with a word from the box. Two words are not used." : "Complète chaque phrase avec un mot de la boîte. Deux mots ne servent pas.",
+        q: '<p class="ex-fr ex-banque">' + d.banque.map(esc).join(" · ") + '</p><ul class="ex-fr ex-phrases">' + d.phrases.map(function (x) { return "<li>" + esc(x.s).split("___").join(exT(esc(x.w))) + "</li>"; }).join("") + "</ul>", r: d.phrases.map(function (x) { return esc(x.w); }).join(" · ") });
+      if (d.familles.length >= 2) { var mel = HE.shuf(d.familles.reduce(function (a, f) { return a.concat(f.words.map(MO.plain)); }, []));
+        ex.push({ c: en ? "Sort the words into their family." : "Range les mots dans leur famille.",
+          q: '<p class="ex-fr ex-banque">' + mel.map(esc).join(" · ") + '</p><div class="ex-familles ex-familles' + d.familles.length + '">' + d.familles.map(function (f) { return '<div><b class="ex-fr">' + esc(moCle(f.key)) + "</b>" + f.words.map(function (w) { return "<p>" + exT(MO.html(w)) + "</p>"; }).join("") + "</div>"; }).join("") + "</div>",
+          r: d.familles.map(function (f) { return esc(moCle(f.key)) + " : " + f.words.map(MO.html).join(", "); }).join(" — ") }); }
+      ex.push(moDictee(d.dictee, en));
+      return ex;
+    }
+  });
+
+  /* ===== La monnaie et les prix (leçon GM1) ===== */
+  var MN_VRAIS = [5, 10, 20, 50, 100, 200, 500, 1000, 5000, 10000], MN_FAUX = [25, 30, 75, 300, 2000];
+  function mnGlouton(n) { var L = []; MN_VRAIS.slice().reverse().forEach(function (v) { while (n >= v) { L.push(v); n -= v; } }); return L; }
+  function mnDecompose(n) { var s = String(n), L = []; for (var i = 0; i < s.length; i++) if (s[i] !== "0") L.push(+s[i] * Math.pow(10, s.length - 1 - i)); return L; }
+  function mnSomme(b) { return b.reduce(function (a, v) { return a + v; }, 0); }
+  exNiveaux("monnaie", [
+    "L’élève est capable de reconnaître les billets et les pièces de la monnaie calédonienne.",
+    "L’élève est capable de calculer la somme formée par des billets et des pièces.",
+    "L’élève est capable de décomposer une somme pour la constituer avec des billets et des pièces (6 875 F = 6 000 + 800 + 70 + 5).",
+    "L’élève est capable de résoudre un problème simple de prix (payer, rendre la monnaie)."
+  ], {
+    but: "Reconnaître les vraies pièces et les vrais billets ; petites sommes (moins de 500 F) ; décomposer un prix à 3 chiffres ; un problème avec un seul achat.",
+    rappel: EXOS.monnaie.rappel,
+    tirer: function () { var P = [5, 10, 20, 50, 100], bourse = function () { return [HE.pk(P), HE.pk(P), HE.pk(P)].sort(function (x, y) { return y - x; }); };
+      var cible = function () { var c = HE.shuf([10, 20, 50, 100, 200]).slice(0, 2); return c.sort(function (x, y) { return y - x; }); };
+      var payer = [cible(), cible()].map(function (c) { return { c: c, montre: HE.shuf(c.concat(HE.shuf([5, 10, 20, 50, 100, 200].filter(function (v) { return c.indexOf(v) < 0; })).slice(0, 2))) }; });
+      var dec = [HE.rint(1, 9) * 100 + HE.rint(1, 9) * 10 + 5, HE.rint(1, 9) * 100 + HE.rint(1, 9) * 10 + 5];
+      return { vrai: HE.shuf(HE.shuf(MN_VRAIS).slice(0, 5).concat(HE.shuf(MN_FAUX).slice(0, 3))), bourses: [bourse(), bourse()], payer: payer, dec: dec, fruit: HE.pk(PO.FRUITS) }; },
+    exos: function (d, en) {
+      var f = d.fruit;
+      return [
+        { c: en ? "Circle the coins and notes we really use in New Caledonia." : "Entoure les pièces et les billets qui existent vraiment en Nouvelle-Calédonie.",
+          q: '<div class="ex-bourse ex-vrais">' + d.vrai.map(function (v) { return MN_VRAIS.indexOf(v) >= 0 ? exG(exC(exPiece(v)), "cercle") : exPiece(v); }).join("") + "</div>",
+          r: d.vrai.filter(function (v) { return MN_VRAIS.indexOf(v) >= 0; }).map(function (v) { return exMille(v) + " F"; }).join(" · ") },
+        { c: en ? "How much money is there in each purse?" : "Combien d’argent y a-t-il dans chaque porte-monnaie ?",
+          q: '<div class="ex-bourses">' + d.bourses.map(function (b) { return '<div><div class="ex-bourse">' + b.map(exPiece).join("") + "</div><p>" + exT(exMille(mnSomme(b))) + " F</p></div>"; }).join("") + "</div>",
+          r: d.bourses.map(function (b) { return b.join(" F + ") + " F = " + mnSomme(b) + " F"; }).join(" · ") },
+        { c: en ? "Circle the coins to pay exactly the price." : "Entoure les pièces pour payer le prix exact.",
+          q: d.payer.map(function (x) { var reste = x.c.slice(); return '<div class="ex-payer"><b>' + mnSomme(x.c) + " F</b>" + exG('<div class="ex-bourse">' + x.montre.map(function (v) { var i = reste.indexOf(v); if (i < 0) return exPiece(v); reste.splice(i, 1); return exC(exPiece(v)); }).join("") + "</div>", "cercle", true) + "</div>"; }).join(""),
+          r: d.payer.map(function (x) { return mnSomme(x.c) + " F = " + x.c.join(" F + ") + " F"; }).join(" · ") },
+        { c: en ? "Split each amount, like 375 F = 300 + 70 + 5." : "Décompose chaque somme, comme 375 F = 300 + 70 + 5.",
+          q: exListe(d.dec, function (n) { return n + " F = " + mnDecompose(n).map(function (p) { return exT(String(p)); }).join(" + "); }),
+          r: d.dec.map(function (n) { return n + " = " + mnDecompose(n).join(" + "); }).join(" · ") },
+        { c: en ? "Solve the problem." : "Résous le problème.",
+          q: "<p>" + (en ? "At the market, Tehani buys " + f.en + " for " + f.prix + " F. She pays with a 500 F note. How much change does she get?" : "Au marché, Tehani achète " + f.fr + " à " + f.prix + " F. Elle paie avec un billet de 500 F. Combien la marchande lui rend-elle ?") + "</p><p>" + (en ? "She gets " : "On lui rend ") + exT(String(500 - f.prix)) + " F.</p>",
+          r: "500 F − " + f.prix + " F = " + (500 - f.prix) + " F" }
+      ];
+    }
+  }, "Fiche d’origine : compter l’argent des porte-monnaie, payer le prix exact, deux façons de payer, rendre la monnaie, un problème avec deux achats.", {
+    but: "Grandes sommes avec des billets (jusqu’à 9 995 F) ; décomposer une somme à 4 chiffres et la payer avec le moins de billets et de pièces possible ; un problème en plusieurs étapes.",
+    rappel: EXOS.monnaie.rappel,
+    tirer: function () { var bourse = function () { var b = [HE.pk([1000, 5000]), HE.pk([500, 1000]), HE.pk([100, 200]), HE.pk([50, 100]), HE.pk([5, 10, 20])]; if (Math.random() < 0.5) b.push(HE.pk([500, 1000])); return b.sort(function (x, y) { return y - x; }); };
+      var n4 = function () { return HE.rint(1, 9) * 1000 + HE.rint(1, 9) * 100 + HE.rint(1, 9) * 10 + 5; };
+      /* le problème : toutes les sommes restent sous 9 995 F (choix de l’enseignante) ; on paie avec le plus petit billet qui suffit */
+      var fr = HE.shuf(PO.FRUITS).slice(0, 2), na = HE.rint(2, 9);
+      return { bourses: [bourse(), bourse()], dec: [n4(), n4()], moins: n4(), rendre: [[1000, HE.rint(2, 18) * 50], [5000, HE.rint(11, 98) * 50], [10000, HE.rint(21, 198) * 50]], pb: { a: fr[0], b: fr[1], na: na } }; },
+    exos: function (d, en) {
+      var pb = d.pb, tot = pb.na * pb.a.prix + pb.b.prix, billet = tot < 1000 ? 1000 : tot < 5000 ? 5000 : 10000, reste = billet - tot;
+      return [
+        { c: en ? "How much money is there in each purse?" : "Combien d’argent y a-t-il dans chaque porte-monnaie ?",
+          q: '<div class="ex-bourses">' + d.bourses.map(function (b) { return '<div><div class="ex-bourse">' + b.map(exPiece).join("") + "</div><p>" + exT(exMille(mnSomme(b))) + " F</p></div>"; }).join("") + "</div>",
+          r: d.bourses.map(function (b) { return exMille(mnSomme(b)) + " F"; }).join(" · ") },
+        { c: en ? "Split each amount." : "Décompose chaque somme.",
+          q: exListe(d.dec, function (n) { return exMille(n) + " F = " + mnDecompose(n).map(function (p) { return exT(exMille(p)); }).join(" + "); }),
+          r: d.dec.map(function (n) { return exMille(n) + " = " + mnDecompose(n).map(exMille).join(" + "); }).join(" · ") },
+        { c: en ? "Pay " + exMille(d.moins) + " F with as few notes and coins as possible." : "Paie " + exMille(d.moins) + " F avec le moins possible de billets et de pièces.",
+          q: "<p>" + exT(mnGlouton(d.moins).map(function (v) { return exMille(v) + " F"; }).join(" + "), true) + "</p>",
+          r: mnGlouton(d.moins).map(function (v) { return exMille(v) + " F"; }).join(" + ") + " (" + mnGlouton(d.moins).length + (en ? " notes and coins)" : " billets et pièces)") },
+        { c: en ? "How much change do you get?" : "Combien la marchande rend-elle ?",
+          q: exListe(d.rendre, function (x) { return (en ? "I pay " + exMille(x[1]) + " F with a " + exMille(x[0]) + " F note. I get " : "Je paie " + exMille(x[1]) + " F avec un billet de " + exMille(x[0]) + " F. On me rend ") + exT(exMille(x[0] - x[1])) + " F."; }, "ex-une-col"),
+          r: d.rendre.map(function (x) { return exMille(x[0] - x[1]) + " F"; }).join(" · ") },
+        { c: en ? "Solve the problem." : "Résous le problème.",
+          q: "<p>" + (en ? "Tehani buys " + pb.na + " times " + pb.a.en + " at " + pb.a.prix + " F and " + pb.b.en + " at " + pb.b.prix + " F. She pays with a " + exMille(billet) + " F note. How much does she spend? How much change does she get? Can she then buy a lime at 50 F?"
+            : "Tehani achète " + pb.na + " fois " + pb.a.fr + " à " + pb.a.prix + " F et " + pb.b.fr + " à " + pb.b.prix + " F. Elle paie avec un billet de " + exMille(billet) + " F. Combien dépense-t-elle ? Combien lui rend-on ? Peut-elle ensuite acheter un citron à 50 F ?") +
+            "</p><p>" + (en ? "She spends " : "Elle dépense ") + exT(exMille(tot)) + " F. " + (en ? "She gets " : "On lui rend ") + exT(exMille(reste)) + " F. " + exT(reste >= 50 ? (en ? "Yes" : "Oui") : (en ? "No" : "Non")) + "</p>",
+          r: pb.na + " × " + pb.a.prix + " + " + pb.b.prix + " = " + exMille(tot) + " F · " + exMille(billet) + " − " + exMille(tot) + " = " + exMille(reste) + " F · " + (reste >= 50 ? (en ? "yes" : "oui") : (en ? "no" : "non")) }
+      ];
+    }
+  });
+
+  /* ===== Lire un graphique en barres (leçon OGD1) ===== */
+  function dgNomN(dd, i, en) { return en ? dd.ctx.cats[i].en : dd.ctx.cats[i].fr; }
+  function dgFig(dd, en, o) { return '<figure class="ex-dg"><figcaption>' + esc(tr(dd.ctx.titre)) + "</figcaption>" + DG.diagramme(dd, Object.assign({ en: en }, o || {})) + "</figure>"; }
+  function dgTab(dd, en, vide) { return '<table class="ex-tab"><tr><th>' + esc(tr(dd.ctx.axeX)) + "</th><th>" + (en ? "Number" : "Nombre") + "</th></tr>" + dd.ctx.cats.map(function (_, i) { return "<tr><td>" + esc(dgNomN(dd, i, en)) + "</td><td>" + (vide ? exT(String(dd.vals[i]), false, "") : dd.vals[i]) + "</td></tr>"; }).join("") + "</table>"; }
+  function dgTirer(p1, p2, p3) { var ids = HE.shuf(DG.CONTEXTES.map(function (c) { return c.id; })); var d1 = DG.tirer(Object.assign({ ctx: ids[0] }, p1)); return { d1: d1, d2: DG.tirer(Object.assign({ ctx: ids[1] }, p2)), d3: DG.tirer(Object.assign({ ctx: ids[2] }, p3)), k: HE.shuf(d1.vals.map(function (_, i) { return i; })) }; }
+  function dgConstruire(d3, en) { return { c: en ? "Draw the bar chart using the table." : "Construis le graphique à partir du tableau.", q: '<div class="ex-cote ex-construire">' + dgTab(d3, en) + exS(dgFig(d3, en, { vals: d3.vals.map(function () { return 0; }) }), dgFig(d3, en)) + "</div>", r: '<div class="ex-petit-dg">' + dgFig(d3, en) + "</div>" }; }
+  function dgCompleter(d2, en) { return { c: en ? "Complete the table using the bar chart." : "Complète le tableau à partir du graphique.", q: '<div class="ex-cote">' + dgFig(d2, en) + dgTab(d2, en, true) + "</div>", r: d2.ctx.cats.map(function (_, i) { return esc(dgNomN(d2, i, en)) + " " + d2.vals[i]; }).join(" · ") }; }
+  exNiveaux("diagrammes", [
+    "L’élève est capable de lire une information dans un tableau et dans un graphique en barres.",
+    "L’élève est capable de compléter un graphique en barres à partir d’un tableau.",
+    "L’élève est capable d’utiliser les données d’un graphique pour répondre à une question ou résoudre un problème (comparer, trouver un écart ou un total)."
+  ], {
+    but: "Graduations de 1 en 1, petits nombres ; trois questions de lecture (une barre, le plus, le moins).",
+    rappel: EXOS.diagrammes.rappel,
+    tirer: function () { return dgTirer({ pas: 1, niveaux: 9, min: 1 }, { pas: 1, niveaux: 8, min: 1 }, { pas: 1, niveaux: 7, min: 1 }); },
+    exos: function (d, en) {
+      var d1 = d.d1, a = d.k[0], im = d1.vals.indexOf(Math.max.apply(null, d1.vals)), il = d1.vals.indexOf(Math.min.apply(null, d1.vals));
+      var qs = [[en ? "What number does the “" + dgNomN(d1, a, en) + "” bar show?" : "Quel nombre la barre « " + dgNomN(d1, a, en) + " » indique-t-elle ?", String(d1.vals[a])], [tr(d1.ctx.plus), esc(dgNomN(d1, im, en))], [tr(d1.ctx.moins), esc(dgNomN(d1, il, en))]];
+      return [
+        { c: en ? "Read the bar chart and answer." : "Lis le graphique et réponds.", q: '<div class="ex-cote">' + dgFig(d1, en) + '<ol class="ex-qs">' + qs.map(function (x) { return "<li>" + esc(x[0]) + " " + exT(x[1]) + "</li>"; }).join("") + "</ol></div>", r: qs.map(function (x) { return x[1]; }).join(" · ") },
+        dgCompleter(d.d2, en), dgConstruire(d.d3, en)
+      ];
+    }
+  }, "Fiche d’origine : graduations de 2 en 2 et de 5 en 5 ; six questions de lecture, dont le total et l’écart ; compléter un tableau ; construire un graphique.", {
+    but: "Graduations de 5 en 5 et de 10 en 10, des barres qui s’arrêtent entre deux graduations ; questions d’écart, de total et en deux étapes ; construire un graphique de 5 en 5.",
+    rappel: EXOS.diagrammes.rappel,
+    tirer: function () { return dgTirer({ pas: 10, niveaux: 8, min: 10, demi: true }, { pas: 10, niveaux: 8, min: 10, demi: true }, { pas: 5, niveaux: 8, min: 5 }); },
+    exos: function (d, en) {
+      var d1 = d.d1, a = d.k[0], b = d.k[1], c = d.k[2], hi = d1.vals[a] >= d1.vals[b] ? a : b, lo = hi === a ? b : a, ec = DG.ecart(d1.ctx, d1.ctx.cats[hi], d1.ctx.cats[lo]);
+      var tri = d1.vals.map(function (v, i) { return i; }).sort(function (x, y) { return d1.vals[x] - d1.vals[y]; });
+      var deux = d1.vals[a] + d1.vals[c];
+      var qs = [[tr(ec), String(d1.vals[hi] - d1.vals[lo])], [en ? "How many " + d1.ctx.axe.en + " are there in all?" : "Combien " + d1.ctx.axe.de + " y a-t-il en tout ?", String(DG.somme(d1.vals))],
+        [en ? "How many for “" + dgNomN(d1, a, en) + "” and “" + dgNomN(d1, c, en) + "” together?" : "Combien pour « " + dgNomN(d1, a, en) + " » et « " + dgNomN(d1, c, en) + " » ensemble ?", String(deux)],
+        [en ? "Write the bars in order, from the smallest to the largest." : "Range les barres de la plus petite à la plus grande.", tri.map(function (i) { return esc(dgNomN(d1, i, en)); }).join(" &lt; ")]];
+      return [
+        { c: en ? "Read the bar chart and answer." : "Lis le graphique et réponds.", q: '<div class="ex-cote">' + dgFig(d1, en) + '<ol class="ex-qs">' + qs.map(function (x, i) { return "<li>" + esc(x[0]) + " " + exT(x[1], i === 3) + "</li>"; }).join("") + "</ol></div>",
+          r: (d1.vals[hi] + " − " + d1.vals[lo] + " = " + (d1.vals[hi] - d1.vals[lo])) + " · " + d1.vals.join(" + ") + " = " + DG.somme(d1.vals) + " · " + d1.vals[a] + " + " + d1.vals[c] + " = " + deux + " · " + qs[3][1] },
+        dgCompleter(d.d2, en), dgConstruire(d.d3, en)
+      ];
+    }
+  });
+
+  /* ===== Lire l’heure digitale (P5, séquence 1) ===== */
+  var DI_J = [["Je me lève", "I get up", [6, 7]], ["Je pars à l’école", "I leave for school", [7, 7]], ["La récréation est", "Break time is", [9, 10]], ["Je mange", "I have lunch", [11, 12]], ["Je finis l’école", "School finishes", [15, 15]], ["Je me couche", "I go to bed", [19, 20]]];
+  var DI_PB = [["La récréation commence à", "Break time starts at", "Elle dure", "It lasts", "À quelle heure finit-elle ?", "What time does it end?"], ["Le film commence à", "The film starts at", "Il dure", "It lasts", "À quelle heure finit-il ?", "What time does it end?"], ["Le cours de natation commence à", "The swimming lesson starts at", "Il dure", "It lasts", "À quelle heure finit-il ?", "What time does it end?"]];
+  function diSoir(h, en) { return h >= 18 ? (en ? "p.m." : "du soir") : (en ? "p.m." : "de l’après-midi"); }
+  function diJour(Q, n) { return HE.shuf(DI_J).slice(0, n).map(function (x) { return [x[0], x[1], HE.rint(x[2][0], x[2][1]), HE.pk(Q)]; }).sort(function (a, b) { return a[2] * 60 + a[3] - b[2] * 60 - b[3]; }); }
+  function diMots(x, en) { return en ? HE.cap(HE.direEn(x[2], x[3])) : HE.cap(exDigMots(x[2], x[3])); }
+  function diHm(t) { return Math.floor(t / 60) + ":" + HE.pad(t % 60); }
+  exNiveaux("digitale", [
+    "L’élève identifie la relation suivante : 1 journée=24h (2x12h).",
+    "L’élève est capable d’associer une heure donnée à celle de l’après-midi ou du soir (ex. 6h du soir = 18h).",
+    "L’élève identifie la relation suivante : 1h=60min.",
+    "L’élève est capable de lire l’heure digitale en utilisant le vocabulaire : pile (0min), et demie/une demi-heure (30min).",
+    "L’élève est capable de lire l’heure digitale en utilisant le vocabulaire : et quart/un quart d’heure (15min), moins le quart (45min).",
+    "L’élève est capable de résoudre un problème simple en lien avec ces durées."
+  ], {
+    but: "Heures pile et demies seulement ; passer de l’après-midi à l’heure sur 24 h (+12) ; un problème qui dure une demi-heure ou une heure.",
+    rappel: function (en) { return en ? "There are 24 hours in a day. For the afternoon and evening, add 12: 4:00 p.m. → 16:00. 1 hour = 60 minutes." : "Dans une journée, il y a 24 heures. L’après-midi et le soir, j’ajoute 12 : 4:00 de l’après-midi → 16:00. 1 heure = 60 minutes."; },
+    tirer: function () { var Q = [0, 30]; return { jour: diJour(Q, 3), conv: HE.shuf([13, 14, 15, 16, 17, 18, 19, 20]).slice(0, 4).map(function (h) { return [h, HE.pk(Q)]; }), hor: HE.shuf([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]).slice(0, 2).map(function (h) { return [h, HE.pk(Q)]; }),
+      pb: { t: HE.pk(DI_PB), h: HE.rint(9, 16), m: 0, du: HE.pk([[30, "une demi-heure", "half an hour"], [60, "une heure", "an hour"]]) } }; },
+    exos: function (d, en) {
+      var fin = d.pb.h * 60 + d.pb.m + d.pb.du[0], pb = d.pb;
+      return [
+        { c: en ? "Write the time in words." : "Écris l’heure en lettres.", q: exListe(d.jour, function (x) { return (en ? x[1] + " at " + x[2] + ":" + HE.pad(x[3]) + ". " : x[0] + " à " + x[2] + "h" + HE.pad(x[3]) + ". ") + exT(diMots(x, en), true); }, "ex-une-col"), r: d.jour.map(function (x) { return diMots(x, en); }).join(" · ") },
+        { c: en ? "Add 12 to write the 24-hour time." : "Ajoute 12 pour écrire l’heure sur 24 heures.", q: exListe(d.conv, function (x) { return exDig(x[0] - 12, x[1]) + " " + diSoir(x[0], en) + " → " + exT(String(x[0])) + ":" + HE.pad(x[1]); }), r: d.conv.map(function (x) { return x[0] + ":" + HE.pad(x[1]); }).join(" · ") },
+        { c: en ? "What time is it? Write the morning time and the afternoon or evening time." : "Quelle heure est-il ? Écris l’heure du matin, puis celle de l’après-midi ou du soir.",
+          q: '<div class="ex-liste">' + d.hor.map(function (x) { return '<div class="ex-ligne-clk">' + HE.horloge(x[0], x[1], { deco: true, cls: "ex-clk" }) + "<p>" + (en ? "a.m. " : "matin ") + exT(String(x[0])) + ":" + exT(HE.pad(x[1])) + " &nbsp; " + (en ? "p.m. " : "après-midi ou soir ") + exT(String(x[0] + 12)) + ":" + exT(HE.pad(x[1])) + "</p></div>"; }).join("") + "</div>",
+          r: d.hor.map(function (x) { return x[0] + ":" + HE.pad(x[1]) + " / " + (x[0] + 12) + ":" + HE.pad(x[1]); }).join(" · ") },
+        { c: en ? "Complete." : "Complète.", q: exListe(en ? ["1 hour = ", "half an hour = ", "In a day, there are "] : ["1 heure = ", "une demi-heure = ", "Dans une journée, il y a "], function (s, i) { return s + exT(String([60, 30, 24][i])) + (i < 2 ? " min" : (en ? " hours." : " heures.")); }), r: "60 min · 30 min · 24" },
+        { c: en ? "Solve the problem." : "Résous le problème.", q: "<p>" + (en ? pb.t[1] + " " + pb.h + ":00. " + pb.t[3] + " " + pb.du[2] + ". " + pb.t[5] : pb.t[0] + " " + pb.h + "h00. " + pb.t[2] + " " + pb.du[1] + ". " + pb.t[4]) + "</p><p>" + (en ? "Answer: " : "Réponse : ") + exT(String(Math.floor(fin / 60))) + ":" + exT(HE.pad(fin % 60)) + "</p>", r: diHm(fin) }
+      ];
+    }
+  }, "Fiche d’origine : heures pile, et quart, et demie, moins le quart ; écrire l’heure de deux façons (+12 et −12) ; un problème de durée.", {
+    but: "Toutes les heures du programme (pile, et quart, et demie, moins le quart), le soir compris ; les deux façons dans les deux sens ; durées de 45 min et 1 h 15 ; retrouver l’heure du début.",
+    rappel: EXOS.digitale.rappel,
+    tirer: function () { var Q = [0, 15, 30, 45];
+      return { jour: diJour(Q, 4), conv: HE.shuf([["+", HE.rint(13, 17)], ["+", HE.rint(18, 22)], ["-", HE.rint(13, 17)], ["-", HE.rint(18, 23)]]).map(function (x) { return [x[0], x[1], HE.pk([15, 30, 45])]; }),
+        dur: HE.shuf([[90, "1 h 30"], [75, "1 h 15"], [105, "1 h 45"]]).slice(0, 1),
+        pb1: { t: HE.pk(DI_PB), h: HE.rint(9, 16), m: HE.pk([15, 30, 45]), du: HE.pk([[45, "trois quarts d’heure", "three quarters of an hour"], [75, "une heure et quart", "an hour and a quarter"]]) },
+        pb2: { h: HE.rint(14, 20), m: HE.pk([0, 15, 30, 45]), du: HE.pk([[30, "une demi-heure", "half an hour"], [15, "un quart d’heure", "a quarter of an hour"], [45, "trois quarts d’heure", "three quarters of an hour"]]) } }; },
+    exos: function (d, en) {
+      var f1 = d.pb1.h * 60 + d.pb1.m + d.pb1.du[0], p1 = d.pb1, p2 = d.pb2, deb2 = p2.h * 60 + p2.m - p2.du[0], dur = d.dur[0];
+      return [
+        { c: en ? "Write the time in words." : "Écris l’heure en lettres.", q: exListe(d.jour, function (x) { return (en ? x[1] + " at " + x[2] + ":" + HE.pad(x[3]) + ". " : x[0] + " à " + x[2] + "h" + HE.pad(x[3]) + ". ") + exT(diMots(x, en), true); }, "ex-une-col"), r: d.jour.map(function (x) { return diMots(x, en); }).join(" · ") },
+        { c: en ? "Write the time in the other way." : "Écris l’heure de l’autre façon.", q: exListe(d.conv, function (x) { return x[0] === "+" ? exDig(x[1] - 12, x[2]) + " " + diSoir(x[1], en) + " → " + exT(x[1] + ":" + HE.pad(x[2])) : exDig(x[1], x[2]) + " → " + exT((x[1] - 12) + ":" + HE.pad(x[2])) + " " + diSoir(x[1], en); }),
+          r: d.conv.map(function (x) { return x[0] === "+" ? x[1] + ":" + HE.pad(x[2]) : (x[1] - 12) + ":" + HE.pad(x[2]); }).join(" · ") },
+        { c: en ? "Complete." : "Complète.", q: exListe(en ? ["a quarter of an hour = ", "three quarters of an hour = ", dur[1] + " = ", "120 min = "] : ["un quart d’heure = ", "trois quarts d’heure = ", dur[1] + " = ", "120 min = "], function (s, i) { return s + exT(String([15, 45, dur[0], 2][i])) + (i < 3 ? " min" : " h"); }), r: "15 min · 45 min · " + dur[0] + " min · 2 h" },
+        { c: en ? "Solve the problems." : "Résous les problèmes.",
+          q: '<ol class="ex-conv ex-une-col"><li>' + (en ? p1.t[1] + " " + p1.h + ":" + HE.pad(p1.m) + ". " + p1.t[3] + " " + p1.du[2] + ". " + p1.t[5] : p1.t[0] + " " + p1.h + "h" + HE.pad(p1.m) + ". " + p1.t[2] + " " + p1.du[1] + ". " + p1.t[4]) + " " + exT(diHm(f1)) + "</li><li>" +
+            (en ? "The match ends at " + p2.h + ":" + HE.pad(p2.m) + ". It lasted " + p2.du[2] + ". What time did it start? " : "Le match se termine à " + p2.h + "h" + HE.pad(p2.m) + ". Il a duré " + p2.du[1] + ". À quelle heure a-t-il commencé ? ") + exT(diHm(deb2)) + "</li></ol>",
+          r: diHm(f1) + " · " + diHm(deb2) }
+      ];
+    }
+  });
+
+  /* ===== Lire l’heure à aiguilles (P5, séquence 2) ===== */
+  function hrDig(h, m, en) { return en ? HE.H12(h) + ":" + HE.pad(m) : HE.H12(h) + " h" + (m ? " " + HE.pad(m) : ""); }
+  function hrClk(h, m, sans) { return HE.horloge(h, m, { deco: true, sans: sans, cls: "ex-clk" }); }
+  function hrMots(h, m, en) { return (en ? HE.direEn(h, m) : HE.direFr(h, m)).replace(/ \(\d+ min\)$/, ""); }
+  function hrLire(L, en) { return { c: en ? "Write the time shown on each clock." : "Écris l’heure indiquée par chaque horloge.",
+    q: '<div class="ex-grille">' + L.map(function (x) { return "<div>" + hrClk(x[0], x[1]) + '<p class="ex-rep">' + exT(String(HE.H12(x[0]))) + (en ? " : " : " h ") + exT(HE.pad(x[1])) + "</p></div>"; }).join("") + "</div>", r: L.map(function (x) { return hrDig(x[0], x[1], en); }).join(" · ") }; }
+  function hrDessin(L, en) { return { c: en ? "Draw the hands." : "Dessine les aiguilles.",
+    q: '<div class="ex-grille ex-quatre">' + L.map(function (x) { return "<div>" + exS(hrClk(x[0], x[1], true), hrClk(x[0], x[1])) + '<p class="ex-rep"><b>' + hrDig(x[0], x[1], en) + "</b></p></div>"; }).join("") + "</div>",
+    r: '<div class="ex-grille ex-quatre ex-petit">' + L.map(function (x) { return "<div>" + hrClk(x[0], x[1]) + "<p>" + hrDig(x[0], x[1], en) + "</p></div>"; }).join("") + "</div>" }; }
+  function hrLettres(L, en) { return { c: en ? "Write the time in words." : "Écris l’heure en lettres.",
+    q: '<div class="ex-liste">' + L.map(function (x) { return '<div class="ex-ligne-clk">' + hrClk(x[0], x[1]) + "<p>" + (en ? "It is " : "Il est ") + exT(hrMots(x[0], x[1], en), true) + ".</p></div>"; }).join("") + "</div>", r: L.map(function (x) { return HE.cap(hrMots(x[0], x[1], en)); }).join(" · ") }; }
+  function hrProbleme(pb, en) { return { c: en ? "Solve the problem." : "Résous le problème.", q: '<div class="ex-ligne-clk">' + hrClk(pb.h, pb.m) + "<div><p>" + esc(typo(tr(pb))) + "</p><p>" + (en ? "Answer: " : "Réponse : ") + exT(esc(typo(HE.cap(tr(pb.o[pb.a])))), true) + "</p></div></div>", r: esc(typo(HE.cap(tr(pb.o[pb.a])))) }; }
+  function hrHeures() { var H = HE.shuf([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]), k = 0; return function () { return H[k++ % 12]; }; }
+  exNiveaux("heure", [
+    "L’élève est capable de reconnaître les différentes aiguilles d’une horloge.",
+    "L’élève est capable de lire les heures piles sur le cadran d’une horloge.",
+    "L’élève est capable de lire les demies-heures sur le cadran d’une horloge.",
+    "L’élève est capable de lire les quarts d’heure (et quart/moins le quart) sur le cadran d’une horloge.",
+    "L’élève est capable de lire les minutes multiples de 5, puis toutes les minutes sur le cadran d’une horloge.",
+    "L’élève est capable de lire l’heure en utilisant le vocabulaire « moins 5, moins 10, moins 25 ».",
+    "L’élève est capable de résoudre un problème simple sur l’heure à aiguilles."
+  ], {
+    but: "Reconnaître les deux aiguilles ; heures pile, et demie, et quart, moins le quart ; dessiner les aiguilles pour une heure pile ou une demie.",
+    rappel: EXOS.heure.rappel,
+    tirer: function () { var h = hrHeures(); return { lire: HE.shuf([[h(), 0], [h(), 30], [h(), 15], [h(), 45]]), lettres: HE.shuf([[h(), 0], [h(), 30], [h(), 15]]), dessin: HE.shuf([[h(), 0], [h(), 0], [h(), 30], [h(), 30]]), pb: HE.PROBLEMES[HE.rint(0, HE.PROBLEMES.length - 1)] }; },
+    exos: function (d, en) {
+      return [
+        { c: en ? "Complete with hours or minutes." : "Complète avec « heures » ou « minutes ».",
+          q: '<div class="ex-ligne-clk">' + hrClk(3, 0) + "<div><p>" + (en ? "The short hand shows the " : "La petite aiguille indique les ") + exT(en ? "hours" : "heures") + ".</p><p>" + (en ? "The long hand shows the " : "La grande aiguille indique les ") + exT("minutes") + ".</p></div></div>",
+          r: en ? "short hand: hours · long hand: minutes" : "petite aiguille : heures · grande aiguille : minutes" },
+        hrLire(d.lire, en), hrLettres(d.lettres, en), hrDessin(d.dessin, en), hrProbleme(d.pb, en)
+      ];
+    }
+  }, "Fiche d’origine : lire 6 horloges (pile, quarts, demies, multiples de 5), écrire l’heure en lettres, dessiner les aiguilles, l’heure de l’après-midi, un problème.", {
+    but: "Toutes les minutes sur le cadran ; l’heure en lettres avec « moins 5, moins 10, moins 25 » ; dessiner les aiguilles pour des multiples de 5 ; l’heure de l’après-midi et du soir ; un problème.",
+    rappel: EXOS.heure.rappel,
+    tirer: function () { var h = hrHeures(), M = HE.shuf([1, 2, 3, 4, 6, 7, 8, 9, 11, 12, 13, 14, 16, 17, 18, 19, 21, 22, 23, 24, 26, 27, 28, 29, 31, 32, 33, 34, 36, 37, 38, 39, 41, 42, 43, 44, 46, 47, 48, 49, 51, 52, 53, 54, 56, 57, 58, 59]);
+      return { lire: HE.shuf([[h(), M[0]], [h(), M[1]], [h(), HE.pk([5, 10, 20, 25])], [h(), HE.pk([35, 40, 50, 55])], [h(), M[2]], [h(), 45]]), lettres: HE.shuf([[h(), 55], [h(), 50], [h(), 35]]),
+        dessin: HE.shuf([[h(), HE.pk([5, 10, 20, 25])], [h(), HE.pk([35, 40])], [h(), HE.pk([50, 55])], [h(), 45]]), conv: HE.shuf([13, 14, 15, 16, 17, 18, 19, 20, 21, 22]).slice(0, 4).map(function (x) { return [x, HE.pk([15, 30, 45, 10, 50])]; }), pb: HE.PROBLEMES[HE.rint(0, HE.PROBLEMES.length - 1)] }; },
+    exos: function (d, en) {
+      return [hrLire(d.lire, en), hrLettres(d.lettres, en), hrDessin(d.dessin, en),
+        { c: en ? "Write the 24-hour time." : "Écris l’heure de l’après-midi ou du soir sur 24 heures.", q: exListe(d.conv, function (x) { return (x[0] - 12) + " h " + HE.pad(x[1]) + " " + (x[0] >= 18 ? (en ? "in the evening" : "du soir") : (en ? "in the afternoon" : "de l’après-midi")) + " → " + exT(x[0] + " h " + HE.pad(x[1])); }), r: d.conv.map(function (x) { return x[0] + " h " + HE.pad(x[1]); }).join(" · ") },
+        hrProbleme(d.pb, en)];
+    }
+  });
+
+  /* ===== Mesurer des masses (P5, séquence 4) ===== */
+  var MA_INSTR = [["Je pèse la farine pour faire un gâteau.", "I weigh the flour to make a cake.", 0], ["Je pèse ma valise avant le voyage.", "I weigh my suitcase before the trip.", 1], ["Je me pèse à la maison.", "I weigh myself at home.", 2],
+    ["Au magasin, on pèse les tomates.", "At the shop, we weigh the tomatoes.", 3], ["En classe, on compare deux objets avec des masses marquées.", "In class, we compare two objects with weights.", 4]];
+  var MA_NOMS = [["la balance alimentaire", "the kitchen scales"], ["le pèse-bagage", "the luggage scale"], ["le pèse-personne", "the bathroom scales"], ["la balance de supermarché", "the shop scales"], ["la balance de Roberval", "the balance scales"]];
+  var MA_OBJ = { g: [["une mangue", "a mango", 400], ["un œuf", "an egg", 50], ["une lettre", "a letter", 20], ["un crayon", "a pencil", 5], ["un avocat", "an avocado", 200]], kg: [["un chien", "a dog", 15], ["un sac de riz", "a bag of rice", 5], ["une valise", "a suitcase", 20], ["une pastèque", "a watermelon", 6], ["un enfant de 8 ans", "an 8-year-old child", 27]], t: [["un éléphant", "an elephant", 5], ["un bus", "a bus", 12], ["un camion", "a lorry", 10], ["une petite voiture", "a small car", 1]] };
+  function maM(v, en) { return en ? v.toLocaleString("en-GB") : exMille(v); }
+  function maSigne(A, B) { return A === B ? "=" : A > B ? "&gt;" : "&lt;"; }
+  function maUnites(nG, nK, nT) { return HE.shuf(HE.shuf(MA_OBJ.g).slice(0, nG).map(function (x) { return x.concat(["g"]); }).concat(HE.shuf(MA_OBJ.kg).slice(0, nK).map(function (x) { return x.concat(["kg"]); }), HE.shuf(MA_OBJ.t).slice(0, nT).map(function (x) { return x.concat(["t"]); }))); }
+  exNiveaux("masses", [
+    "L’élève est capable d’identifier et nommer certains instruments de mesure de masse : la balance de Roberval, le pèse-personne, le pèse-bagage, la balance alimentaire, la balance de supermarché.",
+    "L’élève connaît les unités de mesure t, kg, g et est capable d’estimer la masse d’un objet donné en utilisant la bonne unité.",
+    "L’élève connaît les relations qui lient le kg (kilo-) au g et la tonne au kg.",
+    "L’élève convertit des g en kg et inversement ; des kg en t et inversement.",
+    "L’élève est capable de résoudre un problème simple en lien avec la mesure de masse.",
+    "L’élève est capable de résoudre un problème simple de conversion en lien avec la mesure de masse."
+  ], {
+    but: "Choisir l’instrument de mesure ; l’unité parmi trois ; les relations 1 kg = 1 000 g et 1 t = 1 000 kg ; comparer dans la même unité ; un problème en grammes.",
+    rappel: EXOS.masses.rappel,
+    tirer: function () { var ins = HE.shuf(MA_INSTR).slice(0, 3).map(function (x) { var o = HE.shuf([x[2]].concat(HE.shuf([0, 1, 2, 3, 4].filter(function (k) { return k !== x[2]; })).slice(0, 2))); return { x: x, o: o }; });
+      var g1 = HE.pk([300, 400, 500, 600, 750]), g2 = HE.pk([250, 500]);
+      return { ins: ins, unites: maUnites(1, 2, 1), kg: HE.shuf([2, 3, 4, 5]).slice(0, 2), comp: HE.shuf([[HE.rint(1, 4) * 100 + 50, null, "g"], [HE.rint(2, 9), null, "kg"], [HE.rint(2, 9), null, "t"]]).map(function (c) { var b = c[0] + HE.pk([-1, 1]) * (c[2] === "g" ? HE.pk([20, 90, 110]) : 1); return [c[0], b, c[2]]; }).concat([[1, 1000, "kgg"]]), pb: [g1, g2] }; },
+    exos: function (d, en) {
+      var tot = d.pb[0] + d.pb[1];
+      return [
+        { c: en ? "Circle the right instrument." : "Entoure l’instrument qui convient.",
+          q: exListe(d.ins, function (y) { return esc(en ? y.x[1] : y.x[0]) + "<br>" + exG(y.o.map(function (k) { var s = esc(MA_NOMS[k][en ? 1 : 0]); return k === y.x[2] ? exC(s) : s; }).join('<span class="ex-sep">/</span>'), "cercle"); }, "ex-une-col"),
+          r: d.ins.map(function (y) { return MA_NOMS[y.x[2]][en ? 1 : 0]; }).join(" · ") },
+        { c: en ? "Circle the right unit." : "Entoure l’unité qui convient.",
+          q: exListe(d.unites, function (x) { return HE.cap(en ? x[1] : x[0]) + (en ? " weighs about " : " pèse environ ") + x[2] + " " + exG("( " + ["g", "kg", "t"].map(function (u) { return u === x[3] ? exC(u) : u; }).join(" / ") + " )", "cercle"); }, "ex-une-col"),
+          r: d.unites.map(function (x) { return x[2] + " " + x[3]; }).join(" · ") },
+        { c: en ? "Complete." : "Complète.", q: exListe(["1 kg = ", "1 t = ", d.kg[0] + " kg = ", d.kg[1] + " kg = "], function (s, i) { return s + exT(maM([1000, 1000, d.kg[0] * 1000, d.kg[1] * 1000][i], en)) + (i === 1 ? " kg" : " g"); }),
+          r: "1 000 g · 1 000 kg · " + maM(d.kg[0] * 1000, en) + " g · " + maM(d.kg[1] * 1000, en) + " g" },
+        { c: en ? "Compare with &lt;, &gt; or =." : "Compare avec &lt;, &gt; ou =.",
+          q: exListe(d.comp, function (c) { return c[2] === "kgg" ? "1 kg " + exT("=") + " " + maM(1000, en) + " g" : c[0] + " " + c[2] + " " + exT(maSigne(c[0], c[1])) + " " + c[1] + " " + c[2]; }),
+          r: d.comp.map(function (c) { return c[2] === "kgg" ? "1 kg = " + maM(1000, en) + " g" : c[0] + " " + c[2] + " " + maSigne(c[0], c[1]) + " " + c[1] + " " + c[2]; }).join(" · ") },
+        { c: en ? "Solve the problem." : "Résous le problème.",
+          q: "<p>" + (en ? "Sari buys " + d.pb[0] + " g of tomatoes and " + d.pb[1] + " g of beans. How much does her shopping weigh? Is it more or less than 1 kg?" : "Sari achète " + d.pb[0] + " g de tomates et " + d.pb[1] + " g de haricots. Combien pèsent ses courses ? Est-ce plus ou moins que 1 kg ?") + "</p><p>" +
+            (en ? "Her shopping weighs " : "Ses courses pèsent ") + exT(String(tot)) + " g. " + (en ? "It is " : "C’est ") + exT(tot > 1000 ? (en ? "more" : "plus") : (en ? "less" : "moins")) + (en ? " than 1 kg." : " que 1 kg.") + "</p>",
+          r: d.pb[0] + " g + " + d.pb[1] + " g = " + tot + " g · " + maM(tot, en) + " g " + maSigne(tot, 1000) + " " + maM(1000, en) + " g" }
+      ];
+    }
+  }, "Fiche d’origine : choisir l’unité, convertir (kg, g, t), comparer des masses écrites dans des unités différentes, ranger des masses, un problème de conversion.", {
+    but: "Écrire l’unité sans propositions ; conversions dans les deux sens, avec kg et g mélangés ; comparer et ranger 5 masses ; un problème en plusieurs étapes avec la tonne.",
+    rappel: EXOS.masses.rappel,
+    tirer: function () { var n = HE.shuf([2, 3, 4, 5, 6, 7, 8, 9]), g = HE.shuf([150, 250, 350, 450, 600, 750, 850]);
+      var r0 = HE.shuf([[900, "900 g"], [1200, "1 kg 200 g"], [1500, "1 500 g"], [2000, "2 kg"], [1750, "1 kg 750 g"], [800, "800 g"], [1050, "1 050 g"], [2300, "2 kg 300 g"]]).slice(0, 5);
+      var T = HE.rint(2, 4), a = HE.rint(8, 15) * 100, b = HE.rint(5, 9) * 100 + 50, plus = HE.pk([200, 300, 500]);
+      return { unites: maUnites(2, 2, 2), conv: [["kgg", n[0] % 4 + 1, g[0]], ["gkg", n[1] % 4 + 1, g[1]], ["t", n[2]], ["kgt", n[3]], ["g", n[4]], ["kgg", n[5] % 3 + 1, g[2]]],
+        comp: EXOS.masses.tirer().comp, ranger: r0, pb: { T: T, a: a, b: b, plus: plus } }; },
+    exos: function (d, en) {
+      var M = function (v) { return maM(v, en); }, lib = function (s) { return en ? s.replace(/(\d)[\s  ](?=\d{3})/g, "$1,") : s; };
+      var comp = d.comp.map(function (c) { if (c[1] === null) { var k = c[0] / 1000; return { a: k + " kg", b: M(c[0]) + " g", A: c[0], B: c[0] }; } var A = c[1], B = c[3] === " kg" ? c[2] * 1000 : c[2]; return { a: c[0], b: M(c[2]) + c[3], A: A, B: B }; });
+      var ordre = d.ranger.slice().sort(function (x, y) { return x[0] - y[0]; }), pb = d.pb, ch = pb.a + pb.b, reste = pb.T * 1000 - ch;
+      var cv = function (x) { if (x[0] === "kgg") return [x[1] + " kg " + x[2] + " g = ", M(x[1] * 1000 + x[2]), " g"]; if (x[0] === "gkg") return [M(x[1] * 1000 + x[2]) + " g = ", x[1] + " kg " + x[2], " g"]; if (x[0] === "t") return [x[1] + " t = ", M(x[1] * 1000), " kg"]; if (x[0] === "kgt") return [M(x[1] * 1000) + " kg = ", String(x[1]), " t"]; return [M(x[1] * 1000) + " g = ", String(x[1]), " kg"]; };
+      return [
+        { c: en ? "Write the right unit: g, kg or t." : "Écris l’unité qui convient : g, kg ou t.", q: exListe(d.unites, function (x) { return HE.cap(en ? x[1] : x[0]) + (en ? " weighs about " : " pèse environ ") + x[2] + " " + exT(x[3]); }), r: d.unites.map(function (x) { return x[2] + " " + x[3]; }).join(" · ") },
+        { c: en ? "Complete." : "Complète.", q: exListe(d.conv, function (x) { var c = cv(x); if (x[0] === "gkg") return c[0] + exT(String(x[1])) + " kg " + exT(String(x[2])) + " g"; return c[0] + exT(c[1]) + c[2]; }), r: d.conv.map(function (x) { var c = cv(x); return c[0] + c[1] + (x[0] === "gkg" ? " g" : c[2]); }).join(" · ") },
+        { c: en ? "Compare with &lt;, &gt; or =." : "Compare avec &lt;, &gt; ou =.", q: exListe(comp, function (c) { return lib(c.a) + " " + exT(maSigne(c.A, c.B)) + " " + lib(c.b); }), r: comp.map(function (c) { return lib(c.a) + " " + maSigne(c.A, c.B) + " " + lib(c.b); }).join(" · ") },
+        { c: en ? "Put these masses in order, from the lightest to the heaviest." : "Range ces masses de la plus légère à la plus lourde.", q: '<p class="ex-banque">' + d.ranger.map(function (x) { return lib(x[1]); }).join(" · ") + '</p><p class="ex-ordre">' + ordre.map(function (x) { return exT(lib(x[1])); }).join(" &lt; ") + "</p>", r: ordre.map(function (x) { return lib(x[1]); }).join(" < ") },
+        { c: en ? "Solve the problem." : "Résous le problème.",
+          q: "<p>" + (en ? "A small lorry can carry " + pb.T + " t. We load " + M(pb.a) + " kg of sand and " + M(pb.b) + " kg of cement. How much does the load weigh? How many more kilograms can we load? Can we add " + pb.plus + " kg of bricks?" : "Un petit camion peut transporter " + pb.T + " t. On charge " + M(pb.a) + " kg de sable et " + M(pb.b) + " kg de ciment. Combien pèse le chargement ? Combien de kilogrammes peut-on encore charger ? Peut-on ajouter " + pb.plus + " kg de briques ?") +
+            '</p><ol class="ex-conv ex-une-col"><li>' + exT(M(ch)) + " kg</li><li>" + exT(M(reste)) + " kg</li><li>" + exT(reste >= pb.plus ? (en ? "Yes" : "Oui") : (en ? "No" : "Non")) + "</li></ol>",
+          r: M(pb.a) + " + " + M(pb.b) + " = " + M(ch) + " kg · " + pb.T + " t = " + M(pb.T * 1000) + " kg · " + M(pb.T * 1000) + " − " + M(ch) + " = " + M(reste) + " kg · " + (reste >= pb.plus ? (en ? "yes" : "oui") : (en ? "no" : "non")) }
+      ];
+    }
+  });
 
   /* ==========================================================================================
      Jeux des séquences complétées (D-96) : un moteur commun « QZ »
@@ -2316,14 +2846,26 @@
     else if (a === "lx-autre") { LX.ex = { a: HE.rint(2, 9), b: HE.rint(2, 9), c: HE.rint(1, 4), d: HE.pk([100, 200, 250, 300, 400, 600, 750, 800]) }; LX.vu = {}; }
     else if (a === "lx-ex0") { LX.ex = null; LX.vu = {}; }
   }
-  function exSauver() { var m = lire("fiches", {}); m[EXF.seq] = { n: EXF.n, opt: EXF.opt }; ecrire("fiches", m); }
-  function exTirer() { var X = EXOS[EXF.seq]; EXF.d = exAvec(EXF.n, function () { return X.tirer(EXF.opt); }); EXF.vu = {}; EXF.i = 0; exSauver(); }
+  function exSauver() { var m = lire("fiches", {}); m[EXF.seq] = { n: EXF.n, opt: EXF.opt, niv: EXF.niv }; ecrire("fiches", m); }
+  /* même numéro + même niveau = mêmes exercices ; les 3 niveaux d’un même numéro sont différents */
+  function exTirer() { var X = exX(EXOS[EXF.seq]), graine = EXF.n + (X.niveaux ? EXF.niv * 100003 : 0); EXF.d = exAvec(graine, function () { return X.tirer(EXF.opt); }); EXF.vu = {}; EXF.i = 0; exSauver(); }
   function exGenerer(X, en, tbi) { EXTBI = !!tbi; EXK = 0; try { return exAvec(EXF.n + 1, function () { return X.exos(EXF.d, en); }); } finally { EXTBI = false; } }
+  /* choix du niveau (fiches en 3 niveaux) : le numéro de fiche est gardé, les exercices changent */
+  function exChoixNiveau(X0, en) {
+    if (!X0.niveaux) return "";
+    return '<div class="ex-niveaux" role="group" aria-label="' + (en ? "Level" : "Niveau") + '">' + [1, 2, 3].map(function (v) {
+      return '<button type="button" class="ex-niv' + (EXF.niv === v ? " est-actif" : "") + '" data-action="ex-niv" data-v="' + v + '" aria-pressed="' + (EXF.niv === v) + '">' + (en ? EX_NIV_EN : EX_NIV_NOM)[v - 1] + " " + exEtoiles(v) + "</button>"; }).join("") + "</div>";
+  }
+  /* pour l’enseignante (pas imprimé) : les objectifs de la programmation travaillés et ce qui change à ce niveau */
+  function exObjectifs(X0, X, en) {
+    if (!X0.objectifs) return "";
+    return '<details class="no-print ex-objectifs"><summary>' + (en ? "Objectives (P5 plan, in French) and this level" : "Objectifs travaillés (programmation P5) et ce niveau") + "</summary><ul>" + X0.objectifs.map(function (o) { return "<li>" + esc(o) + "</li>"; }).join("") + "</ul><p><b>" + (en ? EX_NIV_EN : EX_NIV_NOM)[EXF.niv - 1] + " :</b> " + esc(X.but || "") + "</p></details>";
+  }
   function pageExos(seq) {
-    var X = EXOS[seq], en = langue === "en";
-    if (!EXF || EXF.seq !== seq) { var memo = lire("fiches", {})[seq] || {}; EXF = { seq: seq, opt: memo.opt || X.optDefaut || "", n: memo.n || exNouveauNum(), corrige: EXF ? EXF.corrige : false, tbi: EXF ? EXF.tbi : false, vu: {}, i: 0 }; }
+    var X0 = EXOS[seq], en = langue === "en";
+    if (!EXF || EXF.seq !== seq) { var memo = lire("fiches", {})[seq] || {}; EXF = { seq: seq, opt: memo.opt || X0.optDefaut || "", niv: memo.niv || 2, n: memo.n || exNouveauNum(), corrige: EXF ? EXF.corrige : false, tbi: EXF ? EXF.tbi : false, vu: {}, i: 0 }; }
     if (!EXF.d) exTirer();
-    var mat = MATIERE[X.matiere], num = (en ? "Worksheet no. " : "Fiche n° ") + EXF.n;
+    var X = exX(X0), mat = MATIERE[X.matiere], num = (en ? "Worksheet no. " : "Fiche n° ") + EXF.n + (X0.niveaux ? " " + exEtoiles(EXF.niv) : "");
     if (EXF.tbi) return pageExosTbi(X, en, mat, num);
     var ex = exGenerer(X, en, false);
     var tete = '<header class="ex-tete"><div><small>' + esc(tr(mat.nom)) + " · " + (en ? "Worksheet" : "Fiche d’exercices") + "</small><h1>" + esc(X.titre()) + '</h1></div><p class="ex-nom">' + (en ? "Name: " : "Prénom : ") + '<span class="ex-ligne"></span><br>' + (en ? "Date: " : "Date : ") + '<span class="ex-ligne"></span><br><small class="ex-num">' + num + "</small></p></header>" +
@@ -2332,11 +2874,11 @@
     var corrige = EXF.corrige ? '<section class="ex-corrige"><h2>' + (en ? "Answers" : "Corrigé") + " · " + num + "</h2><ol>" + ex.map(function (e) { return "<li>" + e.r + "</li>"; }).join("") + "</ol></section>" : "";
     return '<div class="no-print ex-outils coco-row"><a class="coco-btn coco-btn--secondaire" href="#' + X.seq + '">← ' + (en ? "Back to the unit" : "Retour à la séquence") + '</a>' +
       '<button class="coco-btn coco-btn--secondaire" type="button" data-action="ex-nouveau">' + (en ? "New worksheet" : "Nouvelle fiche") + "</button>" +
-      (X.reglage ? X.reglage(EXF, en) : "") +
+      (X.reglage ? X.reglage(EXF, en) : "") + exChoixNiveau(X0, en) +
       '<label class="ex-case"><input type="checkbox" data-action="ex-corrige"' + (EXF.corrige ? " checked" : "") + "> " + (en ? "Add the answers (on a separate page)" : "Ajouter le corrigé (sur une page à part)") + "</label>" +
       '<button class="coco-btn" type="button" data-action="imprimer">' + (en ? "Print or save as PDF" : "Imprimer ou enregistrer en PDF") + "</button>" +
       '<button class="coco-btn" type="button" data-action="ex-tbi">' + (en ? "Correct on the board" : "Corriger au TBI") + "</button>" + choixLangue() + "</div>" +
-      '<p class="no-print ex-aide">' + (en ? "To get a PDF file: in the print window, choose “Save as PDF”. Each click on “New worksheet” draws new exercises. The worksheet number (top right) lets you find the same exercises again to correct them on the board." : "Pour obtenir un fichier PDF : dans la fenêtre d’impression, choisissez « Enregistrer au format PDF ». Chaque « Nouvelle fiche » tire d’autres exercices. Le numéro de la fiche (en haut à droite) permet de retrouver les mêmes exercices pour les corriger au TBI.") + "</p>" +
+      '<p class="no-print ex-aide">' + (en ? "To get a PDF file: in the print window, choose “Save as PDF”. Each click on “New worksheet” draws new exercises. The worksheet number (top right) lets you find the same exercises again to correct them on the board." : "Pour obtenir un fichier PDF : dans la fenêtre d’impression, choisissez « Enregistrer au format PDF ». Chaque « Nouvelle fiche » tire d’autres exercices. Le numéro de la fiche (en haut à droite) permet de retrouver les mêmes exercices pour les corriger au TBI.") + (X0.niveaux ? (en ? " The three levels share the same worksheet number: each level has its own exercises." : " Les trois niveaux gardent le même numéro de fiche : chaque niveau a ses propres exercices.") : "") + "</p>" + exObjectifs(X0, X, en) +
       '<article class="exos ' + mat.classe + '">' + tete + corps + "</article>" + (corrige ? '<article class="exos ex-page ' + mat.classe + '">' + corrige + "</article>" : "");
   }
   /* correction au TBI (D-104) : un exercice par écran, on touche une case pour montrer la réponse */
@@ -2346,7 +2888,7 @@
     var tout = cles.length && cles.every(function (k) { return EXF.vu[k]; });
     return '<div class="no-print ex-outils coco-row tb-barre"><button class="coco-btn coco-btn--secondaire" type="button" data-action="ex-feuille">← ' + (en ? "Printable worksheet" : "Fiche à imprimer") + "</button>" +
       '<label class="ex-case tb-num">' + (en ? "Worksheet no. " : "Fiche n° ") + '<input id="ex-num" inputmode="numeric" maxlength="5" value="' + EXF.n + '"></label><button class="coco-btn coco-btn--secondaire" type="button" data-action="ex-num">' + (en ? "Open" : "Ouvrir") + "</button>" +
-      (X.reglage ? X.reglage(EXF, en) : "") +
+      (X.reglage ? X.reglage(EXF, en) : "") + exChoixNiveau(EXOS[EXF.seq], en) +
       '<button class="coco-btn coco-btn--secondaire" type="button" data-action="ex-plein">' + (en ? "Full screen" : "Plein écran") + "</button>" + choixLangue() + "</div>" +
       '<section class="exos tb-scene ' + mat.classe + '"><header class="tb-tete"><div><small>' + esc(tr(mat.nom)) + " · " + num + "</small><h1>" + esc(X.titre()) + "</h1></div>" +
       '<p class="ex-rappel"><b>' + (en ? "I remember" : "Je me rappelle") + "</b> " + X.rappel(en) + "</p></header>" +
@@ -2361,6 +2903,7 @@
     if (!EXF) return;
     if (a === "ex-nouveau") { EXF.n = exNouveauNum(); exTirer(); }
     else if (a === "ex-corrige") EXF.corrige = el.checked;
+    else if (a === "ex-niv") { var nv = +el.dataset.v; if (nv !== EXF.niv) { EXF.niv = nv; exTirer(); } }
     else if (a === "ex-tbi") { EXF.tbi = true; EXF.i = 0; window.scrollTo(0, 0); }
     else if (a === "ex-feuille") EXF.tbi = false;
     else if (a === "ex-vu") { var k = +el.dataset.k; EXF.vu[k] = !EXF.vu[k]; }
@@ -3074,6 +3617,11 @@
   var BQ = window.COCO_BANQUE;
   var Bq = { fam: -1, sel: {}, shown: 24, ouverts: {}, vals: {}, res: {} };
   BQ.FILTRES.forEach(function (g) { Bq.sel[g.k] = {}; });
+  /* signe écrit dans le cercle : « + » ou « − » (le tiret « - » compte aussi) ; référent en haut : + si l’état comparé (en bas) est le plus grand */
+  function bqSigne(x) { var m = String(x || "").trim().match(/^([+\-−–])/); return m ? (m[1] === "+" ? "+" : "−") : ""; }
+  /* transformation : + si on gagne ou ajoute, − si on perd ou enlève ; comparaison : référent en haut, + si l’état du bas est le plus grand */
+  function bqSigneAttendu(p) { return p.t[0] === "2" ? (p.tr === "p" ? "+" : "−") : (p.ref ? "+" : "−"); }
+  function bqAvecSigne(p) { return p.t[0] === "2" || p.t[0] === "3"; }
   function bqNum(x) { var d = String(x || "").replace(/[^\d]/g, ""); return d === "" ? NaN : parseInt(d, 10); }
   function bqAns(p) {
     var v = p.v, t = p.t;
@@ -3087,7 +3635,8 @@
     if (t === "1A") return { g: [["pA", "pB", v[0], v[1]]], e: { tot: v[2] } };
     if (t === "1B") return { g: [], e: { pK: v[1], pU: v[2], tot: v[0] } };
     if (t[0] === "2") return { g: [], e: { i: v[0], d: v[1], f: v[2] } };
-    if (t[0] === "3") return { g: v[0] == null ? [] : [["big", "small", v[0], v[1]]], e: { d: v[2] } };
+    /* comparaison : chaque état à sa place (référent en haut) ; plus d’échange possible entre le haut et le bas */
+    if (t[0] === "3") return { g: [], e: v[0] == null ? { d: v[2] } : { big: v[0], small: v[1], d: v[2] } };
     if (t[0] === "4") return { g: [["top", "left", v[0], v[1]]], e: { prod: v[2] } };
     return { g: [], e: { top: v[0], left: v[1], prod: v[2] } };
   }
@@ -3096,6 +3645,9 @@
     for (k in E.e) if (bqNum(V[k]) !== E.e[k]) tout = false;
     E.g.forEach(function (x) { var a = bqNum(V[x[0]]), b = bqNum(V[x[1]]); if (!((a === x[2] && b === x[3]) || (a === x[3] && b === x[2]))) tout = false; });
     var ans = bqAns(p);
+    /* comparaison : l’élève écrit lui-même + ou − dans le cercle (demande de l’enseignante, 09/11/2026) */
+    if (p.t[0] === "3" && !tout && p.v[0] != null && bqNum(V.big) === p.v[1] && bqNum(V.small) === p.v[0] && bqNum(V.d) === p.v[2]) { Bq.res[id] = "place"; return; }
+    if (tout && bqAvecSigne(p) && bqSigne(V.d) !== bqSigneAttendu(p)) { Bq.res[id] = "signe"; return; }
     Bq.res[id] = tout ? "ok" : (bqNum(V[ans[0]]) === ans[1] ? "part" : "no");
   }
   /* schémas : mêmes géométries que le site v0 (schéma de Vergnaud, barres, tableau) */
@@ -3112,14 +3664,15 @@
       var k1 = t === "1A" ? "pA" : "pK", k2 = t === "1A" ? "pB" : "pU";
       svg(bx(14, 14, 38, 38, k1) + bx(14, 64, 38, 38, k2) + '<path d="M60 14Q70 14 70 30V46Q70 58 80 58Q70 58 70 70V86Q70 102 60 102" class="bq-ar"/>' + bx(88, 40, 38, 38, "tot") + bx(168, 22, 128, 32, "tot") + bx(168, 54, 64, 32, k1) + bx(232, 54, 64, 32, k2) + tx(78, 124, L.verg) + tx(232, 124, L.bars), L.verg);
     } else if (t[0] === "2") {
-      svg(bx(14, 56, 42, 42, "i") + fl(56, 77, 262, 77) + ci(160, 57, 20, "d") + bx(264, 56, 42, 42, "f") + tx(160, 124, L.verg), L.verg);
+      svg(bx(14, 56, 42, 42, "i") + fl(56, 77, 262, 77) + ci(160, 50, 27, "d") + bx(264, 56, 42, 42, "f") + tx(160, 124, L.verg), L.verg);
       if (t === "2B" && p.n === 4) {
         var tk = ""; for (var x = 76; x <= 250; x += 34) tk += '<path d="M' + x + ' 71V83" class="bq-ar"/>';
-        svg(bx(14, 50, 42, 42, "i") + bx(264, 50, 42, 42, "f") + fl(56, 71, 262, 71) + tk + ci(160, 32, 20, "d") + '<path d="M160 52V71" class="bq-ar"/>' + tx(35, 112, L.start) + tx(285, 112, L.end) + tx(160, 124, L.time), L.time);
+        svg(bx(14, 50, 42, 42, "i") + bx(264, 50, 42, 42, "f") + fl(56, 71, 262, 71) + tk + ci(160, 26, 26, "d") + '<path d="M160 52V71" class="bq-ar"/>' + tx(35, 112, L.start) + tx(285, 112, L.end) + tx(160, 124, L.time), L.time);
       }
     } else if (t[0] === "3") {
-      var sg = t === "3A" ? (p.s ? 1 : -1) : 1;
-      svg(bx(139, 6, 42, 42, "big") + fl(160, 48, 160, 82) + ci(160 + sg * 34, 66, 21, "d") + bx(139, 84, 42, 42, "small"), L.verg);
+      /* référent en haut, état comparé en bas, cercle toujours à droite (p.ref : voir banque.js) */
+      var kH = p.ref ? "small" : "big", kB = p.ref ? "big" : "small";
+      svg(bx(139, 6, 42, 42, kH) + fl(160, 48, 160, 82) + ci(210, 66, 27, "d") + bx(139, 84, 42, 42, kB), L.verg);
     } else {
       var mult = t[0] === "4", g = '<rect x="76" y="30" width="220" height="88" class="bq-b"/>';
       for (var i = 1; i < 5; i++) g += '<path d="M' + (76 + 44 * i) + ' 30V118" class="' + (mult ? "bq-gd" : "bq-gs") + '"/>';
@@ -3133,14 +3686,16 @@
     var id = p.i, V = Bq.vals[id] || {}, r = Bq.res[id], en = langue === "en";
     var w = bqSchemas(p).map(function (o) {
       return '<div class="bq-sw">' + o.svg + o.S.map(function (s) {
-        return '<input class="bq-in' + (s.ph === "?" ? " bq-inc" : "") + '" data-bq="' + id + '" data-k="' + s.k + '" value="' + esc(V[s.k] || "") + '" placeholder="' + s.ph + '" inputmode="numeric" autocomplete="off" aria-label="' + (en ? "Write a number" : "Écris un nombre") + '" style="left:' + (s.x / 3.2).toFixed(2) + "%;top:" + (s.y / o.H * 100).toFixed(2) + "%;width:" + (s.w / 3.2).toFixed(2) + "%;height:" + (s.h / o.H * 100).toFixed(2) + '%">';
+        return '<input class="bq-in' + (s.ph === "?" ? " bq-inc" : "") + '" data-bq="' + id + '" data-k="' + s.k + '" value="' + esc(V[s.k] || "") + '" placeholder="' + s.ph + '" inputmode="' + (bqAvecSigne(p) && s.k === "d" ? "text" : "numeric") + '" autocomplete="off" aria-label="' + (en ? "Write a number" : "Écris un nombre") + '" style="left:' + (s.x / 3.2).toFixed(2) + "%;top:" + (s.y / o.H * 100).toFixed(2) + "%;width:" + (s.w / 3.2).toFixed(2) + "%;height:" + (s.h / o.H * 100).toFixed(2) + '%">';
       }).join("") + "</div>";
     }).join("");
     var msg = "";
     if (r === "ok") msg = retour("bravo", t("bravo"), en ? "You found the answer, and your model is right." : "Tu as trouvé la réponse, et ton schéma est juste.");
     else if (r === "part") msg = retour("revoir", en ? "Almost!" : "Presque !", en ? "The answer is right! Check the other boxes of the model." : "La réponse est juste ! Vérifie les autres cases du schéma.");
+    else if (r === "place") msg = retour("revoir", en ? "Almost!" : "Presque !", en ? "The numbers are right, but two of them are in the wrong place. At the top, write the amount we compare to." : "Les nombres sont justes, mais deux sont échangés. En haut, écris la quantité à laquelle on compare.");
+    else if (r === "signe") msg = retour("revoir", en ? "Almost!" : "Presque !", en ? (p.t[0] === "2" ? "The numbers are right! Check the sign in the circle: + if we gain or add, − if we lose or take away." : "The numbers are right! Check the sign in the circle: + if the bottom box has more, − if it has less.") : (p.t[0] === "2" ? "Les nombres sont justes ! Vérifie le signe dans le cercle : + si on gagne ou si on ajoute, − si on perd ou si on enlève." : "Les nombres sont justes ! Vérifie le signe dans le cercle : + si la case du bas a plus, − si elle a moins."));
     else if (r === "no") msg = retour("revoir", t("pasEncore"), en ? "Read the problem again. What is the question? Where does the number you are looking for go in the model?" : "Relis l'énoncé. Quelle est la question ? Où va le nombre cherché dans le schéma ?");
-    return w + '<p class="bq-aide">' + (en ? "Fill in the model with the numbers from the problem. The <b>?</b> box is the answer." : "Complète le schéma avec les nombres de l'énoncé. La case <b>?</b> est la réponse.") + "</p>" +
+    return w + '<p class="bq-aide">' + (en ? "Fill in the model with the numbers from the problem. The <b>?</b> box is the answer." : "Complète le schéma avec les nombres de l'énoncé. La case <b>?</b> est la réponse.") + (bqAvecSigne(p) ? (en ? " In the circle, write <b>+</b> or <b>−</b> before the number." : " Dans le cercle, écris <b>+</b> ou <b>−</b> devant le nombre.") : "") + "</p>" +
       '<div class="coco-row"><button class="coco-btn" type="button" data-action="bq-verifier" data-v="' + id + '">' + t("valider") + '</button><button class="coco-btn coco-btn--secondaire" type="button" data-action="bq-effacer" data-v="' + id + '">' + (en ? "Clear" : "Effacer") + "</button></div>" + msg;
   }
   function bqGarde(p) {
@@ -3166,7 +3721,7 @@
     var cartes = vis.map(function (p) {
       var T = BQ.TYPES[p.t], ouvert = Bq.ouverts[p.i];
       return '<article class="bq-carte"><header><img src="' + IMG(BQ.WHO[p.t]) + '" alt=""><div><b>' + p.t + " · " + esc(T[langue]) + '</b><small>' + (en ? "Level " : "Niveau ") + p.n + (p.n === 4 ? ' · <span class="bq-defi">' + (en ? "Challenge!" : "Défi !") + "</span>" : "") + "</small></div></header>" +
-        '<p class="bq-enonce">' + esc(p[langue] || p.fr) + "</p>" +
+        '<p class="bq-enonce">' + esc(p[langue] || p.fr).replace(/(\d) (\d{3})/g, "$1\u00a0$2") + "</p>" +
         '<button class="coco-btn coco-btn--secondaire" type="button" data-action="bq-ouvrir" data-v="' + p.i + '" aria-expanded="' + !!ouvert + '">' + (ouvert ? (en ? "Hide the model" : "Cacher le schéma") : (en ? "Fill in the model" : "Compléter le schéma")) + "</button>" +
         (ouvert ? '<div class="bq-schema">' + bqSchema(p) + "</div>" : "") + "</article>";
     }).join("");
