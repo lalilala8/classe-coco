@@ -761,11 +761,11 @@
     return '<div class="no-print coco-row"><a class="coco-btn coco-btn--secondaire" href="#ens-sequences">← Séquences d’apprentissage</a><a class="coco-btn coco-btn--secondaire" href="#lecon-masses">La leçon</a><a class="coco-btn coco-btn--secondaire" href="#exos-masses">Fiche d’exercices</a><a class="coco-btn coco-btn--secondaire" href="#seq-masses">Voir la séquence</a><button class="coco-btn coco-btn--secondaire" type="button" data-action="imprimer">Imprimer la fiche</button></div>' +
       '<article class="fiche m-maths"><small>Maths · Grandeurs et mesures (masses) · Cycle 2, CE2, niveau de maîtrise 3</small><h1>Mesurer des masses</h1>' +
       '<p class="f-q">Objectif : « ' + esc(C.masses.objectif.fr) + " »</p>" +
-      '<p class="f-source">Programmation de maths de la collègue : période 5, séquence 4, semaine 5 (du 23 au 27 novembre 2026). Leçon de classe : GM8 « Les mesures de masses » (2023). Les deux problèmes ouverts viennent de l’outil de la collègue, adaptés.</p>' +
+      '<p class="f-source">Programmation de maths de la classe : période 5, séquence 4, semaine 5 (du 23 au 27 novembre 2026). Leçon de classe : GM8 « Les mesures de masses » (2023). Les deux problèmes ouverts viennent de l’outil de la collègue, adaptés.</p>' +
       encadreProgramme("masses") +
       '<section><h2>Les séances et les activités du site</h2><table class="f-table"><thead><tr><th>Séance</th><th>Objectif</th><th>Sur le site</th></tr></thead><tbody>' + [
-        ["Séance 1", "Instruments et unités : on mesure une masse avec une balance ; le gramme, le kilogramme, la tonne ; choisir l’unité qui convient en s’appuyant sur un repère (trombone 1 g, paquet de sucre 1 kg, petite voiture environ 1 t). [CLASSE : programmation de la collègue]", "Revoir la leçon (blocs 1 et 2) · Je me rappelle · Quelle unité ? · Problème ouvert « L’étiquette effacée »"],
-        ["Séances 2 et 3", "1 kg = 1 000 g et 1 t = 1 000 kg : exprimer une même masse avec différentes unités ; problèmes de masse. [CLASSE : programmation de la collègue]", "Revoir la leçon (bloc 3) · C’est pareil que… · Problème ouvert « Le panier d’un kilo »"],
+        ["Séance 1", "Instruments et unités : on mesure une masse avec une balance ; le gramme, le kilogramme, la tonne ; choisir l’unité qui convient en s’appuyant sur un repère (trombone 1 g, paquet de sucre 1 kg, petite voiture environ 1 t). [CLASSE : programmation de la classe]", "Revoir la leçon (blocs 1 et 2) · Je me rappelle · Quelle unité ? · Problème ouvert « L’étiquette effacée »"],
+        ["Séances 2 et 3", "1 kg = 1 000 g et 1 t = 1 000 kg : exprimer une même masse avec différentes unités ; problèmes de masse. [CLASSE : programmation de la classe]", "Revoir la leçon (bloc 3) · C’est pareil que… · Problème ouvert « Le panier d’un kilo »"],
         ["Séance 4", "Comparer et ranger des masses écrites avec des unités différentes ; résoudre des problèmes. [PROPOSITION]", "Le plus lourd · Problèmes de masses"],
         ["Séance 5", "Évaluation des objectifs de la séquence. [PROPOSITION]", "Fiche d’exercices (corrigé à part, correction au TBI)"]
       ].map(function (r) { return "<tr><th>" + r[0] + "</th><td>" + esc(r[1]) + "</td><td>" + esc(r[2]) + "</td></tr>"; }).join("") + "</tbody></table></section>" +
@@ -784,7 +784,7 @@
         "Peser de vrais objets avec la balance de Roberval et des masses marquées, puis avec une balance digitale (repères : « il mesure une masse en kilogrammes et grammes ; utilise un instrument adapté »).",
         "Encadrer une masse par deux nombres entiers d’unités (« ce cartable pèse entre 2 kg et 3 kg ») : ce repère n’est pas encore travaillé sur le site.",
         "La moitié de 1 kg, c’est 500 g ; 2 kg = 2 × 1 000 g (repères du niveau 3)."]) + "</ul></section>" +
-      '<p class="f-source">Sources : programmation périodique P5 de la collègue, leçon GM8 de la classe, programmes de Nouvelle-Calédonie 2021, repères de progressivité de la DENC (cycle 2, mathématiques, p. 13 et 15), Sullivan & Lilburn, « La masse », p. 78.</p></article>';
+      '<p class="f-source">Sources : programmation périodique P5 de la classe, leçon GM8 de la classe, programmes de Nouvelle-Calédonie 2021, repères de progressivité de la DENC (cycle 2, mathématiques, p. 13 et 15), Sullivan & Lilburn, « La masse », p. 78.</p></article>';
   }
   /* fiches enseignantes des séquences, même modèle que « Mesurer des masses » (D-112) : D-115 */
   function ficheSeq(o) {
@@ -813,16 +813,16 @@
   }
   function ficheDivision() {
     return ficheSeq({ seq: "division", mat: "maths", prog: "division", dom: "Maths · Nombres et calculs",
-      source: "Programmation de maths de la collègue : période 5, séquence 3 « Le partage et la division en ligne », semaines 3 et 4 (du 9 au 20 novembre 2026). Leçons de classe : CAL7 « Diviser : grouper ou partager » et CAL8 « La division en ligne avec reste » (2023). Problèmes ouverts de l’outil de la collègue, adaptés.",
+      source: "Programmation de maths de la classe : période 5, séquence 3 « Le partage et la division en ligne », semaines 3 et 4 (du 9 au 20 novembre 2026). Leçons de classe : CAL7 « Diviser : grouper ou partager » et CAL8 « La division en ligne avec reste » (2023). Problèmes ouverts de l’outil de la collègue, adaptés.",
       seances: [
-        ["Séances 1 à 3", "Partager en parts égales ; quotient et reste. [CLASSE : programmation de la collègue]", "Revoir la leçon (grouper, partager, avec reste) · Je me rappelle (tables) · Grouper ou partager · Problème ouvert « Les coquillages de Nina »"],
-        ["Séances 2 à 5", "Groupement ou partage ; division sans reste. [CLASSE : programmation de la collègue]", "Calcule · Problème ouvert « Les sachets de letchis »"],
+        ["Séances 1 à 3", "Partager en parts égales ; quotient et reste. [CLASSE : programmation de la classe]", "Revoir la leçon (grouper, partager, avec reste) · Je me rappelle (tables) · Grouper ou partager · Problème ouvert « Les coquillages de Nina »"],
+        ["Séances 2 à 5", "Groupement ou partage ; division sans reste. [CLASSE : programmation de la classe]", "Calcule · Problème ouvert « Les sachets de letchis »"],
         ["Séance suivante", "Écrire la division avec reste : 23 = (4 × 5) + 3 ; le vocabulaire (dividende, diviseur, quotient, reste). [PROPOSITION]", "Avec un reste"],
         ["Dernière séance", "Évaluation des objectifs de la séquence. [PROPOSITION]", "Fiche d’exercices (corrigé à part, correction au TBI)"]],
       erreurs: ["Un reste plus grand que le diviseur (« 23 = (4 × 4) + 7 ») : on peut encore faire un groupe ; le reste est toujours plus petit que le diviseur.", "Confondre grouper et partager : se demander « combien de groupes ? » ou « combien dans chaque part ? ».", "Oublier le reste dans l’égalité : vérifier en recalculant (4 × 5) + 3.", "Inverser dividende et diviseur dans « 23 : 4 »."],
       conseils: ["La classe ne pose pas la division au CE2 : division en ligne seulement.", "Écriture de la classe avec les parenthèses : 43 = (5 × 8) + 3.", "Les tables de multiplication sont le premier outil : « Je me rappelle » les fait revoir."],
       prolonger: ["Manipuler (jetons, coquillages, letchis) avant d’écrire l’égalité.", "Problèmes « quotient + 1 » (« 23 élèves, des voitures de 4 places : combien de voitures ? ») : repère du niveau 3, pas encore sur le site."],
-      sources: "Sources : programmation périodique P5 de la collègue, leçons CAL7 et CAL8 de la classe, programmes de Nouvelle-Calédonie 2021, repères de progressivité de la DENC (cycle 2, mathématiques, p. 7 et 11)." });
+      sources: "Sources : programmation périodique P5 de la classe, leçons CAL7 et CAL8 de la classe, programmes de Nouvelle-Calédonie 2021, repères de progressivité de la DENC (cycle 2, mathématiques, p. 7 et 11)." });
   }
   function ficheMonnaie() {
     return ficheSeq({ seq: "monnaie", mat: "maths", prog: "monnaie", dom: "Maths · Grandeurs et mesures (prix)",
@@ -839,7 +839,7 @@
   }
   function ficheDigitale() {
     return ficheSeq({ seq: "digitale", mat: "maths", prog: "digitale", tbi: JEU_DIGITAL, dom: "Maths · Grandeurs et mesures (durées)",
-      source: "Programmation de maths de la collègue : période 5, séquence 1, semaine 1 (du 26 au 30 octobre 2026). Leçon de classe : GM5 « Lire l’heure digitale ». Jeux collectifs « L’heure à l’ardoise » (séances 1 à 3), création de la collègue Teacher Nadège, adaptés avec son accord ; problèmes ouverts de son outil.",
+      source: "Programmation de maths de la classe : période 5, séquence 1, semaine 1 (du 26 au 30 octobre 2026). Leçon de classe : GM5 « Lire l’heure digitale ». Jeux collectifs « L’heure à l’ardoise » (séances 1 à 3), création de la collègue Teacher Nadège, adaptés avec son accord ; problèmes ouverts de son outil.",
       seances: [
         ["Séance 1", "1 journée = 24 h (2 × 12 h) ; 6 h du soir = 18 h. [CLASSE : « L’heure à l’ardoise », séance 1]", "Au TBI (séance 1 de « L’heure à l’ardoise ») · Revoir la leçon · Je me rappelle · Matin ou après-midi ? · Deux façons de dire l’heure · Problème ouvert « L’heure magique »"],
         ["Séances 2 et 3", "Lire et dire l’heure pile et et demie (1 h = 60 min), puis et quart et moins le quart (un quart d’heure = 15 min). [CLASSE : « L’heure à l’ardoise », séances 2 et 3]", "Au TBI (séances 2 et 3) · Lis le réveil"],
@@ -848,7 +848,7 @@
       erreurs: ["Lire 18:00 « six heures » sans dire « du soir » : rappeler les deux tours du cadran (+12 h).", "Ajouter 12 dans le mauvais sens (14:15 → 26:15) : le matin va de 0 h à 12 h, l’après-midi et le soir de 12 h à 24 h.", "« et demie » pour 30 minutes, mais « et demi » après midi et minuit.", "Une durée qui dépasse l’heure (9:45 + 30 min = 9:75) : après 59 minutes, on passe à l’heure suivante."],
       conseils: ["Code des leçons : les heures en rouge, les minutes en bleu.", "L’écriture de la classe : « 6h30 » dans les phrases, « 6:30 » sur le réveil, comme la leçon GM5.", "« L’heure à l’ardoise » reste en français ; les activités du site existent aussi en anglais (« noon », a.m. / p.m.)."],
       prolonger: ["L’emploi du temps de la classe : relever les heures de la journée et les écrire de deux façons.", "Relier à la séquence suivante : lire l’heure à aiguilles (P5, séquence 2)."],
-      sources: "Sources : programmation périodique P5 de la collègue, leçon GM5 de la classe, programmes de Nouvelle-Calédonie 2021, repères de progressivité de la DENC (cycle 2, mathématiques, p. 16 et 17)." });
+      sources: "Sources : programmation périodique P5 de la classe, leçon GM5 de la classe, programmes de Nouvelle-Calédonie 2021, repères de progressivité de la DENC (cycle 2, mathématiques, p. 16 et 17)." });
   }
 
 
