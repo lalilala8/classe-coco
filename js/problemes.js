@@ -239,7 +239,7 @@
           bas: { fr: "Peut-on partager entre 2 amis ? Pourquoi ?", en: "Can I share between 2 friends? Why?" }
         },
         fiche: {
-          source: "Problème repris de l'outil « Problèmes ouverts P5 » de la collègue (crédit à confirmer avec elle). D'après Sullivan & Lilburn, « Activités ouvertes en mathématiques » (Chenelière, 2010), « Les opérations », p. 69 : un nombre divisé par 5 a 3 comme reste ; quel peut être ce nombre ?",
+          source: "Problème repris, avec son accord, de l’outil « Problèmes ouverts P5 » de la collègue (séquence 3, la division en ligne). D’après Sullivan & Lilburn, « Activités ouvertes en mathématiques » (Chenelière, 2010), « Les opérations », p. 69 : un nombre divisé par 5 a 3 comme reste ; quel peut être ce nombre ?",
           moment: "Séances 1 à 3 : partage, quotient et reste",
           apprend: ["Partager en parts égales et écrire la division en ligne : 23 = (4 × 5) + 3.", "Le reste est toujours plus petit que le diviseur : avec 3 amis, il ne peut pas rester 3 coquillages.", "Le vocabulaire : dividende, diviseur, quotient, reste.", "Utiliser ses tables pour fabriquer le nombre de départ."],
           pourquoi: ["Il faut fabriquer le nombre de départ : c'est l'inverse de l'exercice habituel.", "Une infinité de réponses : chacun en trouve avec ses tables (4 × 2 + 3 = 11), les plus à l'aise avec de grands nombres.", "La condition sur le reste (plus de 3 amis) se découvre en vérifiant : c'est le cœur de la division avec reste."],
@@ -331,7 +331,7 @@
           bas: { fr: "Comment sais-tu que tu les as toutes trouvées ?", en: "How do you know you have found them all?" }
         },
         fiche: {
-          source: "Problème repris de l'outil « Problèmes ouverts P5 » de la collègue (crédit à confirmer avec elle). D'après Sullivan & Lilburn, « Activités ouvertes en mathématiques » (Chenelière, 2010), « Les opérations », p. 70 et 72 (□ × □ = 36 ; les élèves d'une école répartis dans des autobus).",
+          source: "Problème repris, avec son accord, de l’outil « Problèmes ouverts P5 » de la collègue (séquence 3, la division en ligne). D’après Sullivan & Lilburn, « Activités ouvertes en mathématiques » (Chenelière, 2010), « Les opérations », p. 70 et 72 (□ × □ = 36 ; les élèves d'une école répartis dans des autobus).",
           moment: "Séances 2 à 5 : groupement ou partage, division sans reste",
           apprend: ["Faire des groupements égaux (des sachets de 6) ou des partages égaux (4 sachets) et les écrire : 24 = 4 × 6, 24 : 4 = 6.", "Une multiplication donne deux divisions : 4 sachets de 6, ou 6 sachets de 4.", "Reconnaître une division qui tombe juste (reste 0) grâce aux tables.", "Chercher toutes les possibilités en s'organisant (1, 2, 3… sachets)."],
           pourquoi: ["Il faut chercher les nombres qui « vont dans » 24 : c'est plus que réciter une table.", "8 réponses : chacun en trouve (2 sachets de 12), certains les trouvent toutes et le prouvent.", "Les essais qui ne marchent pas (5 sachets) font apparaître le reste."],
@@ -425,7 +425,7 @@
     feuille: { colonnes: [{ fr: "Le réveil", en: "The clock" }, { fr: "Je le lis à l’envers", en: "I read it backwards" }, { fr: "Magique ?", en: "Magic?" }, { fr: "Je la dis avec des mots", en: "I say it in words", large: true }], lignes: 10,
       bas: { fr: "Comment sais-tu si tu les as toutes trouvées ?", en: "How do you know you have found them all?" } },
     fiche: {
-      source: "Problème repris de l’outil « Problèmes ouverts P5 » de la collègue (séquence 1, l’heure digitale). D’après Sullivan & Lilburn, « Activités ouvertes en mathématiques » (Chenelière, 2010), « La mesure du temps », 8-10 ans, p. 99 : « À quelles heures les chiffres sur un cadran numérique forment-ils une régularité ? »",
+      source: "Problème repris, avec son accord, de l’outil « Problèmes ouverts P5 » de la collègue (séquence 1, l’heure digitale). D’après Sullivan & Lilburn, « Activités ouvertes en mathématiques » (Chenelière, 2010), « La mesure du temps », 8-10 ans, p. 99 : « À quelles heures les chiffres sur un cadran numérique forment-ils une régularité ? »",
       moment: "Après la séance 1 de l’heure digitale (la journée = 24 h)",
       apprend: ["Un réveil affiche 4 chiffres : 2 pour les heures (de 00 à 23), 2 pour les minutes (de 00 à 59).", "Une heure n’existe pas si les minutes dépassent 59 ou les heures 23.", "Dire une heure digitale avec des mots et la placer dans la journée.", "Chercher toutes les possibilités en s’organisant."],
       pourquoi: ["Lire l’heure ne suffit pas : il faut comprendre comment le réveil fonctionne.", "16 réponses : chacun en trouve à son niveau, une seule ou toutes.", "Les propositions montrent tout de suite qui sait que les minutes s’arrêtent à 59."],
@@ -496,7 +496,7 @@
     feuille: { colonnes: [{ fr: "Je commence", en: "I start" }, { fr: "Je m’arrête", en: "I stop" }, { fr: "Je vérifie : 30 minutes ?", en: "I check: 30 minutes?" }, { fr: "Je les dis avec des mots", en: "I say them in words", large: true }], lignes: 9,
       bas: { fr: "Trouve une paire où le chiffre des heures change. Comment as-tu fait ?", en: "Find a pair where the hour changes. How did you do it?" } },
     fiche: {
-      source: "Problème repris de l’outil « Problèmes ouverts P5 » de la collègue (séquence 1, l’heure digitale et les durées). D’après Sullivan & Lilburn, « La mesure du temps », 8-10 ans, p. 99 (on part de la maison et on arrive à l’école 45 minutes plus tard : à quelle heure ?).",
+      source: "Problème repris, avec son accord, de l’outil « Problèmes ouverts P5 » de la collègue (séquence 1, l’heure digitale et les durées). D’après Sullivan & Lilburn, « La mesure du temps », 8-10 ans, p. 99 (on part de la maison et on arrive à l’école 45 minutes plus tard : à quelle heure ?).",
       moment: "Séquence 1, après le travail sur les durées",
       apprend: ["Une demi-heure = 30 minutes ; un quart d’heure = 15 minutes.", "Ajouter 30 minutes à une heure digitale, même quand on passe à l’heure suivante (09:50 → 10:20).", "Après 59 minutes, on passe à l’heure suivante : 09:80 n’existe pas.", "Dire les heures avec des mots, et avec « et quart, et demie, moins le quart »."],
       pourquoi: ["Il y a une réponse pour chaque minute du matin : chacun commence par une paire facile (08:00 → 08:30).", "Les paires qui changent d’heure montrent qui a compris que 1 h = 60 min.", "Les erreurs (09:50 → 09:80, ou → 10:30 en comptant comme pour 100) se voient tout de suite."],
@@ -562,7 +562,7 @@
     feuille: { colonnes: [{ fr: "Je dessine les aiguilles", en: "I draw the hands", large: true }, { fr: "J’écris l’heure", en: "I write the time" }, { fr: "Je la dis avec des mots", en: "I say it in words", large: true }], lignes: 8,
       bas: { fr: "Que remarques-tu ?", en: "What do you notice?" } },
     fiche: {
-      source: "Problème repris de l’outil « Problèmes ouverts P5 » de la collègue (séquence 2, l’heure à aiguilles). D’après Sullivan & Lilburn, « La mesure du temps », 8-10 ans, p. 100 (les aiguilles forment un angle plus petit qu’un quart de tour : quelle heure peut-il être ?).",
+      source: "Problème repris, avec son accord, de l’outil « Problèmes ouverts P5 » de la collègue (séquence 2, l’heure à aiguilles). D’après Sullivan & Lilburn, « La mesure du temps », 8-10 ans, p. 100 (les aiguilles forment un angle plus petit qu’un quart de tour : quelle heure peut-il être ?).",
       moment: "Après la séance 3 (les minutes de 5 en 5, « moins 5, moins 10… »)",
       apprend: ["L’aiguille des minutes compte de 5 en 5 : sur le 3, 15 minutes ; sur le 8, 40 minutes.", "L’aiguille des heures avance entre deux nombres : à 6 h 30, elle est à mi-chemin entre le 6 et le 7.", "Dire l’heure avec « et quart, et demie, moins le quart, moins vingt-cinq, moins dix, moins cinq ».", "Chercher toutes les possibilités en s’organisant (de 1 à 12)."],
       pourquoi: ["Il faut relier le nombre montré aux minutes (× 5) : lire l’heure ne suffit pas.", "12 réponses : chacun en trouve à son niveau, et la régularité (minutes = 5 × heures) se voit en les rangeant.", "Les réponses font dire toutes les heures « moins » : 7 h 35, c’est huit heures moins vingt-cinq."],
@@ -632,7 +632,7 @@
     feuille: { colonnes: [{ fr: "Avant (dessine les aiguilles)", en: "Before (draw the hands)", large: true }, { fr: "Après (dessine les aiguilles)", en: "After (draw the hands)", large: true }, { fr: "J’écris les deux heures", en: "I write both times" }], lignes: 7,
       bas: { fr: "Trouve une paire où l’aiguille des minutes passe par le 12. Que fait l’aiguille des heures ?", en: "Find a pair where the minute hand goes past the 12. What does the hour hand do?" } },
     fiche: {
-      source: "Problème repris de l’outil « Problèmes ouverts P5 » de la collègue (séquence 2, l’heure à aiguilles et les durées). D’après Sullivan & Lilburn, p. 125 (à quelles heures les aiguilles forment un quart de tour) et « La mesure du temps », 8-10 ans, p. 99.",
+      source: "Problème repris, avec son accord, de l’outil « Problèmes ouverts P5 » de la collègue (séquence 2, l’heure à aiguilles et les durées). D’après Sullivan & Lilburn, p. 125 (à quelles heures les aiguilles forment un quart de tour) et « La mesure du temps », 8-10 ans, p. 99.",
       moment: "Séquence 2, après les quarts d’heure",
       apprend: ["Un quart de tour de l’aiguille des minutes = un quart d’heure = 15 minutes (un demi-tour = 30 min, un tour = 1 h).", "Avancer de 15 minutes sur l’horloge, même en passant par le 12 : 2 h 50 → 3 h 05.", "Quand l’aiguille des minutes passe par le 12, l’aiguille des heures arrive au nombre suivant.", "Dire les heures avec « et quart, et demie, moins le quart, moins dix… »."],
       pourquoi: ["Il faut relier une part de tour à une durée : c’est plus que lire l’heure.", "Beaucoup de réponses : 3 h → 3 h 15 pour commencer, 2 h 50 → 3 h 05 pour aller plus loin.", "Les paires qui passent par le 12 montrent qui sait que l’heure change à ce moment-là."],
@@ -764,7 +764,7 @@
     feuille: { colonnes: [{ fr: "5 g", en: "5 g" }, { fr: "5 kg", en: "5 kg" }, { fr: "5 t", en: "5 t" }], lignes: 7,
       bas: { fr: "Range tes objets du plus léger au plus lourd.", en: "Put your objects in order from lightest to heaviest." } },
     fiche: {
-      source: "Problème repris de l’outil « Problèmes ouverts P5 » de la collègue (séquence 4, les masses). D’après Sullivan & Lilburn, « Activités ouvertes en mathématiques » (Chenelière, 2010), « La masse », 8-10 ans, p. 78 : « Je vois un objet dont la masse est supérieure à 1 kg mais inférieure à 2 kg. Quel peut être cet objet ? »",
+      source: "Problème repris, avec son accord, de l’outil « Problèmes ouverts P5 » de la collègue (séquence 4, les masses). D’après Sullivan & Lilburn, « Activités ouvertes en mathématiques » (Chenelière, 2010), « La masse », 8-10 ans, p. 78 : « Je vois un objet dont la masse est supérieure à 1 kg mais inférieure à 2 kg. Quel peut être cet objet ? »",
       moment: "Séance 1 des masses : instruments et unités (g, kg, t)",
       apprend: ["Avoir des repères de masse : 1 g (un trombone, leçon GM8), 1 kg (un paquet de sucre), 1 t (une petite voiture).", "Choisir l’unité qui convient pour exprimer une masse.", "Connaître les relations 1 kg = 1 000 g et 1 t = 1 000 kg.", "Relier un objet à l’instrument qui sert à le peser (balance de cuisine, pèse-personne, pèse-bagage…)."],
       pourquoi: ["Le même nombre 5 change complètement de sens avec l’unité : il faut estimer, pas calculer.", "Des réponses très variées : chacun propose des objets de sa vie (un sac de riz de 5 kg, un éléphant de 5 t).", "Les propositions montrent qui a de vrais repères : « un chien de 5 t » fait réagir toute la classe."],
@@ -846,7 +846,7 @@
     feuille: { colonnes: [{ fr: "Les produits du panier", en: "The things in the basket", large: true }, { fr: "En grammes", en: "In grams", large: true }, { fr: "En tout", en: "Total" }], lignes: 7,
       bas: { fr: "Comment sais-tu que ton panier pèse bien 1 kg ?", en: "How do you know your basket really weighs 1 kg?" } },
     fiche: {
-      source: "Problème repris de l’outil « Problèmes ouverts P5 » de la collègue (séquence 4, les masses). D’après Sullivan & Lilburn, « Activités ouvertes en mathématiques » (Chenelière, 2010), « La masse », 8-10 ans, p. 78 : « Je pose trois objets sur une balance. Leur masse combinée est de 3 kg. Quelle peut être la masse de chaque objet ? » ; voir aussi p. 79 (10-12 ans) : « J’ai acheté 500 g de fruits. Quels fruits puis-je avoir achetés et combien peut peser chacun ? »",
+      source: "Problème repris, avec son accord, de l’outil « Problèmes ouverts P5 » de la collègue (séquence 4, les masses). D’après Sullivan & Lilburn, « Activités ouvertes en mathématiques » (Chenelière, 2010), « La masse », 8-10 ans, p. 78 : « Je pose trois objets sur une balance. Leur masse combinée est de 3 kg. Quelle peut être la masse de chaque objet ? » ; voir aussi p. 79 (10-12 ans) : « J’ai acheté 500 g de fruits. Quels fruits puis-je avoir achetés et combien peut peser chacun ? »",
       moment: "Séances 2 et 3 des masses : 1 kg = 1 000 g, problèmes de masse",
       apprend: ["1 kg = 1 000 g : le paquet de sucre seul fait un panier juste !", "Ajouter des masses en grammes et comparer à 1 000 g.", "Chercher les compléments à 1 000 : 600 + 400, 500 + 250 + 250…", "Écrire une masse en grammes ou en kilogrammes."],
       pourquoi: ["Beaucoup de paniers possibles (297 !) : les uns s’arrêtent à 500 + 500, les autres en fabriquent de très longs.", "L’étiquette « 1 kg » du sucre, au milieu des grammes, montre qui sait que 1 kg = 1 000 g.", "Il faut calculer, vérifier et ajuster : « il manque 150 g » relance la recherche."],

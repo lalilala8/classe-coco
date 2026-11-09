@@ -1443,3 +1443,8 @@ a.fo-carte:hover { background: var(--lagon-clair); }
 .ip-minis .jr-pop { display: inline-block; }
 .ip-table td.ip-apo { padding-right: 0; }
 .ip-table td.ip-apo2 { padding-left: 0; }
+/* Séquences d’apprentissage : les 5 boutons d’une séquence sur une seule ligne (demande de l’enseignante, 09/11/2026) */
+@media (min-width: 861px) {
+  .ens-seq > .ens-boutons { flex-wrap: nowrap; gap: 8px; }
+  .ens-seq > .ens-boutons .coco-btn { font-size: 16px; padding-left: 14px; padding-right: 14px; white-space: nowrap; }
+}

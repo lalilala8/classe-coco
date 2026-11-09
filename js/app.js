@@ -528,7 +528,7 @@
     var li = function (a) { return a.map(function (x) { return "<li>" + x + "</li>"; }).join(""); };
     return '<div class="no-print coco-row"><a class="coco-btn coco-btn--secondaire" href="#ens-sequences">← Séquences d’apprentissage</a><a class="coco-btn" href="#seq-mots">Voir la séquence</a><button class="coco-btn coco-btn--secondaire" type="button" data-action="imprimer">Imprimer la fiche</button></div>' +
       '<article class="fiche m-francais"><small>Français · Étude de la langue · Orthographe lexicale · CE2</small><h1>Les mots invariables</h1>' +
-      '<p class="f-source">Module « Mes mots invariables » du premier site de la classe, repris dans le nouveau site. Listes et familles : affiches « Mots-outils du CP-CE1 et mots invariables » (2026).</p>' +
+      '' +
       encadreProgramme("mots") +
       '<section><h2>La séquence sur le site</h2><table class="f-table"><tbody>' +
       [["Revoir la leçon", "Revoir les familles : repérer la partie commune (orange) et la lettre muette ou finale (jaune) d'un groupe de mots, comme sur les affiches."],
@@ -740,7 +740,7 @@
     var li = function (a) { return a.map(function (x) { return "<li>" + x + "</li>"; }).join(""); };
     return '<div class="no-print coco-row"><a class="coco-btn coco-btn--secondaire" href="#ens-sequences">← Séquences d’apprentissage</a><a class="coco-btn coco-btn--secondaire" href="#seq-diagrammes">Voir la séquence</a><button class="coco-btn coco-btn--secondaire" type="button" data-action="imprimer">Imprimer la fiche</button></div>' +
       '<article class="fiche m-maths"><small>Maths · Résolution de problèmes · Organisation et gestion de données · CE2</small><h1>Lire un graphique en barres</h1>' +
-      '<p class="f-source">Séquence créée le 07/11/2026 à la demande de l’enseignante, pour couvrir le repère « diagrammes en barres ». Leçon de classe : OGD1 « Le graphique en barres (ou histogramme) » ; « Je retiens » d’après OGD1.</p>' +
+      '' +
       encadreProgramme("diagrammes") +
       '<section><h2>Les activités du site</h2><table class="f-table"><tbody>' + [
         ["Revoir la leçon", "Les 4 éléments d’un graphique (titre, graduations, barres, noms) ; lire une barre en suivant la ligne jusqu’aux nombres ; une valeur entre deux graduations."],
@@ -761,13 +761,13 @@
     return '<div class="no-print coco-row"><a class="coco-btn coco-btn--secondaire" href="#ens-sequences">← Séquences d’apprentissage</a><a class="coco-btn coco-btn--secondaire" href="#lecon-masses">La leçon</a><a class="coco-btn coco-btn--secondaire" href="#exos-masses">Fiche d’exercices</a><a class="coco-btn coco-btn--secondaire" href="#seq-masses">Voir la séquence</a><button class="coco-btn coco-btn--secondaire" type="button" data-action="imprimer">Imprimer la fiche</button></div>' +
       '<article class="fiche m-maths"><small>Maths · Grandeurs et mesures (masses) · Cycle 2, CE2, niveau de maîtrise 3</small><h1>Mesurer des masses</h1>' +
       '<p class="f-q">Objectif : « ' + esc(C.masses.objectif.fr) + " »</p>" +
-      '<p class="f-source">Programmation de maths de la classe : période 5, séquence 4, semaine 5 (du 23 au 27 novembre 2026). Leçon de classe : GM8 « Les mesures de masses » (2023). Les deux problèmes ouverts viennent de l’outil de la collègue, adaptés.</p>' +
+      '' +
       encadreProgramme("masses") +
       '<section><h2>Les séances et les activités du site</h2><table class="f-table"><thead><tr><th>Séance</th><th>Objectif</th><th>Sur le site</th></tr></thead><tbody>' + [
-        ["Séance 1", "Instruments et unités : on mesure une masse avec une balance ; le gramme, le kilogramme, la tonne ; choisir l’unité qui convient en s’appuyant sur un repère (trombone 1 g, paquet de sucre 1 kg, petite voiture environ 1 t). [CLASSE : programmation de la classe]", "Revoir la leçon (blocs 1 et 2) · Je me rappelle · Quelle unité ? · Problème ouvert « L’étiquette effacée »"],
-        ["Séances 2 et 3", "1 kg = 1 000 g et 1 t = 1 000 kg : exprimer une même masse avec différentes unités ; problèmes de masse. [CLASSE : programmation de la classe]", "Revoir la leçon (bloc 3) · C’est pareil que… · Problème ouvert « Le panier d’un kilo »"],
-        ["Séance 4", "Comparer et ranger des masses écrites avec des unités différentes ; résoudre des problèmes. [PROPOSITION]", "Le plus lourd · Problèmes de masses"],
-        ["Séance 5", "Évaluation des objectifs de la séquence. [PROPOSITION]", "Fiche d’exercices (corrigé à part, correction au TBI)"]
+        ["Séance 1", "Instruments et unités : on mesure une masse avec une balance ; le gramme, le kilogramme, la tonne ; choisir l’unité qui convient en s’appuyant sur un repère (trombone 1 g, paquet de sucre 1 kg, petite voiture environ 1 t).", "Revoir la leçon (blocs 1 et 2) · Je me rappelle · Quelle unité ? · Problème ouvert « L’étiquette effacée »"],
+        ["Séances 2 et 3", "1 kg = 1 000 g et 1 t = 1 000 kg : exprimer une même masse avec différentes unités ; problèmes de masse.", "Revoir la leçon (bloc 3) · C’est pareil que… · Problème ouvert « Le panier d’un kilo »"],
+        ["Séance 4", "Comparer et ranger des masses écrites avec des unités différentes ; résoudre des problèmes.", "Le plus lourd · Problèmes de masses"],
+        ["Séance 5", "Évaluation des objectifs de la séquence.", "Fiche d’exercices (corrigé à part, correction au TBI)"]
       ].map(function (r) { return "<tr><th>" + r[0] + "</th><td>" + esc(r[1]) + "</td><td>" + esc(r[2]) + "</td></tr>"; }).join("") + "</tbody></table></section>" +
       '<div class="f-deux"><section><h2>Les erreurs à guetter</h2><ul>' + li([
         "Pas de repère pour le gramme ou pour la tonne (« un chat de 5 g », « une voiture de 5 kg ») : revenir au trombone, au paquet de sucre, à la petite voiture.",
@@ -792,7 +792,7 @@
     var liens = [["La leçon", "#lecon-" + o.seq], ["Fiche d’exercices", "#exos-" + o.seq]].concat(o.tbi ? [["Au TBI", o.tbi]] : []).concat([["Voir la séquence", "#seq-" + o.seq]]);
     return '<div class="no-print coco-row"><a class="coco-btn coco-btn--secondaire" href="#ens-sequences">← Séquences d’apprentissage</a>' + liens.map(function (l) { return '<a class="coco-btn coco-btn--secondaire" href="' + l[1] + '">' + l[0] + "</a>"; }).join("") + '<button class="coco-btn coco-btn--secondaire" type="button" data-action="imprimer">Imprimer la fiche</button></div>' +
       '<article class="fiche ' + cls + '"><small>' + esc(o.dom) + " · Cycle 2, CE2, niveau de maîtrise 3</small><h1>" + esc(tr(C[o.seq].titre)) + "</h1>" +
-      '<p class="f-q">Objectif : « ' + esc(C[o.seq].objectif.fr) + " »</p>" + '<p class="f-source">' + esc(o.source) + "</p>" + encadreProgramme(o.prog) +
+      '<p class="f-q">Objectif : « ' + esc(C[o.seq].objectif.fr) + " »</p>" + encadreProgramme(o.prog) +
       '<section><h2>Les séances et les activités du site</h2><table class="f-table"><thead><tr><th>Séance</th><th>Objectif</th><th>Sur le site</th></tr></thead><tbody>' +
       o.seances.map(function (r) { return "<tr><th>" + esc(r[0]) + "</th><td>" + esc(r[1]) + "</td><td>" + esc(r[2]) + "</td></tr>"; }).join("") + "</tbody></table></section>" +
       '<div class="f-deux"><section><h2>Les erreurs à guetter</h2><ul>' + li(o.erreurs) + "</ul></section><section><h2>Conseils d’utilisation</h2><ul>" + li(o.conseils.concat(["Le site à la maison reste facultatif : jamais de devoir écrit (art. 34)."])) + "</ul></section></div>" +
@@ -800,12 +800,12 @@
   }
   function ficheVerbe() {
     return ficheSeq({ seq: "verbe", mat: "francais", prog: "verbe", dom: "Français · Étude de la langue (grammaire et conjugaison)",
-      source: "Progression de français de la classe : n° 4 « Le verbe ». Leçon de classe : CONJ2 « Le verbe » (2023). Pas de programmation par période pour le français : les séances ci-dessous sont proposées [PROPOSITION].",
+      source: "Progression de français de la classe : n° 4 « Le verbe ». Leçon de classe : CONJ2 « Le verbe » (2023). Pas de programmation par période pour le français : les séances ci-dessous sont proposées.",
       seances: [
-        ["Séance 1", "Découvrir : le verbe exprime un état ou une action ; il change selon le temps de la phrase. [PROPOSITION]", "Revoir la leçon (cartes « état / action », hier · aujourd’hui · demain) · Le verbe se cache (avec « Je me rappelle »)"],
-        ["Séance 2", "Trouver le verbe conjugué avec la forme négative : il est entre ne et pas. [PROPOSITION]", "Revoir la leçon (la machine ne … pas) · Chasse aux verbes"],
-        ["Séance 3", "Réinvestir : trouver tous les verbes conjugués d’un court texte. [PROPOSITION]", "Les verbes du texte"],
-        ["Séance 4", "Évaluation des objectifs de la séquence. [PROPOSITION]", "Fiche d’exercices (corrigé à part, correction au TBI)"]],
+        ["Séance 1", "Découvrir : le verbe exprime un état ou une action ; il change selon le temps de la phrase.", "Revoir la leçon (cartes « état / action », hier · aujourd’hui · demain) · Le verbe se cache (avec « Je me rappelle »)"],
+        ["Séance 2", "Trouver le verbe conjugué avec la forme négative : il est entre ne et pas.", "Revoir la leçon (la machine ne … pas) · Chasse aux verbes"],
+        ["Séance 3", "Réinvestir : trouver tous les verbes conjugués d’un court texte.", "Les verbes du texte"],
+        ["Séance 4", "Évaluation des objectifs de la séquence.", "Fiche d’exercices (corrigé à part, correction au TBI)"]],
       erreurs: ["Prendre le sujet ou un nom pour le verbe (« la pluie ») : faire changer le moment de la phrase, le mot qui change est le verbe.", "Ne pas reconnaître un verbe d’état (« est », « semble ») : rappeler qu’un verbe peut exprimer un état, pas seulement une action.", "Placer ne … pas autour d’un autre mot que le verbe : relire la phrase à voix haute, elle doit rester correcte.", "Avec ne devant une voyelle : « n’ », comme dans la leçon GRAM3."],
       conseils: ["Code des leçons : le verbe en rouge ; ne et pas dans des bulles rouges.", "En mode anglais, les consignes passent en anglais mais les phrases restent en français.", "La fiche d’exercices porte un numéro : le même numéro redonne les mêmes exercices, pour corriger au TBI."],
       prolonger: ["Transformer des phrases de la vie de la classe (hier, aujourd’hui, demain) et entourer le mot qui change.", "Relier à la leçon suivante de la progression : l’infinitif du verbe (CONJ3)."],
@@ -815,10 +815,10 @@
     return ficheSeq({ seq: "division", mat: "maths", prog: "division", dom: "Maths · Nombres et calculs",
       source: "Programmation de maths de la classe : période 5, séquence 3 « Le partage et la division en ligne », semaines 3 et 4 (du 9 au 20 novembre 2026). Leçons de classe : CAL7 « Diviser : grouper ou partager » et CAL8 « La division en ligne avec reste » (2023). Problèmes ouverts de l’outil de la collègue, adaptés.",
       seances: [
-        ["Séances 1 à 3", "Partager en parts égales ; quotient et reste. [CLASSE : programmation de la classe]", "Revoir la leçon (grouper, partager, avec reste) · Je me rappelle (tables) · Grouper ou partager · Problème ouvert « Les coquillages de Nina »"],
-        ["Séances 2 à 5", "Groupement ou partage ; division sans reste. [CLASSE : programmation de la classe]", "Calcule · Problème ouvert « Les sachets de letchis »"],
-        ["Séance suivante", "Écrire la division avec reste : 23 = (4 × 5) + 3 ; le vocabulaire (dividende, diviseur, quotient, reste). [PROPOSITION]", "Avec un reste"],
-        ["Dernière séance", "Évaluation des objectifs de la séquence. [PROPOSITION]", "Fiche d’exercices (corrigé à part, correction au TBI)"]],
+        ["Séances 1 à 3", "Partager en parts égales ; quotient et reste.", "Revoir la leçon (grouper, partager, avec reste) · Je me rappelle (tables) · Grouper ou partager · Problème ouvert « Les coquillages de Nina »"],
+        ["Séances 2 à 5", "Groupement ou partage ; division sans reste.", "Calcule · Problème ouvert « Les sachets de letchis »"],
+        ["Séance suivante", "Écrire la division avec reste : 23 = (4 × 5) + 3 ; le vocabulaire (dividende, diviseur, quotient, reste).", "Avec un reste"],
+        ["Dernière séance", "Évaluation des objectifs de la séquence.", "Fiche d’exercices (corrigé à part, correction au TBI)"]],
       erreurs: ["Un reste plus grand que le diviseur (« 23 = (4 × 4) + 7 ») : on peut encore faire un groupe ; le reste est toujours plus petit que le diviseur.", "Confondre grouper et partager : se demander « combien de groupes ? » ou « combien dans chaque part ? ».", "Oublier le reste dans l’égalité : vérifier en recalculant (4 × 5) + 3.", "Inverser dividende et diviseur dans « 23 : 4 »."],
       conseils: ["La classe ne pose pas la division au CE2 : division en ligne seulement.", "Écriture de la classe avec les parenthèses : 43 = (5 × 8) + 3.", "Les tables de multiplication sont le premier outil : « Je me rappelle » les fait revoir."],
       prolonger: ["Manipuler (jetons, coquillages, letchis) avant d’écrire l’égalité.", "Problèmes « quotient + 1 » (« 23 élèves, des voitures de 4 places : combien de voitures ? ») : repère du niveau 3, pas encore sur le site."],
@@ -826,12 +826,12 @@
   }
   function ficheMonnaie() {
     return ficheSeq({ seq: "monnaie", mat: "maths", prog: "monnaie", dom: "Maths · Grandeurs et mesures (prix)",
-      source: "Progression de maths de la classe : grandeurs et mesures, « 2. prix ». Leçon de classe : GM1 « La monnaie » (2023 ; pièces de 5 à 200 F, billets de 500 à 10 000 F). Pas de programmation par période reçue pour cette séquence : les séances ci-dessous sont proposées [PROPOSITION].",
+      source: "Progression de maths de la classe : grandeurs et mesures, « 2. prix ». Leçon de classe : GM1 « La monnaie » (2023 ; pièces de 5 à 200 F, billets de 500 à 10 000 F). Pas de programmation par période reçue pour cette séquence : les séances ci-dessous sont proposées.",
       seances: [
-        ["Séance 1", "Connaître les billets et les pièces de la monnaie calédonienne ; compter une somme. [PROPOSITION]", "Revoir la leçon (bloc 1) · Je me rappelle (décomposer un nombre) · Combien d’argent ?"],
-        ["Séance 2", "Décomposer une somme pour payer le prix exact. [PROPOSITION]", "Revoir la leçon (bloc 2) · Paie le prix exact · Problème ouvert « Le jus à 100 F »"],
-        ["Séance 3", "Calculer une dépense et la monnaie rendue. [PROPOSITION]", "Au marché · Problème ouvert « Au marché »"],
-        ["Séance 4", "Évaluation des objectifs de la séquence. [PROPOSITION]", "Fiche d’exercices (corrigé à part, correction au TBI)"]],
+        ["Séance 1", "Connaître les billets et les pièces de la monnaie calédonienne ; compter une somme.", "Revoir la leçon (bloc 1) · Je me rappelle (décomposer un nombre) · Combien d’argent ?"],
+        ["Séance 2", "Décomposer une somme pour payer le prix exact.", "Revoir la leçon (bloc 2) · Paie le prix exact · Problème ouvert « Le jus à 100 F »"],
+        ["Séance 3", "Calculer une dépense et la monnaie rendue.", "Au marché · Problème ouvert « Au marché »"],
+        ["Séance 4", "Évaluation des objectifs de la séquence.", "Fiche d’exercices (corrigé à part, correction au TBI)"]],
       erreurs: ["Compter les pièces au lieu de leur valeur (« 3 pièces, donc 3 F »).", "Commencer par les petites pièces et se perdre : commencer par les plus gros billets et les plus grosses pièces.", "Rendre la monnaie en ajoutant au lieu de soustraire : vérifier que prix + monnaie rendue = somme donnée.", "Chercher des pièces de 1 F ou de 2 F : elles ne circulent plus."],
       conseils: ["Les pièces et billets sont ceux de la leçon GM1 : 5, 10, 20, 50, 100, 200 F ; 500, 1 000, 5 000, 10 000 F.", "Les fruits du marché sont en étiquettes écrites, en attendant les illustrations de l’enseignante.", "La fiche d’exercices porte un numéro : le même numéro redonne les mêmes exercices, pour corriger au TBI."],
       prolonger: ["Jouer à la marchande avec de la monnaie factice et les étiquettes de prix du marché.", "Relier aux nombres jusqu’à 9 999 : décomposer 6 875 F en milliers, centaines, dizaines et unités."],
@@ -841,10 +841,10 @@
     return ficheSeq({ seq: "digitale", mat: "maths", prog: "digitale", tbi: JEU_DIGITAL, dom: "Maths · Grandeurs et mesures (durées)",
       source: "Programmation de maths de la classe : période 5, séquence 1, semaine 1 (du 26 au 30 octobre 2026). Leçon de classe : GM5 « Lire l’heure digitale ». Jeux collectifs « L’heure à l’ardoise » (séances 1 à 3), création de la collègue Teacher Nadège, adaptés avec son accord ; problèmes ouverts de son outil.",
       seances: [
-        ["Séance 1", "1 journée = 24 h (2 × 12 h) ; 6 h du soir = 18 h. [CLASSE : « L’heure à l’ardoise », séance 1]", "Au TBI (séance 1 de « L’heure à l’ardoise ») · Revoir la leçon · Je me rappelle · Matin ou après-midi ? · Deux façons de dire l’heure · Problème ouvert « L’heure magique »"],
-        ["Séances 2 et 3", "Lire et dire l’heure pile et et demie (1 h = 60 min), puis et quart et moins le quart (un quart d’heure = 15 min). [CLASSE : « L’heure à l’ardoise », séances 2 et 3]", "Au TBI (séances 2 et 3) · Lis le réveil"],
-        ["Séance 4", "Calculer une heure de fin quand on connaît le début et la durée. [PROPOSITION]", "Ma journée · Problème ouvert « La demi-heure de lecture »"],
-        ["Séance 5", "Évaluation des objectifs de la séquence. [PROPOSITION]", "Fiche d’exercices (corrigé à part, correction au TBI)"]],
+        ["Séance 1", "1 journée = 24 h (2 × 12 h) ; 6 h du soir = 18 h.", "Au TBI (séance 1 de « L’heure à l’ardoise ») · Revoir la leçon · Je me rappelle · Matin ou après-midi ? · Deux façons de dire l’heure · Problème ouvert « L’heure magique »"],
+        ["Séances 2 et 3", "Lire et dire l’heure pile et et demie (1 h = 60 min), puis et quart et moins le quart (un quart d’heure = 15 min).", "Au TBI (séances 2 et 3) · Lis le réveil"],
+        ["Séance 4", "Calculer une heure de fin quand on connaît le début et la durée.", "Ma journée · Problème ouvert « La demi-heure de lecture »"],
+        ["Séance 5", "Évaluation des objectifs de la séquence.", "Fiche d’exercices (corrigé à part, correction au TBI)"]],
       erreurs: ["Lire 18:00 « six heures » sans dire « du soir » : rappeler les deux tours du cadran (+12 h).", "Ajouter 12 dans le mauvais sens (14:15 → 26:15) : le matin va de 0 h à 12 h, l’après-midi et le soir de 12 h à 24 h.", "« et demie » pour 30 minutes, mais « et demi » après midi et minuit.", "Une durée qui dépasse l’heure (9:45 + 30 min = 9:75) : après 59 minutes, on passe à l’heure suivante."],
       conseils: ["Code des leçons : les heures en rouge, les minutes en bleu.", "L’écriture de la classe : « 6h30 » dans les phrases, « 6:30 » sur le réveil, comme la leçon GM5.", "« L’heure à l’ardoise » reste en français ; les activités du site existent aussi en anglais (« noon », a.m. / p.m.)."],
       prolonger: ["L’emploi du temps de la classe : relever les heures de la journée et les écrire de deux façons.", "Relier à la séquence suivante : lire l’heure à aiguilles (P5, séquence 2)."],
@@ -2526,7 +2526,7 @@
   /* ==========================================================================================
      Mode « Au TBI » des séquences (D-117), sur le modèle de l’heure à aiguilles : 1. découverte guidée, 2. jeu des ardoises.
      Découverte : chaque carte « Je retiens » de la leçon devient une étape ; la classe répond d’abord à une question
-     (écrite par Claude [PROPOSITION]), puis « On découvre » montre la phrase de la leçon.
+     (écrite par Claude), puis « On découvre » montre la phrase de la leçon.
      Ardoises : questions tirées des activités de la séquence ; la question s’affiche en grand, minuteur, « Ardoises levées », « On corrige ».
      ========================================================================================== */
   /* Questions d’ardoise du verbe (CONJ2) [PROPOSITION] : trouver le verbe conjugué (forme négative pour vérifier), état ou action.
@@ -2927,7 +2927,7 @@
     var li = function (a) { return a.map(function (x) { return "<li>" + x + "</li>"; }).join(""); };
     return '<div class="no-print coco-row"><a class="coco-btn coco-btn--secondaire" href="#ens-sequences">← Séquences d’apprentissage</a><a class="coco-btn" href="#tbi-heure">Au TBI</a><a class="coco-btn coco-btn--secondaire" href="#seq-heure">Voir la séquence</a><button class="coco-btn coco-btn--secondaire" type="button" data-action="imprimer">Imprimer la fiche</button></div>' +
       '<article class="fiche m-maths"><small>Maths · Grandeurs et mesures (durées) · Cycle 2, CE2, niveau de maîtrise 3</small><h1>Lire l’heure à aiguilles</h1>' +
-      '<p class="f-source">Module du premier site de la classe, repris et rendu bilingue. Programmation : période 5, semaine 2 (du 2 au 6 novembre), séquence 2. Leçons : GM5 « Lire l’heure digitale » et GM5 « Lire l’heure avec aiguilles » (reçues le 06/11/2026) ; leçon anglaise (Read the time) non reçue.</p>' +
+      '' +
       encadreProgramme("heure") +
       '<section><h2>Les séances et les activités du site</h2><table class="f-table"><tbody>' + [
         ["Séance 1", "Reconnaître les différentes aiguilles d’une horloge ; lire les heures piles sur le cadran.", "Je me rappelle · Heures ou minutes ? · Lis l’horloge (niveau 1)"],
@@ -3217,7 +3217,7 @@
       "<section><h2>Les réponses</h2><p>" + esc(f.reponses) + "</p></section>" +
       '<section><h2>Les erreurs à guetter, et quoi demander</h2><table class="f-table"><tbody>' + f.erreurs.map(function (e) { return "<tr><td>" + esc(e[0]) + "</td><td>" + esc(e[1]) + "</td>" + (e[2] ? '<td class="f-dire">' + esc(e[2]) + "</td>" : "") + "</tr>"; }).join("") + "</tbody></table></section>" +
       '<section><h2>Évaluer sans note : les 5 niveaux</h2><table class="f-table"><tbody>' + ["Ne semble pas comprendre", "A fait un essai, mais comprend peu", "Comprend, mais pas tout", "Semble bien comprendre", "Dépasse les attentes"].map(function (n, i) { return "<tr><th>" + (i + 1) + " · " + n + "</th><td>" + esc(f.niveaux[i]) + "</td></tr>"; }).join("") + "</tbody></table>" +
-      '<p class="f-source">Échelle et liste de comportements à observer : Sullivan & Lilburn, chapitre 4 (coopère, persévère, essaie autre chose, organise l\'information, cherche toutes les possibilités, généralise, explique, utilise le matériel).</p></section>' +
+      '<p>Comportements à observer (Sullivan & Lilburn, chapitre 4) (coopère, persévère, essaie autre chose, organise l\'information, cherche toutes les possibilités, généralise, explique, utilise le matériel).</p></section>' +
       '<div class="f-deux"><section><h2>La trace écrite</h2><p>' + esc(p.retenir.fr) + '</p><p class="lecon-ex">' + esc(p.exemple.fr || p.exemple) + "</p></section><section><h2>Pour réinvestir un autre jour</h2><ul>" + li(f.reinvestir) + "</ul></section></div></article>";
   }
 
@@ -3281,7 +3281,7 @@
   }
   function ensSeq(seq, img, titre, lecon, nbAct, tbi, cls) {
     var nbPO = (PO.sequences[seq] || []).length;
-    var sous = [lecon ? "Leçon " + lecon : "", nbAct + " activité" + (nbAct > 1 ? "s" : ""), nbPO ? nbPO + " problème" + (nbPO > 1 ? "s" : "") + " ouvert" + (nbPO > 1 ? "s" : "") : ""].filter(Boolean).join(" · ");
+    var sous = [nbAct + " activité" + (nbAct > 1 ? "s" : ""), nbPO ? nbPO + " problème" + (nbPO > 1 ? "s" : "") + " ouvert" + (nbPO > 1 ? "s" : "") : ""].filter(Boolean).join(" · ");
     var boutons = [
       ensBouton("Fiche enseignante", ROUTES["fiche-" + seq] ? "#fiche-" + seq : "", true),
       ensBouton("La leçon", ROUTES["lecon-" + seq] ? "#lecon-" + seq : ""),
@@ -3337,7 +3337,7 @@
   }
 
   /* ---------- Étoiles de grammaire (D-123) : fichier de la classe « Étoiles de grammaire » [CLASSE] (9 étoiles, mêmes couleurs que les étoiles de calcul ;
-     6 entraînements et 3 évaluations chacune). Corrigés des évaluations rédigés par Claude [PROPOSITION], dans la présentation des corrections
+     6 entraînements et 3 évaluations chacune). Corrigés des évaluations rédigés par Claude, dans la présentation des corrections
      du fichier (déterminants en bleu, noms en rose avec NP / NC, adjectifs en vert et nom souligné, verbe en rouge). Le fichier ne contient
      pas la correction des évaluations. Ordre choisi par l’enseignante : rose = futur, noire = imparfait (comme la progression) ; être et avoir au 3e groupe (CONJ3). Balises : [d:mot] déterminant, [n:mot|NC] nom, [a:mot] adjectif, [u:mot] nom qualifié, [v:mot] verbe. ---------- */
   var ET_GRAM_SOUS = ["Déterminants", "Noms", "Adjectifs", "Passé, présent, futur", "Verbe", "Présent", "Passé composé", "Futur", "Imparfait"];
@@ -3586,9 +3586,49 @@
       '<section class="ens-vide ens-vide--petit"><p>Le suivi des résultats des activités du site viendra avec la <b>base en ligne</b> : réussites par activité, bilans par séquence, repères pour le livret scolaire unique.</p></section>';
   }
   /* Espace enseignante › Formation (D-114) : organisé comme le sommaire des notes de l’enseignante (Lexique, Didactique générale,
-     Mathématiques, Français ; fiches L, D, M, F) ; fiches vides grisées « À venir » ; encadré « Dans le site » [PROPOSITION]. */
+     Mathématiques, Français ; fiches L, D, M, F) ; fiches vides grisées « À venir » ; encadré « Dans le site ». */
   var FO = window.COCO_FORMATION || { domaines: [], fiches: {} };
-  var FO_SULLIVAN = '<p><b>Une « bonne » question</b> demande plus qu\'un rappel, fait apprendre l\'élève (et renseigne l\'enseignant), et accepte plusieurs réponses.</p><p><b>4 temps :</b> poser la question (sans donner de méthode) · chercher par 2 ou 3 (coup de pouce si on bloque, relance si on a fini) · mettre en commun (la classe donne son avis avant la vérification) · faire un résumé.</p><p><b>Évaluer sans note :</b> 5 niveaux de compréhension et une liste de comportements à observer.</p><p class="f-source">Sullivan & Lilburn, « Activités ouvertes en mathématiques », Chenelière, 2010, chapitres 1 à 4. Fiche de synthèse préparée pour le site.</p>';
+  /* Fiche de formation « La démarche de Peter Sullivan », sur le modèle des fiches de l’enseignante (tableau Origine / Définition / Utilité, puis sections).
+     Contenu tiré de Sullivan & Lilburn, « Activités ouvertes en mathématiques », Chenelière, 2010, partie 1 (chapitres 1 à 4) et présentation de la partie 2,
+     reformulé (livre sous droits : pas de longues citations, exemples du livre résumés). Demande de l’enseignante, 09/11/2026. */
+  var FO_SULLIVAN = { titre: "La démarche de Peter Sullivan", auteur: "Peter SULLIVAN et Pat LILBURN", ouvrage: "Activités ouvertes en mathématiques. 600 « bonnes » questions pour développer la compréhension en mathématiques (Chenelière, 2010)",
+    tableau: [
+      ["Origine", "Notion de question ouverte, ou « bonne » question, mûrie au fil de recherches menées par Peter SULLIVAN et David CLARKE, puis mise à l’essai en classe à de nombreuses reprises. Le livre est l’adaptation française de <i>Open-ended Maths Activities</i> (Oxford University Press, 2004)."],
+      ["Définition", "Une « bonne » question est une question ouverte qui :<ul><li>demande <b>plus qu’un rappel</b> de faits ou que la répétition d’une procédure ;</li><li>fait <b>apprendre l’élève</b> pendant qu’il y répond, et <b>renseigne l’enseignant</b> sur ce que l’élève comprend ;</li><li>accepte <b>plusieurs réponses</b>.</li></ul>"],
+      ["Utilité dans la pratique", "Faire réfléchir, analyser, justifier et résoudre des problèmes inhabituels en mathématiques ; permettre à <b>chaque élève de répondre à son niveau</b> dans une classe hétérogène ; <b>évaluer sans noter</b> la compréhension réelle des notions."]],
+    corps: '<h3>Questions fermées et questions ouvertes</h3><p>Une grande partie de ce que dit un enseignant en classe est faite de questions, le plus souvent improvisées. Les auteurs distinguent :</p>' +
+      '<ul><li>les <b>questions fermées</b> : elles appellent surtout la mémoire (rappeler un fait, décrire, répéter une procédure) ;</li><li>les <b>questions ouvertes</b> : elles obligent à approfondir la réflexion et à aller au-delà du rappel.</li></ul>' +
+      '<p>En français ou en histoire, les enseignants posent facilement des questions ouvertes (interpréter, justifier un avis). En mathématiques, les questions fermées dominent. SULLIVAN et LILBURN proposent d’en faire une place aux questions ouvertes, et en particulier aux « bonnes » questions.</p>' +
+      '<h3>Les 3 caractéristiques d’une « bonne » question</h3>' +
+      '<p><b>1. Elle demande plus qu’un rappel.</b> En s’appuyant sur la taxonomie de BLOOM, les auteurs notent que la plupart des exercices de mathématiques restent au niveau de la connaissance (se rappeler, reproduire). Une « bonne » question mobilise aussi la compréhension, l’application, l’analyse et la synthèse.<br><i>Exemple du livre :</i> une élève réussit tous ses calculs d’aire et de périmètre de rectangles, mais reste bloquée devant un jardin rectangulaire à clore avec 30 m de grillage, dont il faut trouver l’aire possible. La question révèle qu’elle appliquait des procédures sans avoir compris les notions.</p>' +
+      '<p><b>2. L’élève apprend en y répondant, et l’enseignant apprend sur l’élève.</b> En cherchant, l’élève prend conscience de ce qu’il sait et de ce qu’il ne sait pas encore. Dans un exemple sur la mesure de longueurs, des élèves établissent eux-mêmes les règles du mesurage (partir de zéro, ni chevauchement ni espace vide, mesurer en ligne droite). Pour l’enseignant, la « bonne » question devient un <b>outil d’évaluation</b>.</p>' +
+      '<p><b>3. Plusieurs réponses sont acceptables.</b> Chacun répond au niveau de sa compréhension, ce qui convient aux classes hétérogènes. À l’élève qui répond vite et en surface, on demande une autre réponse ou une solution plus générale.<br><i>Exemple du livre :</i> au lieu de calculer la moyenne de cinq nombres donnés, on demande quels peuvent être cinq nombres dont la moyenne est 6.</p>' +
+      '<h3>Fabriquer ses propres « bonnes » questions</h3><p>Une « bonne » question <b>se prépare à l’avance</b> : elle ne s’improvise pas. Le livre propose deux méthodes en 3 étapes.</p>' +
+      '<p><b>Méthode 1 : commencer par la fin</b></p><ol><li>Définir le sujet de la leçon.</li><li>Penser à une question fermée et écrire sa réponse.</li><li>Poser une question qui part de cette réponse.</li></ol>' +
+      '<p><i>Exemples du livre :</i> « J’ai compté des objets dans la pièce : il y en a exactement quatre. Qu’ai-je pu compter ? » ; « Le caissier m’a rendu 35 ¢. Qu’ai-je acheté ? »</p>' +
+      '<p><b>Méthode 2 : adapter une question conventionnelle</b></p><ol><li>Définir le sujet de la leçon.</li><li>Penser à une question habituelle du manuel.</li><li>La transformer en « bonne » question.</li></ol>' +
+      '<p><i>Exemples du livre :</i> « Quelle heure indique ce cadran ? » devient « Quelle heure de la journée préférez-vous ? Indiquez-la sur un cadran. » ; « Combien de longueurs de main mesure ton pupitre ? » devient « Trouve un objet qui mesure trois longueurs de main. »</p>' +
+      '<h3>La séance en 4 étapes</h3>' +
+      '<p><b>Étape 1 : poser la question.</b> L’écrire au tableau et s’y référer. S’assurer que tous ont compris : faire reformuler par quelques élèves, laisser du temps pour les questions. Expliquer la tâche si besoin, mais <b>ne donner aucune méthode</b> : les élèves cherchent eux-mêmes comment faire.</p>' +
+      '<p><b>Étape 2 : laisser chercher, de préférence en petits groupes.</b> Communiquer ses idées fait partie de l’apprentissage, et le groupe évite que l’élève en difficulté attende l’enseignant pour démarrer. Le rôle de l’enseignant est d’observer et d’ajuster :</p>' +
+      '<ul><li>trop d’élèves bloqués : arrêter pour une courte mise au point collective ;</li><li>question trop difficile : la <b>simplifier</b>, ou proposer de représenter le problème (matériel, dessin, schéma) ; le matériel concret doit rester disponible ;</li>' +
+      '<li>un groupe s’arrête après une réponse : lui demander d’<b>en chercher d’autres</b> ;</li><li>un groupe a tout trouvé : lui faire <b>décrire ses réponses</b>, chercher une régularité ou une règle, ou lui poser une <b>question liée</b> pour aller plus loin ;</li>' +
+      '<li>arrêter quand l’intérêt est encore là, après un <b>préavis de 5 minutes</b>, sans attendre que tous les groupes aient fini.</li></ul>' +
+      '<p><b>Étape 3 : revoir la question en grand groupe.</b> Chaque groupe donne ses réponses et explique son raisonnement ; on les note au tableau en accordant la même importance à chacun. Devant une réponse erronée, rester bienveillant et <b>chercher la cause de l’erreur</b> : en expliquant, les élèves repèrent souvent leurs erreurs eux-mêmes. Les réponses montrent des niveaux de compréhension différents ; on valorise chacune, puis on demande de préciser.</p>' +
+      '<p><b>Étape 4 : faire un résumé.</b> Qu’un élève ait donné la réponse ne veut pas dire que tous ont compris : l’enseignant reprend les <b>éléments clés</b> pour toute la classe, avec des modèles et du matériel, et <b>revient à la question de départ</b>. Il propose ensuite des tâches semblables pour appliquer ce qui a été appris.</p>' +
+      '<p>Cette démarche diffère de la leçon où l’enseignant montre une procédure puis la fait appliquer : il accueille toutes les réponses, en reconnaît la valeur, fixe clairement les limites, fait ressortir les contradictions et les idées erronées, et s’appuie sur des réponses partielles pour faire avancer la discussion.</p>' +
+      '<h3>Évaluer sans noter</h3><p>Une « bonne » question montre ce que l’élève sait plus que ce qu’il ignore. Qualifier les réponses de « bonnes » ou « mauvaises » n’a pas de sens : les auteurs proposent deux approches complémentaires.</p>' +
+      '<p><b>1. La compréhension du contenu mathématique</b> : une échelle globale en 5 niveaux.</p>' +
+      '<table class="fo-table"><tbody><tr><th>1</th><td>Ne semble pas comprendre</td></tr><tr><th>2</th><td>A fait un essai, mais manifeste une compréhension limitée</td></tr><tr><th>3</th><td>Manifeste une compréhension acceptable mais incomplète</td></tr><tr><th>4</th><td>Semble clairement comprendre</td></tr><tr><th>5</th><td>Dépasse les attentes</td></tr></tbody></table>' +
+      '<p>Si les élèves écrivent, on classe leurs productions dans ces catégories. S’ils manipulent ou dessinent, on tient une liste de la classe avec un espace de commentaires, remplie en les observant. <i>Exemple du livre (6-7 ans) :</i> « Un clown a trois ballons de plus que l’autre. Dessine combien chacun peut en tenir. » Du dessin sans écart de trois, à l’élève qui produit une suite organisée de dessins et explique que seul l’écart compte.</p>' +
+      '<p><b>2. Les comportements adoptés</b> pendant la recherche. Exemples de la liste du livre : travaille en coopération ; pose des questions ; travaille de façon autonome ; organise l’information de manière stratégique ; prépare un plan ; explique clairement ses idées ; persévère ; cherche toutes les possibilités ; essaie autre chose quand il piétine ; généralise ; discute avec son groupe ; utilise le matériel quand c’est pertinent ; accepte l’aide des autres ; a confiance en ses capacités ; utilise plusieurs stratégies ; dessine des schémas au besoin ; reste concentré.</p>' +
+      '<p>Deux façons de les noter : une feuille par élève avec les comportements à cocher ou à dater, ou un tableau de classe (élèves en lignes, comportements en colonnes) où l’on trace un trait oblique à la première observation, puis une croix quand le comportement devient constant. Conseil des auteurs : <b>observer un ou deux groupes à la fois</b>, pas toute la classe.</p>' +
+      '<h3>La banque de questions du livre</h3><p>La partie 2 propose environ 600 « bonnes » questions, avec des notes pour l’enseignant, sur 16 sujets répartis en 4 domaines : le sens des nombres et des opérations, la mesure, la géométrie, la probabilité et la statistique. Chaque sujet a 3 niveaux : débutant (6 à 8 ans), <b>intermédiaire (8 à 10 ans, celui du CE2)</b> et avancé (10 à 12 ans).</p>' +
+      '<h3>Liens avec les autres fiches</h3><ul><li><b>Étayage</b> (L1) et <b>ZPD</b> (D3) : simplifier la question pour un groupe bloqué, puis revenir à la question de départ, est une aide temporaire et ajustée.</li><li><b>Variables didactiques</b> (D2) : simplifier une question (des nombres plus petits, une fraction plus simple) ou poser une question liée revient à jouer sur une variable de la situation.</li></ul>',
+    site: [["Les problèmes ouverts en mode autonome : l’élève coche ce qu’il a vérifié, range ses solutions et reçoit un coup de pouce (simplifier) ou des relances (aller plus loin).", "#po-coquillages"],
+      ["Au TBI, les 4 temps : la question, on cherche (avec minuteur), on met en commun (vérification après l’avis de la classe), on retient.", "#classe-letchis"],
+      ["La fiche enseignante de chaque problème : réponses, erreurs à guetter, évaluation en 5 niveaux et comportements à observer.", "#fiche-jus"],
+      ["Toutes les séquences et leurs problèmes ouverts.", "#ens-sequences"]] };
   function foPastille(code) { return '<span class="fo-code">' + code + "</span>"; }
   function foCarte(code, f) {
     var lien = f && !f.vide ? "#ens-form-" + code : "";
@@ -3608,18 +3648,16 @@
   }
   function pageFormationFiche(code) {
     var retour = '<div class="no-print coco-row"><a class="coco-btn coco-btn--secondaire" href="#ens-formation">← Formation</a><button class="coco-btn coco-btn--secondaire" type="button" data-action="imprimer">Imprimer la fiche</button></div>';
-    if (code === "sullivan") return retour + '<article class="fiche fo-fiche m-maths"><header class="fo-tete">' + foPastille("★") + '<div><small>Formation · Mathématiques · Fiche du site</small><h1>La démarche de Peter Sullivan</h1></div></header>' + FO_SULLIVAN +
-      foSite([["Les problèmes ouverts des séquences de maths, en 4 versions (mode autonome, au TBI, feuille de recherche, fiche).", "#ens-sequences"]]) + "</article>";
-    var f = FO.fiches[code], d = FO.domaines.filter(function (x) { return x.id === code.charAt(0); })[0];
+    var sul = code === "sullivan", f = sul ? FO_SULLIVAN : FO.fiches[code], d = sul ? { nom: "Mathématiques" } : FO.domaines.filter(function (x) { return x.id === code.charAt(0); })[0];
     var tab = f.tableau ? '<table class="fo-table fo-def"><tbody>' + f.tableau.map(function (r) { return "<tr><th>" + r[0] + "</th><td>" + (r[1] || '<span class="fo-vide">À rédiger</span>') + "</td></tr>"; }).join("") + "</tbody></table>" : "";
-    return retour + '<article class="fiche fo-fiche"><header class="fo-tete">' + foPastille(code) + "<div><small>Formation · " + esc(d.nom) + (f.aCompleter ? " · fiche à compléter" : "") + "</small><h1>" + esc(f.titre) + "</h1>" +
+    return retour + '<article class="fiche fo-fiche' + (sul ? " m-maths" : "") + '"><header class="fo-tete">' + foPastille(sul ? "★" : code) + "<div><small>Formation · " + esc(d.nom) + (sul ? " · Fiche du site" : "") + (f.aCompleter ? " · fiche à compléter" : "") + "</small><h1>" + esc(f.titre) + "</h1>" +
       (f.sousTitre || f.auteur ? '<p class="fo-auteur">' + esc(f.sousTitre || f.auteur) + "</p>" : "") + (f.ouvrage ? '<p class="fo-ouvrage">Ouvrage : <i>' + esc(f.ouvrage) + "</i></p>" : "") + "</div></header>" +
       tab + (f.corps || "") +
       (f.schemas ? '<p class="fo-schemas"><b>Schémas</b> (non repris sur le site, droits d’auteur) : ' + f.schemas.map(esc).join(" ") + "</p>" : "") +
       (f.site ? foSite(f.site) : "") +
-      '<p class="f-source">Fiche ' + code + " · « Didactique – Formation professionnelle », notes de l’enseignante.</p></article>";
+      "</article>";
   }
-  function foSite(l) { return '<section class="fo-site"><h2>Dans le site</h2><ul>' + l.map(function (x) { return '<li><a href="' + x[1] + '">' + esc(x[0]) + "</a></li>"; }).join("") + '</ul><p class="fo-prop">Liens proposés par Claude [PROPOSITION].</p></section>'; }
+  function foSite(l) { return '<section class="fo-site"><h2>Dans le site</h2><ul>' + l.map(function (x) { return '<li><a href="' + x[1] + '">' + esc(x[0]) + "</a></li>"; }).join("") + '</ul></section>'; }
 
 
   /* ---------- banque de problèmes (Vergnaud), reprise du site v0 ---------- */
@@ -3764,11 +3802,11 @@
   });
 
   /* ==========================================================================================
-     Séquence « L’imparfait » (demande de l’enseignante, 09/11/2026) [PROPOSITION]
-     Leçons de classe CONJ13 « L’imparfait des verbes du 1er groupe » et CONJ14 « L’imparfait » (2023, à jour) : phrases reprises mot pour mot [CLASSE].
-     Programmation P5 de la classe, semaines 3 et 4 (du 9 au 20 novembre 2026) : objectifs opérationnels des séances [CLASSE].
+     Séquence « L’imparfait » (demande de l’enseignante, 09/11/2026)
+     Leçons de classe CONJ13 « L’imparfait des verbes du 1er groupe » et CONJ14 « L’imparfait » (2023, à jour) : phrases reprises mot pour mot.
+     Programmation P5 de la classe, semaines 3 et 4 (du 9 au 20 novembre 2026) : objectifs opérationnels des séances.
      Compagnon : Léo (choix de l’enseignante). Code des leçons : verbe et terminaisons en rouge, pronoms en violet.
-     Les textes et les phrases d’exercices sont écrits pour le site [PROPOSITION].
+     Les textes et les phrases d’exercices sont écrits pour le site.
      ========================================================================================== */
   var IP_T = ["ais", "ais", "ait", "ions", "iez", "aient"];
   var IP_PRON = ["je", "tu", "il, elle, on", "nous", "vous", "ils, elles"];
@@ -3935,11 +3973,11 @@
         ["Séance 2", "L’élève conjugue à l’oral les verbes des 1er et 3ème groupes à l’imparfait.", "Revoir la leçon (blocs 2 et 3, tableaux à faire défiler) · Au TBI (ardoises)"],
         ["Séance 3", "L’élève conjugue à l’écrit les verbes des 1er et 3ème groupes à l’imparfait.", "J’écris le verbe"],
         ["Séances 4 et 5 (exercices bilan et évaluation)", "L’élève est capable d’associer un de ces verbes conjugué à l’imparfait au pronom personnel qui correspond. L’élève choisit, selon le sujet, la bonne terminaison de ces verbes conjugués à l’imparfait. L’élève est capable de conjuguer à l’écrit ces verbes à l’imparfait. L’élève sera capable de transposer des phrases en modifiant le sujet et la terminaison de ces verbes à l’imparfait.", "Le bon pronom · La bonne terminaison · Je change le sujet · Fiche d’exercices en 3 niveaux (corrigé, correction au TBI)"]],
-      erreurs: ["Écrire « je jouait » ou « il jouais » : ais, ais, ait se prononcent pareil ; faire chercher le sujet et redire la chanson de l’imparfait. [PROPOSITION]",
-        "Confondre « il jouait » et « ils jouaient » (même son) : le pluriel prend « aient ». [PROPOSITION]",
-        "Oublier le i de « nous jouions », « vous jouiez » ; pour voir : « nous voyions », « vous voyiez » (y puis i). [PROPOSITION]",
-        "Changer le radical : le radical ne change pas (« je chantais », « nous chantions »). [PROPOSITION]",
-        "Oublier « j’ » devant une voyelle : « j’étais », « j’avais », « j’allais ». [PROPOSITION]"],
+      erreurs: ["Écrire « je jouait » ou « il jouais » : ais, ais, ait se prononcent pareil ; faire chercher le sujet et redire la chanson de l’imparfait.",
+        "Confondre « il jouait » et « ils jouaient » (même son) : le pluriel prend « aient ».",
+        "Oublier le i de « nous jouions », « vous jouiez » ; pour voir : « nous voyions », « vous voyiez » (y puis i).",
+        "Changer le radical : le radical ne change pas (« je chantais », « nous chantions »).",
+        "Oublier « j’ » devant une voyelle : « j’étais », « j’avais », « j’allais »."],
       conseils: ["Code des leçons : le verbe et les terminaisons en rouge, les pronoms en violet.", "En mode anglais, les consignes passent en anglais mais les phrases restent en français.", "La fiche d’exercices existe en 3 niveaux (★, ★★, ★★★), avec les mêmes objectifs ; le même numéro redonne les mêmes exercices, pour corriger au TBI.", "Les étoiles de grammaire de la classe : l’étoile noire porte sur l’imparfait.", "« La chanson de l’imparfait » se chante en classe ; ses paroles ne sont pas reprises sur le site (droits d’auteur). Vidéo indiquée par l’enseignante : https://www.youtube.com/watch?v=LyJhmm35tlI"],
       prolonger: ["Réinvestissement de la programmation (séances 7 et 8 du futur) : faire rédiger la suite d’un conte à l’imparfait, puis relire en tenant compte des remarques (majuscules, points, accords sujet-verbe).", "Comparer l’imparfait et le futur : mêmes verbes irréguliers, mêmes regroupements (repère CC6)."],
       sources: "Sources : programmation périodique P5 de la classe, leçons CONJ13 et CONJ14 de la classe, programmes de Nouvelle-Calédonie 2021, repères de progressivité de la DENC (cycle 2, français, p. 34 et 35)." });
