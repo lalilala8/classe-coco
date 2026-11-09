@@ -656,13 +656,16 @@ body.mode-classe .site { max-width: none; padding-block: 12px 24px; }
 @media (min-width: 861px) { .ens-entete { grid-template-columns: auto 1fr auto; } }
 .ens-entete .ens-verrou { align-self: center; justify-self: end; }
 @media (max-width: 860px) { .ens-entete .ens-verrou { justify-self: center; } }
+/* les trois dossiers alignés : cartes de même hauteur, titre sur une ligne, texte juste dessous, étiquette en bas */
 .ens-dossiers { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--espace-6); }
-.ens-dossier { display: grid; justify-items: start; gap: 6px; padding: 20px 22px 18px; background: var(--carte); border: var(--bord) solid var(--lagon); border-radius: var(--arrondi-grand); box-shadow: 0 var(--socle) 0 var(--lagon-fonce); text-decoration: none; color: var(--encre); transition: transform .12s ease; }
+.ens-dossier { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: 20px 22px 18px; background: var(--carte); border: var(--bord) solid var(--lagon); border-radius: var(--arrondi-grand); box-shadow: 0 var(--socle) 0 var(--lagon-fonce); text-decoration: none; color: var(--encre); transition: transform .12s ease; }
 .ens-dossier:hover { transform: translateY(-3px); }
 .ens-dossier:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--lagon-fonce); }
-.ens-dossier b { font: 400 26px/30px var(--font-titre); color: var(--lagon-fonce); }
-.ens-dossier small { font-size: 17px; line-height: 24px; color: var(--encre-douce); }
-.ens-compte { margin-top: 4px; font: 600 15px/1 var(--font-texte); color: var(--lagon-texte); background: var(--lagon-clair); border-radius: var(--arrondi-pilule); padding: 6px 12px; }
+/* titres sur une seule ligne : la taille suit la largeur de la carte (26 px au plus), la même pour les trois cartes */
+.ens-dossier { container-type: inline-size; }
+.ens-dossier b { font: 400 min(26px, 6.4cqi)/30px var(--font-titre); color: var(--lagon-fonce); white-space: nowrap; }
+.ens-dossier small { margin-bottom: 10px; font-size: 17px; line-height: 24px; color: var(--encre-douce); }
+.ens-compte { white-space: nowrap; margin-top: auto; font: 600 15px/1 var(--font-texte); color: var(--lagon-texte); background: var(--lagon-clair); border-radius: var(--arrondi-pilule); padding: 6px 12px; }
 .ens-dossier-ic { width: 64px; height: 52px; }
 .ens-d-fond { fill: var(--lagon); }
 .ens-d-face { fill: var(--lagon-clair); stroke: var(--lagon); stroke-width: 3; stroke-linejoin: round; }

@@ -539,7 +539,7 @@
        ["2 · Le tri des familles", "Associer un mot invariable à sa famille orthographique."],
        ["2 · Écoute et écris", "Écrire sous la dictée un mot invariable, en cherchant si besoin dans « Mon outil » (je connais le mot, je le cherche, ou je demande)."],
        ["3 · La dictée sans erreur", "Se préparer (réseau de mots, partie à retenir), puis écrire cinq phrases dictées en regardant le modèle le moins possible."]].map(function (r) { return "<tr><th>" + r[0] + "</th><td>" + r[1] + "</td></tr>"; }).join("") + "</tbody></table></section>" +
-      "<section><h2>Conseils d'utilisation</h2><ul>" + li(["L'élève choisit les listes et les familles qu'il révise, sur la page de la séquence. Le choix est gardé sur l'iPad d'une fois sur l'autre.", "Les jeux d'écriture refusent les fautes d'accent : la barre de lettres accentuées aide les élèves sur iPad.", "L'écoute utilise la voix française de l'appareil : penser à monter le son et à désactiver le mode silencieux. La voix n'est utilisée que dans « Écoute et écris » et dans la dictée (décision D-31).", "En fin de partie, « Rejouer mes erreurs » relance uniquement les mots ratés.", "« Le mot manquant » ne montre que des mots bien écrits, et les productions erronées des élèves ne sont pas réaffichées : l'orthographe lexicale se mémorise en limitant les occasions de produire ou de rencontrer des graphies fautives.", "La dictée sans erreur comporte cinq phrases : le nombre de fois où l'élève regarde le modèle est donné en fin de partie, l'objectif étant de le diminuer d'une fois à l'autre."]) + "</ul></section>" +
+      "<section><h2>Conseils d'utilisation</h2><ul>" + li(["L'élève choisit les listes et les familles qu'il révise, sur la page de la séquence. Le choix est gardé sur l'iPad d'une fois sur l'autre.", "Les jeux d'écriture refusent les fautes d'accent : la barre de lettres accentuées aide les élèves sur iPad.", "L'écoute utilise la voix française de l'appareil : penser à monter le son et à désactiver le mode silencieux. La voix n'est utilisée que dans « Écoute et écris » et dans la dictée.", "En fin de partie, « Rejouer mes erreurs » relance uniquement les mots ratés.", "« Le mot manquant » ne montre que des mots bien écrits, et les productions erronées des élèves ne sont pas réaffichées : l'orthographe lexicale se mémorise en limitant les occasions de produire ou de rencontrer des graphies fautives.", "La dictée sans erreur comporte cinq phrases : le nombre de fois où l'élève regarde le modèle est donné en fin de partie, l'objectif étant de le diminuer d'une fois à l'autre."]) + "</ul></section>" +
       "<section><h2>Ressources pédagogiques</h2><ul>" + li(["A. Ouzoulias, « La mémorisation de l'orthographe lexicale, un enjeu décisif ».", "Éduscol : « Installer les bases de l'orthographe lexicale au cycle 2 » ; « Différentes formes de dictées » (dictée sans erreur) ; « La copie » ; « Lecture et orthographe : un renforcement mutuel »."]) + "</ul></section></article>";
   }
 
@@ -740,7 +740,7 @@
     var li = function (a) { return a.map(function (x) { return "<li>" + x + "</li>"; }).join(""); };
     return '<div class="no-print coco-row"><a class="coco-btn coco-btn--secondaire" href="#ens-sequences">← Séquences d’apprentissage</a><a class="coco-btn coco-btn--secondaire" href="#seq-diagrammes">Voir la séquence</a><button class="coco-btn coco-btn--secondaire" type="button" data-action="imprimer">Imprimer la fiche</button></div>' +
       '<article class="fiche m-maths"><small>Maths · Résolution de problèmes · Organisation et gestion de données · CE2</small><h1>Lire un graphique en barres</h1>' +
-      '<p class="f-source">Séquence créée le 07/11/2026 à la demande de l’enseignante, pour couvrir le repère « diagrammes en barres » (D-77). Leçon de classe : OGD1 « Le graphique en barres (ou histogramme) » ; « Je retiens » d’après OGD1 (D-83).</p>' +
+      '<p class="f-source">Séquence créée le 07/11/2026 à la demande de l’enseignante, pour couvrir le repère « diagrammes en barres ». Leçon de classe : OGD1 « Le graphique en barres (ou histogramme) » ; « Je retiens » d’après OGD1.</p>' +
       encadreProgramme("diagrammes") +
       '<section><h2>Les activités du site</h2><table class="f-table"><tbody>' + [
         ["Revoir la leçon", "Les 4 éléments d’un graphique (titre, graduations, barres, noms) ; lire une barre en suivant la ligne jusqu’aux nombres ; une valeur entre deux graduations."],
@@ -749,7 +749,7 @@
         ["2 · Lis les graduations", "Graduations de 2 en 2, de 5 en 5 et de 10 en 10, valeurs parfois entre deux graduations."],
         ["2 · Je construis le graphique", "Monter les barres d’après un tableau (graduations de 1 en 1, puis de 2 en 2)."],
         ["3 · Problèmes avec un graphique", "Total, écart, problème en deux étapes, prix (× 100 F), information inutile."],
-        ["4 · Problèmes ouverts", "« Le graphique mélangé » (24 élèves, l’ordre des fruits : 84 graphiques possibles) et « Deux chiens de plus » (l’écart et le total : 7 graphiques), adaptés de Sullivan & Lilburn, chap. 8 ; chacun avec son mode autonome, son mode classe au TBI, sa feuille de recherche et sa fiche (D-116)."]
+        ["4 · Problèmes ouverts", "« Le graphique mélangé » (24 élèves, l’ordre des fruits : 84 graphiques possibles) et « Deux chiens de plus » (l’écart et le total : 7 graphiques), adaptés de Sullivan & Lilburn, chap. 8 ; chacun avec son mode autonome, son mode classe au TBI, sa feuille de recherche et sa fiche."]
       ].map(function (r) { return "<tr><th>" + r[0] + "</th><td>" + r[1] + "</td></tr>"; }).join("") + "</tbody></table></section>" +
       '<div class="f-deux"><section><h2>Les erreurs à guetter</h2><ul>' + li(["Lire le nombre de graduations au lieu de la valeur (graduations de 2, 5 ou 10).", "Lire la barre voisine : suivre la ligne avec la règle ou le doigt.", "Une valeur entre deux graduations : chercher le nombre du milieu.", "Prendre toutes les données d’un problème, même celle qui ne sert pas."]) + "</ul></section>" +
       "<section><h2>Pour prolonger en classe</h2><ul>" + li(["Construire un graphique avec les données de la classe (sport préféré, transport, anniversaires par mois), en lien avec «\u00a0Questionner le monde\u00a0».", "Comparer un tableau et un graphique : lequel permet de voir plus vite le plus grand ?"]) + "</ul></section></div></article>";
@@ -761,7 +761,7 @@
     return '<div class="no-print coco-row"><a class="coco-btn coco-btn--secondaire" href="#ens-sequences">← Séquences d’apprentissage</a><a class="coco-btn coco-btn--secondaire" href="#lecon-masses">La leçon</a><a class="coco-btn coco-btn--secondaire" href="#exos-masses">Fiche d’exercices</a><a class="coco-btn coco-btn--secondaire" href="#seq-masses">Voir la séquence</a><button class="coco-btn coco-btn--secondaire" type="button" data-action="imprimer">Imprimer la fiche</button></div>' +
       '<article class="fiche m-maths"><small>Maths · Grandeurs et mesures (masses) · Cycle 2, CE2, niveau de maîtrise 3</small><h1>Mesurer des masses</h1>' +
       '<p class="f-q">Objectif : « ' + esc(C.masses.objectif.fr) + " »</p>" +
-      '<p class="f-source">Programmation de maths de la collègue (D-40) : période 5, séquence 4, semaine 5 (du 23 au 27 novembre 2026). Leçon de classe : GM8 « Les mesures de masses » (2023). Les deux problèmes ouverts viennent de l’outil de la collègue, adaptés (D-109). Leçon, activités et fiche d’exercices du site : D-110, D-111.</p>' +
+      '<p class="f-source">Programmation de maths de la collègue : période 5, séquence 4, semaine 5 (du 23 au 27 novembre 2026). Leçon de classe : GM8 « Les mesures de masses » (2023). Les deux problèmes ouverts viennent de l’outil de la collègue, adaptés.</p>' +
       encadreProgramme("masses") +
       '<section><h2>Les séances et les activités du site</h2><table class="f-table"><thead><tr><th>Séance</th><th>Objectif</th><th>Sur le site</th></tr></thead><tbody>' + [
         ["Séance 1", "Instruments et unités : on mesure une masse avec une balance ; le gramme, le kilogramme, la tonne ; choisir l’unité qui convient en s’appuyant sur un repère (trombone 1 g, paquet de sucre 1 kg, petite voiture environ 1 t). [CLASSE : programmation de la collègue]", "Revoir la leçon (blocs 1 et 2) · Je me rappelle · Quelle unité ? · Problème ouvert « L’étiquette effacée »"],
@@ -807,20 +807,20 @@
         ["Séance 3", "Réinvestir : trouver tous les verbes conjugués d’un court texte. [PROPOSITION]", "Les verbes du texte"],
         ["Séance 4", "Évaluation des objectifs de la séquence. [PROPOSITION]", "Fiche d’exercices (corrigé à part, correction au TBI)"]],
       erreurs: ["Prendre le sujet ou un nom pour le verbe (« la pluie ») : faire changer le moment de la phrase, le mot qui change est le verbe.", "Ne pas reconnaître un verbe d’état (« est », « semble ») : rappeler qu’un verbe peut exprimer un état, pas seulement une action.", "Placer ne … pas autour d’un autre mot que le verbe : relire la phrase à voix haute, elle doit rester correcte.", "Avec ne devant une voyelle : « n’ », comme dans la leçon GRAM3."],
-      conseils: ["Code des leçons : le verbe en rouge ; ne et pas dans des bulles rouges.", "En mode anglais, les consignes passent en anglais mais les phrases restent en français (D-27).", "La fiche d’exercices porte un numéro : le même numéro redonne les mêmes exercices, pour corriger au TBI."],
+      conseils: ["Code des leçons : le verbe en rouge ; ne et pas dans des bulles rouges.", "En mode anglais, les consignes passent en anglais mais les phrases restent en français.", "La fiche d’exercices porte un numéro : le même numéro redonne les mêmes exercices, pour corriger au TBI."],
       prolonger: ["Transformer des phrases de la vie de la classe (hier, aujourd’hui, demain) et entourer le mot qui change.", "Relier à la leçon suivante de la progression : l’infinitif du verbe (CONJ3)."],
       sources: "Sources : progression de français de la classe, leçon CONJ2, programmes de Nouvelle-Calédonie 2021, repères de progressivité de la DENC (cycle 2, français, p. 31 et 33)." });
   }
   function ficheDivision() {
     return ficheSeq({ seq: "division", mat: "maths", prog: "division", dom: "Maths · Nombres et calculs",
-      source: "Programmation de maths de la collègue (D-40) : période 5, séquence 3 « Le partage et la division en ligne », semaines 3 et 4 (du 9 au 20 novembre 2026). Leçons de classe : CAL7 « Diviser : grouper ou partager » et CAL8 « La division en ligne avec reste » (2023). Problèmes ouverts de l’outil de la collègue, adaptés (D-55).",
+      source: "Programmation de maths de la collègue : période 5, séquence 3 « Le partage et la division en ligne », semaines 3 et 4 (du 9 au 20 novembre 2026). Leçons de classe : CAL7 « Diviser : grouper ou partager » et CAL8 « La division en ligne avec reste » (2023). Problèmes ouverts de l’outil de la collègue, adaptés.",
       seances: [
         ["Séances 1 à 3", "Partager en parts égales ; quotient et reste. [CLASSE : programmation de la collègue]", "Revoir la leçon (grouper, partager, avec reste) · Je me rappelle (tables) · Grouper ou partager · Problème ouvert « Les coquillages de Nina »"],
         ["Séances 2 à 5", "Groupement ou partage ; division sans reste. [CLASSE : programmation de la collègue]", "Calcule · Problème ouvert « Les sachets de letchis »"],
         ["Séance suivante", "Écrire la division avec reste : 23 = (4 × 5) + 3 ; le vocabulaire (dividende, diviseur, quotient, reste). [PROPOSITION]", "Avec un reste"],
         ["Dernière séance", "Évaluation des objectifs de la séquence. [PROPOSITION]", "Fiche d’exercices (corrigé à part, correction au TBI)"]],
       erreurs: ["Un reste plus grand que le diviseur (« 23 = (4 × 4) + 7 ») : on peut encore faire un groupe ; le reste est toujours plus petit que le diviseur.", "Confondre grouper et partager : se demander « combien de groupes ? » ou « combien dans chaque part ? ».", "Oublier le reste dans l’égalité : vérifier en recalculant (4 × 5) + 3.", "Inverser dividende et diviseur dans « 23 : 4 »."],
-      conseils: ["La classe ne pose pas la division au CE2 : division en ligne seulement (D-104).", "Écriture de la classe avec les parenthèses : 43 = (5 × 8) + 3 (D-52).", "Les tables de multiplication sont le premier outil : « Je me rappelle » les fait revoir."],
+      conseils: ["La classe ne pose pas la division au CE2 : division en ligne seulement.", "Écriture de la classe avec les parenthèses : 43 = (5 × 8) + 3.", "Les tables de multiplication sont le premier outil : « Je me rappelle » les fait revoir."],
       prolonger: ["Manipuler (jetons, coquillages, letchis) avant d’écrire l’égalité.", "Problèmes « quotient + 1 » (« 23 élèves, des voitures de 4 places : combien de voitures ? ») : repère du niveau 3, pas encore sur le site."],
       sources: "Sources : programmation périodique P5 de la collègue, leçons CAL7 et CAL8 de la classe, programmes de Nouvelle-Calédonie 2021, repères de progressivité de la DENC (cycle 2, mathématiques, p. 7 et 11)." });
   }
@@ -832,14 +832,14 @@
         ["Séance 2", "Décomposer une somme pour payer le prix exact. [PROPOSITION]", "Revoir la leçon (bloc 2) · Paie le prix exact · Problème ouvert « Le jus à 100 F »"],
         ["Séance 3", "Calculer une dépense et la monnaie rendue. [PROPOSITION]", "Au marché · Problème ouvert « Au marché »"],
         ["Séance 4", "Évaluation des objectifs de la séquence. [PROPOSITION]", "Fiche d’exercices (corrigé à part, correction au TBI)"]],
-      erreurs: ["Compter les pièces au lieu de leur valeur (« 3 pièces, donc 3 F »).", "Commencer par les petites pièces et se perdre : commencer par les plus gros billets et les plus grosses pièces.", "Rendre la monnaie en ajoutant au lieu de soustraire : vérifier que prix + monnaie rendue = somme donnée.", "Chercher des pièces de 1 F ou de 2 F : elles ne circulent plus (D-77)."],
+      erreurs: ["Compter les pièces au lieu de leur valeur (« 3 pièces, donc 3 F »).", "Commencer par les petites pièces et se perdre : commencer par les plus gros billets et les plus grosses pièces.", "Rendre la monnaie en ajoutant au lieu de soustraire : vérifier que prix + monnaie rendue = somme donnée.", "Chercher des pièces de 1 F ou de 2 F : elles ne circulent plus."],
       conseils: ["Les pièces et billets sont ceux de la leçon GM1 : 5, 10, 20, 50, 100, 200 F ; 500, 1 000, 5 000, 10 000 F.", "Les fruits du marché sont en étiquettes écrites, en attendant les illustrations de l’enseignante.", "La fiche d’exercices porte un numéro : le même numéro redonne les mêmes exercices, pour corriger au TBI."],
       prolonger: ["Jouer à la marchande avec de la monnaie factice et les étiquettes de prix du marché.", "Relier aux nombres jusqu’à 9 999 : décomposer 6 875 F en milliers, centaines, dizaines et unités."],
       sources: "Sources : progression de maths de la classe, leçon GM1, programmes de Nouvelle-Calédonie 2021, repères de progressivité de la DENC (cycle 2, mathématiques, p. 12 et 17)." });
   }
   function ficheDigitale() {
     return ficheSeq({ seq: "digitale", mat: "maths", prog: "digitale", tbi: JEU_DIGITAL, dom: "Maths · Grandeurs et mesures (durées)",
-      source: "Programmation de maths de la collègue (D-40) : période 5, séquence 1, semaine 1 (du 26 au 30 octobre 2026). Leçon de classe : GM5 « Lire l’heure digitale ». Jeux collectifs « L’heure à l’ardoise » (séances 1 à 3), création de la collègue Teacher Nadège, adaptés avec son accord (D-73) ; problèmes ouverts de son outil (D-96).",
+      source: "Programmation de maths de la collègue : période 5, séquence 1, semaine 1 (du 26 au 30 octobre 2026). Leçon de classe : GM5 « Lire l’heure digitale ». Jeux collectifs « L’heure à l’ardoise » (séances 1 à 3), création de la collègue Teacher Nadège, adaptés avec son accord ; problèmes ouverts de son outil.",
       seances: [
         ["Séance 1", "1 journée = 24 h (2 × 12 h) ; 6 h du soir = 18 h. [CLASSE : « L’heure à l’ardoise », séance 1]", "Au TBI (séance 1 de « L’heure à l’ardoise ») · Revoir la leçon · Je me rappelle · Matin ou après-midi ? · Deux façons de dire l’heure · Problème ouvert « L’heure magique »"],
         ["Séances 2 et 3", "Lire et dire l’heure pile et et demie (1 h = 60 min), puis et quart et moins le quart (un quart d’heure = 15 min). [CLASSE : « L’heure à l’ardoise », séances 2 et 3]", "Au TBI (séances 2 et 3) · Lis le réveil"],
@@ -1920,7 +1920,7 @@
     ];
   }
   /* « Je retiens » en cartes animées étendu au verbe (CONJ2), aux mots invariables (v0, D-62) et au graphique en barres (OGD1) : D-107.
-     Les phrases de la trace écrite sont reprises mot pour mot et découpées ; en mode EN, les phrases de français restent en français (D-27). */
+     Les phrases de la trace écrite sont reprises mot pour mot et découpées ; en mode EN, les phrases de français restent en français. */
   function jrCycle(items) { /* 3 états montrés l'un après l'autre, en boucle */
     return '<span class="jr-cycle">' + items.map(function (h, k) { return '<span style="animation-delay:' + (k * 2.2) + 's">' + h + "</span>"; }).join("") + "</span>";
   }
@@ -1994,7 +1994,7 @@
      Ardoises : questions tirées des activités de la séquence ; la question s’affiche en grand, minuteur, « Ardoises levées », « On corrige ».
      ========================================================================================== */
   /* Questions d’ardoise du verbe (CONJ2) [PROPOSITION] : trouver le verbe conjugué (forme négative pour vérifier), état ou action.
-     [phrase, verbe, 2 autres mots de la phrase, forme négative, infinitif si le verbe exprime un état] — les phrases restent en français (D-27). */
+     [phrase, verbe, 2 autres mots de la phrase, forme négative, infinitif si le verbe exprime un état] — les phrases restent en français. */
   var TQ_VERBES = [
     ["Le soleil brille sur la plage.", "brille", ["soleil", "plage"], "Le soleil ne brille pas sur la plage."],
     ["Nina mange la mangue.", "mange", ["Nina", "mangue"], "Nina ne mange pas la mangue."],
@@ -3031,7 +3031,7 @@
     var n = etDonnees().eleves.length;
     return ensEntete("Suivi des élèves") + '<p class="et-classe">' + (n ? "<b>" + n + " élève" + (n > 1 ? "s" : "") + "</b> dans la liste (la même pour les deux fichiers d’étoiles)." : "La liste des élèves se remplit dans un des deux tableaux de suivi ; elle sert aux deux.") + "</p>" +
       '<section class="et-familles">' + etFamille("calcul") + etFamille("grammaire") + "</section>" +
-      '<section class="ens-vide ens-vide--petit"><p>Le suivi des résultats des activités du site viendra avec la <b>base en ligne</b> (D-93) : réussites par activité, bilans par séquence, repères pour le livret scolaire unique.</p></section>';
+      '<section class="ens-vide ens-vide--petit"><p>Le suivi des résultats des activités du site viendra avec la <b>base en ligne</b> : réussites par activité, bilans par séquence, repères pour le livret scolaire unique.</p></section>';
   }
   /* Espace enseignante › Formation (D-114) : organisé comme le sommaire des notes de l’enseignante (Lexique, Didactique générale,
      Mathématiques, Français ; fiches L, D, M, F) ; fiches vides grisées « À venir » ; encadré « Dans le site » [PROPOSITION]. */
