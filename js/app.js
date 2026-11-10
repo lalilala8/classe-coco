@@ -1773,16 +1773,32 @@
   function moCycle(L, n) { var r = []; for (var i = 0; L.length && r.length < n; i++) r.push(L[i % L.length]); return r; }
   function moCle(k) { return MO.plain(k).replace(/^-/, "… ").replace(/-$/, " …"); }
   function moNom(f) { var k = MO.plain(f.key); return /^\d+$/.test(k) ? "Liste " + k : moCle(f.key); }
-  function moPhraseDictee(q) { var t = q.sent.replace("___", q.p); return t.charAt(0).toUpperCase() + t.slice(1); }
-  /* Phrases écrites par Claude pour les familles qui n’en avaient qu’une [PROPOSITION] */
-  var MO_PHRASES_PLUS = { "g1-4": ["L’avion vole au-dessus de la maison.", "Le chat saute par-dessus la barrière."], "g1-8": ["Le chat passe à travers la haie.", "Tao a mis son pull à l’envers."], "g1-13": ["Pourquoi le cagou ne vole-t-il pas ?"] };
-  /* Répartit les phrases : celles à compléter (avec un trou) et celles à dicter, jamais les mêmes (une phrase dictée ne doit pas être sous les yeux de l’élève) */
+  /* une phrase à trous remplie ; « ne ... pas » remplit deux trous (ne, puis pas) ; q.rep remplace le mot si besoin (« à l’envers ») */
+  function moParts(q) { return String(q.rep || q.p).split(/\s*\.\.\.\s*/); }
+  function moRemplir(q, f) { var P = moParts(q), i = 0; return q.sent.split("___").map(function (morceau, k) { return k === 0 ? (f ? f.texte(morceau) : morceau) : (f ? f.trou(P[Math.min(i++, P.length - 1)]) : P[Math.min(i++, P.length - 1)]) + (f ? f.texte(morceau) : morceau); }).join(""); }
+  function moPhraseDictee(q) { var t = moRemplir(q); return t.charAt(0).toUpperCase() + t.slice(1); }
+  /* Une phrase par mot pour l’exercice 2 (demande de l’enseignante, 10/11/2026) : phrases écrites par Claude pour les mots qui n’en avaient pas [PROPOSITION] */
+  var MO_TROUS_PLUS = { "ne ... pas": ["Le cagou ___ vole ___."], "tantôt": ["Le ciel est ___ bleu, ___ gris."], "auprès": ["Le chaton dort ___ de sa maman."], "au-dessus": ["L’avion vole ___ de la maison."],
+    "là-dessus": ["Voici une chaise : assieds-toi ___."], "par-dessus": ["Le chat saute ___ la barrière."], "dessous": ["Le chat dort sur le lit, et le chien dort ___."], "en dessous": ["Écris ton prénom sur la ligne, et la date juste ___."],
+    "par-dessous": ["Le serpent passe ___ la barrière."], "dès lors": ["Tao a perdu sa clé ; ___, il range toujours ses affaires."], "(à) l’envers": ["Dylan a mis sa casquette ___.", "à l’envers"], "tout à coup": ["Nous jouions dehors quand, ___, la pluie est tombée."],
+    "quoique": ["Il sort jouer, ___ le temps soit gris."], "lors": ["Nous avons vu des tortues ___ de notre sortie à la plage."], "dehors": ["Il fait beau : les enfants jouent ___."], "ici": ["Viens ___, près de moi !"], "ceci": ["Regarde ___ : c’est un coquillage rare."],
+    "dedans": ["Ouvre la boîte : il y a un cadeau ___."], "dès que": ["Je range mon cartable ___ je rentre de l’école."], "parce que": ["Léo met son chapeau ___ le soleil brille."], "auparavant": ["Il habite à Nouméa ; ___, il vivait à Koné."], "dorénavant": ["Le bus passe plus tôt : ___, nous partirons à sept heures."] };
+  /* Phrases à dicter écrites par Claude, pour que chaque famille en ait au moins deux qui ne sont pas dans l’exercice 2 [PROPOSITION] */
+  var MO_PHRASES_PLUS = { "g0-7": ["Il y a des poissons dans le lagon."], "g0-8": ["Margouille ne dort plus.", "Je ne mange pas de piment."], "g0-9": ["Nous allons à la plage.", "Vous jouez au ballon."], "g0-10": ["Léo court vite comme le vent.", "Méi aime aussi les letchis."],
+    "g1-0": ["Parfois, Kakou se cache sous les feuilles.", "Autrefois, Papi Tao allait à l’école à pied."], "g1-4": ["Les nuages passent au-dessus du lagon.", "Lis la consigne ci-dessus."], "g1-5": ["Le crabe se cache en dessous du rocher."], "g1-6": ["Lorsque la cloche sonne, nous rentrons en classe.", "La pluie tombe ; alors, Kakou court se cacher."],
+    "g1-8": ["Le vent souffle à travers les arbres.", "Tao a mis son pull à l’envers."], "g1-9": ["Depuis ce matin, il pleut sur Nouméa."], "g1-10": ["Voilà le bus de l’école !", "Le chat est passé par-là."], "g1-11": ["Kakou ne vole jamais.", "Désormais, je range ma chambre."],
+    "g1-13": ["Pourquoi le cagou ne vole-t-il pas ?", "Pourquoi pleures-tu ?"], "g2-0": ["Ensuite, nous mangeons encore un fruit."], "g2-1": ["Aujourd’hui, Méi mange une papaye.", "Les poules courent autour de la case."], "g2-2": ["Comment vas-tu ?", "Tao va souvent à la pêche."],
+    "g2-7": ["Il est presque midi.", "Lorsque le soleil se couche, le ciel devient rose."], "g2-8": ["Le bus s’arrête devant l’école.", "Je me brosse les dents avant de dormir."], "g0-4": ["Il mange du pain au chocolat.", "J’ai une petite sœur."], "g0-15": ["Quand le soleil se lève, Kakou sort de son nid.", "Léo et Tao portent le même tee-shirt."], "g0-1": ["La tortue nage dans le lagon.", "Les enfants jouent au ballon."], "g2-3": ["Le chien attend dehors."], "g2-5": ["La valise est vide : il n’y a rien dedans."], "g3-1": ["D’accord, je viens avec toi.", "D’abord, je range mes affaires."], "g2-9": ["Maintenant, nous allons lire.", "Il a plu pendant toute la nuit."], "g2-11": ["Demain, nous irons au marché.", "Soudain, le chat saute sur la table."],
+    "g2-12": ["Combien de billes as-tu ?", "Je vais bien, merci."], "g2-13": ["Plusieurs enfants jouent dans la cour.", "Le chat est allé dormir ailleurs."], "g3-0": ["Margouille dort toujours au soleil."], "g3-2": ["Parmi les fruits, je préfère la mangue.", "Aujourd’hui, il fait beau."],
+    "g3-3": ["Je joue avec mon frère.", "Il fait nuit, donc je rentre à la maison."], "g3-5": ["Il est déjà huit heures !", "Je compte jusqu’à cent."] };
+  /* Répartit les phrases : une phrase à compléter par mot de la famille, et des phrases à dicter, jamais les mêmes (une phrase dictée ne doit pas être sous les yeux de l’élève) */
   function moRepartir(T, nDictee) {
-    var plus = (MO_PHRASES_PLUS[T.fam.id] || []).slice(), sent = T.pool.map(function (x) { return MO.SENT[x.p]; }).filter(Boolean);
-    var gaps = T.gaps.slice(), deja = gaps.map(moPhraseDictee), libres = HE.shuf(plus.concat(sent).filter(function (p, i, L) { return deja.indexOf(p) < 0 && L.indexOf(p) === i; }));
-    var dictee = libres.slice(0, nDictee);
-    while (dictee.length < nDictee && gaps.length > 1) dictee.push(moPhraseDictee(gaps.pop()));
-    return { trous: gaps.slice(0, 4), dictee: dictee };
+    var trous = [], autres = [];
+    T.pool.forEach(function (x) { var G = T.gaps.filter(function (q) { return q.p === x.p; }), t = MO_TROUS_PLUS[x.p];
+      if (G.length) { trous.push(G[0]); G.slice(1).forEach(function (q) { autres.push(moPhraseDictee(q)); }); } else if (t) trous.push({ p: x.p, m: x.m, sent: t[0], rep: t[1] }); });
+    var deja = trous.map(moPhraseDictee), sent = T.pool.map(function (x) { return MO.SENT[x.p]; }).filter(Boolean);
+    var libres = HE.shuf((MO_PHRASES_PLUS[T.fam.id] || []).concat(sent, autres).filter(function (p, i, L) { return deja.indexOf(p) < 0 && L.indexOf(p) === i; }));
+    return { trous: trous, dictee: libres.slice(0, nDictee) };
   }
   function moTrous(L) { return '<ul class="ex-fr ex-mots">' + L.map(function (x) { return "<li>" + esc(x.h.before) + exT(esc(x.h.seg)) + esc(x.h.after) + "</li>"; }).join("") + "</ul>"; }
   /* niveau 3 : seule la première lettre est donnée (b…… pour bientôt ; d’…… pour d’après) */
@@ -1795,7 +1811,7 @@
   /* niveau 3 (d.sansListe) : la liste n’est pas donnée, seulement le nom de la famille ; elle donnerait les réponses de l’exercice 1 */
   function moCompleter(d, en) { var L = d.sansListe && !d.fam.liste;
     return { c: L ? (en ? "Complete each sentence with a word from the family." : "Complète chaque phrase avec un mot de la famille.") : (en ? "Complete each sentence with a word from the list." : "Complète chaque phrase avec un mot de la liste."),
-    q: '<p class="ex-fr ex-banque">' + (L ? (en ? "Family: " : "Famille : ") + "<b>" + esc(moCle(d.fam.key)) + "</b>" : d.fam.words.map(function (w) { return esc(MO.plain(w)); }).join(" · ")) + '</p><ul class="ex-fr ex-phrases">' + d.phrases.map(function (x) { return "<li>" + esc(x.sent).split("___").join(exT(esc(x.p))) + "</li>"; }).join("") + "</ul>", r: d.phrases.map(function (x) { return esc(x.p); }).join(" · ") }; }
+    q: '<p class="ex-fr ex-banque">' + (L ? (en ? "Family: " : "Famille : ") + "<b>" + esc(moCle(d.fam.key)) + "</b>" : d.fam.words.map(function (w) { return esc(MO.plain(w)); }).join(" · ")) + '</p><ul class="ex-fr ex-phrases">' + d.phrases.map(function (x) { return "<li>" + moRemplir(x, { texte: esc, trou: function (w) { return exT(esc(w)); } }) + "</li>"; }).join("") + "</ul>", r: d.phrases.map(function (x) { return esc(x.rep || x.p); }).join(" · ") }; }
   /* niveaux 2 et 3 : 1. lettres qui manquent ; 2. phrases à compléter ; 3. dictée de mots ; 4. dictée de phrase(s) (ordre demandé par l’enseignante ;
      aucun exercice ne montre un mot mal écrit, recommandation d’Ouzoulias rappelée par l’enseignante) */
   function moExos(d, en) {
