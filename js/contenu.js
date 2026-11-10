@@ -18,7 +18,10 @@ window.COCO_CONTENU = {
           ["L’imparfait", "demo", "imparfait"] /* les deux lignes des progressions réunies en une séquence, comme la programmation P5 (choix de l’enseignante, 09/11/2026) */
         ] },
         { nom: { fr: "Orthographe", en: "Spelling" }, sequences: [
-          ["Les mots invariables", "demo", "mots"], ["Les correspondances graphèmes-phonèmes"], ["Les accords particuliers"]
+          ["Les mots invariables", "demo", "mots"],
+          /* orthographe par régularités (leçons de classe 2026, sans numéro ; D-134) */
+          ["Les nombres en lettres", "demo", "nombres"], ["Les consonnes muettes", "demo", "muettes"], ["Le -e après un groupe de consonnes", "demo", "egroupe"],
+          ["Les correspondances graphèmes-phonèmes"], ["Les accords particuliers"]
         ] },
         { nom: { fr: "Lexique", en: "Vocabulary" }, sequences: [
           ["Enrichir son lexique"], ["L'ordre alphabétique"], ["Le dictionnaire"]

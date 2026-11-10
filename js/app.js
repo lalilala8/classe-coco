@@ -316,7 +316,7 @@
   var JEUX_MOTS = {
     rappel: { perso: "sari", etape: 1, fr: "Je me rappelle", en: "I remember", dfr: "Je retrouve les mots-outils du CP-CE1.", den: "I find the key words from CP-CE1." },
     look: { perso: "nina", etape: 1, fr: "Regarde, cache, écris", en: "Look, cover, write", dfr: "J'observe le mot, je le cache, puis je l'écris de mémoire.", den: "I look at the word, cover it, then write it from memory." },
-    hidden: { perso: "vaka", etape: 1, fr: "Lettres cachées", en: "Hidden letters", dfr: "Je retrouve les lettres qui manquent.", den: "I find the missing letters." },
+    hidden: { perso: "vaka", etape: 1, fr: "Lettres cachées", en: "Hidden letters", dfr: "Je tape les lettres qui manquent.", den: "I type the missing letters." },
     choose: { perso: "waeko", etape: 2, fr: "Le mot manquant", en: "The missing word", dfr: "Je complète la phrase avec le bon mot.", den: "I complete the sentence with the right word." },
     sort: { perso: "dylan", etape: 2, fr: "Le tri des familles", en: "Sorting into families", dfr: "Je range chaque mot dans sa famille.", den: "I put each word into its family." },
     listen: { perso: "tehani", etape: 2, fr: "Écoute et écris", en: "Listen and write", dfr: "J'écoute le mot et je l'écris sans le voir.", den: "I listen to the word and write it without seeing it." },
@@ -341,7 +341,7 @@
   /* préparation d'une question : tirages au sort faits une seule fois */
   function miPreparer() {
     var q = G.qs[G.i]; G.rep = false; G.ok = false; G.choix = null; G.typed = ""; G.phase = G.jeu === "look" ? "voir" : ""; G.outil = false; G.msg = "";
-    if (G.jeu === "hidden") { G.h = MO.hiddenPart(q.m); G.opts = MO.shuffle([G.h.seg].concat(MO.segOptions(G.h))); }
+    if (G.jeu === "hidden") { G.h = MO.hiddenPart(q.m); G.opts = []; } /* l’élève tape les lettres : aucune écriture fausse proposée (principe d’Ouzoulias, D-132) */
     else if (G.jeu === "choose" || G.jeu === "rappel") G.opts = MO.shuffle([q.p].concat(q.opts));
     else if (G.jeu === "sort") G.opts = MO.shuffle([MO.FAM[q.fam]].concat(MO.intrus(q, MI.sel)));
     if (G.jeu === "listen") MO.direAvecPhrase(q.p);
@@ -432,9 +432,9 @@
       zone = indice + (G.phase === "voir" ? motHTML(q.m) : miEcrire(G.rep));
       bas = G.phase === "voir" ? '<button class="coco-btn coco-btn--grand" type="button" data-action="m-cacher">' + (en ? "I've looked, cover it" : "J'ai bien regardé, je cache") + "</button>" : (G.rep ? "" : valider);
     } else if (jeu === "hidden") {
-      consigne = en ? "Which letters are missing?" : "Quelles lettres manquent ?";
-      zone = indice + '<span class="mi-mot">' + G.h.beforeH + '<span class="mi-trou' + (G.rep ? " est-rempli" : "") + '">' + (G.rep ? G.h.segH : "?") + "</span>" + G.h.afterH + "</span>" +
-        choix(function (o) { return o === "" ? "<i>" + (en ? "nothing" : "rien") + "</i>" : esc(o); });
+      consigne = en ? "Type the missing letters." : "Tape les lettres qui manquent.";
+      zone = indice + '<span class="mi-mot">' + G.h.beforeH + '<span class="mi-trou' + (G.rep ? " est-rempli" : "") + '">' + (G.rep ? G.h.segH : "?") + "</span>" + G.h.afterH + "</span>" + miEcrire(G.rep);
+      bas = G.rep ? "" : valider;
     } else if (jeu === "choose" || jeu === "rappel") {
       var cap = q.sent.indexOf("___") === 0;
       consigne = jeu === "rappel" ? (en ? "I remember the <b>key words</b> from CP-CE1. Complete the sentence." : "Je me rappelle les <b>mots-outils</b> du CP-CE1. Complète la phrase.") : (en ? "Complete the sentence with the right word." : "Complète la phrase avec le mot qui convient.");
@@ -516,6 +516,9 @@
       if (G.jeu === "dict") {
         var r = MO.phraseJuste(val, q), modele = '<span class="mi-modele-final">' + esc(r.full) + "</span>";
         miFinir(r.mot, r.phrase ? (en ? "Your sentence has no mistakes! " : "Ta phrase est sans erreur ! ") : r.mot ? (en ? "The invariable word is right. Compare the rest of your sentence with the model: " : "Le mot invariable est juste. Compare le reste de ta phrase avec le modèle : ") + modele + " " : (en ? "Here is the dictated sentence: " : "Voici la phrase dictée : ") + modele + " ");
+      } else if (G.jeu === "hidden") {
+        var nl = function (x) { return MO.norm(String(x).replace(/'/g, "’").trim()); };
+        miFinir(nl(val) === nl(G.h.seg) || nl(val) === nl(q.p), "");
       } else {
         var bon = MO.accepte(val, q.p);
         miFinir(bon, bon && G.jeu === "listen" && G.outilVu === G.i + 1 ? (en ? "You looked in your toolbox: that is a good strategy! " : "Tu as cherché dans ton outil : c'est une bonne stratégie ! ") : "");
@@ -797,7 +800,7 @@
       '<section><h2>Les séances et les activités du site</h2><table class="f-table"><thead><tr><th>Séance</th><th>Objectif</th><th>Sur le site</th></tr></thead><tbody>' +
       o.seances.map(function (r) { return "<tr><th>" + esc(r[0]) + "</th><td>" + esc(r[1]) + "</td><td>" + esc(r[2]) + "</td></tr>"; }).join("") + "</tbody></table></section>" +
       '<div class="f-deux"><section><h2>Les erreurs à guetter</h2><ul>' + li(o.erreurs) + "</ul></section><section><h2>Conseils d’utilisation</h2><ul>" + li(o.conseils.concat(["Le site à la maison reste facultatif : jamais de devoir écrit (art. 34)."])) + "</ul></section></div>" +
-      "<section><h2>Pour prolonger en classe</h2><ul>" + li(o.prolonger) + "</ul></section>" + '<p class="f-source">' + esc(o.sources) + "</p></article>";
+      (o.extra || "") + "<section><h2>Pour prolonger en classe</h2><ul>" + li(o.prolonger) + "</ul></section>" + '<p class="f-source">' + esc(o.sources) + "</p></article>";
   }
   function ficheVerbe() {
     return ficheSeq({ seq: "verbe", mat: "francais", prog: "verbe", dom: "Français · Étude de la langue (grammaire et conjugaison)",
@@ -2378,6 +2381,15 @@
         (QZ.rep ? '<p class="qz-total">' + (en ? "Total: " : "Total : ") + exMille(somme) + " F</p>" : '<p class="qz-legende">' + (en ? "Tap a coin in your hand to take it back." : "Touche une pièce dans ta main pour la reprendre.") + "</p>") +
         (QZ.rep ? "" : '<div class="po-pieces qz-caisse">' + QZ_BILLETS.concat(PO.PIECES.slice().reverse()).map(function (v) { return qzArgent(v, "qz-piece"); }).join("") + "</div>");
       bas = QZ.rep ? "" : '<button class="coco-btn coco-btn--grand" type="button" data-action="qz-valider"' + (QZ.sel.length ? "" : " disabled") + ">" + t("valider") + "</button>";
+    } else if (q.t === "dictee") {
+      var nv = lire("dictee-niv", 1);
+      zone = '<div class="coco-row or-niveaux" role="group" aria-label="' + (en ? "Level" : "Niveau") + '">' + [1, 2, 3].map(function (k) { return '<button class="coco-btn' + (k === nv ? "" : " coco-btn--secondaire") + '" type="button" data-action="qz-niv" data-v="' + k + '" aria-pressed="' + (k === nv) + '">' + "★★★".slice(0, k) + "</button>"; }).join("") + "</div>" +
+        (q.titre ? '<p class="qz-legende"><b>« ' + esc(q.titre) + " »</b></p>" : "") +
+        '<div class="coco-row or-ecoute"><button class="coco-btn coco-btn--secondaire" type="button" data-action="qz-dire" data-v="' + esc(orPlain(q.texte)) + '">' + (q.titre ? (en ? "Listen to the text" : "Écouter le texte") : (en ? "Listen to the sentence" : "Écouter la phrase")) + "</button>" +
+        '<button class="coco-btn coco-btn--secondaire" type="button" data-action="qz-dire" data-v="' + esc(orMorceaux(q.texte).join("|")) + '">' + (en ? "Bit by bit" : "Morceau par morceau") + "</button></div>" +
+        (QZ.vu ? '<p class="qz-phrase or-dictee">' + orCibles(q.texte) + "</p><p>" + (en ? "Compare with your exercise book. Did you write all the words in bold correctly?" : "Compare avec ton cahier. As-tu bien écrit tous les mots en gras ?") + "</p>" : "");
+      bas = QZ.rep ? "" : !QZ.vu ? '<button class="coco-btn coco-btn--grand" type="button" data-action="qz-fini">' + (en ? "I’ve finished" : "J’ai fini") + "</button>"
+        : '<span class="coco-row"><button class="coco-btn coco-btn--secondaire" type="button" data-action="qz-auto" data-v="0">' + (en ? "Not all of them" : "Pas tous") + '</button><button class="coco-btn coco-btn--grand" type="button" data-action="qz-auto" data-v="1">' + (en ? "Yes, all of them" : "Oui, tous") + "</button></span>";
     } else if (q.t === "mots") {
       zone += '<p class="qz-texte">' + q.mots.map(function (w, k) { var on = QZ.sel.indexOf(k) >= 0, juste = q.v.indexOf(k) >= 0;
         var cls = "qz-mot" + (on ? " est-choisi" : "") + (QZ.rep && juste ? " est-verbe" : "") + (QZ.rep && on && !juste ? " est-revoir" : "");
@@ -2395,10 +2407,14 @@
   function actionQZ(a, el) {
     if (!QZ) return;
     var q = QZ.qs[QZ.i];
-    if (a === "qz-suite") { if (QZ.i >= QZ.qs.length - 1) QZ.fin = true; else { QZ.i++; QZ.rep = false; QZ.choix = -1; QZ.msg = ""; QZ.essais = 0; QZ.val = {}; QZ.sel = []; } return; }
+    if (a === "qz-dire") { MO.dire(String(el.dataset.v).split("|")); return; }
+    if (a === "qz-niv") { ecrire("dictee-niv", +el.dataset.v); qzDemarrer(QZ.seq, QZ.jeu); return; }
+    if (a === "qz-suite") { if (QZ.i >= QZ.qs.length - 1) QZ.fin = true; else { QZ.i++; QZ.rep = false; QZ.choix = -1; QZ.msg = ""; QZ.essais = 0; QZ.val = {}; QZ.sel = []; QZ.vu = false; } return; }
     if (a === "qz-rejouer") { qzDemarrer(QZ.seq, QZ.jeu); return; }
     if (QZ.rep) return;
     if (a === "qz-choix") { QZ.choix = +el.dataset.v; var ok = QZ.choix === q.a; qzFinir(ok, typo(qzT(q.ex))); return; }
+    if (a === "qz-fini") { QZ.vu = true; return; }
+    if (a === "qz-auto") { var tout = el.dataset.v === "1"; qzFinir(tout, tout ? (langue === "en" ? "Well done: the words of the rule are spelt correctly." : "Bravo : les mots de la leçon sont bien écrits.") : (langue === "en" ? "Correct the words in bold in your exercise book, then read the sentence again." : "Corrige les mots en gras sur ton cahier, puis relis toute la phrase.")); return; }
     if (a === "qz-piece") { if (QZ.sel.length < 20) QZ.sel.push(+el.dataset.v); QZ.sel.sort(function (x, y) { return y - x; }); return; }
     if (a === "qz-retirer") { QZ.sel.splice(+el.dataset.k, 1); return; }
     if (a === "qz-mot") { var k = +el.dataset.v, i = QZ.sel.indexOf(k); if (i >= 0) QZ.sel.splice(i, 1); else QZ.sel.push(k); return; }
@@ -3299,7 +3315,7 @@
   }
   document.addEventListener("toggle", function (e) { var d = e.target; if (!d.classList || !(d.classList.contains("ens-tiroir") || d.classList.contains("ens-po-tiroir"))) return; ENS_TIROIRS[d.dataset.tiroir] = d.open; ensTiroirsGarder(); }, true);
   function pageEnseignante() {
-    var n = { "ens-suivi": "Étoiles de calcul et de grammaire", "ens-sequences": "9 séquences", "ens-formation": Object.keys(FO.fiches).filter(function (c) { return !FO.fiches[c].vide; }).length + " fiches" };
+    var n = { "ens-suivi": "Étoiles de calcul et de grammaire", "ens-sequences": "12 séquences", "ens-formation": Object.keys(FO.fiches).filter(function (c) { return !FO.fiches[c].vide; }).length + " fiches" };
     return ensEntete("") + '<section class="ens-dossiers">' + ENS_DOSSIERS.map(function (d) {
       return '<a class="ens-dossier" href="#' + d.id + '">' + DOSSIER_SVG + "<b>" + d.t + "</b><small>" + d.d + '</small><span class="ens-compte">' + n[d.id] + "</span></a>";
     }).join("") + "</section>" + '<p class="ens-reglages"><a class="coco-btn coco-btn--secondaire" href="#ens-voix">' + "Voix de la dictée</a></p>";
@@ -3363,7 +3379,8 @@
       '<p class="ens-legende">Pour chaque séquence, toujours les mêmes boutons : <b>Fiche enseignante</b>, La leçon, Fiche d’exercices, Au TBI, Voir la séquence. Un bouton grisé « À venir » montre ce qui reste à construire. Touchez un sous-domaine pour l’ouvrir.</p>' +
       '<div class="coco-row ens-tiroirs-boutons"><button class="coco-btn coco-btn--secondaire" type="button" data-action="ens-tiroirs" data-v="1">Tout ouvrir</button><button class="coco-btn coco-btn--secondaire" type="button" data-action="ens-tiroirs" data-v="0">Tout fermer</button></div>' +
       ensTiroir("m-francais", "Français · Grammaire et conjugaison", [ensSeq("verbe", "tehani", "Le verbe", "CONJ2", 2 + nQ("verbe"), ROUTES["tbi-verbe"] ? "#tbi-verbe" : "", F), ensSeq("imparfait", "leo", "L’imparfait", "CONJ13 et CONJ14", nQ("imparfait"), ROUTES["tbi-imparfait"] ? "#tbi-imparfait" : "", F)]) +
-      ensTiroir("m-francais", "Français · Orthographe", [ensSeq("mots", "sari", "Les mots invariables", "affiches 2026", Object.keys(JEUX_MOTS).length, ROUTES["tbi-mots"] ? "#tbi-mots" : "", F)]) +
+      ensTiroir("m-francais", "Français · Orthographe", [ensSeq("mots", "sari", "Les mots invariables", "affiches 2026", Object.keys(JEUX_MOTS).length, ROUTES["tbi-mots"] ? "#tbi-mots" : "", F),
+        ensSeq("nombres", "sari", "Les nombres en lettres", "", nQ("nombres"), "#tbi-nombres", F), ensSeq("muettes", "waeko", "Les consonnes muettes", "", nQ("muettes"), "#tbi-muettes", F), ensSeq("egroupe", "adi", "Le -e après un groupe de consonnes", "", nQ("egroupe"), "#tbi-egroupe", F)]) +
       ensTiroir("m-maths", "Maths · Techniques opératoires", [ensSeq("division", "nina", "La division en ligne", "CAL7 et CAL8", nQ("division"), ROUTES["tbi-division"] ? "#tbi-division" : "")]) +
       ensTiroir("m-maths", "Maths · Grandeurs et mesures", [
         ensSeq("monnaie", "mei", "La monnaie et les prix", "GM1", nQ("monnaie"), ROUTES["tbi-monnaie"] ? "#tbi-monnaie" : ""),
@@ -4135,6 +4152,312 @@
   });
 
   /* ---------- routeur ---------- */
+  /* ==========================================================================================
+     Orthographe : les dictées par régularités (D-134, demande de l’enseignante, 10/11/2026)
+     Trois séquences complètes : « Les nombres en lettres », « Les consonnes muettes », « Le -e après un groupe de consonnes ».
+     Leçons de classe 2026 reprises mot pour mot (sans leur numéro : l’ordre change d’une année à l’autre) ; « gr » ajouté à la règle
+     du -e (accord de l’enseignante). Démarche de Laura MARIE, « Mon répertoire de dictées par régularités » (registre D30) : de la
+     reconnaissance à la production (j’écoute et je montre, je complète, j’écris les mots, la dictée). Aucun texte du livre n’est repris :
+     mots, phrases et dictées écrits par Claude d’après les mots des leçons [PROPOSITION]. Jamais de mot mal écrit montré (Ouzoulias, D-132).
+     Marques dans les mots : [x] orange (la régularité, comme dans les leçons), {x} en gras, |x| jaune moutarde (attention).
+     ========================================================================================== */
+  var ORTH_IDS = ["nombres", "muettes", "egroupe"], OR = {}, OR_VU = {}, OR_TIRET = 79;
+  function orMarque(s) { return esc(s).replace(/\[([^\]]+)\]/g, '<span class="mi-c">$1</span>').replace(/\{([^}]+)\}/g, "<b>$1</b>").replace(/\|([^|]+)\|/g, '<span class="mi-m">$1</span>'); }
+  function orPlain(s) { return String(s).replace(/[\[\]{}|]/g, ""); }
+  function orCibles(s) { return esc(s).replace(/\[([^\]]+)\]/g, "<b>$1</b>"); }
+  /* morceaux pour la dictée : on coupe aux signes de ponctuation, puis par groupes de 5 mots au plus */
+  function orMorceaux(s) { var out = []; orPlain(s).replace(/([,.:;!?])\s+/g, "$1\n").split("\n").forEach(function (p) { var w = p.split(" "); while (w.length > 6) out.push(w.splice(0, 4).join(" ")); out.push(w.join(" ")); }); return out; }
+  var OR_U = ["zéro", "un", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf", "dix", "onze", "douze", "treize", "quatorze", "quinze", "seize"];
+  /* nombres en lettres de 0 à 79, et 100, avec des tirets entre chaque mot (orthographe de la leçon) */
+  function orNombre(n) { if (n === 100) return "cent"; if (n <= 16) return OR_U[n]; if (n < 20) return "dix-" + OR_U[n - 10];
+    if (n >= 70) return "soixante-" + (n === 71 ? "et-onze" : orNombre(n - 60));
+    var d = ["", "", "vingt", "trente", "quarante", "cinquante", "soixante"][Math.floor(n / 10)], u = n % 10; return u === 0 ? d : u === 1 ? d + "-et-un" : d + "-" + OR_U[u]; }
+  function orEcoute(texte, en, lib) { return '<p class="or-ecoute"><button class="coco-btn coco-btn--secondaire" type="button" data-action="qz-dire" data-v="' + esc(texte) + '">' + esc(lib || (en ? "Listen to the word" : "Écouter le mot")) + "</button></p>"; }
+  function orGros(s) { return '<p class="or-cue">' + esc(s) + "</p>"; }
+
+  /* ---------- 1. Les nombres en lettres (perso : Sari) ---------- */
+  OR.nombres = { titre: { fr: "Les nombres en lettres", en: "Numbers in words" }, objectif: { fr: "Je sais écrire les nombres en lettres.", en: "I can write numbers in words." }, perso: "sari",
+    rappelFiche: { fr: "Je mets des tirets entre chaque mot : vingt-et-un, soixante-dix-neuf.", en: "I put hyphens between every word: vingt-et-un, soixante-dix-neuf." },
+    rappel: [
+      { t: "choix", c: { fr: "Comment lit-on ce nombre : <b>46</b> ?", en: "How do we read this number: <b>46</b>?" }, o: ["quarante-six", "soixante-quatre", "trente-six"], a: 0, ex: { fr: "46 : 4 dizaines et 6 unités, quarante-six.", en: "46: 4 tens and 6 ones, quarante-six." } },
+      { t: "choix", c: { fr: "Quel nombre vient juste après <b>15</b> ?", en: "Which number comes just after <b>15</b>?" }, o: ["seize", "quatorze", "cinq"], a: 0, ex: { fr: "Après 15 vient 16 : seize.", en: "After 15 comes 16: seize." } },
+      { t: "choix", c: { fr: "Dans <b>64</b>, quel est le chiffre des dizaines ?", en: "In <b>64</b>, which digit is the tens digit?" }, o: ["6", "4", "64"], a: 0, ex: { fr: "64 = 6 dizaines et 4 unités.", en: "64 = 6 tens and 4 ones." } }],
+    /* « J’écoute et je montre » : le mot est dit, l’élève touche le mot qui l’écrit (tous les mots proposés sont bien écrits) */
+    carte: { c: { fr: "Écoute le nombre, puis touche le mot qui l’écrit.", en: "Listen to the number, then tap the word that writes it." }, lib: { fr: "Écouter le nombre", en: "Listen to the number" },
+      items: [["quatorze", ["quatre", "quatorze", "quarante"]], ["quarante", ["quatre", "quatorze", "quarante"]], ["quinze", ["cinq", "quinze", "cinquante"]], ["cinquante", ["cinq", "quinze", "cinquante"]],
+        ["seize", ["six", "seize", "soixante"]], ["soixante", ["six", "seize", "soixante"]], ["douze", ["deux", "douze", "dix"]], ["treize", ["trois", "treize", "trente"]], ["trente", ["trois", "treize", "trente"]], ["cent", ["cent", "cinq", "seize"]]] },
+    /* « Je complète » : [nombre, avant, lettres à écrire, après, aide] */
+    trous: [[14, "quator", "ze", "", "Les nombres de 11 à 16 finissent par -ze : onze, douze, treize, quatorze, quinze, seize."], [5, "cin", "q", "", "Attention : cinq finit par q."], [20, "vin", "gt", "", "Vingt finit par deux lettres muettes : g et t."],
+      [60, "soi", "x", "ante", "Soixante s’écrit avec un x."], [40, "", "qu", "arante", "Quarante commence par qu-, comme quatre."], [30, "tr", "en", "te", "Attention : trente s’écrit avec « en »."], [8, "", "h", "uit", "Huit commence par un h muet."],
+      [7, "se", "p", "t", "Sept a un p muet."], [50, "cinqu", "ante", "", "Quarante, cinquante, soixante finissent par -ante."], [2, "deu", "x", "", "Deux finit par un x muet."], [12, "dou", "ze", "", "Douze finit par -ze."], [100, "cen", "t", "", "Cent finit par un t muet, comme dans centaine."]],
+    ecrire: [14, 16, 21, 33, 46, 57, 60, 72, 79, 100, 18, 35],
+    /* phrases à compléter avec un nombre écrit en lettres */
+    gaps: [["Une semaine compte ___ jours.", "sept"], ["Dans une année, il y a ___ mois.", "douze"], ["Une heure dure ___ minutes.", "soixante"], ["Le mois de novembre compte ___ jours.", "trente"], ["Une araignée a ___ pattes.", "huit"],
+      ["Un quart d’heure dure ___ minutes.", "quinze"], ["Un mètre mesure ___ centimètres.", "cent"], ["Un triangle a ___ côtés.", "trois"], ["Un insecte a ___ pattes.", "six"], ["Une main a ___ doigts.", "cinq"], ["Un carré a ___ côtés.", "quatre"], ["Les vélos ont ___ roues.", "deux"]],
+    autres: function (w) { var G = [["quatre", "quatorze", "quarante"], ["cinq", "quinze", "cinquante"], ["six", "seize", "soixante"], ["deux", "douze", "dix"], ["trois", "treize", "trente"], ["sept", "cent", "seize"], ["huit", "dix", "trois"]], g = G.filter(function (x) { return x.indexOf(w) >= 0; })[0] || ["deux", "trois", "quatre"];
+      return g.filter(function (x) { return x !== w; }).slice(0, 2); },
+    entoure: { c: { fr: "Entoure la fin des nombres : -ze ou -ante.", en: "Circle the end of each number: -ze or -ante." }, mots: ["on[ze]", "dou[ze]", "trei[ze]", "quator[ze]", "quin[ze]", "sei[ze]", "quar[ante]", "cinqu[ante]", "soix[ante]"] },
+    dictees: {
+      1: ["Léo a [huit] ans.", "Il y a [douze] billes dans le sac.", "Nina mange [trois] letchis.", "Le chat a [quatre] pattes.", "Papa achète [six] mangues.", "Il est [onze] heures."],
+      2: ["[Vingt-et-un] élèves sont dans la classe.", "Tao a [quinze] billes et [seize] cartes.", "Le bus arrive dans [cinq] minutes.", "Une heure dure [soixante] minutes.", "La maîtresse range [trente] cahiers.", "Méi a [quarante] perles dans sa boîte."],
+      3: ["Le marchand vend [cinquante] letchis pour [cent] francs.", "Il y a [soixante-dix-neuf] coquillages dans le seau de Nina.", "Papi Tao a pêché [quatorze] poissons et [vingt-deux] crabes.", "Au marché, Sari compte [quarante-six] tomates et [trente-trois] citrons."] },
+    textes: [{ n: 1, titre: "Le goûter", t: "Il est [quatre] heures. Léo a [deux] pommes. Nina a [trois] gâteaux. Ils mangent dans la cour." },
+      { n: 2, titre: "À la plage", t: "Dimanche, nous sommes [quinze] à la plage. Tao trouve [vingt-et-un] coquillages. Méi en trouve [douze]. Le soir, nous rentrons à [six] heures." },
+      { n: 3, titre: "Le marché", t: "Samedi, Maman va au marché. Elle achète [seize] letchis, [cinq] papayes et [trente-deux] bananes. Le petit sac coûte [quarante] francs. Elle paie avec une pièce de [cinquante] francs." }],
+    objectifs: ["L’élève est capable d’écrire en lettres les nombres étudiés (de 0 à 79, et cent).", "L’élève écrit les fins -ze et -ante, le début qu- et les lettres muettes des nombres.", "L’élève met des tirets entre chaque mot d’un nombre écrit en lettres."] };
+  function orNbCartes(L) { return L.map(function (x) { return [String(x[0]), x[1]]; }); }
+  OR.nombres.blocs = function (en) {
+    var tirets = [21, 35, 46, 57, 64, 71, 79], n = OR_TIRET, mot = orNombre(n);
+    return [[en ? "-ze and -ante" : "-ze et -ante", "<p><b>-ze</b> : " + (en ? "tap a number to see how it is written." : "touche un nombre pour voir comment il s’écrit.") + "</p>" + orCartes("nombres", orNbCartes([[11, "on[ze]"], [12, "dou[ze]"], [13, "tr{ei}[ze]"], [14, "quator[ze]"], [15, "quin[ze]"], [16, "s{ei}[ze]"]])) +
+        "<p><b>-ante</b></p>" + orCartes("nombres", orNbCartes([[40, "quar[ante]"], [50, "cinqu[ante]"], [60, "soix[ante]"]])) + '<p class="or-attention">⚠ ' + (en ? "Careful:" : "Attention :") + "</p>" + orCartes("nombres", orNbCartes([[30, "tr|en|te"], [100, "c|en|t"]]))],
+      [en ? "qu-, silent letters and -x" : "qu-, lettres muettes et -x", "<p><b>qu-</b></p>" + orCartes("nombres", orNbCartes([[4, "[qu]atre"], [14, "[qu]atorze"], [40, "[qu]arante"], [15, "[qu]inze"], [50, "{c}in[qu]ante"]])) + '<p class="or-attention">⚠ ' + (en ? "Careful:" : "Attention :") + "</p>" + orCartes("nombres", orNbCartes([[5, "{c}in|q|"]])) +
+        "<p><b>" + (en ? "Silent letters" : "Lettres muettes") + "</b></p>" + orCartes("nombres", orNbCartes([[2, "deu[x]"], [3, "troi[s]"], [7, "se[p]t"], [8, "[h]uit"], [20, "vin[gt]"], [100, "{c}en[t]"]])) + '<p class="or-note">troi<span class="mi-c">s</span>ième · cen<span class="mi-c">t</span>aine</p>' +
+        "<p><b>-x</b></p>" + orCartes("nombres", orNbCartes([[6, "si[x]"], [60, "soi[x]ante"], [10, "di[x]"]]))],
+      [en ? "Hyphens" : "Les tirets", "<p>Je mets des <b>tirets</b> entre chaque mot : vingt-et-un, soixante-dix-neuf</p>" + '<div class="coco-row or-tirets">' + tirets.map(function (k) { return '<button class="coco-btn' + (k === n ? "" : " coco-btn--secondaire") + '" type="button" data-action="or-tiret" data-v="' + k + '" aria-pressed="' + (k === n) + '">' + k + "</button>"; }).join("") + "</div>" +
+        '<p class="or-tiret-mot"><b>' + n + "</b> = " + esc(mot).split("-").join('<span class="mi-c or-tiret">-</span>') + "</p>"]];
+  };
+  OR.nombres.jr = function (en) { return [
+    { t: "-ze", svg: '<div class="lx-illu lx-col jr-phrases">' + lxPop('<span class="jr-ph">' + orMarque("11 on[ze] · 12 dou[ze] · 13 tr{ei}[ze]") + "</span>", 0) + lxPop('<span class="jr-ph">' + orMarque("14 quator[ze] · 15 quin[ze] · 16 s{ei}[ze]") + "</span>", 2) + "</div>", txt: ["11 onze 12 douze", "13 treize 14 quatorze", "15 quinze 16 seize"] },
+    { t: "-ante", svg: '<div class="lx-illu lx-col jr-phrases">' + lxPop('<span class="jr-ph">' + orMarque("40 quar[ante] · 50 cinqu[ante] · 60 soix[ante]") + "</span>", 0) + lxPop('<span class="jr-ph">⚠ ' + orMarque("30 tr|en|te · 100 c|en|t") + "</span>", 2) + "</div>", txt: ["40 quarante", "50 cinquante", "60 soixante", "Attention : 30 trente, 100 cent"] },
+    { t: "qu-", svg: '<div class="lx-illu lx-col jr-phrases">' + lxPop('<span class="jr-ph">' + orMarque("4 [qu]atre · 14 [qu]atorze · 40 [qu]arante") + "</span>", 0) + lxPop('<span class="jr-ph">' + orMarque("15 [qu]inze · 50 {c}in[qu]ante") + "</span>", 1) + lxPop('<span class="jr-ph">⚠ ' + orMarque("5 {c}in|q|") + "</span>", 3) + "</div>", txt: ["4 quatre, 14 quatorze", "40 quarante", "15 quinze", "50 cinquante", "Attention : 5 cinq"] },
+    { t: en ? "Silent letters and -x" : "Lettres muettes et -x", svg: '<div class="lx-illu lx-col jr-phrases">' + lxPop('<span class="jr-ph">' + orMarque("2 deu[x] · 3 troi[s] · 7 se[p]t · 8 [h]uit") + "</span>", 0) + lxPop('<span class="jr-ph">' + orMarque("20 vin[gt] · 100 {c}en[t]") + "</span>", 1) + lxPop('<span class="jr-ph">' + orMarque("6 si[x] · 60 soi[x]ante · 10 di[x]") + "</span>", 3) + "</div>",
+      txt: ["2 deux", "3 trois (troisième)", "7 sept, 8 huit, 20 vingt", "100 cent (centaine)", "-x : 6 six, 60 soixante, 10 dix"] },
+    { t: en ? "Hyphens" : "Les tirets", svg: '<div class="lx-illu lx-col jr-phrases">' + lxPop('<span class="jr-ph">21 = vingt<span class="mi-c">-</span>et<span class="mi-c">-</span>un</span>', 0) + lxPop('<span class="jr-ph">79 = soixante<span class="mi-c">-</span>dix<span class="mi-c">-</span>neuf</span>', 2) + "</div>",
+      txt: ["Je mets des tirets entre chaque mot : vingt-et-un, soixante-dix-neuf"] }]; };
+  OR.nombres.jrPersos = [["sari", "presente"], ["sari", "reflechit"], ["sari", "idee"], ["sari", "content"], ["sari", "victoire"]];
+  OR.nombres.tbiQ = [
+    { fr: "Que remarquez-vous à la fin de ces nombres ?", en: "What do you notice at the end of these numbers?", illu: function () { return '<p class="tq-phrases"><span>onze · douze · treize</span><span>quatorze · quinze · seize</span></p>'; } },
+    { fr: "Écoutez : quarante, cinquante, soixante. Comment s’écrit la fin ?", en: "Listen: quarante, cinquante, soixante. How is the end written?", illu: function () { return '<p class="tq-phrases"><span>40 · 50 · 60</span></p>'; } },
+    { fr: "Comment s’écrit le début de ces nombres ?", en: "How is the beginning of these numbers written?", illu: function () { return '<p class="tq-phrases"><span>4 · 14 · 40 · 15 · 50</span></p>'; } },
+    { fr: "Quelles lettres ne s’entendent pas ?", en: "Which letters can’t you hear?", illu: function () { return '<p class="tq-phrases"><span>2 · 3 · 7 · 8 · 20 · 100</span></p>'; } },
+    { fr: "Comment écrit-on 21 et 79 en lettres ?", en: "How do we write 21 and 79 in words?", illu: function () { return '<p class="tq-phrases"><span>21 · 79</span></p>'; } }];
+
+  /* ---------- 2. Les consonnes muettes (perso : Waeko) ---------- */
+  var OR_MU_T = ["trot", "pot", "robot", "port", "fort", "sport", "mort", "enfant", "éléphant", "biscuit", "fruit", "bruit"], OR_MU_S = ["pas", "cadenas", "bras", "tapis", "colis", "radis", "bois", "trois", "mois"],
+    OR_MU_D = ["lézard", "cafard", "lard", "grand", "normand", "chaud", "crapaud"], OR_MU_X = ["amoureux", "vieux", "heureux", "doux", "roux", "époux"];
+  function orMuet(w) { return w.slice(0, -1) + "[" + w.slice(-1) + "]"; }
+  OR.muettes = { titre: { fr: "Les consonnes muettes", en: "Silent consonants" }, objectif: { fr: "Je sais écrire la consonne muette à la fin des mots.", en: "I can write the silent consonant at the end of words." }, perso: "waeko",
+    rappelFiche: { fr: "Beaucoup de noms et d’adjectifs masculins ont une consonne muette à la fin : t, s, d, x. Un mot de la même famille aide à la trouver : fruit > fruité.", en: "Many masculine nouns and adjectives end with a silent consonant: t, s, d, x. A word from the same family helps to find it: fruit > fruité." },
+    rappel: [
+      { t: "choix", c: { fr: "Quel est le féminin de « petit » ?", en: "What is the feminine of « petit »?" }, o: ["petite", "petits", "grand"], a: 0, ex: { fr: "Un petit chat, une petite chatte : au féminin, on entend le t.", en: "Un petit chat, une petite chatte: in the feminine, we hear the t." } },
+      { t: "choix", c: { fr: "Quel mot est de la même famille que « fruit » ?", en: "Which word is from the same family as « fruit »?" }, o: ["fruité", "frite", "fourmi"], a: 0, ex: { fr: "fruit, fruité, fruitier : ce sont des mots de la même famille.", en: "fruit, fruité, fruitier: these words are from the same family." } },
+      { t: "choix", c: { fr: "« Un chat », c’est…", en: "« Un chat » is…" }, o: [{ fr: "masculin", en: "masculine" }, { fr: "féminin", en: "feminine" }], a: 0, ex: { fr: "On dit « un chat » : c’est un nom masculin.", en: "We say « un chat »: it is a masculine noun." } }],
+    carte: { c: { fr: "Écoute le mot. Quelle est sa consonne muette ? Lève la bonne carte.", en: "Listen to the word. Which silent consonant does it end with? Raise the right card." }, cartes: ["t", "s", "d", "x"],
+      items: [["robot", 0], ["sport", 0], ["enfant", 0], ["biscuit", 0], ["fruit", 0], ["cadenas", 1], ["tapis", 1], ["radis", 1], ["bois", 1], ["mois", 1], ["lézard", 2], ["cafard", 2], ["grand", 2], ["chaud", 2], ["crapaud", 2], ["heureux", 3], ["vieux", 3], ["doux", 3], ["roux", 3], ["époux", 3]] },
+    trous: [["frui", "t", "", "Pense à : fruité."], ["spor", "t", "", "Pense à : sportif."], ["for", "t", "", "Pense à : forte."], ["peti", "t", "", "Pense à : petite."], ["enfan", "t", "", "Pense à : enfantin."], ["éléphan", "t", "", "Pense à : éléphanteau."],
+      ["gri", "s", "", "Pense à : grise."], ["gro", "s", "", "Pense à : grosse."], ["bra", "s", "", "Pense à : brassard."], ["tapi", "s", "", "Pense à : tapisser."], ["gran", "d", "", "Pense à : grande."], ["chau", "d", "", "Pense à : chaude."],
+      ["lézar", "d", "", "Pense à : lézarder."], ["heureu", "x", "", "Les mots en -eux s’écrivent avec un x : on ne l’entend jamais."], ["dou", "x", "", "Les mots en -oux s’écrivent avec un x : on ne l’entend jamais."], ["vieu", "x", "", "Les mots en -eux s’écrivent avec un x : on ne l’entend jamais."]],
+    ecrire: ["fruit", "robot", "enfant", "sport", "tapis", "radis", "bois", "lézard", "grand", "chaud", "heureux", "doux"],
+    devinettes: [["le contraire de petit", "grand"], ["le contraire de froid", "chaud"], ["un petit gâteau sec", "biscuit"], ["un animal qui saute dans la mare", "crapaud"], ["le contraire de jeune", "vieux"], ["on le met sur un vélo pour qu’on ne le vole pas", "cadenas"],
+      ["il court sur les murs au soleil", "lézard"], ["le contraire de dur", "doux"], ["le judo, le foot, la natation", "sport"], ["on le pose par terre dans le salon", "tapis"], ["le contraire de triste", "heureux"], ["une machine qui bouge toute seule", "robot"]],
+    gaps: [["Le ___ monte sur le mur.", "lézard"], ["Nina mange un ___ au chocolat.", "biscuit"], ["L’___ barrit dans la savane.", "éléphant"], ["Tao met un ___ sur son vélo.", "cadenas"], ["Maman achète des ___ au marché.", "radis"], ["Le ___ saute dans la mare.", "crapaud"],
+      ["Les bateaux entrent dans le ___.", "port"], ["Le chat de Waeko est ___ comme une carotte.", "roux"], ["Il fait ___ en été.", "chaud"], ["Le cagou se cache dans les ___.", "bois"], ["Dylan range ses jouets sous le ___.", "tapis"], ["Le ___ danse avec ses bras en métal.", "robot"]],
+    autres: function (w) { var L = OR_MU_T.concat(OR_MU_S, OR_MU_D, OR_MU_X).filter(function (x) { return x !== w; }); return HE.shuf(L).slice(0, 2); },
+    entoure: { c: { fr: "Entoure la consonne muette à la fin de chaque mot.", en: "Circle the silent consonant at the end of each word." }, mots: ["robot", "sport", "enfant", "éléphant", "biscuit", "fruit", "cadenas", "bras", "tapis", "radis", "bois", "mois", "lézard", "grand", "chaud", "crapaud", "heureux", "vieux", "doux", "roux"].map(orMuet) },
+    dictees: {
+      1: ["Le [lézard] dort au soleil.", "Nina mange un [biscuit].", "Le [chat] est sur le [tapis].", "Papa a un [grand] [robot].", "Le [crapaud] saute dans l’eau.", "Tao a un [fruit] dans son sac."],
+      2: ["Les [enfants] jouent dans les [bois].", "Le [vieux] [lézard] se cache sous le [tapis].", "Il fait [chaud] au [port] de Nouméa.", "Mon chat [roux] est très [heureux].", "Le [petit] [éléphant] suit sa maman.", "Maman met un [cadenas] sur le vélo."],
+      3: ["Ce [matin], un [gros] [crapaud] est sorti du [bois] en faisant un [bruit] étrange.", "Pendant [trois] [mois], Tao a fait du [sport] au bord du [port].", "Sur le [tapis] du salon, le chat [roux] mange un [biscuit] aux [fruits].", "Le [vieux] [robot] de Dylan ne marche plus : il fait un [bruit] [doux] et [lent]."] },
+    textes: [{ n: 1, titre: "Au jardin", t: "Le [chat] [gris] dort sous le [lit]. Le [lézard] court sur le [toit]. Il fait [chaud]." },
+      { n: 2, titre: "Le goûter de Waeko", t: "Après l’école, Waeko prend un [biscuit] et un [fruit]. Son [petit] frère est très [heureux] : il boit un [chocolat] [chaud]." },
+      { n: 3, titre: "Dans la forêt", t: "Au fond du [bois], Kakou le cagou cherche des vers. Un [gros] [crapaud] l’observe depuis un tronc. Soudain, un [bruit] [fort] fait fuir le [lézard] caché sous les feuilles. Le cagou, [heureux], reprend son repas." }],
+    objectifs: ["L’élève est capable d’écrire la consonne muette (t, s, d, x) à la fin des mots étudiés.", "L’élève cherche un mot de la même famille pour trouver la consonne muette (sauf pour le x).", "L’élève écrit sans erreur les mots étudiés dans une dictée de phrases."] };
+  OR.muettes.blocs = function (en) {
+    var fam = [["fruit", "fruité"], ["grand", "grande"], ["petit", "petite"], ["gros", "grosse"]];
+    return [[en ? "A silent consonant" : "Une consonne muette", "<ul><li>Beaucoup de <b>noms</b> et d’<b>adjectifs masculins</b> comportent une <b>consonne muette</b> en fin de mot.</li><li>Les plus courantes sont : <b class=\"mi-c\">t</b>, <b class=\"mi-c\">s</b>, <b class=\"mi-c\">d</b>, <b class=\"mi-c\">x</b>.</li><li>Les lettres <b class=\"mi-c\">c</b> et <b class=\"mi-c\">p</b> peuvent également se trouver à la fin des mots mais elles ne représentent que 2% des consonnes muettes</li></ul>"],
+      [en ? "A word from the same family" : "Un mot de la même famille", "<p>Chercher un <b>mot de la même famille</b> peut aider à trouver la consonne muette finale, sauf pour le x.</p><p><u>Exemple</u> : frui<b>t</b> &gt; fruité</p><p>" + (en ? "Tap a word to see a word from its family." : "Touche un mot pour voir un mot de sa famille.") + "</p>" +
+        orCartes("muettes", fam.map(function (x) { return [x[0].slice(0, -1) + "…", orMuet(x[0]) + " > " + x[1].replace(x[0].slice(-1), "[" + x[0].slice(-1) + "]")]; }))],
+      [en ? "Words to pick" : "Les mots à piocher", "<p>" + (en ? "Tap a word to see its silent consonant." : "Touche un mot pour voir sa consonne muette.") + "</p>" +
+        [["T", "38%", OR_MU_T], ["S", "15%", OR_MU_S], ["D", "5%", OR_MU_D], ["X", "8%", OR_MU_X]].map(function (g) { return '<p class="or-groupe"><b class="mi-c">' + g[0] + "</b> " + g[1] + "</p>" + orCartes("muettes", g[2].map(function (w) { return [w.slice(0, -1) + "…", orMuet(w)]; })); }).join("")]];
+  };
+  OR.muettes.jr = function (en) { var l = function (L) { return L.map(orMuet).map(orMarque).join(", "); }; return [
+    { t: en ? "A silent consonant" : "Une consonne muette", svg: '<div class="lx-illu lx-col jr-phrases">' + lxPop('<span class="jr-ph">' + orMarque("frui[t] · tapi[s]") + "</span>", 0) + lxPop('<span class="jr-ph">' + orMarque("gran[d] · dou[x]") + "</span>", 2) + "</div>",
+      txt: ["Beaucoup de <b>noms</b> et d’<b>adjectifs masculins</b> comportent une <b>consonne muette</b> en fin de mot.", "Les plus courantes sont : t, s, d, x.", "Les lettres c et p peuvent également se trouver à la fin des mots mais elles ne représentent que 2% des consonnes muettes"] },
+    { t: "T (38%)", svg: '<div class="lx-illu lx-col jr-phrases">' + lxPop('<span class="jr-ph">' + l(["trot", "pot", "robot"]) + "</span>", 0) + lxPop('<span class="jr-ph">' + l(["port", "fort", "sport", "mort"]) + "</span>", 1) + lxPop('<span class="jr-ph">' + l(["enfant", "éléphant"]) + "</span>", 2) + lxPop('<span class="jr-ph">' + l(["biscuit", "fruit", "bruit"]) + "</span>", 3) + "</div>", txt: ["-ot, -ort, -ant, -uit"] },
+    { t: "S (15%)", svg: '<div class="lx-illu lx-col jr-phrases">' + lxPop('<span class="jr-ph">' + l(["pas", "cadenas", "bras"]) + "</span>", 0) + lxPop('<span class="jr-ph">' + l(["tapis", "colis", "radis"]) + "</span>", 1) + lxPop('<span class="jr-ph">' + l(["bois", "trois", "mois"]) + "</span>", 2) + "</div>", txt: ["-as, -is, -ois"] },
+    { t: "D (5%) · X (8%)", svg: '<div class="lx-illu lx-col jr-phrases">' + lxPop('<span class="jr-ph">' + l(["lézard", "cafard", "lard"]) + "</span>", 0) + lxPop('<span class="jr-ph">' + l(["grand", "normand", "chaud", "crapaud"]) + "</span>", 1) + lxPop('<span class="jr-ph">' + l(["amoureux", "vieux", "heureux"]) + "</span>", 2) + lxPop('<span class="jr-ph">' + l(["doux", "roux", "époux"]) + "</span>", 3) + "</div>", txt: ["-ard, -and, -aud", "-eux, -oux"] },
+    { t: en ? "A word from the same family" : "Un mot de la même famille", svg: '<div class="lx-illu lx-col jr-phrases">' + lxPop('<span class="jr-ph">' + orMarque("frui[t] > frui[t]é") + "</span>", 0) + lxPop('<span class="jr-ph">' + orMarque("gran[d] > gran[d]e") + "</span>", 2) + "</div>",
+      txt: ["Chercher un <b>mot de la même famille</b> peut aider à trouver la consonne muette finale, sauf pour le x.", "Exemple : fruit > fruité"] }]; };
+  OR.muettes.jrPersos = [["waeko", "presente"], ["waeko", "reflechit"], ["waeko", "content"], ["waeko", "reflechit"], ["waeko", "idee"]];
+  OR.muettes.tbiQ = [
+    { fr: "Lisez ces mots à voix haute. Quelle lettre ne s’entend pas ?", en: "Read these words aloud. Which letter can’t you hear?", illu: function () { return '<p class="tq-phrases"><span>fruit · tapis · grand · doux</span></p>'; } },
+    { fr: "Quelle consonne muette ont tous ces mots ?", en: "Which silent consonant do all these words have?", illu: function () { return '<p class="tq-phrases"><span>robot · sport · enfant · biscuit</span></p>'; } },
+    { fr: "Et ceux-là ?", en: "And these ones?", illu: function () { return '<p class="tq-phrases"><span>cadenas · radis · bois</span></p>'; } },
+    { fr: "Et ceux-là ?", en: "And these ones?", illu: function () { return '<p class="tq-phrases"><span>lézard · grand · crapaud</span><span>heureux · doux · roux</span></p>'; } },
+    { fr: "Comment savoir qu’il y a un t à la fin de « fruit » ?", en: "How can we know there is a t at the end of « fruit »?", illu: function () { return '<p class="tq-phrases"><span>un fruit… un jus fruité</span></p>'; } }];
+
+  /* ---------- 3. Le -e après un groupe de consonnes (perso : Adi) ---------- */
+  var OR_EG_R = ["sucre", "propre", "contre", "arbre", "coffre", "livre", "prendre", "tigre"], OR_EG_L = ["muscle", "souple", "cartable", "trèfle", "ongle", "règle"], OR_EG_CH = ["biche", "poche", "ruche", "bouche", "mouche", "tache"];
+  function orGroupe(w) { return w.slice(0, -3) + "{" + w.slice(-3, -1) + "}[e]"; } /* sucre → su{cr}[e], biche → bi{ch}[e] */
+  OR.egroupe = { titre: { fr: "Le -e après un groupe de consonnes", en: "The -e after a group of consonants" }, objectif: { fr: "Je sais écrire le -e à la fin des mots qui finissent par un groupe de consonnes.", en: "I can write the final -e of words that end with a group of consonants." }, perso: "adi",
+    rappelFiche: { fr: "Tous les mots terminant par les groupes de consonnes cr, pr, tr, br, fr, vr, dr, gr, cl, pl, bl, fl, gl, ch prennent un -e à la fin.", en: "All words ending with the consonant groups cr, pr, tr, br, fr, vr, dr, gr, cl, pl, bl, fl, gl, ch take an -e at the end." },
+    rappel: [
+      { t: "choix", c: { fr: "Laquelle de ces lettres est une <b>voyelle</b> ?", en: "Which of these letters is a <b>vowel</b>?" }, o: ["a", "b", "r"], a: 0, ex: { fr: "Les voyelles : a, e, i, o, u, y. Les autres lettres sont des consonnes.", en: "The vowels: a, e, i, o, u, y. The other letters are consonants." } },
+      { t: "choix", c: { fr: "Laquelle de ces lettres est une <b>consonne</b> ?", en: "Which of these letters is a <b>consonant</b>?" }, o: ["t", "e", "i"], a: 0, ex: { fr: "t est une consonne ; e et i sont des voyelles.", en: "t is a consonant; e and i are vowels." } },
+      { t: "choix", c: { fr: "Écoute bien la fin du mot « livre ». Qu’entends-tu ?", en: "Listen carefully to the end of the word « livre ». What do you hear?" }, z: function (en) { return orEcoute("livre", en); }, o: ["vr", "li", "iv"], a: 0, ex: { fr: "Livre finit par les consonnes v et r : on entend « vr ».", en: "Livre ends with the consonants v and r: we hear « vr »." } }],
+    carte: { c: { fr: "Écoute le mot. Par quel groupe de consonnes finit-il ? Lève la bonne carte.", en: "Listen to the word. Which group of consonants does it end with? Raise the right card." }, cartes: ["cr, pr, tr, br, fr, vr, dr, gr + e", "cl, pl, bl, fl, gl + e", "ch + e"],
+      items: OR_EG_R.map(function (w) { return [w, 0]; }).concat(["table", "sable", "cercle"].map(function (w) { return [w, 1]; }), OR_EG_L.map(function (w) { return [w, 1]; }), OR_EG_CH.map(function (w) { return [w, 2]; }), [["chèvre", 0], ["zèbre", 0], ["vache", 2], ["niche", 2]]) },
+    trous: [["su", "cre", "", "Le mot finit par le groupe cr : n’oublie pas le e."], ["ar", "bre", "", "Le mot finit par le groupe br : n’oublie pas le e."], ["li", "vre", "", "Le mot finit par le groupe vr : n’oublie pas le e."], ["ti", "gre", "", "Le mot finit par le groupe gr : n’oublie pas le e."],
+      ["co", "ffre", "", "Le mot finit par le groupe fr (avec deux f) : n’oublie pas le e."], ["ta", "ble", "", "Le mot finit par le groupe bl : n’oublie pas le e."], ["rè", "gle", "", "Le mot finit par le groupe gl : n’oublie pas le e."], ["sou", "ple", "", "Le mot finit par le groupe pl : n’oublie pas le e."],
+      ["mou", "che", "", "Le mot finit par ch : n’oublie pas le e."], ["po", "che", "", "Le mot finit par ch : n’oublie pas le e."], ["ru", "che", "", "Le mot finit par ch : n’oublie pas le e."], ["con", "tre", "", "Le mot finit par le groupe tr : n’oublie pas le e."]],
+    ecrire: ["arbre", "livre", "tigre", "sucre", "table", "règle", "cartable", "mouche", "poche", "biche", "chèvre", "propre"],
+    devinettes: [["on en met dans le gâteau", "sucre"], ["il a des branches et des feuilles", "arbre"], ["on le lit", "livre"], ["un grand félin rayé", "tigre"], ["on y cache un trésor", "coffre"], ["on mange dessus", "table"], ["elle sert à tracer des traits", "règle"],
+      ["un petit insecte qui vole", "mouche"], ["on y met les mains", "poche"], ["la maison des abeilles", "ruche"], ["le contraire de sale", "propre"], ["on y range ses cahiers pour aller à l’école", "cartable"]],
+    gaps: [["Le ___ se cache dans les herbes.", "tigre"], ["Je mets du ___ dans mon lait.", "sucre"], ["Léo range ses cahiers dans son ___.", "cartable"], ["Les abeilles vivent dans la ___.", "ruche"], ["Une ___ vole autour de la lampe.", "mouche"], ["Nina lit un ___ de contes.", "livre"],
+      ["Le cagou se cache derrière un ___.", "arbre"], ["Je trace un trait avec ma ___.", "règle"], ["Il a une ___ de peinture sur son tee-shirt.", "tache"], ["Dylan met sa main dans sa ___.", "poche"], ["Une ___ court dans la forêt.", "biche"], ["Le pirate cache son trésor dans un ___.", "coffre"]],
+    autres: function (w) { var L = OR_EG_R.concat(OR_EG_L, OR_EG_CH).filter(function (x) { return x !== w && x !== "prendre" && x !== "propre" && x !== "contre" && x !== "souple"; }); return HE.shuf(L).slice(0, 2); },
+    entoure: { c: { fr: "Entoure le groupe de consonnes et le e à la fin de chaque mot.", en: "Circle the group of consonants and the e at the end of each word." }, mots: OR_EG_R.concat(OR_EG_L, OR_EG_CH).map(orGroupe) },
+    dictees: {
+      1: ["Le [tigre] dort.", "Léo lit un [livre].", "Il y a du [sable] sur la [table].", "La [mouche] vole.", "Nina ouvre son [cartable].", "La [chèvre] mange de l’herbe."],
+      2: ["Les abeilles sortent de la [ruche].", "Tao range sa [règle] dans sa [poche].", "Le [tigre] se cache [contre] un [arbre].", "Maman met du [sucre] dans le gâteau.", "Une [biche] boit au bord de la rivière.", "Le pirate ouvre son [coffre] avec une clé."],
+      3: ["Le [maître] dessine un [cercle] sur la [vitre] de la classe.", "Dans la forêt, une [biche] [souple] saute par-dessus un [arbre] tombé.", "Adi a fait une [tache] de [sucre] sur la couverture de son [livre].", "Sur la [table] du salon, Papi Tao a posé sa [montre] et un [cadre] doré."] },
+    textes: [{ n: 1, titre: "Au zoo", t: "Au zoo, je vois un [tigre] et un [zèbre]. La [chèvre] mange de l’herbe." },
+      { n: 2, titre: "Le cartable d’Adi", t: "Adi ouvre son [cartable]. Il prend son [livre], sa [règle] et un [cadre] pour sa photo. Une [mouche] se pose sur la [table]." },
+      { n: 3, titre: "La ruche du jardin", t: "Au fond du jardin, Papi Tao a installé une [ruche] [contre] le vieil [arbre]. Les abeilles fabriquent du miel, plus doux que le [sucre]. Adi les regarde de loin, la main devant la [bouche] : il ne veut surtout pas les déranger." }],
+    objectifs: ["L’élève est capable d’écrire le e final des mots qui finissent par cr, pr, tr, br, fr, vr, dr, gr, cl, pl, bl, fl, gl ou ch.", "L’élève écrit sans erreur les mots étudiés dans une dictée de phrases."] };
+  OR.egroupe.blocs = function (en) {
+    var c = function (L) { return orCartes("egroupe", L.map(function (w) { return [w.slice(0, -3) + "…", orGroupe(w)]; })); };
+    return [[en ? "The rule" : "La règle", "<ul><li>Tous les mots terminant par les groupes de consonnes <b>cr</b>, <b>pr</b>, <b>tr</b>, <b>br</b>, <b>fr</b>, <b>vr</b>, <b>dr</b>, <b>gr</b>, <b>cl</b>, <b>pl</b>, <b>bl</b>, <b>fl</b>, <b>gl</b>, <b>ch</b>, prennent un -<b class=\"mi-c\">e</b> à la fin.</li></ul>" + '<p class="or-plus">+ <span class="mi-c">e</span></p>'],
+      [en ? "Words to pick" : "Les mots à piocher", "<p>" + (en ? "Tap a word to see how it ends." : "Touche un mot pour voir comment il finit.") + '</p><p class="or-groupe"><b class="mi-c">cr, pr, tr, br, fr, vr, dr, gr</b></p>' + c(OR_EG_R) + '<p class="or-groupe"><b class="mi-c">cl, pl, bl, fl, gl</b></p>' + c(OR_EG_L) + '<p class="or-groupe"><b class="mi-c">ch</b></p>' + c(OR_EG_CH)]];
+  };
+  OR.egroupe.jr = function (en) { var l = function (L) { return L.map(orGroupe).map(orMarque).join(", "); }; return [
+    { t: en ? "The rule" : "La règle", svg: '<div class="lx-illu lx-col jr-phrases">' + lxPop('<span class="jr-ph or-grand">+ <span class="mi-c">e</span></span>', 0) + "</div>", txt: ["Tous les mots terminant par les groupes de consonnes <b>cr</b>, <b>pr</b>, <b>tr</b>, <b>br</b>, <b>fr</b>, <b>vr</b>, <b>dr</b>, <b>gr</b>, <b>cl</b>, <b>pl</b>, <b>bl</b>, <b>fl</b>, <b>gl</b>, <b>ch</b>, prennent un -e à la fin."] },
+    { t: "cr, pr, tr, br, fr, vr, dr, gr", svg: '<div class="lx-illu lx-col jr-phrases">' + lxPop('<span class="jr-ph">' + l(["sucre", "propre", "contre"]) + "</span>", 0) + lxPop('<span class="jr-ph">' + l(["arbre", "coffre", "livre"]) + "</span>", 1) + lxPop('<span class="jr-ph">' + l(["prendre", "tigre"]) + "</span>", 2) + "</div>", txt: ["sucre, propre, contre, arbre, coffre, livre, prendre, tigre"] },
+    { t: "cl, pl, bl, fl, gl", svg: '<div class="lx-illu lx-col jr-phrases">' + lxPop('<span class="jr-ph">' + l(["muscle", "souple", "cartable"]) + "</span>", 0) + lxPop('<span class="jr-ph">' + l(["trèfle", "ongle", "règle"]) + "</span>", 2) + "</div>", txt: ["muscle, souple, cartable, trèfle, ongle, règle"] },
+    { t: "ch", svg: '<div class="lx-illu lx-col jr-phrases">' + lxPop('<span class="jr-ph">' + l(["biche", "poche", "ruche"]) + "</span>", 0) + lxPop('<span class="jr-ph">' + l(["bouche", "mouche", "tache"]) + "</span>", 2) + "</div>", txt: ["biche, poche, ruche, bouche, mouche, tache"] }]; };
+  OR.egroupe.jrPersos = [["adi", "presente"], ["adi", "reflechit"], ["adi", "idee"], ["adi", "victoire"]];
+  OR.egroupe.tbiQ = [
+    { fr: "Observez la fin de ces mots. Que remarquez-vous ?", en: "Look at the end of these words. What do you notice?", illu: function () { return '<p class="tq-phrases"><span>sucre · arbre · table · biche</span></p>'; } },
+    { fr: "Par quelles consonnes finissent ces mots ? Qu’ajoute-t-on ?", en: "Which consonants do these words end with? What do we add?", illu: function () { return '<p class="tq-phrases"><span>su… · ar… · li… · ti…</span></p>'; } },
+    { fr: "Et ceux-là ?", en: "And these ones?", illu: function () { return '<p class="tq-phrases"><span>carta… · rè… · tr…</span></p>'; } },
+    { fr: "Et ceux-là ?", en: "And these ones?", illu: function () { return '<p class="tq-phrases"><span>bi… · po… · mou…</span></p>'; } }];
+
+  /* ---------- outils communs ---------- */
+  function orCartes(id, L) {
+    return '<div class="or-cartes">' + L.map(function (x) { var cle = id + "|" + x[1], vu = OR_VU[cle];
+      return '<button type="button" class="or-carte' + (vu ? " vu" : "") + '" data-action="or-voir" data-v="' + esc(cle) + '" aria-pressed="' + !!vu + '"><span class="or-cue">' + esc(x[0]) + '</span><span class="or-mot">' + (vu ? orMarque(x[1]) : "?") + "</span></button>"; }).join("") + "</div>";
+  }
+  function actionOrth(a, el) {
+    if (a === "or-voir") OR_VU[el.dataset.v] = !OR_VU[el.dataset.v];
+    else if (a === "or-tiret") OR_TIRET = +el.dataset.v;
+  }
+  function orLecon(id) { var O = OR[id], en = langue === "en"; return lxLecon(id, tr(O.titre), O.blocs(en), O.jrFn, "francais"); }
+  /* le mot dit à l’oral (les nombres sont dits en lettres) */
+  function orDit(id, x) { return id === "nombres" ? orNombre(x) : x; }
+  function orDicteeQs(id) { var O = OR[id], n = lire("dictee-niv", 1), P = HE.shuf(O.dictees[n]).slice(0, 3), T = O.textes.filter(function (x) { return x.n === n; })[0];
+    return P.map(function (s) { return { t: "dictee", texte: s, c: { fr: "Écoute la phrase, écris-la sur ton cahier, puis touche « J’ai fini ».", en: "Listen to the sentence, write it in your exercise book, then tap « I’ve finished »." } }; })
+      .concat(T ? [{ t: "dictee", texte: T.t, titre: T.titre, c: { fr: "Écoute le petit texte, écris-le sur ton cahier, puis touche « J’ai fini ».", en: "Listen to the short text, write it in your exercise book, then tap « I’ve finished »." } }] : []); }
+  function orQuiz(id) {
+    var O = OR[id], p = O.perso, lbl = function (o) { return typeof o === "string" ? { fr: o, en: o } : o; };
+    return { matiere: "francais", jeux: {
+      rappel: { perso: p, etape: 0, fr: "Je me rappelle", en: "I remember", dfr: id === "nombres" ? "Lire un nombre ; les mots-nombres." : id === "muettes" ? "Masculin et féminin ; un mot de la même famille." : "Voyelles et consonnes.", den: id === "nombres" ? "Reading a number; number words." : id === "muettes" ? "Masculine and feminine; a word from the same family." : "Vowels and consonants.",
+        gen: function () { return O.rappel.map(function (q) { return { t: q.t, c: q.c, z: q.z, o: q.o.map(lbl), a: q.a, ex: q.ex }; }); } },
+      carte: { perso: p, etape: 1, fr: "J’écoute et je montre", en: "I listen and show", dfr: id === "nombres" ? "J’écoute un nombre et je touche le mot qui l’écrit." : "J’écoute un mot et je lève la bonne carte.", den: id === "nombres" ? "I listen to a number and tap the word that writes it." : "I listen to a word and raise the right card.",
+        gen: function () { return HE.shuf(O.carte.items).slice(0, 8).map(function (x) {
+          if (id === "nombres") { var o = HE.shuf(x[1]); return { t: "choix", c: O.carte.c, z: function (en) { return orEcoute(x[0], en, tr(O.carte.lib)); }, o: o.map(lbl), a: o.indexOf(x[0]), ex: { fr: "On écrit « " + x[0] + " ».", en: "We write « " + x[0] + " »." } }; }
+          return { t: "choix", c: O.carte.c, z: function (en) { return orEcoute(x[0], en); }, o: O.carte.cartes.map(lbl), a: x[1],
+            ex: { fr: "On écrit « " + orMarque(id === "muettes" ? orMuet(x[0]) : orGroupe(x[0])) + " ».", en: "We write « " + orMarque(id === "muettes" ? orMuet(x[0]) : orGroupe(x[0])) + " »." } }; }); } },
+      completer: { perso: p, etape: 2, fr: "Je complète", en: "I complete", dfr: "J’écris les lettres qui manquent.", den: "I write the missing letters.",
+        gen: function () { return HE.shuf(O.trous).slice(0, 8).map(function (x) { var nb = id === "nombres", T = nb ? x.slice(1) : x, mot = T[0] + T[1] + T[2];
+          return { t: "ecrire", c: { fr: "Écris les lettres qui manquent.", en: "Write the missing letters." }, z: function (en) { return nb ? orGros(String(x[0])) : orEcoute(mot, en); }, avant: T[0], apres: T[2], r: [T[1]],
+            ex: { fr: "« " + esc(T[0]) + '<span class="mi-c">' + esc(T[1]) + "</span>" + esc(T[2]) + " » — " + esc(T[3]), en: "« " + esc(T[0]) + '<span class="mi-c">' + esc(T[1]) + "</span>" + esc(T[2]) + " » — " + esc(T[3]) } }; }); } },
+      ecrire: { perso: p, etape: 2, fr: id === "nombres" ? "J’écris les nombres" : "J’écris les mots", en: id === "nombres" ? "I write the numbers" : "I write the words", dfr: id === "nombres" ? "J’écris les nombres en lettres." : "J’écoute le mot, puis je l’écris.", den: id === "nombres" ? "I write numbers in words." : "I listen to the word, then I write it.",
+        gen: function () { return HE.shuf(O.ecrire).slice(0, 8).map(function (x) { var nb = id === "nombres", mot = nb ? orNombre(x) : x;
+          return { t: "ecrire", c: nb ? { fr: "Écris ce nombre en lettres, avec des tirets entre chaque mot.", en: "Write this number in words, with hyphens between every word." } : { fr: "Écoute le mot, puis écris-le.", en: "Listen to the word, then write it." },
+            z: function (en) { return nb ? orGros(String(x)) : orEcoute(mot, en); }, r: [mot], ex: { fr: "On écrit « " + (nb ? esc(mot) : orMarque(id === "muettes" ? orMuet(mot) : orGroupe(mot))) + " ».", en: "We write « " + (nb ? esc(mot) : orMarque(id === "muettes" ? orMuet(mot) : orGroupe(mot))) + " »." } }; }); } },
+      dictee: { perso: p, etape: 3, fr: "La dictée", en: "Dictation", dfr: "J’écris des phrases et un petit texte dictés, puis je me corrige.", den: "I write dictated sentences and a short text, then I check them.", gen: function () { return orDicteeQs(id); } }
+    } };
+  }
+  /* au TBI : « j’écoute et je montre » puis « j’écris sur l’ardoise » */
+  function orTq(id) { var O = OR[id], qs = [], lbl = function (o) { return typeof o === "string" ? { fr: o, en: o } : o; };
+    var bouton = function (texte, en) { return '<p class="tq-ecoute"><button class="coco-btn" type="button" data-action="tq-dire" data-v="' + esc(texte) + '">' + (en ? "Listen" : "Écouter") + "</button></p>"; };
+    HE.shuf(O.carte.items).slice(0, 5).forEach(function (x) {
+      if (id === "nombres") { var o = HE.shuf(x[1]); qs.push({ t: "choix", c: O.carte.c, z: function (en, voir) { return voir ? '<span class="mi-mot">' + esc(x[0]) + "</span>" : bouton(x[0], en); }, o: o.map(lbl), a: o.indexOf(x[0]), ex: { fr: "On écrit « " + x[0] + " ».", en: "We write « " + x[0] + " »." } }); return; }
+      var m = id === "muettes" ? orMuet(x[0]) : orGroupe(x[0]);
+      qs.push({ t: "choix", c: O.carte.c, z: function (en, voir) { return voir ? '<span class="mi-mot">' + orMarque(m) + "</span>" : bouton(x[0], en); }, o: O.carte.cartes.map(lbl), a: x[1], ex: { fr: "On écrit « " + orPlain(m) + " ».", en: "We write « " + orPlain(m) + " »." } }); });
+    HE.shuf(O.ecrire).slice(0, 5).forEach(function (x) { var nb = id === "nombres", mot = nb ? orNombre(x) : x, m = nb ? mot : id === "muettes" ? orMuet(mot) : orGroupe(mot);
+      qs.push({ t: "ecrit", c: nb ? { fr: "Écris ce nombre en lettres sur ton ardoise.", en: "Write this number in words on your board." } : { fr: "Écoute le mot, puis écris-le sur ton ardoise.", en: "Listen to the word, then write it on your board." },
+        z: function (en, voir) { return voir ? '<span class="mi-mot">' + orMarque(m) + "</span>" : nb ? '<p class="or-cue">' + x + "</p>" : bouton(mot, en); }, ex: { fr: "On écrit « " + mot + " ».", en: "We write « " + mot + " »." } }); });
+    return HE.shuf(qs); }
+  /* fiche enseignante : toutes les dictées, à lire en classe */
+  function orDicteesFiche(id) { var O = OR[id], N = ["", "★ Niveau simple", "★★ Niveau modéré", "★★★ Niveau complexe"];
+    return '<section><h2>Les dictées (à lire en classe)</h2><p>Les mots en gras sont les mots de la régularité. Les mêmes dictées sont lues par le site dans « La dictée ».</p><div class="f-deux">' + [1, 2, 3].map(function (n) { var T = O.textes.filter(function (x) { return x.n === n; })[0];
+      return "<section><h3>" + N[n] + "</h3><ul>" + O.dictees[n].map(function (s) { return "<li>" + orCibles(s) + "</li>"; }).join("") + "</ul>" + (T ? "<p><b>« " + esc(T.titre) + " »</b> : " + orCibles(T.t) + "</p>" : "") + "</section>"; }).join("") + "</div></section>"; }
+  function orFiche(id) { var O = OR[id], F = OR_FICHE[id];
+    return ficheSeq({ seq: id, mat: "francais", prog: id, dom: "Français · Étude de la langue (orthographe)", tbi: "#tbi-" + id,
+      seances: [
+        ["Séance 1", "Découverte. Découvrir la régularité : observer des mots, formuler la règle avec les élèves.", "Au TBI (découverte guidée) · Revoir la leçon · Je me rappelle"],
+        ["Séance 2", "Évocation et reconnaissance. Chercher d’autres mots ; reconnaître la régularité à l’oral (je te dis, tu montres).", "J’écoute et je montre · Au TBI (ardoises)"],
+        ["Séance 3", "Écrire les mots. Compléter, puis écrire les mots de la leçon.", "Je complète · " + (id === "nombres" ? "J’écris les nombres" : "J’écris les mots")],
+        ["Séance 4", "Dictées. Écrire des phrases puis un petit texte dictés, puis se corriger (3 niveaux).", "La dictée · dictées à lire en classe ci-dessous"],
+        ["Séance 5", "Évaluation. Évaluer les objectifs de la séquence.", "Fiche d’exercices (3 niveaux, corrigé, correction au TBI)"]],
+      erreurs: F.erreurs, conseils: F.conseils.concat(["Aucun mot mal écrit n’est montré aux élèves : on ne choisit jamais entre plusieurs écritures d’un même mot (principe d’Ouzoulias).", "La voix des activités se règle dans Espace enseignante › Voix de la dictée (voix et vitesse).", "La fiche d’exercices existe en 3 niveaux (★, ★★, ★★★), avec les mêmes objectifs ; le même numéro redonne les mêmes exercices, pour corriger au TBI."]),
+      prolonger: F.prolonger, extra: orDicteesFiche(id), sources: F.sources }); }
+  var OR_FICHE = {
+    nombres: { erreurs: ["Oublier les tirets, ou n’en mettre qu’un : « vingt et un », « soixante dix-neuf » ; la leçon demande un tiret entre chaque mot.", "Écrire la fin -ze comme on l’entend (« -se ») : onze, douze… seize finissent par -ze.", "Oublier les lettres muettes : deux, trois, sept, huit, vingt, cent.", "Confondre trente et les mots en -ante (« trante ») ; écrire cinq sans q.", "Confondre quatorze, quarante et quatre, ou six, seize et soixante, à l’oral comme à l’écrit."],
+      conseils: ["Code de la leçon : la partie qui se répète en orange, les points d’attention en jaune moutarde."], prolonger: ["Écrire les nombres en lettres sur les chèques fictifs de la classe (monnaie) ou dans les problèmes.", "Repérer les nombres écrits en lettres dans les albums et les documents de la classe.", "Plus tard : quatre-vingts, deux-cents (le s de vingt et de cent)."],
+      sources: "Sources : leçon de classe « Les nombres en lettres » (2026) ; démarche de Laura MARIE, « Mon répertoire de dictées par régularités » (L’Atelier de l’orthophoniste, 2025), aucune dictée reprise ; programmes de Nouvelle-Calédonie 2021, repères de progressivité de la DENC (cycle 2, français p. 30, mathématiques p. 4 et 5)." },
+    muettes: { erreurs: ["Écrire le mot sans sa consonne muette (« frui », « gran ») : faire chercher un mot de la même famille (fruité, grande).", "Choisir la mauvaise consonne (t, s ou d) : le mot de la même famille la fait entendre.", "Chercher un mot de la même famille pour le x : ça ne marche pas (doux, heureux) ; les mots en -eux, -oux s’apprennent.", "Ajouter une consonne muette là où il n’y en a pas : vérifier avec le féminin."],
+      conseils: ["Code de la leçon : la consonne muette en orange."], prolonger: ["Construire une affiche de la classe : un mot, un mot de sa famille (petit / petite, sport / sportif).", "Jeu oral : « je dis le féminin, tu trouves la consonne muette ».", "Revoir les lettres muettes des nombres (deux, trois, vingt, cent) avec la séquence « Les nombres en lettres »."],
+      sources: "Sources : leçon de classe « Écrire les mots avec des consonnes muettes » (2026), d’après la fiche 1 de Laura MARIE, « Mon répertoire de dictées par régularités » (2025), aucune dictée reprise ; pourcentages : Laura MARIE, « Mon répertoire des régularités orthographiques » ; programmes de Nouvelle-Calédonie 2021, repères de progressivité de la DENC (cycle 2, français p. 9, 28 et 30)." },
+    egroupe: { erreurs: ["Oublier le e final (« sucr », « arbr ») : on ne l’entend pas, mais il est obligatoire après ces groupes.", "Écrire « ch » sans e (« mouch »).", "Mal écrire le groupe lui-même (« abre » pour arbre) : faire épeler la fin du mot à l’oral.", "Doubler une consonne à tort, ou oublier le double f de coffre."],
+      conseils: ["Code de la leçon : le groupe de consonnes en gras, le e en orange."], prolonger: ["Chercher d’autres mots en -tre, -ble, -che dans les lectures de la classe et compléter l’affiche.", "Jeu oral « Lève la carte » : cr…, cl…, ch…", "Faire relire les écrits de la classe en cherchant les mots qui finissent par un groupe de consonnes : le e est-il là ?"],
+      sources: "Sources : leçon de classe « Écrire les mots avec -e après un groupe de consonnes » (2026), d’après la fiche 3 de Laura MARIE, « Mon répertoire de dictées par régularités » (2025), aucune dictée reprise ; « gr » ajouté à la règle (accord de l’enseignante) ; programmes de Nouvelle-Calédonie 2021, repères de progressivité de la DENC (cycle 2, français p. 27, 28 et 30)." } };
+  PROG.nombres = { ref: "Français · Étude de la langue (orthographe lexicale) · Mathématiques (nombres)", att: PROG.mots.att, socle: [1, 2], comp: "Comprendre le fonctionnement de la langue : s’initier à l’orthographe lexicale. En mathématiques : nommer, lire, écrire, représenter des nombres entiers.", rp: "français p. 30 ; mathématiques p. 4 et 5",
+    reperes: ["Il connaît l’orthographe des mots étudiés.", "Il raisonne en fonction des catégories de mots et de la morphologie pour orthographier correctement les mots.", "Utiliser diverses représentations des nombres (écritures en chiffres et en lettres, noms à l’oral, graduations sur une demi-droite, constellations sur des dés, doigts de la main…)."] };
+  PROG.muettes = { ref: "Français · Étude de la langue (orthographe lexicale)", att: PROG.mots.att, socle: [1, 2], comp: "Comprendre le fonctionnement de la langue : maîtriser les relations entre l’oral et l’écrit ; s’initier à l’orthographe lexicale.", rp: "français p. 9, 28 et 30",
+    reperes: ["Il repère dans un mot la présence de lettres muettes en appui sur ses connaissances en grammaire.", "Il explique le rôle des lettres muettes.", "Il raisonne en fonction des catégories de mots et de la morphologie pour orthographier correctement les mots."] };
+  PROG.egroupe = { ref: "Français · Étude de la langue (correspondances grapho-phoniques)", att: PROG.mots.att, socle: [1, 2], comp: "Comprendre le fonctionnement de la langue : maîtriser les relations entre l’oral et l’écrit ; s’initier à l’orthographe lexicale.", rp: "français p. 27, 28 et 30",
+    reperes: ["Il consolide l’ensemble des phonèmes du français et des graphèmes associés.", "Il observe et relève les phénomènes irréguliers afin de les mémoriser progressivement.", "Il connaît l’orthographe des mots étudiés."] };
+
+  /* ---------- fiches d’exercices en 3 niveaux (même structure que les mots invariables, D-132) ---------- */
+  function orTrouFiche(id, x, premiere) { var nb = id === "nombres", T = nb ? x.slice(1) : x, mot = T[0] + T[1] + T[2];
+    return premiere ? { cue: nb ? x[0] : "", before: mot.charAt(0), seg: mot.slice(1), after: "" } : { cue: nb ? x[0] : "", before: T[0], seg: T[1], after: T[2] }; }
+  function orTrousHtml(L) { var dev = L.some(function (x) { return x.indice; });
+    return '<ul class="ex-fr ' + (dev ? "ex-devinettes" : "ex-mots") + '">' + L.map(function (x) { return "<li>" + (x.cue !== "" ? "<b>" + x.cue + "</b> : " : "") + (x.indice ? '<span class="ex-indice">' + esc(x.indice) + "</span> → " : "") + esc(x.before) + exT(esc(x.seg)) + esc(x.after) + "</li>"; }).join("") + "</ul>"; }
+  function orMotsDictee(id, n) { return HE.shuf(OR[id].ecrire).slice(0, n); }
+  function orExos(id, d, en, niv) { var O = OR[id], nb = id === "nombres";
+    var dev = d.trous.some(function (x) { return x.indice; });
+    var ex = [{ c: dev ? (en ? "Find the word and write it: its first letter is given." : "Trouve le mot et écris-le : sa première lettre est donnée.") : (en ? "Fill in the missing letters." : "Complète les lettres qui manquent."), q: orTrousHtml(d.trous), r: d.trous.map(function (x) { return (x.cue !== "" ? x.cue + " : " : "") + esc(x.before + x.seg + x.after); }).join(" · ") }];
+    ex.push({ c: niv === 3 ? (nb ? (en ? "Complete each sentence: write the number in words." : "Complète chaque phrase en écrivant le nombre en lettres.") : (en ? "Complete each sentence with a word from the lesson." : "Complète chaque phrase avec un mot de la leçon.")) : (en ? "Complete each sentence with a word from the list." : "Complète chaque phrase avec un mot de la liste."),
+      q: (niv === 3 ? "" : '<p class="ex-fr ex-banque">' + HE.shuf(d.phrases.map(function (x) { return x[1]; })).map(esc).join(" · ") + "</p>") + '<ul class="ex-fr ex-phrases">' + d.phrases.map(function (x) { return "<li>" + esc(x[0]).split("___").join(exT(esc(x[1]))) + "</li>"; }).join("") + "</ul>", r: d.phrases.map(function (x) { return esc(x[1]); }).join(" · ") });
+    if (nb) ex.push({ c: en ? "Write the numbers in words." : "Écris les nombres en lettres.", q: '<ol class="ex-dictee ex-deux-col-ol">' + d.mots.map(function (x) { return "<li><b>" + x + "</b> : " + exT(esc(orNombre(x)), true) + "</li>"; }).join("") + "</ol>", r: d.mots.map(function (x) { return x + " : " + orNombre(x); }).join(" · ") });
+    else ex.push({ c: en ? "Word dictation: write the words your teacher reads." : "Dictée de mots : écris les mots que dit la maîtresse.", q: '<ol class="ex-dictee ex-deux-col-ol">' + d.mots.map(function (x) { return "<li>" + exT(esc(x), true) + "</li>"; }).join("") + "</ol>", r: (en ? "Words to read aloud: " : "Mots à dicter : ") + d.mots.join(" · ") });
+    ex.push(moDicteePhrases(d.dicteePh.map(orPlain), en));
+    return ex; }
+  function orExosDef(id) { var O = OR[id];
+    EXOS[id] = { seq: "seq-" + id, matiere: "francais", titre: function () { return tr(O.titre); }, rappel: function (en) { return en ? O.rappelFiche.en : O.rappelFiche.fr; },
+      tirer: function () { return { trous: HE.shuf(O.trous).slice(0, 6).map(function (x) { return orTrouFiche(id, x); }), phrases: HE.shuf(O.gaps).slice(0, 4), mots: orMotsDictee(id, 6), dicteePh: HE.shuf(O.dictees[2]).slice(0, 1) }; },
+      exos: function (d, en) { return orExos(id, d, en, 2); } };
+    exNiveaux(id, O.objectifs, {
+      but: id === "nombres" ? "Les mêmes nombres, avec des aides : entourer la fin -ze ou -ante, cocher le nombre qui complète la phrase, remettre les lettres dans l’ordre, remettre les mots de la phrase dans l’ordre." : "Les mêmes mots, avec des aides : entourer la régularité, cocher le mot qui complète la phrase, remettre les lettres dans l’ordre, remettre les mots de la phrase dans l’ordre.",
+      rappel: EXOS[id].rappel,
+      tirer: function () { var nb = id === "nombres", L = HE.shuf(O.ecrire).slice(0, 4);
+        return { entoure: HE.shuf(O.entoure.mots).slice(0, 6), phrases: HE.shuf(O.gaps).slice(0, 3).map(function (x) { return { s: x[0], w: x[1], o: HE.shuf([x[1]].concat(O.autres(x[1]))) }; }),
+          lettres: L.map(function (x) { var mot = nb ? orNombre(x) : x; return { cue: nb ? x : "", mot: mot, g: moMelanger(mot.replace(/-/g, " ")) }; }), ordre: HE.shuf(O.dictees[1]).slice(0, 1).map(function (s) { var p = orPlain(s); return { p: p, m: moMotsMelanges(p) }; }) }; },
+      exos: function (d, en) {
+        return [{ c: en ? O.entoure.c.en : O.entoure.c.fr, q: '<p class="ex-fr ex-banque">' + d.entoure.map(function (w) { return exS(esc(orPlain(w)), orMarque(w), true); }).join(" · ") + "</p>", r: d.entoure.map(orMarque).join(" · ") },
+          { c: en ? "Tick the word that completes the sentence." : "Coche le mot qui complète la phrase.", q: '<ul class="ex-fr ex-phrases ex-cocher">' + d.phrases.map(function (x) { return "<li>" + esc(x.s).split("___").join("……") + '<span class="ex-coches">' + x.o.map(function (w) { return '<span class="ex-coche">' + exS("☐", w === x.w ? "☑" : "☐", true) + " " + esc(w) + "</span>"; }).join("") + "</span></li>"; }).join("") + "</ul>", r: d.phrases.map(function (x) { return esc(x.w); }).join(" · ") },
+          { c: id === "nombres" ? (en ? "Put the letters in order to write the number." : "Remets les lettres dans l’ordre pour écrire le nombre.") : (en ? "Put the letters in order to write the word." : "Remets les lettres dans l’ordre pour écrire le mot."),
+            q: '<ul class="ex-fr ex-lettres">' + d.lettres.map(function (x) { return "<li>" + (x.cue !== "" ? "<b>" + x.cue + "</b> " : "") + moCarreaux(x.g) + " → " + exT(esc(x.mot)) + "</li>"; }).join("") + "</ul>", r: d.lettres.map(function (x) { return esc(x.mot); }).join(" · ") },
+          { c: en ? "Put the words in order to write the sentence." : "Remets les mots dans l’ordre pour écrire la phrase.", q: d.ordre.map(function (x) { return '<p class="ex-fr ex-banque">' + x.m.map(esc).join(" · ") + '</p><p class="ex-invente">' + exT(esc(x.p), true) + "</p>"; }).join(""), r: d.ordre.map(function (x) { return esc(x.p); }).join(" ") }];
+      }
+    }, "Fiche d’origine : lettres qui manquent, phrases à compléter avec un mot de la liste, " + (id === "nombres" ? "nombres à écrire en lettres" : "dictée de mots") + ", dictée d’une phrase.", {
+      but: "Moins d’aide : " + (id === "nombres" ? "seule la première lettre est donnée" : "une devinette et la première lettre") + ", phrases à compléter sans la liste, " + (id === "nombres" ? "nombres plus grands à écrire en lettres" : "dictée de mots") + ", dictée de deux phrases plus longues.",
+      rappel: EXOS[id].rappel,
+      tirer: function () { var nb = id === "nombres";
+        return { trous: nb ? HE.shuf(O.trous).slice(0, 6).map(function (x) { return orTrouFiche(id, x, true); }) : HE.shuf(O.devinettes).slice(0, 6).map(function (x) { return { cue: "", indice: x[0], before: x[1].charAt(0), seg: x[1].slice(1), after: "" }; }), phrases: HE.shuf(O.gaps).slice(0, 4), mots: nb ? HE.shuf(O.ecrire.filter(function (x) { return x > 16; })).slice(0, 6) : orMotsDictee(id, 8), dicteePh: HE.shuf(O.dictees[3]).slice(0, 2) }; },
+      exos: function (d, en) { return orExos(id, d, en, 3); }
+    });
+  }
+  ORTH_IDS.forEach(function (id) { var O = OR[id];
+    C[id] = { matiere: "francais", titre: O.titre, objectif: O.objectif };
+    QUIZ[id] = orQuiz(id);
+    O.jrFn = function (en) { return O.jr(en); }; O.jrFn.persos = O.jrPersos;
+    TBI_SEQ[id] = { src: O.jrFn, mat: "francais", pool: function () { return orTq(id); }, questions: O.tbiQ };
+    orExosDef(id);
+  });
+
   var ROUTES = {
     accueil: pageAccueil, "seq-verbe": function () { return pageSequence("verbe"); }, "seq-mots": pageSequenceMots, "lecon-mots": pageLeconMots, "fiche-mots": ficheMots,
     "seq-heure": pageSequenceHeure, "seq-digitale": pageSequenceDigitale, "ens-suivi": pageEnsSuivi, "ens-etoiles": function () { return pageEnsEtoiles("calcul"); }, "ens-etoiles-grammaire": function () { return pageEnsEtoiles("grammaire"); }, "ens-corriges": pageEnsCorriges, "ens-etoiles-fiches": function () { return pageEnsFichesEtoiles(false); }, "ens-voix": pageEnsVoix, "ens-etoiles-fiches-tout": function () { return pageEnsFichesEtoiles(true); }, "ens-corriges-grammaire": pageEnsCorrigesGram, "ens-sequences": pageEnsSequences, "ens-formation": pageEnsFormation, "fiche-digitale": ficheDigitale, "seq-diagrammes": pageSequenceDiagrammes, "lecon-diagrammes": pageLeconDiagrammes, "fiche-diagrammes": ficheDiagrammes, "fiche-masses": ficheMasses, "fiche-verbe": ficheVerbe, "fiche-division": ficheDivision, "fiche-monnaie": ficheMonnaie, "lecon-heure": function () { return pageLeconHeure(true); }, "maquette-retiens": function () { return pageLeconHeure(true); }, "fiche-heure": ficheHeure, "exos-heure": function () { return pageExos("heure"); }, "lecon-digitale": pageLeconDigitale, "lecon-division": pageLeconDivision, "lecon-monnaie": pageLeconMonnaie, "lecon-masses": pageLeconMasses, "exos-verbe": function () { return pageExos("verbe"); }, "exos-mots": function () { return pageExos("mots"); },
@@ -4156,6 +4479,7 @@
     ROUTES["feuille-" + id] = function () { return poFeuille(id); };
   });
   Object.keys(QUIZ).forEach(function (seq) { Object.keys(QUIZ[seq].jeux).forEach(function (jeu) { ROUTES["qz-" + seq + "-" + jeu] = function () { return jeuQZ(seq, jeu); }; }); });
+  ORTH_IDS.forEach(function (id) { ROUTES["seq-" + id] = function () { return pageSequence(id); }; ROUTES["lecon-" + id] = function () { return orLecon(id); }; ROUTES["fiche-" + id] = function () { return orFiche(id); }; ROUTES["exos-" + id] = function () { return pageExos(id); }; });
   function route() { if (UNIQUE) return UNIQUE; var h = (location.hash || "").slice(1); return ROUTES[h] ? h : "accueil"; }
   var derniere = "";
   /* sous-menus des onglets (D-87) */
@@ -4202,7 +4526,8 @@
     else if (/^k-/.test(a)) actionClasse(a, el);
     else if (/^m-/.test(a)) actionMots(a, el);
     else if (/^h-/.test(a)) actionHeure(a, el);
-    else if (/^qz-/.test(a)) actionQZ(a, el);
+    else if (/^qz-/.test(a)) { actionQZ(a, el); if (a === "qz-dire") return; }
+    else if (/^or-/.test(a)) actionOrth(a, el);
     else if (/^lx-/.test(a)) actionLX(a, el);
     else if (/^et-/.test(a)) actionEtoiles(a, el);
     else if (/^voix-/.test(a)) { actionVoix(a, el); if (a === "voix-ecouter") return; }
