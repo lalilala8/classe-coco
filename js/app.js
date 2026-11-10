@@ -1265,16 +1265,21 @@
   };
 
   /* aides communes aux fiches (D-95) */
-  var EXL = '<span class="ex-ligne"></span>', EXLL = '<span class="ex-ligne ex-long"></span>';
+  var EXL = '<span class="ex-ligne"></span>', EXLL = '<span class="ex-ligne ex-long"></span>', EXLM = '<span class="ex-ligne ex-mot"></span>';
+  /* place pour écrire : une réponse en lettres a une ligne plus longue qu’un nombre ou un signe ;
+     la même longueur pour tous les mots, pour ne pas souffler la réponse par la taille de la ligne */
+  function exMotLong(rep) { var t = String(rep == null ? "" : rep).replace(/<[^>]*>/g, "").replace(/&[a-z#0-9]+;/gi, "x"); return /[A-Za-zÀ-ÿ]/.test(t); }
   /* correction au TBI (D-104) : sur la feuille, un trou est une ligne ; au TBI, c'est une case qu'on touche pour montrer la réponse.
      EXTBI vaut vrai pendant qu'on prépare la version TBI ; EXK numérote les cases dans l'ordre (toujours le même pour une fiche donnée). */
   var EXTBI = false, EXK = 0;
   function exVu(k) { return !!(EXF && EXF.vu && EXF.vu[k]); }
   function exT(rep, long, vide) {
-    if (!EXTBI) return vide !== undefined ? vide : long ? EXLL : EXL;
+    if (!EXTBI) return vide !== undefined ? vide : long ? EXLL : exMotLong(rep) ? EXLM : EXL;
     var k = EXK++, vu = exVu(k);
     return '<button type="button" class="tb-u tb-trou' + (long ? " tb-long" : "") + (vu ? " vu" : "") + '" data-action="ex-vu" data-k="' + k + '" aria-pressed="' + vu + '" aria-label="' + (vu ? "" : "Montrer la réponse") + '">' + (vu ? rep : "") + "</button>";
   }
+  function exHM(html) { return '<span class="ex-courtes">' + html + "</span>"; } /* heures et minutes : deux lignes courtes */
+  function exTe(rep) { return EXTBI ? exT(rep) : EXL; } /* une terminaison : ligne moyenne */
   function exC(html) { return '<span class="tb-cible">' + html + "</span>"; }
   function exG(html, marque, bloc) {
     if (!EXTBI) return html;
@@ -1329,16 +1334,16 @@
             q: '<ol class="ex-fr ex-phrases ex-deux-col-ol">' + d.soul.map(function (x) { return "<li>" + exG(souligne(x), "soul") + "</li>"; }).join("") + "</ol>",
             r: d.soul.map(function (x) { return "<b>" + esc(x.mots[x.v]) + "</b>"; }).join(" · ") },
           { c: en ? "Write each sentence with ne … pas, then circle the verb." : "Écris chaque phrase avec ne … pas, puis entoure le verbe.",
-            q: '<ol class="ex-fr ex-phrases ex-neg">' + d.neg.map(function (x) { return "<li>" + esc(ph(x)) + " → " + exT(negEntoure(x), true) + "</li>"; }).join("") + "</ol>",
+            q: '<ol class="ex-fr ex-phrases ex-neg">' + d.neg.map(function (x) { return "<li>" + esc(ph(x)) + "<br>→ " + exT(negEntoure(x), true) + "</li>"; }).join("") + "</ol>",
             r: d.neg.map(function (x) { return esc(x.neg); }).join(" · ") },
           { c: en ? "Circle the word that changes. It is the verb." : "Entoure le mot qui change. C’est le verbe.",
-            q: '<div class="ex-deux-temps">' + d.temps.map(function (x) { var s = /^(Il|Nous)$/.test(x[0]) ? x[0].toLowerCase() : x[0]; return '<ul class="ex-fr ex-temps">' + [["Hier", 1], ["Aujourd’hui", 2], ["Demain", 3]].map(function (t) { return "<li>" + exG(t[0] + ", " + esc(s) + " " + exC(x[t[1]]) + " " + esc(x[4]), "cverbe") + "</li>"; }).join("") + "</ul>"; }).join("") + "</div>",
+            q: '<div class="ex-deux-temps">' + d.temps.map(function (x) { var s = vbSujet(x); return '<ul class="ex-fr ex-temps">' + [["Hier", 1], ["Aujourd’hui", 2], ["Demain", 3]].map(function (t) { return "<li>" + exG(t[0] + ", " + esc(s) + " " + exC(x[t[1]]) + " " + esc(x[4]), "cverbe") + "</li>"; }).join("") + "</ul>"; }).join("") + "</div>",
             r: d.temps.map(function (x) { return x[1] + ", " + x[2] + ", " + x[3]; }).join(" · ") },
           { c: en ? "State or action? Write S (state) or A (action)." : "État ou action ? Écris É ou A.",
             q: '<ul class="ex-fr ex-deux-col">' + d.etat.map(function (x) { return "<li>" + exS('<span class="ex-boite"></span>', '<span class="ex-boite tb-lettre">' + (en ? (x[1] === "E" ? "S" : "A") : (x[1] === "E" ? "É" : "A")) + "</span>", true) + " " + esc(x[0]) + "</li>"; }).join("") + "</ul>",
             r: d.etat.map(function (x) { return (en ? (x[1] === "E" ? "S" : "A") : (x[1] === "E" ? "É" : "A")); }).join(" · ") },
           { c: en ? "Make up a sentence with an action verb, then underline the verb." : "Invente une phrase avec un verbe d’action, puis souligne le verbe.",
-            q: '<p class="ex-invente">' + EXLL + "</p>", r: en ? "Answers will vary: check that the underlined word changes with yesterday / tomorrow." : "Réponses variées : vérifier que le mot souligné change avec « hier » et « demain »." }
+            q: '<p class="ex-invente">' + EXLL + EXLL + "</p>", r: en ? "Answers will vary: check that the underlined word changes with yesterday / tomorrow." : "Réponses variées : vérifier que le mot souligné change avec « hier » et « demain »." }
         ];
       }
     },
@@ -1445,7 +1450,7 @@
             q: '<ul class="ex-conv ex-trois-col">' + d.calc.map(function (x) { return "<li>" + x[0] + div + x[1] + " = " + exT(String(x[0] / x[1])) + "</li>"; }).join("") + "</ul>",
             r: d.calc.map(function (x) { return x[0] + div + x[1] + " = " + x[0] / x[1]; }).join(" · ") },
           { c: en ? "Share, then write the equality with the remainder." : "Partage, puis écris l’égalité avec le reste.",
-            q: '<ul class="ex-conv ex-une-col">' + d.restes.map(function (x) { return "<li>" + (en ? x[0] + " shells shared between " + x[1] + " friends: " : x[0] + " coquillages partagés entre " + x[1] + " amis : ") + x[0] + " = (" + x[1] + " × " + exT(String(x[2])) + ") + " + exT(String(x[3])) + "</li>"; }).join("") + "</ul>",
+            q: '<ul class="ex-conv ex-une-col ex-courtes">' + d.restes.map(function (x) { return "<li>" + (en ? x[0] + " shells shared between " + x[1] + " friends: " : x[0] + " coquillages partagés entre " + x[1] + " amis : ") + x[0] + " = (" + x[1] + " × " + exT(String(x[2])) + ") + " + exT(String(x[3])) + "</li>"; }).join("") + "</ul>",
             r: d.restes.map(function (x) { return x[0] + " = (" + x[1] + " × " + x[2] + ") + " + x[3]; }).join(" · ") },
           { c: en ? "Complete with the right number." : "Complète avec le bon nombre.",
             q: '<p class="ex-egalite">' + v[0] + " = (" + v[1] + " × " + v[2] + ") + " + v[3] + '</p><ul class="ex-conv">' + (en ? ["The dividend is ", "The divisor is ", "The quotient is ", "The remainder is "] : ["Le dividende est ", "Le diviseur est ", "Le quotient est ", "Le reste est "]).map(function (s, i) { return "<li>" + s + exT(String(v[i])) + ".</li>"; }).join("") + "</ul>",
@@ -1479,16 +1484,16 @@
             q: '<ul class="ex-conv ex-une-col">' + d.jour.map(function (x) { return "<li>" + (en ? x[1] + " at " + x[2] + ":" + HE.pad(x[3]) + ". " : x[0] + " à " + x[2] + "h" + HE.pad(x[3]) + ". ") + exT(repJour(x), true) + "</li>"; }).join("") + "</ul>",
             r: d.jour.map(repJour).join(" · ") },
           { c: en ? "Write the time in two ways." : "Écris l’heure de deux façons.",
-            q: '<ul class="ex-conv">' + d.conv.map(function (x) { return x[0] === "+" ? "<li>" + exDig(x[1] - 12, x[2]) + " " + soir(x[1]) + " → " + exT(String(x[1])) + ":" + exT(HE.pad(x[2])) + "</li>" : "<li>" + exDig(x[1], x[2]) + " → " + exT(String(x[1] - 12)) + ":" + exT(HE.pad(x[2])) + " " + soir(x[1]) + "</li>"; }).join("") + "</ul>",
+            q: '<ul class="ex-conv">' + d.conv.map(function (x) { return x[0] === "+" ? "<li>" + exDig(x[1] - 12, x[2]) + " " + soir(x[1]) + " → " + exHM(exT(String(x[1])) + ":" + exT(HE.pad(x[2]))) + "</li>" : "<li>" + exDig(x[1], x[2]) + " → " + exHM(exT(String(x[1] - 12)) + ":" + exT(HE.pad(x[2]))) + " " + soir(x[1]) + "</li>"; }).join("") + "</ul>",
             r: d.conv.map(function (x) { return x[0] === "+" ? x[1] + ":" + HE.pad(x[2]) : (x[1] - 12) + ":" + HE.pad(x[2]); }).join(" · ") },
           { c: en ? "What time is it? Write the morning time and the afternoon or evening time." : "Quelle heure est-il ? Écris l’heure du matin, puis celle de l’après-midi ou du soir.",
-            q: '<div class="ex-liste">' + d.hor.map(function (x) { return '<div class="ex-ligne-clk">' + HE.horloge(x[0], x[1], { deco: true, cls: "ex-clk" }) + "<p>" + (en ? "a.m. " : "matin ") + exT(String(x[0])) + ":" + exT(HE.pad(x[1])) + " &nbsp; " + (en ? "p.m. " : "après-midi ou soir ") + exT(String(x[0] + 12)) + ":" + exT(HE.pad(x[1])) + "</p></div>"; }).join("") + "</div>",
+            q: '<div class="ex-liste">' + d.hor.map(function (x) { return '<div class="ex-ligne-clk">' + HE.horloge(x[0], x[1], { deco: true, cls: "ex-clk" }) + "<p>" + (en ? "a.m. " : "matin ") + exHM(exT(String(x[0])) + ":" + exT(HE.pad(x[1]))) + " &nbsp; " + (en ? "p.m. " : "après-midi ou soir ") + exHM(exT(String(x[0] + 12)) + ":" + exT(HE.pad(x[1]))) + "</p></div>"; }).join("") + "</div>",
             r: d.hor.map(function (x) { return x[0] + ":" + HE.pad(x[1]) + " / " + (x[0] + 12) + ":" + HE.pad(x[1]); }).join(" · ") },
           { c: en ? "Complete." : "Complète.",
             q: '<ul class="ex-conv">' + (en ? ["1 hour = ", "half an hour = ", "a quarter of an hour = ", "In a day, there are "] : ["1 heure = ", "une demi-heure = ", "un quart d’heure = ", "Dans une journée, il y a "]).map(function (s, i) { return "<li>" + s + exT(String([60, 30, 15, 24][i])) + (i < 3 ? " min" : (en ? " hours." : " heures.")) + "</li>"; }).join("") + "</ul>",
             r: "60 min · 30 min · 15 min · 24" },
           { c: en ? "Solve the problem." : "Résous le problème.",
-            q: "<p>" + (en ? pb.t[1] + " " + pb.h + ":" + HE.pad(pb.m) + ". " + pb.t[3] + " " + pb.du[2] + ". " + pb.t[5] : pb.t[0] + " " + pb.h + "h" + HE.pad(pb.m) + ". " + pb.t[2] + " " + pb.du[1] + ". " + pb.t[4]) + "</p><p>" + (en ? "Answer: " : "Réponse : ") + exT(String(Math.floor(fin / 60))) + ":" + exT(HE.pad(fin % 60)) + "</p>",
+            q: "<p>" + (en ? pb.t[1] + " " + pb.h + ":" + HE.pad(pb.m) + ". " + pb.t[3] + " " + pb.du[2] + ". " + pb.t[5] : pb.t[0] + " " + pb.h + "h" + HE.pad(pb.m) + ". " + pb.t[2] + " " + pb.du[1] + ". " + pb.t[4]) + "</p><p>" + (en ? "Answer: " : "Réponse : ") + exHM(exT(String(Math.floor(fin / 60))) + ":" + exT(HE.pad(fin % 60))) + "</p>",
             r: Math.floor(fin / 60) + ":" + HE.pad(fin % 60) }
         ];
       }
@@ -1665,7 +1670,7 @@
             q: '<ul class="ex-conv ex-trois-col">' + d.calc.map(function (x) { return "<li>" + x[0] + div + x[1] + " = " + exT(String(x[2])) + "</li>"; }).join("") + "</ul>",
             r: d.calc.map(function (x) { return x[0] + div + x[1] + " = " + x[2]; }).join(" · ") },
           { c: en ? "Divide, then complete the equality with the remainder." : "Divise, puis complète l’égalité avec le reste.",
-            q: '<ul class="ex-conv ex-une-col">' + d.restes.map(function (x) { return "<li>" + (en ? "I divide " + x[0] + " by " + x[1] + ": " : "Je divise " + x[0] + " par " + x[1] + " : ") + x[0] + " = (" + x[1] + " × " + exT(String(x[2])) + ") + " + exT(String(x[3])) + "</li>"; }).join("") + "</ul>",
+            q: '<ul class="ex-conv ex-une-col ex-courtes">' + d.restes.map(function (x) { return "<li>" + (en ? "I divide " + x[0] + " by " + x[1] + ": " : "Je divise " + x[0] + " par " + x[1] + " : ") + x[0] + " = (" + x[1] + " × " + exT(String(x[2])) + ") + " + exT(String(x[3])) + "</li>"; }).join("") + "</ul>",
             r: d.restes.map(function (x) { return x[0] + " = (" + x[1] + " × " + x[2] + ") + " + x[3]; }).join(" · ") },
           { c: en ? "Complete with the right number." : "Complète avec le bon nombre.",
             q: '<p class="ex-egalite">' + v[0] + " = (" + v[1] + " × " + v[2] + ") + " + v[3] + '</p><ul class="ex-conv">' + (en ? ["The dividend is ", "The divisor is ", "The quotient is ", "The remainder is "] : ["Le dividende est ", "Le diviseur est ", "Le quotient est ", "Le reste est "]).map(function (s, i) { return "<li>" + s + exT(String(v[i])) + ".</li>"; }).join("") + "</ul>",
@@ -1695,7 +1700,7 @@
             q: '<ol class="ex-conv ex-une-col ex-dv-sit">' + d.sits.map(function (x) { return "<li>" + esc(dvSit(x.s, x.t, x.b, en)) + (en ? " How many " + x.s.o[1] + " are left?" : " Combien de " + x.s.o[0] + " reste-t-il ?") + "<br>" + dvChoix(x.s, en) + '<span class="ex-sep"></span>' + '<span class="ex-moyen">' + exT(x.t + " = (" + x.b + " × " + x.q + ") + " + x.r) + "</span><br>" + (en ? "Answer: " : "Réponse : ") + exT(x.q + " " + x.s.u[en ? 1 : 0] + (en ? ", " + x.r + " " + x.s.o[1] + " left" : ", il reste " + x.r + " " + x.s.o[0]), true) + "</li>"; }).join("") + "</ol>",
             r: d.sits.map(function (x) { return x.t + " = (" + x.b + " × " + x.q + ") + " + x.r; }).join(" · ") },
           { c: en ? "Divide. Write the equality, then the quotient and the remainder." : "Divise. Écris l’égalité, puis le quotient et le reste.",
-            q: '<ul class="ex-conv ex-une-col">' + d.restes.map(function (x) { return "<li>" + (en ? "I divide " + x[0] + " by " + x[1] + ": " : "Je divise " + x[0] + " par " + x[1] + " : ") + x[0] + " = (" + x[1] + " × " + exT(String(x[2])) + ") + " + exT(String(x[3])) + " &nbsp; " + (en ? "quotient " : "quotient ") + exT(String(x[2])) + (en ? " remainder " : " reste ") + exT(String(x[3])) + "</li>"; }).join("") + "</ul>",
+            q: '<ul class="ex-conv ex-une-col ex-courtes">' + d.restes.map(function (x) { return "<li>" + (en ? "I divide " + x[0] + " by " + x[1] + ": " : "Je divise " + x[0] + " par " + x[1] + " : ") + x[0] + " = (" + x[1] + " × " + exT(String(x[2])) + ") + " + exT(String(x[3])) + " &nbsp; " + (en ? "quotient " : "quotient ") + exT(String(x[2])) + (en ? " remainder " : " reste ") + exT(String(x[3])) + "</li>"; }).join("") + "</ul>",
             r: d.restes.map(eg).join(" · ") },
           { c: en ? "Who am I?" : "Qui suis-je ?",
             q: '<ul class="ex-conv ex-une-col">' + d.qui.map(function (x) { return "<li>" + (en ? "My divisor is " + x[1] + ", my quotient is " + x[2] + " and my remainder is " + x[3] + ". I am the dividend: " : "Mon diviseur est " + x[1] + ", mon quotient est " + x[2] + " et mon reste est " + x[3] + ". Je suis le dividende : ") + exT(String(x[0])) + "</li>"; }).join("") + "</ul>",
@@ -1734,7 +1739,7 @@
   function vbSouligne(x) { return x.mots.map(function (m, j) { return j === x.v ? exC(esc(exNu(m))) + esc(m.slice(exNu(m).length)) : esc(m); }).join(" "); }
   function vbEtat(L, en) { return '<ul class="ex-fr ex-deux-col">' + L.map(function (x) { return "<li>" + exS('<span class="ex-boite"></span>', '<span class="ex-boite tb-lettre">' + (en ? (x[1] === "E" ? "S" : "A") : (x[1] === "E" ? "É" : "A")) + "</span>", true) + " " + esc(x[0]) + "</li>"; }).join("") + "</ul>"; }
   function vbEtatR(L, en) { return L.map(function (x) { return en ? (x[1] === "E" ? "S" : "A") : (x[1] === "E" ? "É" : "A"); }).join(" · "); }
-  function vbSujet(x) { return /^(Il|Nous)$/.test(x[0]) ? x[0].toLowerCase() : x[0]; }
+  function vbSujet(x) { return /^(Il|Elle|Ils|Elles|Nous|Vous|Je|Tu|On|Les|La|Le|Mes|Ma|Mon)( |$)/.test(x[0]) ? x[0].charAt(0).toLowerCase() + x[0].slice(1) : x[0]; }
   exNiveaux("verbe", [
     "L’élève est capable de reconnaître si un verbe exprime un état (être, sembler, paraître) ou une action.",
     "L’élève est capable de trouver le verbe conjugué dans une phrase en la mettant à la forme négative (ne… pas).",
@@ -1778,7 +1783,7 @@
           q: '<ol class="ex-fr ex-phrases ex-neg">' + d.neg.map(function (x) { return "<li>" + esc(x.mots.join(" ")) + "<br>" + exT(negE(x), true) + "</li>"; }).join("") + "</ol>",
           r: d.neg.map(function (x) { return esc(x.neg); }).join(" · ") },
         { c: en ? "Write the verb for yesterday and for tomorrow." : "Écris le verbe pour hier et pour demain.",
-          q: '<ul class="ex-fr ex-temps">' + d.temps.map(function (x) { var s = vbSujet(x); return "<li>Aujourd’hui, " + esc(s) + " " + x[2] + " " + esc(x[4]) + "<br>Hier, " + esc(s) + " " + exT(x[1]) + " " + esc(x[4]) + " &nbsp; Demain, " + esc(s) + " " + exT(x[3]) + " " + esc(x[4]) + "</li>"; }).join("") + "</ul>",
+          q: '<ul class="ex-fr ex-temps">' + d.temps.map(function (x) { var s = vbSujet(x); return "<li>Aujourd’hui, " + esc(s) + " " + x[2] + " " + esc(x[4]) + "<br>Hier, " + esc(s) + " " + exT(x[1]) + " " + esc(x[4]) + "<br>Demain, " + esc(s) + " " + exT(x[3]) + " " + esc(x[4]) + "</li>"; }).join("") + "</ul>",
           r: d.temps.map(function (x) { return x[1] + " · " + x[3]; }).join(" — ") },
         { c: en ? "State or action? Write S (state) or A (action)." : "État ou action ? Écris É ou A.", q: vbEtat(d.etat, en), r: vbEtatR(d.etat, en) },
         { c: en ? "Underline all the conjugated verbs in the text." : "Souligne tous les verbes conjugués du texte.",
@@ -1864,7 +1869,7 @@
           q: d.payer.map(function (x) { var reste = x.c.slice(); return '<div class="ex-payer"><b>' + mnSomme(x.c) + " F</b>" + exG('<div class="ex-bourse">' + x.montre.map(function (v) { var i = reste.indexOf(v); if (i < 0) return exPiece(v); reste.splice(i, 1); return exC(exPiece(v)); }).join("") + "</div>", "cercle", true) + "</div>"; }).join(""),
           r: d.payer.map(function (x) { return mnSomme(x.c) + " F = " + x.c.join(" F + ") + " F"; }).join(" · ") },
         { c: en ? "Split each amount, like 375 F = 300 + 70 + 5." : "Décompose chaque somme, comme 375 F = 300 + 70 + 5.",
-          q: exListe(d.dec, function (n) { return n + " F = " + mnDecompose(n).map(function (p) { return exT(String(p)); }).join(" + "); }),
+          q: exListe(d.dec, function (n) { return n + " F = " + mnDecompose(n).map(function (p) { return exT(String(p)); }).join(" + "); }, "ex-une-col"),
           r: d.dec.map(function (n) { return n + " = " + mnDecompose(n).join(" + "); }).join(" · ") },
         { c: en ? "Solve the problem." : "Résous le problème.",
           q: "<p>" + (en ? "At the market, Tehani buys " + f.en + " for " + f.prix + " F. She pays with a 500 F note. How much change does she get?" : "Au marché, Tehani achète " + f.fr + " à " + f.prix + " F. Elle paie avec un billet de 500 F. Combien la marchande lui rend-elle ?") + "</p><p>" + (en ? "She gets " : "On lui rend ") + exT(String(500 - f.prix)) + " F.</p>",
@@ -1886,7 +1891,7 @@
           q: '<div class="ex-bourses">' + d.bourses.map(function (b) { return '<div><div class="ex-bourse">' + b.map(exPiece).join("") + "</div><p>" + exT(exMille(mnSomme(b))) + " F</p></div>"; }).join("") + "</div>",
           r: d.bourses.map(function (b) { return exMille(mnSomme(b)) + " F"; }).join(" · ") },
         { c: en ? "Split each amount." : "Décompose chaque somme.",
-          q: exListe(d.dec, function (n) { return exMille(n) + " F = " + mnDecompose(n).map(function (p) { return exT(exMille(p)); }).join(" + "); }),
+          q: exListe(d.dec, function (n) { return exMille(n) + " F = " + mnDecompose(n).map(function (p) { return exT(exMille(p)); }).join(" + "); }, "ex-une-col"),
           r: d.dec.map(function (n) { return exMille(n) + " = " + mnDecompose(n).map(exMille).join(" + "); }).join(" · ") },
         { c: en ? "Pay " + exMille(d.moins) + " F with as few notes and coins as possible." : "Paie " + exMille(d.moins) + " F avec le moins possible de billets et de pièces.",
           q: "<p>" + exT(mnGlouton(d.moins).map(function (v) { return exMille(v) + " F"; }).join(" + "), true) + "</p>",
@@ -1970,10 +1975,10 @@
         { c: en ? "Write the time in words." : "Écris l’heure en lettres.", q: exListe(d.jour, function (x) { return (en ? x[1] + " at " + x[2] + ":" + HE.pad(x[3]) + ". " : x[0] + " à " + x[2] + "h" + HE.pad(x[3]) + ". ") + exT(diMots(x, en), true); }, "ex-une-col"), r: d.jour.map(function (x) { return diMots(x, en); }).join(" · ") },
         { c: en ? "Add 12 to write the 24-hour time." : "Ajoute 12 pour écrire l’heure sur 24 heures.", q: exListe(d.conv, function (x) { return exDig(x[0] - 12, x[1]) + " " + diSoir(x[0], en) + " → " + exT(String(x[0])) + ":" + HE.pad(x[1]); }), r: d.conv.map(function (x) { return x[0] + ":" + HE.pad(x[1]); }).join(" · ") },
         { c: en ? "What time is it? Write the morning time and the afternoon or evening time." : "Quelle heure est-il ? Écris l’heure du matin, puis celle de l’après-midi ou du soir.",
-          q: '<div class="ex-liste">' + d.hor.map(function (x) { return '<div class="ex-ligne-clk">' + HE.horloge(x[0], x[1], { deco: true, cls: "ex-clk" }) + "<p>" + (en ? "a.m. " : "matin ") + exT(String(x[0])) + ":" + exT(HE.pad(x[1])) + " &nbsp; " + (en ? "p.m. " : "après-midi ou soir ") + exT(String(x[0] + 12)) + ":" + exT(HE.pad(x[1])) + "</p></div>"; }).join("") + "</div>",
+          q: '<div class="ex-liste">' + d.hor.map(function (x) { return '<div class="ex-ligne-clk">' + HE.horloge(x[0], x[1], { deco: true, cls: "ex-clk" }) + "<p>" + (en ? "a.m. " : "matin ") + exHM(exT(String(x[0])) + ":" + exT(HE.pad(x[1]))) + " &nbsp; " + (en ? "p.m. " : "après-midi ou soir ") + exHM(exT(String(x[0] + 12)) + ":" + exT(HE.pad(x[1]))) + "</p></div>"; }).join("") + "</div>",
           r: d.hor.map(function (x) { return x[0] + ":" + HE.pad(x[1]) + " / " + (x[0] + 12) + ":" + HE.pad(x[1]); }).join(" · ") },
         { c: en ? "Complete." : "Complète.", q: exListe(en ? ["1 hour = ", "half an hour = ", "In a day, there are "] : ["1 heure = ", "une demi-heure = ", "Dans une journée, il y a "], function (s, i) { return s + exT(String([60, 30, 24][i])) + (i < 2 ? " min" : (en ? " hours." : " heures.")); }), r: "60 min · 30 min · 24" },
-        { c: en ? "Solve the problem." : "Résous le problème.", q: "<p>" + (en ? pb.t[1] + " " + pb.h + ":00. " + pb.t[3] + " " + pb.du[2] + ". " + pb.t[5] : pb.t[0] + " " + pb.h + "h00. " + pb.t[2] + " " + pb.du[1] + ". " + pb.t[4]) + "</p><p>" + (en ? "Answer: " : "Réponse : ") + exT(String(Math.floor(fin / 60))) + ":" + exT(HE.pad(fin % 60)) + "</p>", r: diHm(fin) }
+        { c: en ? "Solve the problem." : "Résous le problème.", q: "<p>" + (en ? pb.t[1] + " " + pb.h + ":00. " + pb.t[3] + " " + pb.du[2] + ". " + pb.t[5] : pb.t[0] + " " + pb.h + "h00. " + pb.t[2] + " " + pb.du[1] + ". " + pb.t[4]) + "</p><p>" + (en ? "Answer: " : "Réponse : ") + exHM(exT(String(Math.floor(fin / 60))) + ":" + exT(HE.pad(fin % 60))) + "</p>", r: diHm(fin) }
       ];
     }
   }, "Fiche d’origine : heures pile, et quart, et demie, moins le quart ; écrire l’heure de deux façons (+12 et −12) ; un problème de durée.", {
@@ -2040,7 +2045,7 @@
         dessin: HE.shuf([[h(), HE.pk([5, 10, 20, 25])], [h(), HE.pk([35, 40])], [h(), HE.pk([50, 55])], [h(), 45]]), conv: HE.shuf([13, 14, 15, 16, 17, 18, 19, 20, 21, 22]).slice(0, 4).map(function (x) { return [x, HE.pk([15, 30, 45, 10, 50])]; }), pb: HE.PROBLEMES[HE.rint(0, HE.PROBLEMES.length - 1)] }; },
     exos: function (d, en) {
       return [hrLire(d.lire, en), hrLettres(d.lettres, en), hrDessin(d.dessin, en),
-        { c: en ? "Write the 24-hour time." : "Écris l’heure de l’après-midi ou du soir sur 24 heures.", q: exListe(d.conv, function (x) { return (x[0] - 12) + " h " + HE.pad(x[1]) + " " + (x[0] >= 18 ? (en ? "in the evening" : "du soir") : (en ? "in the afternoon" : "de l’après-midi")) + " → " + exT(x[0] + " h " + HE.pad(x[1])); }), r: d.conv.map(function (x) { return x[0] + " h " + HE.pad(x[1]); }).join(" · ") },
+        { c: en ? "Write the 24-hour time." : "Écris l’heure de l’après-midi ou du soir sur 24 heures.", q: exListe(d.conv, function (x) { return (x[0] - 12) + " h " + HE.pad(x[1]) + " " + (x[0] >= 18 ? (en ? "in the evening" : "du soir") : (en ? "in the afternoon" : "de l’après-midi")) + " → " + exT(x[0] + " h " + HE.pad(x[1])); }, "ex-heure24"), r: d.conv.map(function (x) { return x[0] + " h " + HE.pad(x[1]); }).join(" · ") },
         hrProbleme(d.pb, en)];
     }
   });
@@ -3995,7 +4000,7 @@
       return [
         { c: en ? "Underline the verbs in the imparfait." : "Souligne les verbes à l’imparfait.", q: '<p class="ex-fr ex-texte">' + exG(ipSouligne(d.texte), "soul") + "</p>", r: ipVerbesDe(d.texte).map(function (v) { return "<b>" + esc(v) + "</b>"; }).join(" · ") },
         { c: en ? "Write the pronoun." : "Écris le pronom qui convient.", q: '<ul class="ex-fr ex-conv">' + d.pron.map(function (x) { var f = ipForme(x[0], x[1]); return "<li>" + exT(esc(ipTrouPron(x[1], f))) + " " + esc(f) + "</li>"; }).join("") + "</ul>", r: d.pron.map(function (x) { var f = ipForme(x[0], x[1]); return esc(ipTrouPron(x[1], f)) + " " + esc(f); }).join(" · ") },
-        { c: en ? "Complete with the right ending." : "Complète avec la bonne terminaison.", q: '<ul class="ex-fr ex-conv">' + d.term.map(function (x) { var f = ipForme(x[0], x[1]), deb = (x[2] === "Je" ? ipJe(f, true) : x[2] + " ") + IP_V[x[0]][0]; return "<li>" + esc(deb) + exT(IP_T[x[1]]) + " " + esc(IP_V[x[0]][1]) + ".</li>"; }).join("") + "</ul>", r: d.term.map(function (x) { return esc(ipForme(x[0], x[1])); }).join(" · ") },
+        { c: en ? "Complete with the right ending." : "Complète avec la bonne terminaison.", q: '<ul class="ex-fr ex-conv">' + d.term.map(function (x) { var f = ipForme(x[0], x[1]), deb = (x[2] === "Je" ? ipJe(f, true) : x[2] + " ") + IP_V[x[0]][0]; return "<li>" + esc(deb) + exTe(IP_T[x[1]]) + " " + esc(IP_V[x[0]][1]) + ".</li>"; }).join("") + "</ul>", r: d.term.map(function (x) { return esc(ipForme(x[0], x[1])); }).join(" · ") },
         { c: en ? "Conjugate in the imparfait." : "Conjugue à l’imparfait.", q: '<div class="ex-deux-col ex-fr">' + d.conj.map(function (v) { return "<div><b>" + esc(v) + "</b>" + [0, 3, 5].map(function (p) { var f = ipForme(v, p); return "<p>" + esc(ipPron(p, f).split(",")[0]) + (p === 0 && ipVoy(f) ? "" : " ") + exT(esc(f)) + "</p>"; }).join("") + "</div>"; }).join("") + "</div>",
           r: d.conj.map(function (v) { return [0, 3, 5].map(function (p) { var f = ipForme(v, p); return ipPron(p, f).split(",")[0] + (p === 0 && ipVoy(f) ? "" : " ") + f; }).join(", "); }).join(" — ") },
         { c: en ? "Rewrite the sentence with « Nous »." : "Réécris la phrase avec « Nous ».", q: '<ul class="ex-fr ex-conv ex-une-col">' + d.trans.map(function (v) { return "<li>" + esc(ipPhrase(v, 2, "Léo")) + "<br>" + exT(esc(ipPhrase(v, 3, "Nous")), true) + "</li>"; }).join("") + "</ul>", r: d.trans.map(function (v) { return esc(ipPhrase(v, 3, "Nous")); }).join(" · ") }
@@ -4022,8 +4027,8 @@
             var o = x[2].map(function (y) { return y === "je" && ipVoy(f) ? "j’" : y; }), b = bon === "je" && ipVoy(f) ? "j’" : bon;
             return "<li>" + exG("( " + o.map(function (y) { return y === b ? exC(esc(y)) : esc(y); }).join(" / ") + " )", "cercle") + " " + esc(f) + "</li>"; }).join("") + "</ul>",
           r: d.pron.map(function (x) { var f = ipForme(x[0], x[1]); return esc(ipPron(x[1], f).split(",")[0]) + (x[1] === 0 && ipVoy(f) ? "" : " ") + esc(f); }).join(" · ") },
-        { c: en ? "Complete with the right ending." : "Complète avec la bonne terminaison.", q: '<ul class="ex-fr ex-conv">' + d.term.map(function (x) { var f = ipForme(x[0], x[1]), deb = (x[2] === "Je" ? ipJe(f, true) : x[2] + " ") + IP_V[x[0]][0]; return "<li>" + esc(deb) + exT(IP_T[x[1]]) + " " + esc(IP_V[x[0]][1]) + ".</li>"; }).join("") + "</ul>", r: d.term.map(function (x) { return esc(ipForme(x[0], x[1])); }).join(" · ") },
-        { c: en ? "Conjugate the verb « " + d.conj + " » in the imparfait." : "Conjugue le verbe « " + d.conj + " » à l’imparfait.", q: '<ul class="ex-fr ex-conv">' + IP_T.map(function (_, p) { var f = ipForme(d.conj, p); return "<li>" + esc(ipPron(p, f)) + (p === 0 && ipVoy(f) ? "" : " ") + esc(IP_V[d.conj][0]) + exT(IP_T[p]) + "</li>"; }).join("") + "</ul>",
+        { c: en ? "Complete with the right ending." : "Complète avec la bonne terminaison.", q: '<ul class="ex-fr ex-conv">' + d.term.map(function (x) { var f = ipForme(x[0], x[1]), deb = (x[2] === "Je" ? ipJe(f, true) : x[2] + " ") + IP_V[x[0]][0]; return "<li>" + esc(deb) + exTe(IP_T[x[1]]) + " " + esc(IP_V[x[0]][1]) + ".</li>"; }).join("") + "</ul>", r: d.term.map(function (x) { return esc(ipForme(x[0], x[1])); }).join(" · ") },
+        { c: en ? "Conjugate the verb « " + d.conj + " » in the imparfait." : "Conjugue le verbe « " + d.conj + " » à l’imparfait.", q: '<ul class="ex-fr ex-conv">' + IP_T.map(function (_, p) { var f = ipForme(d.conj, p); return "<li>" + esc(ipPron(p, f)) + (p === 0 && ipVoy(f) ? "" : " ") + esc(IP_V[d.conj][0]) + exTe(IP_T[p]) + "</li>"; }).join("") + "</ul>",
           r: IP_T.map(function (_, p) { var f = ipForme(d.conj, p); return esc(ipPron(p, f)) + (p === 0 && ipVoy(f) ? "" : " ") + esc(f); }).join(" · ") }
       ];
     }
@@ -4035,10 +4040,10 @@
     exos: function (d, en) {
       return [
         { c: en ? "Underline only the verbs in the imparfait." : "Souligne seulement les verbes à l’imparfait.", q: '<p class="ex-fr ex-texte">' + exG(ipSouligne(d.texte), "soul") + "</p>", r: ipVerbesDe(d.texte).map(function (v) { return "<b>" + esc(v) + "</b>"; }).join(" · ") + (en ? " (the other verbs are in the present)" : " (les autres verbes sont au présent)") },
-        { c: en ? "Write the verb in brackets in the imparfait." : "Écris le verbe entre parenthèses à l’imparfait.", q: '<ul class="ex-fr ex-conv">' + d.paren.map(function (x) { var f = ipForme(x[0], x[1]); return "<li>" + esc(x[2] === "Je" ? (ipVoy(f) ? "J’" : "Je") : x[2]) + " (" + esc(x[0]) + ") " + exT(esc(f)) + " " + esc(IP_V[x[0]][1]) + ".</li>"; }).join("") + "</ul>", r: d.paren.map(function (x) { return esc(ipForme(x[0], x[1])); }).join(" · ") },
-        { c: en ? "Rewrite the text with « Nous » instead of « Je »." : "Réécris le texte avec « Nous » à la place de « Je ».", q: '<p class="ex-fr">' + d.trans.map(function (v) { return esc(ipPhrase(v, 0, "Je")); }).join(" ") + '</p><p class="ex-fr ex-invente">' + exT(esc(d.trans.map(function (v) { return ipPhrase(v, 3, "Nous"); }).join(" ")), true) + EXLL + "</p>",
+        { c: en ? "Write the verb in brackets in the imparfait." : "Écris le verbe entre parenthèses à l’imparfait.", q: '<ul class="ex-fr ex-conv ex-une-col">' + d.paren.map(function (x) { var f = ipForme(x[0], x[1]); return "<li>" + esc(x[2] === "Je" ? (ipVoy(f) ? "J’" : "Je") : x[2]) + " (" + esc(x[0]) + ") " + exT(esc(f)) + " " + esc(IP_V[x[0]][1]) + ".</li>"; }).join("") + "</ul>", r: d.paren.map(function (x) { return esc(ipForme(x[0], x[1])); }).join(" · ") },
+        { c: en ? "Rewrite the text with « Nous » instead of « Je »." : "Réécris le texte avec « Nous » à la place de « Je ».", q: '<p class="ex-fr">' + d.trans.map(function (v) { return esc(ipPhrase(v, 0, "Je")); }).join(" ") + '</p><p class="ex-fr ex-invente">' + exT(esc(d.trans.map(function (v) { return ipPhrase(v, 3, "Nous"); }).join(" ")), true) + EXLL + EXLL + "</p>",
           r: esc(d.trans.map(function (v) { return ipPhrase(v, 3, "Nous"); }).join(" ")) },
-        { c: en ? "Write two sentences in the imparfait to describe the witch’s cave." : "Écris deux phrases à l’imparfait pour décrire la grotte de la sorcière.", q: '<p class="ex-invente">' + EXLL + EXLL + "</p>",
+        { c: en ? "Write two sentences in the imparfait to describe the witch’s cave." : "Écris deux phrases à l’imparfait pour décrire la grotte de la sorcière.", q: '<p class="ex-invente">' + EXLL + EXLL + EXLL + "</p>",
           r: en ? "Answers will vary: check the subject, the stem and the ending (ais, ait, aient…)." : "Réponses variées : vérifier le sujet, le radical et la terminaison (ais, ait, aient…)." }
       ];
     }

@@ -700,8 +700,10 @@ body.mode-classe .site { max-width: none; padding-block: 12px 24px; }
 .ex-clk { max-width: 150px; }
 .ex-petit .ex-clk { max-width: 90px; }
 .ex-rep { margin: 0; text-align: center; }
-.ex-ligne { display: inline-block; min-width: 48px; border-bottom: 2px dotted var(--encre-douce); height: 1.1em; vertical-align: baseline; }
+.ex-ligne { display: inline-block; min-width: 80px; border-bottom: 2px dotted var(--encre-douce); height: 1.1em; vertical-align: baseline; }
 .ex-ligne.ex-long { min-width: 300px; }
+.ex-ligne.ex-mot { min-width: 150px; }
+.ex-courtes .ex-ligne { min-width: 60px; } .ex-heure24 .ex-ligne { min-width: 110px; }
 .ex-liste { display: grid; gap: 8px; }
 .ex-ligne-clk { display: grid; grid-template-columns: 110px 1fr; gap: 18px; align-items: center; }
 .ex-ligne-clk .ex-clk { max-width: 110px; }
@@ -714,15 +716,16 @@ body.mode-classe .site { max-width: none; padding-block: 12px 24px; }
 .ex-fr { font-family: var(--font-lecture); }
 .ex-deux-col-ol { grid-template-columns: 1fr 1fr; column-gap: 32px; }
 .ex-neg li { line-height: 2.2; }
-.ex-neg .ex-ligne.ex-long { min-width: 240px; }
+.ex-neg .ex-ligne.ex-long { min-width: 240px; width: calc(100% - 2em); }
 .ex-deux-temps { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 24px; }
-.ex-invente { margin: 0; line-height: 2.4; } .ex-invente .ex-ligne { width: 100%; }
+.ex-invente { margin: 0; } .ex-invente .ex-ligne { display: block; width: 100%; height: 44px; }
 .ex-construire { grid-template-columns: auto minmax(0, 1fr); }
 .ex-construire .dg { max-width: 460px; }
 .ex-dg .dg-grille { stroke: #9aa3b5; }
 .ex-phrases, .ex-dictee { margin: 0; padding-left: 26px; display: grid; gap: 10px; }
 .ex-phrases li { line-height: 1.9; }
 .ex-temps { list-style: none; margin: 0 0 6px; padding: 0 0 0 4px; display: grid; gap: 2px; border-left: 3px solid var(--ec); padding-left: 12px; }
+.ex-temps li:has(.ex-ligne) { line-height: 1.8; } .ex-temps:has(.ex-ligne) { gap: 4px; }
 .ex-deux-col { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 8px 24px; }
 .ex-boite { display: inline-block; width: 28px; height: 24px; border: 2px solid var(--encre-douce); border-radius: 6px; vertical-align: middle; margin-right: 6px; }
 .ex-mots { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px 20px; font-size: 22px; }
@@ -731,7 +734,7 @@ body.mode-classe .site { max-width: none; padding-block: 12px 24px; }
 .ex-banque { margin: 0; padding: 8px 12px; border: 2px dashed var(--trait); border-radius: var(--arrondi-petit); font-size: 20px; }
 .ex-familles { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 24px; }
 .ex-familles b { font-size: 22px; color: var(--ec); }
-.ex-familles p { margin: 6px 0 0; display: flex; gap: 16px; }
+.ex-familles p { margin: 6px 0 0; display: flex; gap: 16px; min-height: 40px; align-items: flex-end; }
 .ex-familles .ex-ligne { flex: 1; }
 .ex-dictee .ex-ligne.ex-long { min-width: 260px; }
 .ex-bourses { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
@@ -754,6 +757,7 @@ body.mode-classe .site { max-width: none; padding-block: 12px 24px; }
 .ex-egalite { margin: 0; font: 700 22px/1.3 var(--font-lecture); }
 .ex-dig { font: 700 18px/1 var(--font-lecture); letter-spacing: .04em; border: 2px solid var(--encre); border-radius: 6px; padding: 2px 6px; background: #f4f4f1; }
 .ex-cote { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+@media print { .ex-cote:has(> .ex-qs) { grid-template-columns: 62mm minmax(0, 1fr); } }
 .ex-dg { margin: 0; }
 .ex-dg figcaption { font-weight: 700; font-size: 16px; text-align: center; margin-bottom: 4px; }
 .ex-dg .dg { width: 100%; max-width: 380px; display: block; margin: 0 auto; }
@@ -778,7 +782,8 @@ body.mode-classe .site { max-width: none; padding-block: 12px 24px; }
   .ex-grille.ex-quatre .ex-clk { max-width: 28mm; }
   .ex-grille.ex-petit .ex-clk { max-width: 20mm; }
   .ex-grille .ex-rep { white-space: nowrap; font-size: 11pt; }
-  .ex-grille .ex-ligne { min-width: 9mm; }
+  .ex-ligne { min-width: 22mm; } .ex-ligne.ex-mot { min-width: 40mm; } .ex-courtes .ex-ligne { min-width: 15mm; } .ex-heure24 .ex-ligne { min-width: 28mm; }
+  .ex-grille .ex-ligne { min-width: 12mm; }
   .ex-liste { grid-template-columns: 1fr; gap: 4px; }
   .ex-ligne-clk { grid-template-columns: 19mm 1fr; gap: 12px; }
   .ex-ligne-clk .ex-clk { max-width: 19mm; }
@@ -789,7 +794,8 @@ body.mode-classe .site { max-width: none; padding-block: 12px 24px; }
   .ex-dg .dg { max-width: 58mm; }
   .ex-dg figcaption { font-size: 10pt; }
   .ex-qs { font-size: 11pt; }
-  .ex-familles p { margin-top: 3px; }
+  .ex-familles p { margin-top: 0; min-height: 9mm; }
+  .ex-invente .ex-ligne { height: 10mm; }
   .ex-petit-dg .dg { max-width: 55mm; }
   .ex-sachet { width: 26mm; height: 16mm; }
   .ex-piece { width: 9mm; height: 9mm; font-size: 10pt; } .ex-piece--5 { width: 8mm; height: 8mm; } .ex-piece--100, .ex-piece--200 { width: 10mm; height: 10mm; }
