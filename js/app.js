@@ -76,8 +76,9 @@
     try {
       if (!("speechSynthesis" in window)) return;
       speechSynthesis.cancel();
-      var u = new SpeechSynthesisUtterance(texte);
-      u.lang = (lg || langue) === "en" ? "en-GB" : "fr-FR"; u.rate = 0.85;
+      var u = new SpeechSynthesisUtterance(texte), fr = (lg || langue) !== "en", V = window.COCO_VOIX;
+      u.lang = fr ? "fr-FR" : "en-GB"; u.rate = fr && V ? V.vitesseVoix() : 0.85;
+      if (fr && V) { var v = V.meilleureVoix(); if (v) u.voice = v; }
       speechSynthesis.speak(u);
     } catch (e) {}
   }
@@ -1348,45 +1349,18 @@
       }
     },
     mots: {
-      seq: "seq-mots", matiere: "francais", titre: function () { return tr(C.mots.titre); }, optDefaut: "g1",
+      /* une seule famille (ou liste) de mots par fiche : on aborde une régularité à la fois (demande de l’enseignante, 10/11/2026) */
+      seq: "seq-mots", matiere: "francais", titre: function () { return tr(C.mots.titre); }, optDefaut: "g1-1",
       rappel: function (en) { return en ? "Invariable words never change: we learn them by heart!" : "Les mots invariables ne changent jamais : on les apprend par cœur !"; },
       reglage: function (E, en) {
-        return '<label class="ex-case">' + (en ? "Word list:" : "Liste de mots :") + ' <select id="ex-liste">' + MO.GROUPS.map(function (g) { return '<option value="' + g.id + '"' + (E.opt === g.id ? " selected" : "") + ">" + esc(g.name) + "</option>"; }).join("") + "</select></label>";
+        var cur = moFamille(E.opt).id;
+        return '<label class="ex-case">' + (en ? "Words worked on:" : "Mots travaillés :") + ' <select id="ex-liste">' + MO.GROUPS.map(function (g) {
+          return '<optgroup label="' + esc(g.name) + '">' + MO.FAMS.filter(function (f) { return f.group.id === g.id; }).map(function (f) {
+            return '<option value="' + f.id + '"' + (cur === f.id ? " selected" : "") + ">" + esc(moNom(f) + " : " + f.words.map(MO.plain).join(", ")) + "</option>"; }).join("") + "</optgroup>"; }).join("") + "</select></label>";
       },
-      tirer: function (g) {
-        var fams = MO.FAMS.filter(function (f) { return f.group.id === (g || "g1"); }), sel = {};
-        fams.forEach(function (f) { sel[f.id] = 1; });
-        var pool = HE.shuf(MO.pool(sel)), f3 = HE.shuf(fams.filter(function (f) { return f.words.length >= 3; })), deux = f3.slice(0, 1);
-        var cleP = function (f) { return MO.plain(f.key).replace(/-/g, ""); };
-        f3.some(function (f) { if (deux.length && cleP(f).indexOf(cleP(deux[0])) < 0 && cleP(deux[0]).indexOf(cleP(f)) < 0) { deux.push(f); return true; } return false; });
-        return { trous: pool.slice(0, 6).map(function (x) { return { m: x.m, h: MO.hiddenPart(x.m) }; }),
-          choix: pool.slice(6, 10).map(function (x) { return { p: x.p, o: HE.shuf([x.p].concat(MO.misspell(x.p, 2))) }; }),
-          phrases: HE.shuf(MO.gapPool(sel)).slice(0, 4).map(function (q) { return { w: q.p, s: q.sent, o: HE.shuf([q.p].concat(q.opts)) }; }),
-          familles: deux.map(function (f) { return { key: f.key, words: f.words }; }),
-          dictee: HE.shuf(pool).slice(0, 6) };
-      },
-      exos: function (d, en) {
-        var cle = function (k) { return MO.plain(k).replace(/^-/, "… ").replace(/-$/, " …"); };
-        var melange = HE.shuf(d.familles.reduce(function (a, f) { return a.concat(f.words.map(MO.plain)); }, []));
-        var ex = [
-          { c: en ? "Fill in the missing letters." : "Complète les lettres qui manquent.",
-            q: '<ul class="ex-fr ex-mots">' + d.trous.map(function (x) { return "<li>" + esc(x.h.before) + exT(esc(x.h.seg)) + esc(x.h.after) + "</li>"; }).join("") + "</ul>",
-            r: d.trous.map(function (x) { return MO.html(x.m); }).join(" · ") },
-          { c: en ? "Circle the word that is spelt correctly." : "Entoure le mot bien écrit.",
-            q: '<ul class="ex-fr ex-choix">' + d.choix.map(function (x) { return "<li>" + exG(x.o.map(function (o) { return o === x.p ? exC(esc(o)) : esc(o); }).join('<span class="ex-sep">/</span>'), "cercle") + "</li>"; }).join("") + "</ul>",
-            r: d.choix.map(function (x) { return esc(x.p); }).join(" · ") }
-        ];
-        if (d.phrases.length >= 2) ex.push({ c: en ? "Circle the right word to complete the sentence." : "Entoure le mot qui complète la phrase.",
-          q: '<ul class="ex-fr ex-phrases">' + d.phrases.map(function (x) { return "<li>" + exG(esc(x.s).split("___").join("( " + x.o.map(function (o) { return o === x.w ? exC(esc(o)) : esc(o); }).join(" / ") + " )"), "cercle") + "</li>"; }).join("") + "</ul>",
-          r: d.phrases.map(function (x) { return esc(x.w); }).join(" · ") });
-        if (d.familles.length === 2) ex.push({ c: en ? "Sort the words into their family." : "Range les mots dans leur famille.",
-          q: '<p class="ex-fr ex-banque">' + melange.map(esc).join(" · ") + '</p><div class="ex-familles">' + d.familles.map(function (f) { return '<div><b class="ex-fr">' + esc(cle(f.key)) + "</b>" + f.words.map(function (w) { return "<p>" + exT(MO.html(w)) + "</p>"; }).join("") + "</div>"; }).join("") + "</div>",
-          r: d.familles.map(function (f) { return esc(cle(f.key)) + " : " + f.words.map(MO.html).join(", "); }).join(" — ") });
-        ex.push({ c: en ? "Word dictation: write the words your teacher reads." : "Dictée de mots : écris les mots que dit la maîtresse.",
-          q: '<ol class="ex-dictee ex-deux-col-ol">' + d.dictee.map(function (x) { return "<li>" + exT(MO.html(x.m), true) + "</li>"; }).join("") + "</ol>",
-          r: (en ? "Words to read aloud: " : "Mots à dicter : ") + d.dictee.map(function (x) { return MO.html(x.m); }).join(" · ") });
-        return ex;
-      }
+      tirer: function (opt) { var T = moTirer(opt), P = moRepartir(T, 1);
+        return { fam: moFam(T.fam), trous: T.pool.map(function (x) { return { m: x.m, h: MO.hiddenPart(x.m) }; }), phrases: P.trous, dictee: HE.shuf(T.pool), dicteePh: P.dictee }; },
+      exos: function (d, en) { return moExos(d, en); }
     },
     monnaie: {
       seq: "seq-monnaie", matiere: "maths", titre: function () { return tr(C.monnaie.titre); },
@@ -1792,50 +1766,83 @@
     }
   });
 
-  /* ===== Les mots invariables (affiches 2026) ===== */
-  function moTirer(g) { var fams = MO.FAMS.filter(function (f) { return f.group.id === (g || "g1"); }), sel = {}; fams.forEach(function (f) { sel[f.id] = 1; }); return { fams: fams, sel: sel, pool: HE.shuf(MO.pool(sel)) }; }
+  /* ===== Les mots invariables (affiches 2026) : une famille ou une liste par fiche ===== */
+  function moFamille(opt) { return MO.FAMS.filter(function (f) { return f.id === opt; })[0] || MO.FAMS.filter(function (f) { return f.group.id === opt; })[0] || MO.FAMS.filter(function (f) { return f.id === "g1-1"; })[0]; }
+  function moTirer(opt) { var f = moFamille(opt), sel = {}; sel[f.id] = 1; return { fam: f, sel: sel, pool: HE.shuf(MO.pool(sel)), gaps: HE.shuf(MO.gapPool(sel)) }; }
+  function moFam(f) { return { key: f.key, words: f.words, liste: /^\d+$/.test(MO.plain(f.key)) }; }
+  function moCycle(L, n) { var r = []; for (var i = 0; L.length && r.length < n; i++) r.push(L[i % L.length]); return r; }
   function moCle(k) { return MO.plain(k).replace(/^-/, "… ").replace(/-$/, " …"); }
-  function moPhrases(L, en) { return '<ul class="ex-fr ex-phrases">' + L.map(function (x) { return "<li>" + exG(esc(x.s).split("___").join("( " + x.o.map(function (o) { return o === x.w ? exC(esc(o)) : esc(o); }).join(" / ") + " )"), "cercle") + "</li>"; }).join("") + "</ul>"; }
-  function moChoix(L) { return '<ul class="ex-fr ex-choix">' + L.map(function (x) { return "<li>" + exG(x.o.map(function (o) { return o === x.p ? exC(esc(o)) : esc(o); }).join('<span class="ex-sep">/</span>\u200b'), "cercle") + "</li>"; }).join("") + "</ul>"; }
-  function moDictee(L, en) { return { c: en ? "Word dictation: write the words your teacher reads." : "Dictée de mots : écris les mots que dit la maîtresse.", q: '<ol class="ex-dictee ex-deux-col-ol">' + L.map(function (x) { return "<li>" + exT(MO.html(x.m), true) + "</li>"; }).join("") + "</ol>", r: (en ? "Words to read aloud: " : "Mots à dicter : ") + L.map(function (x) { return MO.html(x.m); }).join(" · ") }; }
+  function moNom(f) { var k = MO.plain(f.key); return /^\d+$/.test(k) ? "Liste " + k : moCle(f.key); }
+  function moPhraseDictee(q) { var t = q.sent.replace("___", q.p); return t.charAt(0).toUpperCase() + t.slice(1); }
+  /* Phrases écrites par Claude pour les familles qui n’en avaient qu’une [PROPOSITION] */
+  var MO_PHRASES_PLUS = { "g1-4": ["L’avion vole au-dessus de la maison.", "Le chat saute par-dessus la barrière."], "g1-8": ["Le chat passe à travers la haie.", "Tao a mis son pull à l’envers."], "g1-13": ["Pourquoi le cagou ne vole-t-il pas ?"] };
+  /* Répartit les phrases : celles à compléter (avec un trou) et celles à dicter, jamais les mêmes (une phrase dictée ne doit pas être sous les yeux de l’élève) */
+  function moRepartir(T, nDictee) {
+    var plus = (MO_PHRASES_PLUS[T.fam.id] || []).slice(), sent = T.pool.map(function (x) { return MO.SENT[x.p]; }).filter(Boolean);
+    var gaps = T.gaps.slice(), deja = gaps.map(moPhraseDictee), libres = HE.shuf(plus.concat(sent).filter(function (p, i, L) { return deja.indexOf(p) < 0 && L.indexOf(p) === i; }));
+    var dictee = libres.slice(0, nDictee);
+    while (dictee.length < nDictee && gaps.length > 1) dictee.push(moPhraseDictee(gaps.pop()));
+    return { trous: gaps.slice(0, 4), dictee: dictee };
+  }
+  function moTrous(L) { return '<ul class="ex-fr ex-mots">' + L.map(function (x) { return "<li>" + esc(x.h.before) + exT(esc(x.h.seg)) + esc(x.h.after) + "</li>"; }).join("") + "</ul>"; }
+  /* niveau 3 : seule la première lettre est donnée (b…… pour bientôt ; d’…… pour d’après) */
+  function moTrouLong(m) { var p = MO.plain(m).replace(/^\((à)\) /, "$1 "), k = /^[a-zàâéèêîôûç]’/i.test(p) ? 2 : 1; return { before: p.slice(0, k), seg: p.slice(k), after: "" }; }
+  function moDictee(L, en) { return { c: en ? "Word dictation: write the words your teacher reads." : "Dictée de mots : écris les mots que dit la maîtresse.",
+    q: '<ol class="ex-dictee ex-deux-col-ol">' + L.map(function (x) { return "<li>" + exT(MO.html(x.m), true) + "</li>"; }).join("") + "</ol>",
+    r: (en ? "Words to read aloud: " : "Mots à dicter : ") + L.map(function (x) { return MO.html(x.m); }).join(" · ") }; }
+  function moDicteePhrases(P, en) { return { c: P.length > 1 ? (en ? "Sentence dictation: write the sentences your teacher reads." : "Dictée de phrases : écris les phrases que dit la maîtresse.") : (en ? "Sentence dictation: write the sentence your teacher reads." : "Dictée de phrase : écris la phrase que dit la maîtresse."),
+    q: '<p class="ex-invente">' + P.map(function (p) { return exT(esc(p), true) + EXLL; }).join("") + "</p>", r: (en ? "To read aloud: " : "À dicter : ") + P.map(esc).join(" ") }; }
+  /* niveau 3 (d.sansListe) : la liste n’est pas donnée, seulement le nom de la famille ; elle donnerait les réponses de l’exercice 1 */
+  function moCompleter(d, en) { var L = d.sansListe && !d.fam.liste;
+    return { c: L ? (en ? "Complete each sentence with a word from the family." : "Complète chaque phrase avec un mot de la famille.") : (en ? "Complete each sentence with a word from the list." : "Complète chaque phrase avec un mot de la liste."),
+    q: '<p class="ex-fr ex-banque">' + (L ? (en ? "Family: " : "Famille : ") + "<b>" + esc(moCle(d.fam.key)) + "</b>" : d.fam.words.map(function (w) { return esc(MO.plain(w)); }).join(" · ")) + '</p><ul class="ex-fr ex-phrases">' + d.phrases.map(function (x) { return "<li>" + esc(x.sent).split("___").join(exT(esc(x.p))) + "</li>"; }).join("") + "</ul>", r: d.phrases.map(function (x) { return esc(x.p); }).join(" · ") }; }
+  /* niveaux 2 et 3 : 1. lettres qui manquent ; 2. phrases à compléter ; 3. dictée de mots ; 4. dictée de phrase(s) (ordre demandé par l’enseignante ;
+     aucun exercice ne montre un mot mal écrit, recommandation d’Ouzoulias rappelée par l’enseignante) */
+  function moExos(d, en) {
+    var ex = [{ c: en ? "Fill in the missing letters." : "Complète les lettres qui manquent.", q: moTrous(d.trous), r: d.trous.map(function (x) { return esc(x.h.before + x.h.seg + x.h.after); }).join(" · ") }];
+    if (d.phrases.length) ex.push(moCompleter(d, en));
+    ex.push(moDictee(d.dictee, en));
+    if (d.dicteePh.length) ex.push(moDicteePhrases(d.dicteePh, en));
+    return ex;
+  }
+  /* niveau 1 : lettres d’un mot mélangées, mot par mot pour les expressions (tant pis : n t a t / s i p) */
+  function moMelanger(p) { return p.replace(/[()]/g, "").split(" ").filter(Boolean).map(function (w) { var L = w.split(""), r = L, k = 0; if (L.length > 1) do { r = HE.shuf(L); k++; } while (r.join("") === w && k < 9); return r; }); }
+  function moCarreaux(G) { return G.map(function (L) { return L.map(function (c) { return '<span class="ex-lettre">' + esc(c) + "</span>"; }).join(""); }).join('<span class="ex-sep">/</span>'); }
+  function moMotsMelanges(p) { var M = p.split(" "), r = M, k = 0; if (M.length > 1) do { r = HE.shuf(M); k++; } while (r.join(" ") === p && k < 9); return r; }
+  /* « Entoure la partie commune » (famille) ou « Recopie les mots » (liste de mots-outils, sans partie commune) */
+  function moObserver(f, en) {
+    var W = f.words;
+    if (f.liste) return { c: en ? "Read the words of the list, then copy them." : "Lis les mots de la liste, puis recopie-les.", q: '<ul class="ex-fr ex-mots">' + W.map(function (w) { return "<li>" + esc(MO.plain(w)) + " " + exT(MO.html(w)) + "</li>"; }).join("") + "</ul>", r: W.map(MO.html).join(" · ") };
+    return { c: en ? "These words are from the same family. Circle their common part." : "Ces mots sont de la même famille. Entoure leur partie commune.",
+      q: '<p class="ex-fr ex-banque">' + W.map(function (w) { return exS(esc(MO.plain(w)), MO.html(w), true); }).join(" · ") + "</p>", r: esc(moCle(f.key)) + " : " + W.map(MO.html).join(" · ") };
+  }
   exNiveaux("mots", [
     "L’élève est capable d’orthographier correctement les mots invariables de ses listes.",
     "L’élève est capable de reconnaître la partie commune des mots d’une même famille (tôt, aussitôt, plutôt).",
     "L’élève est capable de choisir le mot invariable qui convient pour compléter une phrase."
   ], {
-    but: "Moins de mots ; deux propositions au lieu de trois ; une famille dont on écrit la partie commune ; une dictée de 4 mots.",
+    but: "Les mêmes mots, avec des aides : entourer la partie commune, cocher le mot qui complète la phrase, remettre les lettres dans l’ordre, remettre les mots de la phrase dans l’ordre.",
     rappel: EXOS.mots.rappel,
-    tirer: function (g) { var T = moTirer(g), P = T.pool, f3 = HE.shuf(T.fams.filter(function (f) { return f.words.length >= 3; }));
-      return { trous: P.slice(0, 4).map(function (x) { return { m: x.m, h: MO.hiddenPart(x.m) }; }), choix: P.slice(4, 8).map(function (x) { return { p: x.p, o: HE.shuf([x.p].concat(MO.misspell(x.p, 1))) }; }),
-        phrases: HE.shuf(MO.gapPool(T.sel)).slice(0, 3).map(function (q) { return { w: q.p, s: q.sent, o: HE.shuf([q.p, HE.pk(q.opts)]) }; }), famille: f3[0] ? { key: f3[0].key, words: f3[0].words } : null, dictee: HE.shuf(P).slice(0, 4) }; },
+    tirer: function (opt) { var T = moTirer(opt), P = moRepartir(T, 1);
+      return { fam: moFam(T.fam), phrases: P.trous.map(function (q) { return { w: q.p, s: q.sent }; }), lettres: HE.shuf(T.pool).map(function (x) { return { m: x.m, g: moMelanger(x.p) }; }),
+        ordre: P.dictee.map(function (p) { return { p: p, m: moMotsMelanges(p) }; }) }; },
     exos: function (d, en) {
-      var ex = [{ c: en ? "Fill in the missing letters." : "Complète les lettres qui manquent.", q: '<ul class="ex-fr ex-mots">' + d.trous.map(function (x) { return "<li>" + esc(x.h.before) + exT(esc(x.h.seg)) + esc(x.h.after) + "</li>"; }).join("") + "</ul>", r: d.trous.map(function (x) { return MO.html(x.m); }).join(" · ") },
-        { c: en ? "Circle the word that is spelt correctly." : "Entoure le mot bien écrit.", q: moChoix(d.choix), r: d.choix.map(function (x) { return esc(x.p); }).join(" · ") }];
-      if (d.phrases.length >= 2) ex.push({ c: en ? "Circle the right word to complete the sentence." : "Entoure le mot qui complète la phrase.", q: moPhrases(d.phrases, en), r: d.phrases.map(function (x) { return esc(x.w); }).join(" · ") });
-      if (d.famille) ex.push({ c: en ? "These words are from the same family. Write their common part." : "Ces mots sont de la même famille. Écris leur partie commune.",
-        q: '<p class="ex-fr ex-banque">' + d.famille.words.map(function (w) { return esc(MO.plain(w)); }).join(" · ") + "</p><p>" + (en ? "Common part: " : "Partie commune : ") + exT(esc(moCle(d.famille.key))) + "</p>", r: esc(moCle(d.famille.key)) });
-      ex.push(moDictee(d.dictee, en));
+      var W = d.fam.words.map(MO.plain), ex = [moObserver(d.fam, en)];
+      if (d.phrases.length) ex.push({ c: en ? "Tick the word that completes the sentence." : "Coche le mot qui complète la phrase.",
+        q: '<ul class="ex-fr ex-phrases ex-cocher">' + d.phrases.map(function (x) { return "<li>" + esc(x.s).split("___").join("……") + '<span class="ex-coches">' + W.map(function (w) { return '<span class="ex-coche">' + exS("☐", w === x.w ? "☑" : "☐", true) + " " + esc(w) + "</span>"; }).join("") + "</span></li>"; }).join("") + "</ul>",
+        r: d.phrases.map(function (x) { return esc(x.w); }).join(" · ") });
+      ex.push({ c: en ? "Put the letters in order to write the word." : "Remets les lettres dans l’ordre pour écrire le mot.",
+        q: '<ul class="ex-fr ex-lettres">' + d.lettres.map(function (x) { return "<li>" + moCarreaux(x.g) + " → " + exT(MO.html(x.m)) + "</li>"; }).join("") + "</ul>", r: d.lettres.map(function (x) { return MO.html(x.m); }).join(" · ") });
+      if (d.ordre.length) ex.push({ c: en ? "Put the words in order to write the sentence." : "Remets les mots dans l’ordre pour écrire la phrase.",
+        q: d.ordre.map(function (x) { return '<p class="ex-fr ex-banque">' + x.m.map(esc).join(" · ") + '</p><p class="ex-invente">' + exT(esc(x.p), true) + "</p>"; }).join(""), r: d.ordre.map(function (x) { return esc(x.p); }).join(" ") });
       return ex;
     }
-  }, "Fiche d’origine : lettres qui manquent, mot bien écrit parmi trois, mot qui complète la phrase, deux familles à ranger, dictée de 6 mots.", {
-    but: "Quatre propositions pour le mot bien écrit ; une banque de mots commune pour compléter les phrases ; trois familles à ranger ; une dictée de 8 mots.",
+  }, "Fiche d’origine, avec les seuls mots choisis : lettres qui manquent, phrases à compléter avec un mot de la liste, dictée de mots, dictée d’une phrase.", {
+    but: "Les mêmes mots, avec moins d’aide : seule la première lettre est donnée, phrases à compléter avec le nom de la famille seulement, dictée de mots, dictée de deux phrases.",
     rappel: EXOS.mots.rappel,
-    tirer: function (g) { var T = moTirer(g), P = T.pool, cleP = function (f) { return MO.plain(f.key).replace(/-/g, ""); }, f3 = HE.shuf(T.fams.filter(function (f) { return f.words.length >= 3; })), fs = [];
-      f3.forEach(function (f) { if (fs.length < 3 && fs.every(function (h) { return cleP(f).indexOf(cleP(h)) < 0 && cleP(h).indexOf(cleP(f)) < 0; })) fs.push(f); });
-      var ph = HE.shuf(MO.gapPool(T.sel)).slice(0, 4), autres = HE.shuf(P.filter(function (x) { return !ph.some(function (q) { return q.p === x.p; }); })).slice(0, 2);
-      return { choix: P.slice(0, 4).map(function (x) { return { p: x.p, o: HE.shuf([x.p].concat(MO.misspell(x.p, 3))) }; }), phrases: ph.map(function (q) { return { w: q.p, s: q.sent }; }),
-        banque: HE.shuf(ph.map(function (q) { return q.p; }).concat(autres.map(function (x) { return x.p; }))), familles: fs.map(function (f) { return { key: f.key, words: f.words }; }), dictee: HE.shuf(P).slice(0, 8) }; },
-    exos: function (d, en) {
-      var ex = [{ c: en ? "Circle the word that is spelt correctly." : "Entoure le mot bien écrit.", q: moChoix(d.choix), r: d.choix.map(function (x) { return esc(x.p); }).join(" · ") }];
-      if (d.phrases.length >= 2) ex.push({ c: en ? "Complete each sentence with a word from the box. Two words are not used." : "Complète chaque phrase avec un mot de la boîte. Deux mots ne servent pas.",
-        q: '<p class="ex-fr ex-banque">' + d.banque.map(esc).join(" · ") + '</p><ul class="ex-fr ex-phrases">' + d.phrases.map(function (x) { return "<li>" + esc(x.s).split("___").join(exT(esc(x.w))) + "</li>"; }).join("") + "</ul>", r: d.phrases.map(function (x) { return esc(x.w); }).join(" · ") });
-      if (d.familles.length >= 2) { var mel = HE.shuf(d.familles.reduce(function (a, f) { return a.concat(f.words.map(MO.plain)); }, []));
-        ex.push({ c: en ? "Sort the words into their family." : "Range les mots dans leur famille.",
-          q: '<p class="ex-fr ex-banque">' + mel.map(esc).join(" · ") + '</p><div class="ex-familles ex-familles' + d.familles.length + '">' + d.familles.map(function (f) { return '<div><b class="ex-fr">' + esc(moCle(f.key)) + "</b>" + f.words.map(function (w) { return "<p>" + exT(MO.html(w)) + "</p>"; }).join("") + "</div>"; }).join("") + "</div>",
-          r: d.familles.map(function (f) { return esc(moCle(f.key)) + " : " + f.words.map(MO.html).join(", "); }).join(" — ") }); }
-      ex.push(moDictee(d.dictee, en));
-      return ex;
-    }
+    tirer: function (opt) { var T = moTirer(opt), P = moRepartir(T, 2);
+      return { fam: moFam(T.fam), trous: T.pool.map(function (x) { return { m: x.m, h: moTrouLong(x.m) }; }), phrases: P.trous, dictee: HE.shuf(T.pool), dicteePh: P.dictee, sansListe: true }; },
+    exos: function (d, en) { return moExos(d, en); }
   });
 
   /* ===== La monnaie et les prix (leçon GM1) ===== */
@@ -2571,17 +2578,19 @@
           : { fr: "« " + x[1] + " » dit ce qui se passe, ce que l’on fait : il exprime une action.", en: "« " + x[1] + " » tells us what happens, what someone or something does: it expresses an action." } };
     }));
   }
-  /* Questions d’ardoise des mots invariables : les outils du v0 (lettres cachées, mot bien écrit, mot manquant), sur la liste choisie */
+  /* Questions d’ardoise des mots invariables : lettres qui manquent, mot entendu, mot manquant de la phrase, sur la liste choisie */
   function tqMotsReglage(B) { return "<h3>" + (langue === "en" ? "Word list" : "Liste de mots") + '</h3><div class="coco-row">' + MO.GROUPS.map(function (g) { return B("liste", g.id, esc(g.name)); }).join("") + "</div>"; }
   function tqMots(cfg) {
     var sel = {}; MO.FAMS.forEach(function (f) { if (f.group.id === (cfg.liste || "g1")) sel[f.id] = 1; });
     var pool = HE.shuf(MO.pool(sel)), qs = [], mot = function (m) { return '<span class="mi-mot">' + MO.html(m) + "</span>"; };
     var ex = function (p) { return { fr: "On écrit « " + p + " ».", en: "We write « " + p + " »." }; };
-    pool.slice(0, 4).forEach(function (x) { var h = MO.hiddenPart(x.m), o = HE.shuf([h.seg].concat(MO.segOptions(h)));
-      qs.push({ t: "choix", c: { fr: "Quelles lettres manquent ?", en: "Which letters are missing?" }, z: function (en, voir) { return voir ? mot(x.m) : '<span class="mi-mot">' + h.beforeH + '<span class="tq-trou">…</span>' + h.afterH + "</span>"; },
-        o: o.map(function (v) { return v === "" ? { fr: "(aucune lettre)", en: "(no letter)" } : v; }), a: o.indexOf(h.seg), ex: ex(x.p) }); });
-    pool.slice(4, 8).forEach(function (x) { var o = HE.shuf([x.p].concat(MO.misspell(x.p, 2)));
-      qs.push({ t: "choix", c: { fr: "Quel mot est bien écrit ?", en: "Which word is spelt correctly?" }, z: function (en, voir) { return voir ? mot(x.m) : ""; }, o: o, a: o.indexOf(x.p), ex: ex(x.p) }); });
+    /* aucun mot ni morceau de mot mal écrit n’est montré (principe d’Ouzoulias, demande de l’enseignante, 10/11/2026) :
+       les élèves écrivent les lettres qui manquent, puis le mot entendu, sur leur ardoise */
+    pool.slice(0, 4).forEach(function (x) { var h = MO.hiddenPart(x.m);
+      qs.push({ t: "ecrit", c: { fr: "Écris les lettres qui manquent.", en: "Write the missing letters." }, z: function (en, voir) { return voir ? mot(x.m) : '<span class="mi-mot">' + h.beforeH + '<span class="tq-trou">…</span>' + h.afterH + "</span>"; }, ex: ex(x.p) }); });
+    pool.slice(4, 8).forEach(function (x) {
+      qs.push({ t: "ecrit", c: { fr: "Écoute le mot, puis écris-le.", en: "Listen to the word, then write it." },
+        z: function (en, voir) { return voir ? mot(x.m) : '<p class="tq-ecoute"><button class="coco-btn" type="button" data-action="tq-dire" data-v="' + esc(MO.sayText(x.p)) + '">' + (en ? "Listen to the word" : "Écouter le mot") + "</button></p>"; }, ex: ex(x.p) }); });
     HE.shuf(MO.gapPool(sel)).slice(0, 4).forEach(function (q) { var o = HE.shuf([q.p].concat(q.opts)), debut = q.sent.indexOf("___") === 0, w = debut ? q.p.charAt(0).toUpperCase() + q.p.slice(1) : q.p;
       qs.push({ t: "choix", c: { fr: "Quel mot complète la phrase ?", en: "Which word completes the sentence?" }, z: function (en, voir) { return tqPhrase(esc(q.sent).replace("___", voir ? "<b>" + esc(w) + "</b>" : '<span class="tq-trou">…</span>')); },
         o: o, a: o.indexOf(q.p), ex: { fr: q.sent.replace("___", w), en: q.sent.replace("___", w) } }); });
@@ -2708,6 +2717,7 @@
   function tqPrec() { if (TQ.part !== "dec") return; if (TQ.vu) TQ.vu = false; else if (TQ.step > 0) { TQ.step--; TQ.vu = true; } }
   function tqRetour() { clearInterval(TQ.tid); if (TQ.part === "menu") location.hash = "ens-sequences"; else { TQ.part = "menu"; TQ.step = 0; TQ.vu = false; } }
   function actionTq(a, el) {
+    if (a === "tq-dire") { MO.dire([el.dataset.v]); return; }
     if (a === "tq-dec") { TQ.part = "dec"; TQ.step = 0; TQ.vu = false; }
     else if (a === "tq-setup") TQ.part = "setup";
     else if (a === "tq-cfg") TQ.cfg[el.dataset.k] = isNaN(+el.dataset.v) ? el.dataset.v : +el.dataset.v;
@@ -3276,7 +3286,35 @@
     var n = { "ens-suivi": "Étoiles de calcul et de grammaire", "ens-sequences": "9 séquences", "ens-formation": Object.keys(FO.fiches).filter(function (c) { return !FO.fiches[c].vide; }).length + " fiches" };
     return ensEntete("") + '<section class="ens-dossiers">' + ENS_DOSSIERS.map(function (d) {
       return '<a class="ens-dossier" href="#' + d.id + '">' + DOSSIER_SVG + "<b>" + d.t + "</b><small>" + d.d + '</small><span class="ens-compte">' + n[d.id] + "</span></a>";
-    }).join("") + "</section>";
+    }).join("") + "</section>" + '<p class="ens-reglages"><a class="coco-btn coco-btn--secondaire" href="#ens-voix">' + "Voix de la dictée</a></p>";
+  }
+  /* Espace enseignante › Voix de la dictée (D-132) : réglage pour l’appareil (localStorage « coco-voix ») ; liste des voix françaises
+     de l’appareil, écoute d’une phrase d’essai, choix de la vitesse ; « Choix automatique » prend la voix la plus naturelle. */
+  var VOIX_ESSAI = "Le petit chat gris dort sur le tapis. Après l’école, Léo range son cartable.";
+  function pageEnsVoix() {
+    var V = window.COCO_VOIX, vs = V ? V.voixFrancaises() : [], p = V ? V.prefVoix() : {}, actuelle = V && V.meilleureVoix(), vit = p.vitesse || "lente";
+    var tri = vs.slice().sort(function (a, b) { return V.scoreVoix(b) - V.scoreVoix(a); });
+    var lignes = tri.map(function (v, i) { var choisie = actuelle && v.name === actuelle.name;
+      return '<li class="voix-ligne' + (choisie ? " voix-choisie" : "") + '"><div><b>' + esc(v.name) + "</b><small>" + esc(v.lang) + (i === 0 ? " · la plus naturelle d’après son nom" : "") + "</small></div>" +
+        '<div class="coco-row"><button class="coco-btn coco-btn--secondaire" type="button" data-action="voix-ecouter" data-v="' + esc(v.name) + '">Écouter</button>' +
+        '<button class="coco-btn' + (choisie ? "" : " coco-btn--secondaire") + '" type="button" data-action="voix-choisir" data-v="' + esc(v.name) + '" aria-pressed="' + !!choisie + '">' + (choisie ? "Voix choisie" : "Choisir") + "</button></div></li>"; }).join("");
+    return ensEntete("Voix de la dictée") +
+      '<div class="voix-page"><p>La voix sert seulement aux jeux d’écoute et aux dictées. Ce réglage vaut <b>pour cet appareil</b> : à refaire sur chaque iPad.</p>' +
+      '<section class="voix-bloc"><h2>Vitesse</h2><div class="coco-row">' + [["normale", "Normale"], ["lente", "Lente"], ["tres-lente", "Très lente"]].map(function (x) {
+        return '<button class="coco-btn' + (vit === x[0] ? "" : " coco-btn--secondaire") + '" type="button" data-action="voix-vitesse" data-v="' + x[0] + '" aria-pressed="' + (vit === x[0]) + '">' + x[1] + "</button>"; }).join("") +
+        '<button class="coco-btn coco-btn--secondaire" type="button" data-action="voix-ecouter" data-v="">Écouter la voix choisie</button></div><p class="et-note">Phrase d’essai : « ' + esc(VOIX_ESSAI) + " »</p></section>" +
+      '<section class="voix-bloc"><h2>Voix françaises de cet appareil</h2>' + (vs.length ? '<p class="et-note">' + (p.nom ? 'Voix choisie à la main. <button class="ens-lien" type="button" data-action="voix-auto">Revenir au choix automatique</button>' : "Choix automatique : le site prend la voix la plus naturelle (en haut de la liste).") + "</p><ul class=\"voix-liste\">" + lignes + "</ul>"
+        : "<p>Aucune voix française n’est proposée par ce navigateur pour l’instant. Rechargez la page ; sinon, ajoutez une voix française dans les réglages de l’appareil.</p>") + "</section>" +
+      '<section class="voix-bloc voix-aide"><h2>Pour une voix plus naturelle sur iPad</h2><ol><li>Ouvrir <b>Réglages › Accessibilité › Contenu énoncé › Voix › Français (France)</b>.</li><li>Télécharger une voix <b>« améliorée »</b> ou <b>« premium »</b> (par exemple Audrey ou Thomas).</li><li>Fermer Safari complètement, le rouvrir, puis revenir sur cette page : la nouvelle voix apparaît dans la liste.</li></ol><p class="et-note">Toutes les voix de l’iPad ne sont pas toujours proposées à Safari : si la voix téléchargée n’apparaît pas, essayer une autre voix « améliorée ».</p></section></div>';
+  }
+  /* les voix arrivent parfois après le premier affichage : on redessine la page quand la liste change */
+  try { if ("speechSynthesis" in window) speechSynthesis.addEventListener("voiceschanged", function () { if (location.hash === "#ens-voix") rendre(); }); } catch (e) {}
+  function actionVoix(a, el) {
+    var V = window.COCO_VOIX; if (!V) return; var p = V.prefVoix();
+    if (a === "voix-vitesse") { p.vitesse = el.dataset.v; ecrire("voix", p); }
+    else if (a === "voix-choisir") { p.nom = el.dataset.v; ecrire("voix", p); }
+    else if (a === "voix-auto") { delete p.nom; ecrire("voix", p); }
+    if (a === "voix-ecouter") { var nom = el.dataset.v, garde = p.nom; if (nom) { p.nom = nom; ecrire("voix", p); } V.dire([VOIX_ESSAI]); if (nom) { if (garde) p.nom = garde; else delete p.nom; ecrire("voix", p); } }
   }
   /* Espace enseignante › Séquences d’apprentissage (D-113) : pour chaque séquence, les mêmes 5 boutons dans le même ordre ;
      un bouton dont le contenu n’existe pas encore reste visible, grisé, avec « À venir ». Les problèmes ouverts sont rangés sous leur séquence. */
@@ -4083,7 +4121,7 @@
   /* ---------- routeur ---------- */
   var ROUTES = {
     accueil: pageAccueil, "seq-verbe": function () { return pageSequence("verbe"); }, "seq-mots": pageSequenceMots, "lecon-mots": pageLeconMots, "fiche-mots": ficheMots,
-    "seq-heure": pageSequenceHeure, "seq-digitale": pageSequenceDigitale, "ens-suivi": pageEnsSuivi, "ens-etoiles": function () { return pageEnsEtoiles("calcul"); }, "ens-etoiles-grammaire": function () { return pageEnsEtoiles("grammaire"); }, "ens-corriges": pageEnsCorriges, "ens-etoiles-fiches": function () { return pageEnsFichesEtoiles(false); }, "ens-etoiles-fiches-tout": function () { return pageEnsFichesEtoiles(true); }, "ens-corriges-grammaire": pageEnsCorrigesGram, "ens-sequences": pageEnsSequences, "ens-formation": pageEnsFormation, "fiche-digitale": ficheDigitale, "seq-diagrammes": pageSequenceDiagrammes, "lecon-diagrammes": pageLeconDiagrammes, "fiche-diagrammes": ficheDiagrammes, "fiche-masses": ficheMasses, "fiche-verbe": ficheVerbe, "fiche-division": ficheDivision, "fiche-monnaie": ficheMonnaie, "lecon-heure": function () { return pageLeconHeure(true); }, "maquette-retiens": function () { return pageLeconHeure(true); }, "fiche-heure": ficheHeure, "exos-heure": function () { return pageExos("heure"); }, "lecon-digitale": pageLeconDigitale, "lecon-division": pageLeconDivision, "lecon-monnaie": pageLeconMonnaie, "lecon-masses": pageLeconMasses, "exos-verbe": function () { return pageExos("verbe"); }, "exos-mots": function () { return pageExos("mots"); },
+    "seq-heure": pageSequenceHeure, "seq-digitale": pageSequenceDigitale, "ens-suivi": pageEnsSuivi, "ens-etoiles": function () { return pageEnsEtoiles("calcul"); }, "ens-etoiles-grammaire": function () { return pageEnsEtoiles("grammaire"); }, "ens-corriges": pageEnsCorriges, "ens-etoiles-fiches": function () { return pageEnsFichesEtoiles(false); }, "ens-voix": pageEnsVoix, "ens-etoiles-fiches-tout": function () { return pageEnsFichesEtoiles(true); }, "ens-corriges-grammaire": pageEnsCorrigesGram, "ens-sequences": pageEnsSequences, "ens-formation": pageEnsFormation, "fiche-digitale": ficheDigitale, "seq-diagrammes": pageSequenceDiagrammes, "lecon-diagrammes": pageLeconDiagrammes, "fiche-diagrammes": ficheDiagrammes, "fiche-masses": ficheMasses, "fiche-verbe": ficheVerbe, "fiche-division": ficheDivision, "fiche-monnaie": ficheMonnaie, "lecon-heure": function () { return pageLeconHeure(true); }, "maquette-retiens": function () { return pageLeconHeure(true); }, "fiche-heure": ficheHeure, "exos-heure": function () { return pageExos("heure"); }, "lecon-digitale": pageLeconDigitale, "lecon-division": pageLeconDivision, "lecon-monnaie": pageLeconMonnaie, "lecon-masses": pageLeconMasses, "exos-verbe": function () { return pageExos("verbe"); }, "exos-mots": function () { return pageExos("mots"); },
     "exos-monnaie": function () { return pageExos("monnaie"); }, "exos-division": function () { return pageExos("division"); }, "exos-masses": function () { return pageExos("masses"); }, "exos-digitale": function () { return pageExos("digitale"); }, "exos-diagrammes": function () { return pageExos("diagrammes"); }, "tbi-heure": pageTbiHeure,
     "seq-imparfait": function () { return pageSequence("imparfait"); }, "lecon-imparfait": pageLeconImparfait, "fiche-imparfait": ficheImparfait, "exos-imparfait": function () { return pageExos("imparfait"); },
     "lecon-verbe": pageLecon, "jeu-verbe-decouvre": jeuDecouvre, "jeu-verbe-chasse": jeuChasse, enseignante: pageEnseignante, banque: pageBanque
@@ -4151,7 +4189,8 @@
     else if (/^qz-/.test(a)) actionQZ(a, el);
     else if (/^lx-/.test(a)) actionLX(a, el);
     else if (/^et-/.test(a)) actionEtoiles(a, el);
-    else if (/^tq-/.test(a)) actionTq(a, el);
+    else if (/^voix-/.test(a)) { actionVoix(a, el); if (a === "voix-ecouter") return; }
+    else if (/^tq-/.test(a)) { actionTq(a, el); if (a === "tq-dire") return; }
     else if (/^t-/.test(a)) actionTbi(a, el);
     else if (/^g-/.test(a)) actionDiag(a, el);
     else if (/^jr-/.test(a)) actionJr(a, el);

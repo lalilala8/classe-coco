@@ -204,14 +204,21 @@ function phraseJuste(val, q){
 
 /* ---------- voix (seulement dans les jeux d'écoute et la dictée, D-31) ---------- */
 const peutParler = typeof window !== "undefined" && "speechSynthesis" in window;
-let voixFr = null;
-function chargerVoix(){ if(!peutParler) return; const vs=speechSynthesis.getVoices(); voixFr = vs.find(v=>/^fr[-_]FR/i.test(v.lang)) || vs.find(v=>/^fr/i.test(v.lang)) || null; }
-if (peutParler){ chargerVoix(); speechSynthesis.onvoiceschanged = chargerVoix; }
+/* Choix de la voix (D-132) : la voix choisie dans l’Espace enseignante › Voix de la dictée (mémorisée sur l’appareil, « coco-voix »),
+   sinon la voix française la plus naturelle de l’appareil (voix « améliorée », « premium », « naturelle » d’abord) ; vitesse lente par défaut. */
+const VITESSES = { normale: .9, lente: .75, "tres-lente": .62 };
+function prefVoix(){ try { return JSON.parse(localStorage.getItem("coco-voix")) || {}; } catch (e) { return {}; } }
+function voixFrancaises(){ if(!peutParler) return []; try { return speechSynthesis.getVoices().filter(v=>/^fr/i.test(v.lang)); } catch (e) { return []; } }
+function scoreVoix(v){ let s=0; if(/^fr[-_]FR/i.test(v.lang)) s+=4; if(/premium|enhanced|am[ée]lior|natural|naturel|neural/i.test(v.name)) s+=6; if(/google/i.test(v.name)) s+=3; if(/online/i.test(v.name)) s+=2;
+  if(/audrey|thomas|aur[ée]lie|denise|henri|vivienne|eloise|remy|marie/i.test(v.name)) s+=1; if(/compact|eloquence|grandma|grandpa|jacques|rocko|shelley|sandy|flo|reed|eddy/i.test(v.name)) s-=3; return s; }
+function meilleureVoix(){ const vs=voixFrancaises(), p=prefVoix(); if(p.nom){ const v=vs.find(x=>x.name===p.nom); if(v) return v; } return vs.slice().sort((a,b)=>scoreVoix(b)-scoreVoix(a))[0] || null; }
+function vitesseVoix(){ return VITESSES[prefVoix().vitesse] || VITESSES.lente; }
 function dire(liste){
   if(!peutParler) return;
-  try { speechSynthesis.cancel();
-    liste.forEach(t=>{ const u=new SpeechSynthesisUtterance(t); u.lang="fr-FR"; if(voixFr) u.voice=voixFr; u.rate=.82; speechSynthesis.speak(u); }); } catch (e) {}
+  try { speechSynthesis.cancel(); const v=meilleureVoix(), r=vitesseVoix();
+    liste.forEach(t=>{ const u=new SpeechSynthesisUtterance(t); u.lang="fr-FR"; if(v) u.voice=v; u.rate=r; speechSynthesis.speak(u); }); } catch (e) {}
 }
+if (typeof window !== "undefined") window.COCO_VOIX = { VITESSES, prefVoix, voixFrancaises, scoreVoix, meilleureVoix, vitesseVoix, dire };
 const direMot = p => dire([sayText(p)]);
 const direAvecPhrase = p => { const s=SENT[p]; dire(s?[sayText(p), s, sayText(p)]:[sayText(p)]); };
 
