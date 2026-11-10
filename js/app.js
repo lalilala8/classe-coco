@@ -1803,7 +1803,7 @@
     var libres = HE.shuf((MO_PHRASES_PLUS[T.fam.id] || []).concat(sent, autres).filter(function (p, i, L) { return deja.indexOf(p) < 0 && L.indexOf(p) === i; }));
     return { trous: trous, dictee: libres.slice(0, nDictee) };
   }
-  function moTrous(L) { return '<ul class="ex-fr ex-mots">' + L.map(function (x) { return "<li>" + esc(x.h.before) + exT(esc(x.h.seg)) + esc(x.h.after) + "</li>"; }).join("") + "</ul>"; }
+  function moTrous(L) { return '<ul class="ex-fr ex-mots ex-trous">' + L.map(function (x) { return "<li>" + esc(x.h.before) + exT(esc(x.h.seg)) + esc(x.h.after) + "</li>"; }).join("") + "</ul>"; }
   /* niveau 3 : seule la première lettre est donnée (b…… pour bientôt ; d’…… pour d’après) */
   function moTrouLong(m) { var p = MO.plain(m).replace(/^\((à)\) /, "$1 "), k = /^[a-zàâéèêîôûç]’/i.test(p) ? 2 : 1; return { before: p.slice(0, k), seg: p.slice(k), after: "" }; }
   function moDictee(L, en) { return { c: en ? "Word dictation: write the words your teacher reads." : "Dictée de mots : écris les mots que dit la maîtresse.",
@@ -3168,9 +3168,97 @@
     el.textContent = Math.floor(reste / 60) + ":" + String(reste % 60).padStart(2, "0");
     if (K.fin && reste === 0) { K.fin = 0; K.reste = 0; clearInterval(minuteur); }
   }
+  /* ---------- Mise en commun et correction avec des réveils (L’heure magique, D-136, demande de l’enseignante, d’après l’outil de la collègue) ----------
+     La maîtresse tape au clavier les heures des groupes ; elles s’affichent en réveils au tableau ; « Magique ! » ou « Pas magique » / « N’existe pas »
+     (jaune soutien, jamais de rouge) ; « Ranger » regroupe par premier chiffre ; la correction montre les 16 heures magiques, celles qui manquent en « 0?:?? ». */
+  var LCD_SEG = { a: "8,5 12,1 28,1 32,5 28,9 12,9", b: "35,8 39,12 39,28 35,32 31,28 31,12", c: "35,38 39,42 39,58 35,62 31,58 31,42", d: "8,65 12,61 28,61 32,65 28,69 12,69",
+    e: "5,38 9,42 9,58 5,62 1,58 1,42", f: "5,8 9,12 9,28 5,32 1,28 1,12", g: "8,35 12,31 28,31 32,35 28,39 12,39" };
+  var LCD_CH = ["abcdef", "bc", "abdeg", "abcdg", "bcfg", "acdfg", "acdefg", "abc", "abcdefg", "abcdfg"];
+  function lcdChiffre(n, x) { return '<g transform="translate(' + (x + 7) + ' 0) skewX(-6)">' + Object.keys(LCD_SEG).map(function (s) { return '<polygon points="' + LCD_SEG[s] + '" class="' + (n !== null && LCD_CH[n].indexOf(s) >= 0 ? "on" : "off") + '"/>'; }).join("") + "</g>"; }
+  /* t : « 1441 », « 14 » (en cours de frappe), « 1??? » (? = chiffre caché) */
+  function reveilLcd(t) {
+    var d = String(t || "").replace(":", "").split("").slice(0, 4).map(function (c) { return c === "?" ? "?" : /\d/.test(c) ? +c : null; }); while (d.length < 4) d.push(null);
+    var X = [0, 46, 108, 154], ch = function (i) { return d[i] === "?" ? lcdChiffre(null, X[i]) + '<text x="' + (X[i] + 27) + '" y="35" class="lcd-q">?</text>' : lcdChiffre(d[i], X[i]); };
+    return '<svg class="reveil-lcd" viewBox="0 0 260 152" aria-hidden="true"><rect x="70" y="2" width="44" height="14" rx="6" class="r-pied"/><rect x="146" y="2" width="44" height="14" rx="6" class="r-pied"/>' +
+      '<rect x="26" y="128" width="34" height="20" rx="8" class="r-pied"/><rect x="200" y="128" width="34" height="20" rx="8" class="r-pied"/><rect x="4" y="10" width="252" height="128" rx="32" class="r-boite"/>' +
+      '<rect x="22" y="28" width="216" height="92" rx="14" class="r-ecran"/><g transform="translate(30 39)">' + ch(0) + ch(1) + '<circle cx="103" cy="22" r="5" class="on"/><circle cx="99" cy="48" r="5" class="on"/>' + ch(2) + ch(3) + "</g></svg>";
+  }
+  /* une heure (« 1441 ») ou une paire début → fin (« 08450915 », La demi-heure de lecture) */
+  function rvCle(C2, t) { return C2.paire ? t : t.padStart(4, "0"); }
+  function rvAff(C2, t) { return C2.paire ? '<span class="k-paire">' + reveilLcd(t.slice(0, 4)) + "<b>→</b>" + reveilLcd(t.slice(4)) + "</span>" : reveilLcd(t); }
+  function rvMax(C2) { return C2.paire ? 8 : 4; }
+  function rvMin(C2) { return C2.paire ? 8 : 3; }
+  function kCommunReveil(p, en) {
+    var C2 = p.commun, tab = K.tableau.map(function (c, i) { return { c: c, i: i }; });
+    var carte = function (x) { var v = C2.verdict(x.c.t, en), etat = x.c.vu ? (v.type === "ok" ? "ok" : "presque") : "";
+      var titre = x.c.vu ? '<img src="' + (v.type === "ok" ? POSE("kakou", "victoire") : POSE("margouille", "reflechit")) + '" alt="">' + esc(v.titre) : "&nbsp;";
+      return '<div class="k-rv ' + etat + '"><button type="button" class="k-rv-voir" data-action="k-voir" data-k="' + x.i + '" aria-label="' + (en ? "Check" : "Vérifier") + '">' + rvAff(C2, rvCle(C2, x.c.t)) +
+        '<span class="k-rv-titre">' + titre + "</span>" + (x.c.vu && v.type !== "ok" ? '<small>' + v.texte + "</small>" : "") + '</button><button type="button" class="k-rv-x" data-action="k-suppr" data-k="' + x.i + '" aria-label="' + (en ? "Remove" : "Retirer") + '">×</button></div>'; };
+    var liste = function (L) { return '<div class="k-rv-liste' + (C2.paire ? " k-rv-liste--paire" : "") + '">' + L.map(carte).join("") + "</div>"; };
+    var groupe = C2.groupe || function (t, en) { return [t[0], (en ? "They start with " : "Elles commencent par ") + "<b>" + t[0] + "</b>"]; };
+    var tableau;
+    if (!tab.length) tableau = '<p class="po-note k-vide">' + (C2.paire ? (en ? "Type each pair on the keypad: the start, then the end. Tap a pair to check it, once the pupils have given their opinion." : "Tape au clavier chaque paire : le début, puis la fin. Touche une paire pour la vérifier, quand les élèves ont donné leur avis.")
+      : (en ? "Type the times given by the groups on the keypad. Tap a clock to check it, once the pupils have given their opinion." : "Tape au clavier les heures proposées par les groupes. Touche un réveil pour le vérifier, quand les élèves ont donné leur avis.")) + "</p>";
+    else if (K.range) { var G = {}, T = {}; tab.forEach(function (x) { var k = rvCle(C2, x.c.t), g = groupe(k, en); T[g[0]] = g[1]; (G[g[0]] = G[g[0]] || []).push(x); });
+      tableau = Object.keys(G).sort().map(function (d) { G[d].sort(function (a, b) { return rvCle(C2, a.c.t) < rvCle(C2, b.c.t) ? -1 : 1; }); return '<section class="k-rv-groupe"><h3>' + T[d] + "</h3>" + liste(G[d]) + "</section>"; }).join(""); }
+    else tableau = liste(tab);
+    var touches = ["1", "2", "3", "4", "5", "6", "7", "8", "9"].map(function (n) { return '<button type="button" data-action="k-n" data-v="' + n + '">' + n + "</button>"; }).join("") +
+      '<button type="button" data-action="k-eff" aria-label="' + (en ? "Delete the last digit" : "Effacer le dernier chiffre") + '">⌫</button><button type="button" data-action="k-n" data-v="0">0</button><button type="button" data-action="k-c" aria-label="' + (en ? "Clear" : "Tout effacer") + '">C</button>';
+    var ecran = C2.paire ? '<div class="k-rv-deux"><figure>' + reveilLcd(K.saisie.slice(0, 4)) + "<figcaption>" + (en ? "I start" : "Je commence") + '</figcaption></figure><b>→</b><figure>' + reveilLcd(K.saisie.slice(4)) + "<figcaption>" + (en ? "I stop" : "Je m’arrête") + "</figcaption></figure></div>"
+      : reveilLcd(K.saisie);
+    return '<div class="k-relances"><img class="k-rv-avatar" src="' + POSE(p.perso, "reflechit") + '" alt="">' + C2.relances.map(function (x) { return "<span>" + esc(tr(x)) + "</span>"; }).join("") + "</div>" +
+      '<div class="k-rv-commun"><section class="k-rv-panneau"><p class="k-rv-nom">' + (C2.paire ? (en ? "The two clocks" : "Les deux réveils") : (en ? "The clock" : "Le réveil")) + "</p>" + ecran +
+      '<div class="k-clavier">' + touches + '</div><button class="coco-btn coco-btn--grand k-rv-ok" type="button" data-action="k-ok"' + (K.saisie.length >= rvMin(C2) ? "" : " disabled") + ">" + (en ? "Add" : "Ajouter") + "</button>" +
+      '<div class="coco-row k-rv-actions"><button class="coco-btn coco-btn--secondaire" type="button" data-action="k-tout">' + (en ? "Check all" : "Tout vérifier") + '</button><button class="coco-btn' + (K.range ? "" : " coco-btn--secondaire") + '" type="button" data-action="k-ranger" aria-pressed="' + K.range + '">' + (en ? "Sort" : "Ranger") + '</button><button class="coco-btn coco-btn--secondaire" type="button" data-action="k-effacer">' + (en ? "Clear the board" : "Effacer le tableau") + "</button></div></section>" +
+      '<section class="k-rv-tableau">' + tableau + "</section></div>";
+  }
+  function kRetientReveil(p, en) {
+    var C2 = p.commun, vue = K.vue || "retient";
+    var justes = {}; K.tableau.forEach(function (c) { var t = rvCle(C2, c.t); if (C2.verdict(t, en).type === "ok") justes[t] = 1; });
+    var grille = {}; C2.lignes.forEach(function (l) { l.heures.forEach(function (t) { grille[t] = 1; }); });
+    var total = Object.keys(grille).length, n = Object.keys(justes).filter(function (t) { return grille[t]; }).length, enCours = n > 0 && n < total && !K.toutMontrer;
+    var onglets = '<div class="coco-row k-rv-vues">' + C2.vues.map(function (v) { return '<button class="coco-btn' + (vue === v[0] ? "" : " coco-btn--secondaire") + '" type="button" data-action="k-vue" data-v="' + v[0] + '" aria-pressed="' + (vue === v[0]) + '">' + esc(tr(v[1])) + "</button>"; }).join("") +
+      (vue === "toutes" && n > 0 && n < total ? '<button class="coco-btn coco-btn--secondaire" type="button" data-action="k-toutmontrer">' + (K.toutMontrer ? (en ? "Hide the ones we did not find" : "Cacher celles qu’on n’a pas trouvées") : (en ? "Show them all" : "Tout montrer")) + "</button>" : "") + "</div>";
+    if (vue === "retient") return onglets + '<div class="k-retient"><div class="retiens"><img src="' + POSE("coralie", "idee") + '" alt=""><div><h3>' + (en ? "We remember" : "On retient") + "</h3><p>" + esc(tr(p.retenir)) + "</p>" +
+      '<div class="k-rv-passages">' + C2.passages.map(function (x) { return '<div class="k-rv-passage">' + x.r.map(function (t, i) { return (i ? "<span>" + x.f[i - 1] + " →</span>" : "") + "<figure>" + reveilLcd(t) + (x.cap && x.cap[i] ? "<figcaption>" + tr(x.cap[i]) + "</figcaption>" : "") + "</figure>"; }).join("") + "</div>"; }).join("") + "</div></div></div></div>";
+    var avatar = function (pose) { return '<img class="k-rv-avatar" src="' + pose + '" alt="">'; };
+    if (vue === "nos") { var L = Object.keys(justes).sort();
+      return onglets + '<div class="k-toutes"><p class="k-compte">' + avatar(POSE(p.perso, L.length ? "content" : "presente")) + "<span>" + C2.compteNos(L.length, en) + "</span></p>" + '<div class="k-rv-colonnes">' + C2.colonnes.map(function (col) {
+        var M = L.filter(col.test); return '<section class="k-rv-groupe"><h3>' + esc(tr(col.titre)) + '</h3><div class="k-rv-liste k-rv-liste--paire">' + (M.map(function (t) { return '<figure class="k-m trouvee">' + rvAff(C2, t) + "</figure>"; }).join("") || '<p class="po-note">' + (en ? "None yet." : "Aucune pour l’instant.") + "</p>") + "</div></section>"; }).join("") +
+        '</div><p class="k-pourquoi">' + esc(tr(C2.pourquoiNos)) + "</p></div>"; }
+    var fig = function (t) {
+      if (justes[t]) return '<figure class="k-m trouvee">' + rvAff(C2, t) + "<figcaption>" + (en ? "found!" : "trouvée !") + "</figcaption></figure>";
+      if (enCours && !K.montre[t]) return '<figure class="k-m manque"><button type="button" data-action="k-montre" data-v="' + t + '" aria-label="' + (en ? "Show this one" : "Montrer") + '">' + rvAff(C2, C2.cache(t)) + "</button><figcaption>&nbsp;</figcaption></figure>";
+      return '<figure class="k-m">' + rvAff(C2, t) + "<figcaption>&nbsp;</figcaption></figure>"; };
+    var nCol = Math.max.apply(null, C2.lignes.map(function (l) { return l.heures.length; })) + 1;
+    var pose = n === total ? POSE("kakou", "victoire") : n ? POSE(p.perso, "reflechit") : POSE(p.perso, "presente");
+    return onglets + '<div class="k-toutes' + (C2.paire ? " k-toutes--paire" : "") + '"><p class="k-compte">' + avatar(pose) + "<span>" + C2.compte(n, total, enCours, en) + "</span></p>" + C2.lignes.map(function (l) {
+      return '<div class="k-ligne" style="grid-template-columns:150px repeat(' + nCol + ', minmax(0, 1fr))"><span>' + (l.d ? (en ? "They start with" : "Elles commencent par") + " <b>" + l.d + "</b>" : esc(tr(l.titre))) + "</span>" + l.heures.map(fig).join("") +
+        (l.non ? '<figure class="k-m non" style="grid-column:' + (nCol + 1) + '">' + rvAff(C2, l.non) + "<figcaption>" + esc(tr(l.pourquoi)) + "</figcaption></figure>" : "") + "</div>"; }).join("") +
+      '<p class="k-pourquoi">' + esc(tr(C2.pourquoi)) + "</p></div>";
+  }
+  function actionReveil(a, el) {
+    var C2 = po(K.id).commun;
+    if (a === "k-n") { if (K.saisie.length < rvMax(C2)) K.saisie += el.dataset.v; }
+    else if (a === "k-eff") K.saisie = K.saisie.slice(0, -1);
+    else if (a === "k-c") K.saisie = "";
+    else if (a === "k-ok") { if (K.saisie.length >= rvMin(C2)) { K.tableau.push({ t: K.saisie, vu: false }); K.saisie = ""; } }
+    else if (a === "k-suppr") K.tableau.splice(+el.dataset.k, 1);
+    else if (a === "k-vue") K.vue = el.dataset.v;
+    else if (a === "k-toutmontrer") K.toutMontrer = !K.toutMontrer;
+    else if (a === "k-montre") K.montre[el.dataset.v] = true;
+  }
+  /* au clavier de l’ordinateur du TBI : chiffres, effacement, Entrée */
+  document.addEventListener("keydown", function (e) {
+    if (!K || K.temps !== 3 || !/^classe-/.test(location.hash.slice(1))) return; var p = po(K.id); if (!p || !p.commun || !p.commun.reveil) return;
+    if (e.target && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+    var a = /^\d$/.test(e.key) ? "k-n" : e.key === "Backspace" ? "k-eff" : e.key === "Enter" ? "k-ok" : e.key === "Escape" ? "k-c" : ""; if (!a) return;
+    e.preventDefault(); actionReveil(a, { dataset: { v: e.key } }); rendre();
+  });
   function poClasse(id) {
     var p = po(id), en = langue === "en";
-    if (!K || K.id !== id) K = { id: id, temps: 1, aide: "cherche", tableau: [], sel: depart(p), range: false, reste: 15 * 60, fin: 0 };
+    if (!K || K.id !== id) K = { id: id, temps: 1, aide: "cherche", tableau: [], sel: depart(p), range: false, reste: 15 * 60, fin: 0, duree: 15, saisie: "", vue: "retient", montre: {}, toutMontrer: false };
+    var rv = p.commun && p.commun.reveil, mmss = function (r) { return Math.floor(r / 60) + ":" + String(r % 60).padStart(2, "0"); };
     var onglets = ["La question", "On cherche", "On met en commun", "On retient"].map(function (n, i) {
       var nEn = ["The question", "We search", "We share", "We remember"][i];
       return '<button class="k-onglet" type="button" data-action="k-temps" data-v="' + (i + 1) + '" aria-pressed="' + (K.temps === i + 1) + '"><span>' + (i + 1) + "</span>" + (en ? nEn : n) + "</button>";
@@ -3183,11 +3271,15 @@
       var aide = K.aide === "pouce" ? ["margouille", en ? "Little help" : "Coup de pouce", "<p>" + esc(tr(p.pouce)) + "</p>"]
         : K.aide === "loin" ? [p.perso, en ? "To go further" : "Pour aller plus loin", "<ol>" + p.relances.map(function (r) { return "<li>" + esc(tr(r)) + "</li>"; }).join("") + "</ol>"]
         : [p.perso, en ? "We search" : "On cherche", "<p>" + (en ? "In pairs or threes, write down <b>all</b> the ways you find. You have one? Look for another!" : "Par 2 ou 3, écrivez <b>toutes</b> les solutions que vous trouvez. Vous en avez une ? Cherchez-en une autre !") + "</p>"];
-      corps = '<div class="k-cherche"><div class="k-rappel">' + enonceBloc(p) + '</div><div class="k-minuteur"><p id="minuteur">15:00</p><div class="coco-row">' +
-        [10, 15, 20].map(function (n) { return '<button class="coco-btn coco-btn--secondaire" type="button" data-action="k-duree" data-v="' + n + '">' + n + " min</button>"; }).join("") +
+      corps = '<div class="k-cherche"><div class="k-rappel">' + enonceBloc(p) + '</div><div class="k-minuteur"><p id="minuteur">' + mmss(K.fin ? Math.max(0, Math.round((K.fin - Date.now()) / 1000)) : K.reste) + '</p><div class="coco-row">' +
+        [10, 15, 20].map(function (n) { return '<button class="coco-btn' + (K.duree === n ? "" : " coco-btn--secondaire") + '" type="button" data-action="k-duree" data-v="' + n + '" aria-pressed="' + (K.duree === n) + '">' + n + " min</button>"; }).join("") +
         '</div><div class="coco-row"><button class="coco-btn" type="button" data-action="k-lancer">' + (K.fin ? "Pause" : (en ? "Start" : "Lancer")) + '</button><button class="coco-btn coco-btn--secondaire" type="button" data-action="k-remettre">' + (en ? "Reset" : "Remettre") + "</button></div></div></div>" +
         '<div class="k-aide"><div class="k-boutons">' + [["cherche", en ? "We search" : "On cherche"], ["pouce", en ? "Little help" : "Coup de pouce"], ["loin", en ? "To go further" : "Pour aller plus loin"]].map(function (b) { return '<button class="coco-btn ' + (K.aide === b[0] ? "" : "coco-btn--secondaire") + '" type="button" data-action="k-aide" data-v="' + b[0] + '">' + b[1] + "</button>"; }).join("") + "</div>" +
         '<img src="' + POSE(aide[0], K.aide === "cherche" ? "reflechit" : "idee") + '" alt=""><div class="k-bulle"><h2>' + aide[1] + "</h2>" + aide[2] + "</div></div>";
+    } else if (K.temps === 3 && rv) {
+      corps = kCommunReveil(p, en);
+    } else if (K.temps === 4 && rv) {
+      corps = kRetientReveil(p, en);
     } else if (K.temps === 3) {
       var tab = K.tableau.slice(); if (K.range) tab.sort(function (a, b) { return p.ranger(a.sol, b.sol); });
       var cartes = tab.map(function (c) {
@@ -3212,21 +3304,22 @@
     var p = po(K.id);
     if (a === "k-temps") K.temps = +el.dataset.v;
     else if (a === "k-aide") K.aide = el.dataset.v;
-    else if (a === "k-duree") { K.reste = +el.dataset.v * 60; K.fin = 0; clearInterval(minuteur); }
+    else if (a === "k-duree") { K.duree = +el.dataset.v; K.reste = K.duree * 60; K.fin = 0; clearInterval(minuteur); }
     else if (a === "k-lancer") {
       if (K.fin) { K.reste = Math.max(0, Math.round((K.fin - Date.now()) / 1000)); K.fin = 0; clearInterval(minuteur); }
       else { K.fin = Date.now() + K.reste * 1000; clearInterval(minuteur); minuteur = setInterval(majMinuteur, 500); }
     }
-    else if (a === "k-remettre") { K.reste = 15 * 60; K.fin = 0; clearInterval(minuteur); }
+    else if (a === "k-remettre") { K.reste = (K.duree || 15) * 60; K.fin = 0; clearInterval(minuteur); }
+    else if (/^k-(n|eff|c|ok|suppr|vue|toutmontrer|montre)$/.test(a)) actionReveil(a, el);
     else if (a === "k-ajout") basculer(p, K.sel, el.dataset.v);
     else if (a === "k-champ") regler(p, K.sel, el);
     else if (a === "k-retire") K.sel.splice(+el.dataset.k, 1);
     else if (a === "k-vider") K.sel = depart(p);
     else if (a === "k-tableau" && pret(p, K.sel)) { K.tableau.push({ sol: copie(p, K.sel), vu: false }); K.sel = relancer(p, K.sel); }
     else if (a === "k-voir") { var c = K.tableau[+el.dataset.k]; c.vu = !c.vu; }
-    else if (a === "k-tout") K.tableau.forEach(function (c) { c.vu = true; });
+    else if (a === "k-tout") { var tout = K.tableau.every(function (c) { return c.vu; }); K.tableau.forEach(function (c) { c.vu = !tout; }); }
     else if (a === "k-ranger") K.range = !K.range;
-    else if (a === "k-effacer") K.tableau = [];
+    else if (a === "k-effacer") { if (!K.tableau.length || window.confirm(langue === "en" ? "Clear all the answers on the board?" : "Effacer toutes les réponses du tableau ?")) { K.tableau = []; K.montre = {}; } }
   }
 
   /* ---------- feuille de recherche (à imprimer) ---------- */
@@ -3315,7 +3408,7 @@
   }
   document.addEventListener("toggle", function (e) { var d = e.target; if (!d.classList || !(d.classList.contains("ens-tiroir") || d.classList.contains("ens-po-tiroir"))) return; ENS_TIROIRS[d.dataset.tiroir] = d.open; ensTiroirsGarder(); }, true);
   function pageEnseignante() {
-    var n = { "ens-suivi": "Étoiles de calcul et de grammaire", "ens-sequences": "12 séquences", "ens-formation": Object.keys(FO.fiches).filter(function (c) { return !FO.fiches[c].vide; }).length + " fiches" };
+    var n = { "ens-suivi": "Étoiles de calcul et de grammaire", "ens-sequences": "15 séquences", "ens-formation": Object.keys(FO.fiches).filter(function (c) { return !FO.fiches[c].vide; }).length + " fiches" };
     return ensEntete("") + '<section class="ens-dossiers">' + ENS_DOSSIERS.map(function (d) {
       return '<a class="ens-dossier" href="#' + d.id + '">' + DOSSIER_SVG + "<b>" + d.t + "</b><small>" + d.d + '</small><span class="ens-compte">' + n[d.id] + "</span></a>";
     }).join("") + "</section>" + '<p class="ens-reglages"><a class="coco-btn coco-btn--secondaire" href="#ens-voix">' + "Voix de la dictée</a></p>";
@@ -3380,7 +3473,8 @@
       '<div class="coco-row ens-tiroirs-boutons"><button class="coco-btn coco-btn--secondaire" type="button" data-action="ens-tiroirs" data-v="1">Tout ouvrir</button><button class="coco-btn coco-btn--secondaire" type="button" data-action="ens-tiroirs" data-v="0">Tout fermer</button></div>' +
       ensTiroir("m-francais", "Français · Grammaire et conjugaison", [ensSeq("verbe", "tehani", "Le verbe", "CONJ2", 2 + nQ("verbe"), ROUTES["tbi-verbe"] ? "#tbi-verbe" : "", F), ensSeq("imparfait", "leo", "L’imparfait", "CONJ13 et CONJ14", nQ("imparfait"), ROUTES["tbi-imparfait"] ? "#tbi-imparfait" : "", F)]) +
       ensTiroir("m-francais", "Français · Orthographe", [ensSeq("mots", "sari", "Les mots invariables", "affiches 2026", Object.keys(JEUX_MOTS).length, ROUTES["tbi-mots"] ? "#tbi-mots" : "", F),
-        ensSeq("nombres", "sari", "Les nombres en lettres", "", nQ("nombres"), "#tbi-nombres", F), ensSeq("muettes", "waeko", "Les consonnes muettes", "", nQ("muettes"), "#tbi-muettes", F), ensSeq("egroupe", "adi", "Le -e après un groupe de consonnes", "", nQ("egroupe"), "#tbi-egroupe", F)]) +
+        ensSeq("nombres", "sari", "Les nombres en lettres", "", nQ("nombres"), "#tbi-nombres", F), ensSeq("muettes", "waeko", "Les consonnes muettes", "", nQ("muettes"), "#tbi-muettes", F), ensSeq("egroupe", "adi", "Le -e après un groupe de consonnes", "", nQ("egroupe"), "#tbi-egroupe", F),
+        ensSeq("efem", "tehani", "Un -e muet au féminin", "", nQ("efem"), "#tbi-efem", F), ensSeq("eoupas", "nina", "Un -e muet ou pas ?", "", nQ("eoupas"), "#tbi-eoupas", F), ensSeq("mbp", "dylan", "m devant m, b, p", "", nQ("mbp"), "#tbi-mbp", F)]) +
       ensTiroir("m-maths", "Maths · Techniques opératoires", [ensSeq("division", "nina", "La division en ligne", "CAL7 et CAL8", nQ("division"), ROUTES["tbi-division"] ? "#tbi-division" : "")]) +
       ensTiroir("m-maths", "Maths · Grandeurs et mesures", [
         ensSeq("monnaie", "mei", "La monnaie et les prix", "GM1", nQ("monnaie"), ROUTES["tbi-monnaie"] ? "#tbi-monnaie" : ""),
@@ -4174,6 +4268,9 @@
     var d = ["", "", "vingt", "trente", "quarante", "cinquante", "soixante"][Math.floor(n / 10)], u = n % 10; return u === 0 ? d : u === 1 ? d + "-et-un" : d + "-" + OR_U[u]; }
   function orEcoute(texte, en, lib) { return '<p class="or-ecoute"><button class="coco-btn coco-btn--secondaire" type="button" data-action="qz-dire" data-v="' + esc(texte) + '">' + esc(lib || (en ? "Listen to the word" : "Écouter le mot")) + "</button></p>"; }
   function orGros(s) { return '<p class="or-cue">' + esc(s) + "</p>"; }
+  /* le mot marqué (couleurs de la leçon) ; un mot de la liste peut être [mot, mot dit à l’oral] (« roue », « la roue ») */
+  function orM(id, w) { return OR[id].marque ? OR[id].marque(w) : w; }
+  function orMot(x) { return Array.isArray(x) ? { mot: x[0], dit: x[1] } : { mot: x, dit: x }; }
 
   /* ---------- 1. Les nombres en lettres (perso : Sari) ---------- */
   OR.nombres = { titre: { fr: "Les nombres en lettres", en: "Numbers in words" }, objectif: { fr: "Je sais écrire les nombres en lettres.", en: "I can write numbers in words." }, perso: "sari",
@@ -4332,6 +4429,163 @@
     { fr: "Et ceux-là ?", en: "And these ones?", illu: function () { return '<p class="tq-phrases"><span>carta… · rè… · tr…</span></p>'; } },
     { fr: "Et ceux-là ?", en: "And these ones?", illu: function () { return '<p class="tq-phrases"><span>bi… · po… · mou…</span></p>'; } }];
 
+  /* ---------- 4. Un -e muet au féminin (perso : Tehani) — leçon de classe 2026, d’après les fiches 4 et 5 de Laura Marie (D-135) ---------- */
+  var OR_EF = { ie: ["vie", "pluie", "momie", "écurie", "sortie", "envie", "poésie", "maladie"], noms: ["Julie", "Italie", "Australie"], ue: ["vue", "rue", "tortue", "statue", "avenue", "grue"], oue: ["joue", "roue", "boue"],
+    ee: ["fée", "purée", "buée", "bouée", "cheminée", "journée", "année", "idée"], aie: ["craie", "raie", "plaie", "baie"], oie: ["oie", "joie", "soie", "proie"],
+    erie: ["boulangerie", "boucherie", "charcuterie", "animalerie", "garderie", "bijouterie", "poterie", "galerie", "sonnerie"] }; /* « écurie » seulement dans -ie (choix de l’enseignante : il finit par -urie) */
+  function orFem(w) { var F = ["erie", "aie", "oie", "oue", "ue", "ée", "ie"]; for (var i = 0; i < F.length; i++) if (w.slice(-F[i].length) === F[i]) return w.slice(0, -F[i].length) + "[" + F[i] + "]"; return w; }
+  OR.efem = { titre: { fr: "Un -e muet au féminin", en: "A silent -e in feminine words" }, objectif: { fr: "Je sais écrire le -e muet à la fin des mots féminins.", en: "I can write the silent -e at the end of feminine words." }, perso: "tehani", marque: orFem,
+    rappelFiche: { fr: "La plupart des mots féminins ont un -e final. Il est muet après les sons i, u, é, ou, oi, ai : la pluie, la rue, la fée.", en: "Most feminine words end with -e. It is silent after the sounds i, u, é, ou, oi, ai: la pluie, la rue, la fée." },
+    rappelD: { fr: "Masculin et féminin ; le son de la fin du mot.", en: "Masculine and feminine; the sound at the end of the word." },
+    rappel: [
+      { t: "choix", c: { fr: "« La pluie », c’est…", en: "« La pluie » is…" }, o: [{ fr: "féminin", en: "feminine" }, { fr: "masculin", en: "masculine" }], a: 0, ex: { fr: "On dit « la pluie », « une pluie » : c’est un nom féminin.", en: "We say « la pluie », « une pluie »: it is a feminine noun." } },
+      { t: "choix", c: { fr: "Quel nom est féminin ?", en: "Which noun is feminine?" }, o: ["la tortue", "le chat", "le vélo"], a: 0, ex: { fr: "« la tortue » : avec « la », le nom est féminin.", en: "« la tortue »: with « la », the noun is feminine." } },
+      { t: "choix", c: { fr: "Écoute bien la fin du mot « fée ». Quel son entends-tu ?", en: "Listen carefully to the end of the word « fée ». Which sound do you hear?" }, z: function (en) { return orEcoute("la fée", en); }, o: ["é", "i", "ou"], a: 0, ex: { fr: "« fée » finit par le son « é ».", en: "« fée » ends with the sound « é »." } }],
+    carte: { c: { fr: "Écoute le mot. Par quel son finit-il ? Lève la bonne carte.", en: "Listen to the word. Which sound does it end with? Raise the right card." }, d: { fr: "J’écoute un mot féminin et je lève la carte de sa fin.", en: "I listen to a feminine word and raise the card for its ending." }, cartes: ["-ie", "-ue · -oue", "-ée", "-aie · -oie"],
+      items: [["la pluie", 0, "", "pluie"], ["la momie", 0, "", "momie"], ["la sortie", 0, "", "sortie"], ["la maladie", 0, "", "maladie"], ["la vie", 0, "", "vie"], ["la tortue", 1, "", "tortue"], ["la statue", 1, "", "statue"], ["la rue", 1, "", "rue"], ["la joue", 1, "", "joue"], ["la roue", 1, "", "roue"], ["la boue", 1, "", "boue"],
+        ["la fée", 2, "", "fée"], ["la purée", 2, "", "purée"], ["la cheminée", 2, "", "cheminée"], ["la journée", 2, "", "journée"], ["une idée", 2, "", "idée"], ["la craie", 3, "", "craie"], ["la plaie", 3, "", "plaie"], ["une oie", 3, "", "oie"], ["la joie", 3, "", "joie"], ["la soie", 3, "", "soie"]] },
+    trous: [["plu", "ie", "", "La pluie : un mot féminin qui finit par le son « i » s’écrit -ie.", "la pluie"], ["mom", "ie", "", "La momie : un mot féminin qui finit par le son « i » s’écrit -ie.", "la momie"], ["sort", "ie", "", "La sortie : un mot féminin qui finit par le son « i » s’écrit -ie.", "la sortie"],
+      ["tort", "ue", "", "La tortue : un mot féminin qui finit par le son « u » s’écrit -ue.", "la tortue"], ["av" + "en", "ue", "", "L’avenue : un mot féminin qui finit par le son « u » s’écrit -ue.", "l’avenue"], ["j", "oue", "", "La joue : un mot féminin qui finit par le son « ou » s’écrit -oue.", "la joue"],
+      ["r", "oue", "", "La roue : un mot féminin qui finit par le son « ou » s’écrit -oue.", "la roue"], ["f", "ée", "", "La fée : un mot féminin qui finit par le son « é » s’écrit -ée.", "la fée"], ["pur", "ée", "", "La purée : un mot féminin qui finit par le son « é » s’écrit -ée.", "la purée"],
+      ["chemin", "ée", "", "La cheminée : un mot féminin qui finit par le son « é » s’écrit -ée.", "la cheminée"], ["cr", "aie", "", "La craie : un mot féminin qui finit par le son « ai » s’écrit -aie.", "la craie"], ["j", "oie", "", "La joie : un mot féminin qui finit par le son « oi » s’écrit -oie.", "la joie"],
+      ["boulang", "erie", "", "La boulangerie : les magasins finissent souvent par -erie.", "la boulangerie"], ["bouch", "erie", "", "La boucherie : les magasins finissent souvent par -erie.", "la boucherie"]],
+    ecrire: [["pluie", "la pluie"], ["tortue", "la tortue"], ["joue", "la joue"], ["fée", "la fée"], ["purée", "la purée"], ["journée", "la journée"], ["craie", "la craie"], ["joie", "la joie"], ["momie", "la momie"], ["rue", "la rue"], ["idée", "une idée"], ["boulangerie", "la boulangerie"]],
+    devinettes: [["elle tombe du ciel quand il pleut", "pluie"], ["un animal lent avec une carapace", "tortue"], ["elle a une baguette magique", "fée"], ["des pommes de terre écrasées", "purée"], ["on écrit au tableau avec elle", "craie"], ["on y achète le pain", "boulangerie"],
+      ["le contraire de la tristesse", "joie"], ["un vélo en a deux", "roue"], ["elle dure du matin au soir", "journée"], ["elle est sur le visage, à côté du nez", "joue"], ["un oiseau blanc de la ferme", "oie"], ["elle dure douze mois", "année"]],
+    gaps: [["Je marche sous la ___.", "pluie"], ["La ___ avance tout doucement sur le sable.", "tortue"], ["Le vélo a perdu une ___.", "roue"], ["Méi a une tache sur la ___.", "joue"], ["La ___ agite sa baguette magique.", "fée"], ["Mamie prépare une ___ de pommes de terre.", "purée"],
+      ["La maîtresse écrit au tableau avec une ___.", "craie"], ["Nina saute de ___ !", "joie"], ["Au musée, Dylan a vu une ___.", "momie"], ["Il fait beau : quelle belle ___ !", "journée"], ["Papa achète le pain à la ___.", "boulangerie"], ["Les enfants traversent la ___.", "rue"]],
+    autres: function (w) { return HE.shuf(["pluie", "tortue", "roue", "joue", "fée", "purée", "craie", "joie", "momie", "journée", "boulangerie", "rue"].filter(function (x) { return x !== w; })).slice(0, 2); },
+    entoure: { c: { fr: "Entoure la fin muette de chaque mot féminin.", en: "Circle the silent ending of each feminine word." }, mots: ["pluie", "momie", "sortie", "tortue", "statue", "rue", "joue", "roue", "fée", "purée", "journée", "craie", "plaie", "joie", "oie", "boulangerie", "boucherie"].map(orFem) },
+    dictees: {
+      1: ["La [tortue] mange une salade.", "Il y a de la [boue] dans la [rue].", "La [fée] a une baguette.", "Méi mange de la [purée].", "La [pluie] tombe.", "Tao saute de [joie]."],
+      2: ["Au musée, Léo regarde une [momie].", "Papa achète une baguette à la [boulangerie].", "La maîtresse écrit la date avec une [craie] blanche.", "Le vélo de Nina a perdu une [roue] dans la [boue].", "Une [oie] blanche traverse la [rue].", "Cette [journée] à la plage était pleine de [joie]."],
+      3: ["Après la [pluie], la [tortue] sort de sa cachette et traverse l’[avenue].", "Pendant la [sortie] scolaire, Dylan a vu une [grue] immense dans la [rue].", "La [fée] transforme la [purée] en [bouée] dorée.", "Toute l’[année], Mamie prépare des gâteaux pour la [boulangerie] du village."] },
+    textes: [{ n: 1, titre: "Sous la pluie", t: "La [pluie] tombe sur la [rue]. Une [tortue] marche dans la [boue]." },
+      { n: 2, titre: "La fée de la cheminée", t: "Une petite [fée] vit près de la [cheminée]. Chaque [journée], elle vole dans la maison avec [joie]. Elle aime la [purée] de Mamie." },
+      { n: 3, titre: "Le marché du samedi", t: "Samedi, Tehani accompagne Papa au marché de Nouméa. Ils passent d’abord à la [boulangerie], puis à la [boucherie]. Dans l’[avenue], une [grue] soulève de grosses poutres. Quelle belle [journée] ! Tehani a une [idée] : préparer une [purée] pour toute la famille." }],
+    objectifs: ["L’élève écrit le e muet final des mots féminins en -ie, -ue, -oue, -ée, -aie, -oie.", "L’élève écrit les noms de lieux en -erie.", "L’élève écrit sans erreur les mots étudiés dans une dictée de phrases."] };
+  OR.efem.blocs = function (en) { var c = function (L) { return orCartes("efem", L.map(function (w) { var m = orFem(w); return [m.slice(0, m.indexOf("[")) + "…", m]; })); };
+    return [[en ? "The rule" : "La règle", "<ul><li>La plupart des <b>mots féminins ont un -e final</b>.</li><li>Ce -e est discret dans les mots comme “table” ou “lampe”, mais <b>il est muet dans les mots se terminant par les sons voyelles i, u, é, ou, oi, ai.</b></li></ul>"],
+      [en ? "Words to pick" : "Les mots à piocher", "<p>" + (en ? "Tap a word to see how it ends." : "Touche un mot pour voir comment il finit.") + '</p><p class="or-groupe"><b class="mi-c">-ie</b></p>' + c(OR_EF.ie) + '<p class="or-note">Julie, Italie, Australie</p><p class="or-groupe"><b class="mi-c">-ue -oue</b></p>' + c(OR_EF.ue.concat(OR_EF.oue)) +
+        '<p class="or-groupe"><b class="mi-c">-ée</b></p>' + c(OR_EF.ee) + '<p class="or-groupe"><b class="mi-c">-aie -oie</b></p>' + c(OR_EF.aie.concat(OR_EF.oie)) + '<p class="or-groupe"><b class="mi-c">-erie</b></p>' + c(OR_EF.erie)]]; };
+  OR.efem.jr = function (en) { var l = function (L) { return L.map(orFem).map(orMarque).join(", "); }, li = function (L, k) { return lxPop('<span class="jr-ph">' + l(L) + "</span>", k); }; return [
+    { t: en ? "The rule" : "La règle", svg: '<div class="lx-illu lx-col jr-phrases">' + li(["pluie", "rue", "fée"], 0) + li(["joue", "joie", "craie"], 2) + "</div>", txt: ["La plupart des <b>mots féminins ont un -e final</b>.", "Ce -e est discret dans les mots comme “table” ou “lampe”, mais <b>il est muet dans les mots se terminant par les sons voyelles i, u, é, ou, oi, ai.</b>"] },
+    { t: "-ie", svg: '<div class="lx-illu lx-col jr-phrases">' + li(["vie", "pluie", "momie", "écurie"], 0) + li(["sortie", "envie", "poésie", "maladie"], 2) + "</div>", txt: ["vie, pluie, momie, écurie, sortie, envie, poésie, maladie", "Julie, Italie, Australie"] },
+    { t: "-ue -oue", svg: '<div class="lx-illu lx-col jr-phrases">' + li(["vue", "rue", "tortue"], 0) + li(["statue", "avenue", "grue"], 1) + li(["joue", "roue", "boue"], 3) + "</div>", txt: ["vue, rue, tortue, statue, avenue, grue", "joue, roue, boue"] },
+    { t: "-ée", svg: '<div class="lx-illu lx-col jr-phrases">' + li(["fée", "purée", "buée", "bouée"], 0) + li(["cheminée", "journée", "année", "idée"], 2) + "</div>", txt: ["fée, purée, buée, bouée, cheminée, journée, année, idée"] },
+    { t: "-aie -oie", svg: '<div class="lx-illu lx-col jr-phrases">' + li(["craie", "raie", "plaie", "baie"], 0) + li(["oie", "joie", "soie", "proie"], 2) + "</div>", txt: ["craie, raie, plaie, baie", "oie, joie, soie, proie"] },
+    { t: "-erie", svg: '<div class="lx-illu lx-col jr-phrases">' + li(["boulangerie", "boucherie", "charcuterie"], 0) + li(["animalerie", "garderie", "bijouterie"], 1) + li(["poterie", "galerie", "sonnerie"], 2) + "</div>", txt: ["boulangerie, boucherie, charcuterie, animalerie, garderie, bijouterie, poterie, galerie, sonnerie"] }]; };
+  OR.efem.jrPersos = [["tehani", "presente"], ["tehani", "reflechit"], ["tehani", "idee"], ["tehani", "content"], ["tehani", "reflechit"], ["tehani", "victoire"]];
+  OR.efem.tbiQ = [
+    { fr: "Ces mots sont-ils masculins ou féminins ? Que remarquez-vous à la fin ?", en: "Are these words masculine or feminine? What do you notice at the end?", illu: function () { return '<p class="tq-phrases"><span>la pluie · la rue · la fée · la joie</span></p>'; } },
+    { fr: "On entend « i » à la fin. Comment l’écrit-on ?", en: "We hear « i » at the end. How do we write it?", illu: function () { return '<p class="tq-phrases"><span>la plu… · la mom… · la sort…</span></p>'; } },
+    { fr: "Et quand on entend « u » ou « ou » ?", en: "And when we hear « u » or « ou »?", illu: function () { return '<p class="tq-phrases"><span>la tort… · la r… · la j…</span></p>'; } },
+    { fr: "Et quand on entend « é » ?", en: "And when we hear « é »?", illu: function () { return '<p class="tq-phrases"><span>la f… · la pur… · la chemin…</span></p>'; } },
+    { fr: "Et quand on entend « ai » ou « oi » ?", en: "And when we hear « ai » or « oi »?", illu: function () { return '<p class="tq-phrases"><span>la cr… · la j…</span></p>'; } },
+    { fr: "Où achète-t-on le pain ? la viande ? Comment finissent ces mots ?", en: "Where do we buy bread? meat? How do these words end?", illu: function () { return '<p class="tq-phrases"><span>la boulang… · la bouch…</span></p>'; } }];
+
+  /* ---------- 5. Un -e muet ou pas ? (perso : Nina) — leçon de classe 2026, d’après la fiche 6 de Laura Marie (D-135) ---------- */
+  var OR_EP = { ou: ["trou", "chou", "clou", "fou", "bisou", "pou", "kangourou"], oue: ["boue", "joue", "roue"], u: ["tutu", "tissu", "écu"], ue: ["statue", "tortue", "grue", "vue", "rue", "avenue"],
+    i: ["midi", "rôti", "abri", "oubli", "papi", "tipi", "épi"], ie: ["mie", "toupie", "pluie", "sortie", "magie", "bougie", "momie", "poésie", "mamie", "partie"],
+    oir: ["tiroir", "mouchoir", "couloir", "bavoir", "miroir", "devoir", "soir"], oire: ["foire", "armoire", "victoire", "histoire", "mémoire", "poire"] };
+  function orEouPas(w) { return /e$/.test(w) ? w.slice(0, -1) + "[e]" : w; }
+  OR.eoupas = { titre: { fr: "Un -e muet ou pas ?", en: "A silent -e or not?" }, objectif: { fr: "Je sais si un mot prend un -e à la fin ou pas.", en: "I know whether a word ends with an -e or not." }, perso: "nina", marque: orEouPas,
+    rappelFiche: { fr: "La plupart des mots féminins comportent un -e final alors que la plupart des mots masculins n’en ont pas : un trou, une joue.", en: "Most feminine words end with -e, while most masculine words do not: un trou, une joue." },
+    rappelD: { fr: "Masculin ou féminin ; la fin des mots féminins.", en: "Masculine or feminine; the end of feminine words." },
+    rappel: [
+      { t: "choix", c: { fr: "« Un trou », c’est…", en: "« Un trou » is…" }, o: [{ fr: "masculin", en: "masculine" }, { fr: "féminin", en: "feminine" }], a: 0, ex: { fr: "On dit « un trou », « le trou » : c’est un nom masculin.", en: "We say « un trou », « le trou »: it is a masculine noun." } },
+      { t: "choix", c: { fr: "Quel nom est masculin ?", en: "Which noun is masculine?" }, o: ["le tiroir", "la poire", "la roue"], a: 0, ex: { fr: "« le tiroir » : avec « le », le nom est masculin.", en: "« le tiroir »: with « le », the noun is masculine." } },
+      { t: "choix", c: { fr: "Un nom féminin qui finit par le son « i » s’écrit souvent…", en: "A feminine noun ending with the sound « i » is often written…" }, o: ["-ie", "-i", "-is"], a: 0, ex: { fr: "la pluie, la sortie, la momie : -ie (leçon « Un -e muet au féminin »).", en: "la pluie, la sortie, la momie: -ie (lesson « A silent -e in feminine words »)." } }],
+    carte: { c: { fr: "Écoute le mot. Prend-il un e à la fin ? Lève la bonne carte.", en: "Listen to the word. Does it end with an e? Raise the right card." }, d: { fr: "J’écoute un mot et je lève la carte « pas de e » ou « + e ».", en: "I listen to a word and raise the card « no e » or « + e »." }, cartes: [{ fr: "pas de e", en: "no e" }, { fr: "+ e", en: "+ e" }],
+      items: [["un trou", 0, "", "trou"], ["la joue", 1, "", "joue"], ["un clou", 0, "", "clou"], ["la roue", 1, "", "roue"], ["un tutu", 0, "", "tutu"], ["la tortue", 1, "", "tortue"], ["un tissu", 0, "", "tissu"], ["la rue", 1, "", "rue"], ["un tipi", 0, "", "tipi"], ["la bougie", 1, "", "bougie"],
+        ["un abri", 0, "", "abri"], ["la toupie", 1, "", "toupie"], ["un tiroir", 0, "", "tiroir"], ["une armoire", 1, "", "armoire"], ["un miroir", 0, "", "miroir"], ["une histoire", 1, "", "histoire"], ["un mouchoir", 0, "", "mouchoir"], ["une poire", 1, "", "poire"], ["un bisou", 0, "", "bisou"], ["la statue", 1, "", "statue"]] },
+    trous: [["tro", "u", "", "Un trou : un mot masculin, pas de e.", "un trou"], ["jo", "ue", "", "La joue : un mot féminin, avec un -e.", "la joue"], ["cho", "u", "", "Un chou : un mot masculin, pas de e.", "un chou"], ["ro", "ue", "", "La roue : un mot féminin, avec un -e.", "la roue"],
+      ["tiss", "u", "", "Un tissu : un mot masculin, pas de e.", "un tissu"], ["tort", "ue", "", "La tortue : un mot féminin, avec un -e.", "la tortue"], ["tip", "i", "", "Un tipi : un mot masculin, pas de e.", "un tipi"], ["boug", "ie", "", "La bougie : un mot féminin, avec un -e.", "la bougie"],
+      ["tir", "oir", "", "Un tiroir : un mot masculin, pas de e.", "un tiroir"], ["arm", "oire", "", "Une armoire : un mot féminin, avec un -e.", "une armoire"], ["mir", "oir", "", "Un miroir : un mot masculin, pas de e.", "un miroir"], ["p", "oire", "", "Une poire : un mot féminin, avec un -e.", "une poire"]],
+    ecrire: [["trou", "un trou"], ["joue", "la joue"], ["clou", "un clou"], ["roue", "la roue"], ["tissu", "un tissu"], ["tortue", "la tortue"], ["midi", "midi"], ["bougie", "la bougie"], ["tiroir", "un tiroir"], ["armoire", "une armoire"], ["miroir", "un miroir"], ["histoire", "une histoire"]],
+    devinettes: [["on y range les vêtements", "armoire"], ["on s’y regarde", "miroir"], ["on le tire pour ranger ses affaires", "tiroir"], ["un fruit jaune ou vert", "poire"], ["on la lit ou on la raconte", "histoire"], ["on la souffle sur le gâteau", "bougie"],
+      ["un animal qui saute avec son bébé dans sa poche", "kangourou"], ["un légume rond et vert", "chou"], ["on le fait sur la joue", "bisou"], ["l’heure du déjeuner", "midi"], ["un tissu pour se moucher", "mouchoir"], ["un vélo en a deux", "roue"]],
+    gaps: [["Le lapin se cache dans un ___.", "trou"], ["Papa plante un ___ dans le mur.", "clou"], ["Méi range ses chaussettes dans le ___.", "tiroir"], ["Tao se regarde dans le ___.", "miroir"], ["Les vêtements sont rangés dans l’___.", "armoire"], ["Le soir, Mamie me lit une ___.", "histoire"],
+      ["Nina allume une ___ sur le gâteau.", "bougie"], ["La ___ avance tout doucement.", "tortue"], ["Je mange une ___ bien juteuse.", "poire"], ["Le ___ de la danseuse est rose.", "tutu"], ["À ___, nous mangeons à la cantine.", "midi"], ["Le petit frère fait un ___ à sa maman.", "bisou"]],
+    autres: function (w) { return HE.shuf(["trou", "clou", "tiroir", "miroir", "armoire", "histoire", "bougie", "tortue", "poire", "tutu", "midi", "bisou"].filter(function (x) { return x !== w; })).slice(0, 2); },
+    entoure: { c: { fr: "Entoure le e à la fin des mots féminins.", en: "Circle the e at the end of the feminine words." }, mots: [["un", "trou"], ["la", "joue"], ["un", "clou"], ["la", "roue"], ["un", "tutu"], ["la", "tortue"], ["un", "tipi"], ["la", "bougie"], ["un", "abri"], ["la", "toupie"], ["un", "tiroir"], ["une", "armoire"], ["un", "miroir"], ["une", "poire"], ["un", "bisou"], ["une", "histoire"]].map(function (x) { return x[0] + " " + orEouPas(x[1]); }) },
+    dictees: {
+      1: ["Le lapin est dans son [trou].", "Nina met son [tutu].", "La [tortue] mange un [chou].", "Papi range son [mouchoir].", "J’ai une [poire].", "La [bougie] brille."],
+      2: ["Mamie me fait un [bisou] sur la [joue].", "Le [miroir] est caché dans l’[armoire].", "À [midi], nous mangeons du [rôti].", "Papa range les [clous] dans le [tiroir].", "Le soir, Maman me lit une [histoire].", "La [roue] du vélo est pleine de [boue]."],
+      3: ["Dans le [couloir], Dylan a trouvé un [mouchoir] en [tissu] et une petite [toupie].", "Après la [pluie], le [kangourou] saute dans la [boue] et salit son pelage.", "Pour gagner la [victoire], l’équipe de Nina s’entraîne chaque [soir] après l’école.", "Mamie range le [rôti] dans le réfrigérateur et la [poire] dans le panier."] },
+    textes: [{ n: 1, titre: "Le tutu de Nina", t: "À [midi], Nina mange une [poire]. Le soir, elle range son [tutu] dans le [tiroir]." },
+      { n: 2, titre: "La chambre de Nina", t: "Dans la chambre de Nina, il y a une grande [armoire] et un [miroir]. Sur son lit, elle range sa [toupie] et son [mouchoir]. Le soir, Papa lui raconte une [histoire]." },
+      { n: 3, titre: "La fête foraine", t: "Ce [soir], la [foire] s’installe sur la place. Les enfants montent sur la grande [roue]. Nina gagne un [kangourou] en peluche : quelle [victoire] ! Avant de partir, elle fait un [bisou] sur la [joue] de Papi. Ce souvenir restera longtemps dans sa [mémoire]." }],
+    objectifs: ["L’élève décide, avec le déterminant (un, une), si le mot prend un e final.", "L’élève écrit les mots étudiés en -ou / -oue, -u / -ue, -i / -ie, -oir / -oire.", "L’élève écrit sans erreur les mots étudiés dans une dictée de phrases."] };
+  OR.eoupas.blocs = function (en) { var c = function (L, det) { return orCartes("eoupas", L.map(function (w) { var m = orEouPas(w), k = /e$/.test(w) ? 2 : 1; return [det + " " + w.slice(0, -k) + "…", m]; })); };
+    return [[en ? "The rule" : "La règle", "<ul><li>La plupart des <b>mots féminins</b> comportent un <b class=\"mi-c\">-e</b> final alors que la plupart des <b>mots masculins</b> n’en ont pas.</li></ul>" + '<p class="or-plus">+ <span class="mi-c">e</span> ou pas ?</p>'],
+      [en ? "Words to pick" : "Les mots à piocher", "<p>" + (en ? "Tap a word to see how it ends." : "Touche un mot pour voir comment il finit.") + "</p>" +
+        [["-ou", OR_EP.ou, "un", OR_EP.oue, "la"], ["-u", OR_EP.u, "un", OR_EP.ue, "la"], ["-i", OR_EP.i, "un", OR_EP.ie, "la"], ["-oir", OR_EP.oir, "un", OR_EP.oire, "une"]].map(function (g) { return '<p class="or-groupe"><b class="mi-c">' + g[0] + "</b></p>" + c(g[1], g[2]) + c(g[3], g[4]); }).join("")]]; };
+  OR.eoupas.jr = function (en) { var l = function (L) { return L.map(orEouPas).map(orMarque).join(", "); }, li = function (L, k) { return lxPop('<span class="jr-ph">' + l(L) + "</span>", k); }; return [
+    { t: en ? "The rule" : "La règle", svg: '<div class="lx-illu lx-col jr-phrases">' + lxPop('<span class="jr-ph">un trou · une jou<span class="mi-c">e</span></span>', 0) + lxPop('<span class="jr-ph">un tiroir · une armoir<span class="mi-c">e</span></span>', 2) + "</div>", txt: ["La plupart des <b>mots féminins</b> comportent un -e final alors que la plupart des <b>mots masculins</b> n’en ont pas."] },
+    { t: "-ou · -oue", svg: '<div class="lx-illu lx-col jr-phrases">' + li(["trou", "chou", "clou", "fou"], 0) + li(["bisou", "pou", "kangourou"], 1) + li(["boue", "joue", "roue"], 3) + "</div>", txt: ["trou, chou, clou, fou, bisou, pou, kangourou", "boue, joue, roue"] },
+    { t: "-u · -ue", svg: '<div class="lx-illu lx-col jr-phrases">' + li(["tutu", "tissu", "écu"], 0) + li(["statue", "tortue", "grue"], 2) + li(["vue", "rue", "avenue"], 3) + "</div>", txt: ["tutu, tissu, écu", "statue, tortue, grue, vue, rue, avenue"] },
+    { t: "-i · -ie", svg: '<div class="lx-illu lx-col jr-phrases">' + li(["midi", "rôti", "abri", "oubli"], 0) + li(["papi", "tipi", "épi"], 1) + li(["mie", "toupie", "pluie", "sortie"], 3) + li(["magie", "bougie", "momie"], 4) + "</div>", txt: ["midi, rôti, abri, oubli, papi, tipi, épi", "mie, toupie, pluie, sortie, magie, bougie, momie, poésie, mamie, partie"] },
+    { t: "-oir · -oire", svg: '<div class="lx-illu lx-col jr-phrases">' + li(["tiroir", "mouchoir", "couloir", "bavoir"], 0) + li(["miroir", "devoir", "soir"], 1) + li(["foire", "armoire", "victoire"], 3) + li(["histoire", "mémoire", "poire"], 4) + "</div>", txt: ["tiroir, mouchoir, couloir, bavoir, miroir, devoir, soir", "foire, armoire, victoire, histoire, mémoire, poire"] }]; };
+  OR.eoupas.jrPersos = [["nina", "presente"], ["nina", "reflechit"], ["nina", "idee"], ["nina", "content"], ["nina", "victoire"]];
+  OR.eoupas.tbiQ = [
+    { fr: "Lesquels de ces mots ont un e à la fin ? Que remarquez-vous ?", en: "Which of these words end with an e? What do you notice?", illu: function () { return '<p class="tq-phrases"><span>un trou · une joue · un tiroir · une poire</span></p>'; } },
+    { fr: "Un ou une ? Comment finit le mot ?", en: "Un or une? How does the word end?", illu: function () { return '<p class="tq-phrases"><span>un tr… · un cl… · la j… · la r…</span></p>'; } },
+    { fr: "Et ceux-là ?", en: "And these ones?", illu: function () { return '<p class="tq-phrases"><span>un tut… · un tiss… · la tort… · la r…</span></p>'; } },
+    { fr: "Et ceux-là ?", en: "And these ones?", illu: function () { return '<p class="tq-phrases"><span>un tip… · midi · la boug… · la toup…</span></p>'; } },
+    { fr: "Et ceux-là ?", en: "And these ones?", illu: function () { return '<p class="tq-phrases"><span>un tir… · un mir… · une arm… · une p…</span></p>'; } }];
+
+  /* ---------- 6. m devant m, b, p (perso : Dylan) — leçon de classe 2026, d’après les fiches 7 et 8 de Laura Marie (D-135) ;
+     conseil du livre suivi : « am » et « em » jamais dans la même phrase dictée ---------- */
+  var OR_MB = { om: ["trompe", "bombe", "pompon", "ombre", "combien", "compote", "tomber", "nombre", "pompier", "plombier", "concombre", "pompe", "compter"], im: ["timbre", "simple", "grimper", "impossible", "imperméable", "impoli", "imprimante", "important", "imprévu", "impératif"],
+    am: ["lampe", "jambe", "jambon", "chambre", "champignon", "camper", "ampoule", "vampire", "bambou", "framboise", "trampoline"], em: ["septembre", "novembre", "décembre", "température", "trembler", "tempête", "remplir", "exemple", "ensemble", "emploi", "emporter", "membre"] };
+  function orMbp(w) { return w.replace(/m([mbp])/, "[m]{$1}"); }
+  OR.mbp = { titre: { fr: "m devant m, b, p", en: "m before m, b, p" }, objectif: { fr: "Je sais écrire m devant m, b et p.", en: "I can write m before m, b and p." }, perso: "dylan", marque: orMbp,
+    rappelFiche: { fr: "Devant les lettres m, b, p, il faut écrire -m au lieu de -n : une lampe, une jambe, un timbre.", en: "Before the letters m, b, p, we write -m instead of -n: une lampe, une jambe, un timbre." },
+    rappelD: { fr: "Les sons on, in, an, en.", en: "The sounds on, in, an, en." },
+    rappel: [
+      { t: "choix", c: { fr: "Écoute le mot « lapin ». Quel son entends-tu à la fin ?", en: "Listen to the word « lapin ». Which sound do you hear at the end?" }, z: function (en) { return orEcoute("un lapin", en); }, o: ["in", "an", "on"], a: 0, ex: { fr: "lapin finit par le son « in ».", en: "lapin ends with the sound « in »." } },
+      { t: "choix", c: { fr: "Écoute le mot « monde ». Quel son entends-tu ?", en: "Listen to the word « monde ». Which sound do you hear?" }, z: function (en) { return orEcoute("le monde", en); }, o: ["on", "an", "in"], a: 0, ex: { fr: "Dans monde, on entend le son « on ».", en: "In monde, we hear the sound « on »." } },
+      { t: "choix", c: { fr: "Dans le mot « vent », le son « an » s’écrit…", en: "In the word « vent », the sound « an » is written…" }, o: ["en", "an", "on"], a: 0, ex: { fr: "vent s’écrit avec « en » : le son « an » s’écrit an ou en.", en: "vent is written with « en »: the sound « an » is written an or en." } }],
+    carte: { c: { fr: "Écoute le mot. Quelle lettre manque : m ou n ? Lève la bonne carte.", en: "Listen to the word. Which letter is missing: m or n? Raise the right card." }, d: { fr: "J’écoute un mot et je lève la carte m ou n.", en: "I listen to a word and raise the card m or n." }, cartes: ["m", "n"],
+      items: [["la trompe", 0, "tro…pe", "trompe"], ["la jambe", 0, "ja…be", "jambe"], ["le timbre", 0, "ti…bre", "timbre"], ["novembre", 0, "nove…bre", "novembre"], ["la lampe", 0, "la…pe", "lampe"], ["la chambre", 0, "cha…bre", "chambre"], ["simple", 0, "si…ple", "simple"], ["la tempête", 0, "te…pête", "tempête"], ["le jambon", 0, "ja…bon", "jambon"], ["l’ombre", 0, "o…bre", "ombre"],
+        ["le pantalon", 1, "pa…talon", "pantalon"], ["le monde", 1, "mo…de", "monde"], ["le dimanche", 1, "dima…che", "dimanche"], ["le jardin", 1, "jardi…", "jardin"], ["la langue", 1, "la…gue", "langue"], ["l’oncle", 1, "o…cle", "oncle"], ["le sapin", 1, "sapi…", "sapin"], ["la viande", 1, "via…de", "viande"], ["vendredi", 1, "ve…dredi", "vendredi"], ["le menton", 1, "me…ton", "menton"]] },
+    trous: [["tro", "m", "pe", "Devant p, on écrit m.", "la trompe"], ["ja", "m", "be", "Devant b, on écrit m.", "la jambe"], ["ti", "m", "bre", "Devant b, on écrit m.", "un timbre"], ["si", "m", "ple", "Devant p, on écrit m.", "simple"], ["cha", "m", "bre", "Devant b, on écrit m.", "la chambre"], ["nove", "m", "bre", "Devant b, on écrit m.", "novembre"],
+      ["te", "m", "pête", "Devant p, on écrit m.", "la tempête"], ["co", "m", "pote", "Devant p, on écrit m.", "la compote"], ["pa", "n", "talon", "Devant t, on écrit n.", "le pantalon"], ["la", "n", "gue", "Devant g, on écrit n.", "la langue"], ["o", "n", "cle", "Devant c, on écrit n.", "l’oncle"], ["ve", "n", "dredi", "Devant d, on écrit n.", "vendredi"]],
+    ecrire: [["trompe", "la trompe"], ["jambe", "la jambe"], ["lampe", "la lampe"], ["timbre", "un timbre"], ["simple", "simple"], ["chambre", "la chambre"], ["nombre", "un nombre"], ["septembre", "septembre"], ["tempête", "la tempête"], ["pompier", "un pompier"], ["jambon", "le jambon"], ["ensemble", "ensemble"]],
+    devinettes: [["le nez de l’éléphant", "trompe"], ["elle éclaire la chambre", "lampe"], ["on la plie pour marcher", "jambe"], ["on le colle sur une lettre", "timbre"], ["il éteint le feu", "pompier"], ["la pièce où l’on dort", "chambre"],
+      ["le mois après octobre", "novembre"], ["un petit fruit rouge", "framboise"], ["beaucoup de vent et de pluie", "tempête"], ["le contraire de compliqué", "simple"], ["le contraire de possible", "impossible"], ["de la viande en tranches pour le sandwich", "jambon"]],
+    gaps: [["L’éléphant attrape les fruits avec sa ___.", "trompe"], ["Dylan s’est fait mal à la ___.", "jambe"], ["Méi allume la ___ de son bureau.", "lampe"], ["Je colle un ___ sur l’enveloppe.", "timbre"], ["Le ___ éteint le feu.", "pompier"], ["Léo range sa ___ avant de jouer.", "chambre"],
+      ["Mamie fait une ___ de pommes.", "compote"], ["Le chat se repose à l’___ de l’arbre.", "ombre"], ["Mon anniversaire est en ___.", "novembre"], ["Il y a une ___ : le vent souffle très fort.", "tempête"], ["Ce jeu est très ___ : je gagne à chaque fois.", "simple"], ["Mamie met du ___ dans le sandwich.", "jambon"]],
+    autres: function (w) { return HE.shuf(["trompe", "jambe", "lampe", "timbre", "pompier", "chambre", "compote", "ombre", "novembre", "tempête", "simple", "jambon"].filter(function (x) { return x !== w; })).slice(0, 2); },
+    entoure: { c: { fr: "Entoure le m et la lettre qui le suit.", en: "Circle the m and the letter after it." }, mots: ["trompe", "bombe", "ombre", "compote", "pompier", "timbre", "simple", "grimper", "impoli", "lampe", "jambe", "chambre", "ampoule", "septembre", "tempête", "ensemble", "membre"].map(orMbp) },
+    dictees: {
+      1: ["L’éléphant lève sa [trompe].", "La [lampe] est allumée.", "Dylan a mal à la [jambe].", "Je colle un [timbre].", "Le chat est dans l’[ombre].", "Le [pompier] arrive."],
+      2: ["Le [pompier] monte sur la grande échelle.", "Méi a mis un [timbre] sur sa lettre.", "Mamie prépare une [compote] de mangues.", "Dylan range sa [chambre] et allume la [lampe].", "En [novembre], il fait chaud à Nouméa.", "Le chat aime [grimper] dans l’arbre."],
+      3: ["Pendant la [tempête], les arbres se mettent à [trembler] et la [température] baisse.", "Le [plombier] répare la [pompe] du jardin : c’est très [important].", "Dylan prépare des sandwichs au [jambon] et aux [champignons] pour [camper] avec Papa.", "Ce [concombre] est trop gros : il est [impossible] de le mettre dans la boîte."] },
+    textes: [{ n: 1, titre: "Le pompier", t: "Le [pompier] arrive vite. Il éteint le feu avec sa [pompe]." },
+      { n: 2, titre: "La chambre de Dylan", t: "Dylan range sa [chambre]. Sous le lit, il trouve un [timbre] et une [ampoule] cassée. Il pose la [lampe] sur son bureau. Ranger, ce n’est pas si [simple] !" },
+      { n: 3, titre: "La tempête de novembre", t: "En [novembre], une [tempête] arrive sur Nouméa. La [température] baisse et les volets se mettent à [trembler]. Toute la famille reste [ensemble] à la maison. Dylan [emporte] sa couverture et écoute le vent souffler." }],
+    objectifs: ["L’élève écrit m (et non n) devant m, b, p : om, im, am, em.", "L’élève écrit n devant les autres consonnes.", "L’élève écrit sans erreur les mots étudiés dans une dictée de phrases."] };
+  OR.mbp.blocs = function (en) { var c = function (L) { return orCartes("mbp", L.map(function (w) { return [w.replace(/m(?=[mbp])/, "…"), orMbp(w)]; })); };
+    return [[en ? "The rule" : "La règle", "<ul><li>Devant les lettres <b class=\"mi-c\">m</b>, <b class=\"mi-c\">b</b>, <b class=\"mi-c\">p</b>, il faut écrire -<b class=\"mi-c\">m</b> au lieu de -<b>n</b>.</li><li>-<b>on</b>, -<b>in</b>, -<b>an</b> et -<b>en</b> deviennent donc -<b class=\"mi-c\">om</b>, -<b class=\"mi-c\">im</b>, -<b class=\"mi-c\">am</b> et -<b class=\"mi-c\">em</b>.</li></ul>" + '<p class="or-plus"><span class="mi-c">m</span> devant <span class="mi-c">m</span>, <span class="mi-c">b</span>, <span class="mi-c">p</span></p>'],
+      [en ? "Words to pick" : "Les mots à piocher", "<p>" + (en ? "Tap a word to see the m." : "Touche un mot pour voir le m.") + "</p>" + [["-om", OR_MB.om], ["-im", OR_MB.im], ["-am", OR_MB.am], ["-em", OR_MB.em]].map(function (g) { return '<p class="or-groupe"><b class="mi-c">' + g[0] + "</b></p>" + c(g[1]); }).join("")]]; };
+  OR.mbp.jr = function (en) { var l = function (L) { return L.map(orMbp).map(orMarque).join(", "); }, li = function (L, k) { return lxPop('<span class="jr-ph">' + l(L) + "</span>", k); }; return [
+    { t: en ? "The rule" : "La règle", svg: '<div class="lx-illu lx-col jr-phrases">' + lxPop('<span class="jr-ph or-grand"><span class="mi-c">m</span> devant <span class="mi-c">m</span>, <span class="mi-c">b</span>, <span class="mi-c">p</span></span>', 0) + li(["lampe", "jambe", "timbre"], 2) + "</div>",
+      txt: ["Devant les lettres m, b, p, il faut écrire -m au lieu de -n.", "-on, -in, -an et -en deviennent donc -om, -im, -am et -em."] },
+    { t: "-om", svg: '<div class="lx-illu lx-col jr-phrases">' + li(["trompe", "bombe", "pompon", "ombre"], 0) + li(["combien", "compote", "tomber", "nombre"], 1) + li(["pompier", "plombier", "concombre"], 2) + "</div>", txt: ["trompe, bombe, pompon, ombre, combien, compote, tomber, nombre, pompier, plombier, concombre, pompe, compter"] },
+    { t: "-im", svg: '<div class="lx-illu lx-col jr-phrases">' + li(["timbre", "simple", "grimper"], 0) + li(["impossible", "imperméable", "impoli"], 1) + li(["imprimante", "important", "imprévu"], 2) + "</div>", txt: ["timbre, simple, grimper, impossible, imperméable, impoli, imprimante, important, imprévu, impératif"] },
+    { t: "-am", svg: '<div class="lx-illu lx-col jr-phrases">' + li(["lampe", "jambe", "jambon", "chambre"], 0) + li(["champignon", "camper", "ampoule"], 1) + li(["vampire", "bambou", "framboise"], 2) + "</div>", txt: ["lampe, jambe, jambon, chambre, champignon, camper, ampoule, vampire, bambou, framboise, trampoline"] },
+    { t: "-em", svg: '<div class="lx-illu lx-col jr-phrases">' + li(["septembre", "novembre", "décembre"], 0) + li(["température", "trembler", "tempête"], 1) + li(["remplir", "exemple", "ensemble"], 2) + "</div>", txt: ["septembre, novembre, décembre, température, trembler, tempête, remplir, exemple, ensemble, emploi, emporter, membre"] }]; };
+  OR.mbp.jrPersos = [["dylan", "presente"], ["dylan", "reflechit"], ["dylan", "idee"], ["dylan", "content"], ["dylan", "victoire"]];
+  OR.mbp.tbiQ = [
+    { fr: "Regardez la lettre avant b et p. Que remarquez-vous ?", en: "Look at the letter before b and p. What do you notice?", illu: function () { return '<p class="tq-phrases"><span>une lampe · une jambe · un timbre · une ombre</span></p>'; } },
+    { fr: "Le son « on » devant p ou b : comment l’écrit-on ?", en: "The sound « on » before p or b: how do we write it?", illu: function () { return '<p class="tq-phrases"><span>une tro…pe · une co…pote · un no…bre</span></p>'; } },
+    { fr: "Et le son « in » ?", en: "And the sound « in »?", illu: function () { return '<p class="tq-phrases"><span>un ti…bre · si…ple · i…possible</span></p>'; } },
+    { fr: "Et le son « an » écrit avec a ?", en: "And the sound « an » written with a?", illu: function () { return '<p class="tq-phrases"><span>une la…pe · une ja…be · une cha…bre</span></p>'; } },
+    { fr: "Et le son « an » écrit avec e ?", en: "And the sound « an » written with e?", illu: function () { return '<p class="tq-phrases"><span>septe…bre · une te…pête · e…semble</span></p>'; } }];
+  ORTH_IDS.push("efem", "eoupas", "mbp");
+
   /* ---------- outils communs ---------- */
   function orCartes(id, L) {
     return '<div class="or-cartes">' + L.map(function (x) { var cle = id + "|" + x[1], vu = OR_VU[cle];
@@ -4350,21 +4604,22 @@
   function orQuiz(id) {
     var O = OR[id], p = O.perso, lbl = function (o) { return typeof o === "string" ? { fr: o, en: o } : o; };
     return { matiere: "francais", jeux: {
-      rappel: { perso: p, etape: 0, fr: "Je me rappelle", en: "I remember", dfr: id === "nombres" ? "Lire un nombre ; les mots-nombres." : id === "muettes" ? "Masculin et féminin ; un mot de la même famille." : "Voyelles et consonnes.", den: id === "nombres" ? "Reading a number; number words." : id === "muettes" ? "Masculine and feminine; a word from the same family." : "Vowels and consonants.",
+      rappel: { perso: p, etape: 0, fr: "Je me rappelle", en: "I remember", dfr: O.rappelD ? O.rappelD.fr : id === "nombres" ? "Lire un nombre ; les mots-nombres." : id === "muettes" ? "Masculin et féminin ; un mot de la même famille." : "Voyelles et consonnes.", den: O.rappelD ? O.rappelD.en : id === "nombres" ? "Reading a number; number words." : id === "muettes" ? "Masculine and feminine; a word from the same family." : "Vowels and consonants.",
         gen: function () { return O.rappel.map(function (q) { return { t: q.t, c: q.c, z: q.z, o: q.o.map(lbl), a: q.a, ex: q.ex }; }); } },
-      carte: { perso: p, etape: 1, fr: "J’écoute et je montre", en: "I listen and show", dfr: id === "nombres" ? "J’écoute un nombre et je touche le mot qui l’écrit." : "J’écoute un mot et je lève la bonne carte.", den: id === "nombres" ? "I listen to a number and tap the word that writes it." : "I listen to a word and raise the right card.",
+      carte: { perso: p, etape: 1, fr: "J’écoute et je montre", en: "I listen and show", dfr: O.carte.d ? O.carte.d.fr : id === "nombres" ? "J’écoute un nombre et je touche le mot qui l’écrit." : "J’écoute un mot et je lève la bonne carte.", den: O.carte.d ? O.carte.d.en : id === "nombres" ? "I listen to a number and tap the word that writes it." : "I listen to a word and raise the right card.",
         gen: function () { return HE.shuf(O.carte.items).slice(0, 8).map(function (x) {
           if (id === "nombres") { var o = HE.shuf(x[1]); return { t: "choix", c: O.carte.c, z: function (en) { return orEcoute(x[0], en, tr(O.carte.lib)); }, o: o.map(lbl), a: o.indexOf(x[0]), ex: { fr: "On écrit « " + x[0] + " ».", en: "We write « " + x[0] + " »." } }; }
-          return { t: "choix", c: O.carte.c, z: function (en) { return orEcoute(x[0], en); }, o: O.carte.cartes.map(lbl), a: x[1],
-            ex: { fr: "On écrit « " + orMarque(id === "muettes" ? orMuet(x[0]) : orGroupe(x[0])) + " ».", en: "We write « " + orMarque(id === "muettes" ? orMuet(x[0]) : orGroupe(x[0])) + " »." } }; }); } },
+          var mt = x[3] || x[0];
+          return { t: "choix", c: O.carte.c, z: function (en) { return (x[2] ? orGros(x[2]) : "") + orEcoute(x[0], en); }, o: O.carte.cartes.map(lbl), a: x[1],
+            ex: { fr: "On écrit « " + orMarque(orM(id, mt)) + " ».", en: "We write « " + orMarque(orM(id, mt)) + " »." } }; }); } },
       completer: { perso: p, etape: 2, fr: "Je complète", en: "I complete", dfr: "J’écris les lettres qui manquent.", den: "I write the missing letters.",
         gen: function () { return HE.shuf(O.trous).slice(0, 8).map(function (x) { var nb = id === "nombres", T = nb ? x.slice(1) : x, mot = T[0] + T[1] + T[2];
-          return { t: "ecrire", c: { fr: "Écris les lettres qui manquent.", en: "Write the missing letters." }, z: function (en) { return nb ? orGros(String(x[0])) : orEcoute(mot, en); }, avant: T[0], apres: T[2], r: [T[1]],
+          return { t: "ecrire", c: { fr: "Écris les lettres qui manquent.", en: "Write the missing letters." }, z: function (en) { return nb ? orGros(String(x[0])) : orEcoute(T[4] || mot, en); }, avant: T[0], apres: T[2], r: [T[1]],
             ex: { fr: "« " + esc(T[0]) + '<span class="mi-c">' + esc(T[1]) + "</span>" + esc(T[2]) + " » — " + esc(T[3]), en: "« " + esc(T[0]) + '<span class="mi-c">' + esc(T[1]) + "</span>" + esc(T[2]) + " » — " + esc(T[3]) } }; }); } },
       ecrire: { perso: p, etape: 2, fr: id === "nombres" ? "J’écris les nombres" : "J’écris les mots", en: id === "nombres" ? "I write the numbers" : "I write the words", dfr: id === "nombres" ? "J’écris les nombres en lettres." : "J’écoute le mot, puis je l’écris.", den: id === "nombres" ? "I write numbers in words." : "I listen to the word, then I write it.",
-        gen: function () { return HE.shuf(O.ecrire).slice(0, 8).map(function (x) { var nb = id === "nombres", mot = nb ? orNombre(x) : x;
+        gen: function () { return HE.shuf(O.ecrire).slice(0, 8).map(function (x) { var nb = id === "nombres", w = orMot(x), mot = nb ? orNombre(x) : w.mot;
           return { t: "ecrire", c: nb ? { fr: "Écris ce nombre en lettres, avec des tirets entre chaque mot.", en: "Write this number in words, with hyphens between every word." } : { fr: "Écoute le mot, puis écris-le.", en: "Listen to the word, then write it." },
-            z: function (en) { return nb ? orGros(String(x)) : orEcoute(mot, en); }, r: [mot], ex: { fr: "On écrit « " + (nb ? esc(mot) : orMarque(id === "muettes" ? orMuet(mot) : orGroupe(mot))) + " ».", en: "We write « " + (nb ? esc(mot) : orMarque(id === "muettes" ? orMuet(mot) : orGroupe(mot))) + " »." } }; }); } },
+            z: function (en) { return nb ? orGros(String(x)) : orEcoute(w.dit, en); }, r: [mot], ex: { fr: "On écrit « " + (nb ? esc(mot) : orMarque(orM(id, mot))) + " ».", en: "We write « " + (nb ? esc(mot) : orMarque(orM(id, mot))) + " »." } }; }); } },
       dictee: { perso: p, etape: 3, fr: "La dictée", en: "Dictation", dfr: "J’écris des phrases et un petit texte dictés, puis je me corrige.", den: "I write dictated sentences and a short text, then I check them.", gen: function () { return orDicteeQs(id); } }
     } };
   }
@@ -4373,11 +4628,11 @@
     var bouton = function (texte, en) { return '<p class="tq-ecoute"><button class="coco-btn" type="button" data-action="tq-dire" data-v="' + esc(texte) + '">' + (en ? "Listen" : "Écouter") + "</button></p>"; };
     HE.shuf(O.carte.items).slice(0, 5).forEach(function (x) {
       if (id === "nombres") { var o = HE.shuf(x[1]); qs.push({ t: "choix", c: O.carte.c, z: function (en, voir) { return voir ? '<span class="mi-mot">' + esc(x[0]) + "</span>" : bouton(x[0], en); }, o: o.map(lbl), a: o.indexOf(x[0]), ex: { fr: "On écrit « " + x[0] + " ».", en: "We write « " + x[0] + " »." } }); return; }
-      var m = id === "muettes" ? orMuet(x[0]) : orGroupe(x[0]);
-      qs.push({ t: "choix", c: O.carte.c, z: function (en, voir) { return voir ? '<span class="mi-mot">' + orMarque(m) + "</span>" : bouton(x[0], en); }, o: O.carte.cartes.map(lbl), a: x[1], ex: { fr: "On écrit « " + orPlain(m) + " ».", en: "We write « " + orPlain(m) + " »." } }); });
-    HE.shuf(O.ecrire).slice(0, 5).forEach(function (x) { var nb = id === "nombres", mot = nb ? orNombre(x) : x, m = nb ? mot : id === "muettes" ? orMuet(mot) : orGroupe(mot);
+      var m = orM(id, x[3] || x[0]);
+      qs.push({ t: "choix", c: O.carte.c, z: function (en, voir) { return voir ? '<span class="mi-mot">' + orMarque(m) + "</span>" : (x[2] ? '<p class="or-cue">' + esc(x[2]) + "</p>" : "") + bouton(x[0], en); }, o: O.carte.cartes.map(lbl), a: x[1], ex: { fr: "On écrit « " + orPlain(m) + " ».", en: "We write « " + orPlain(m) + " »." } }); });
+    HE.shuf(O.ecrire).slice(0, 5).forEach(function (x) { var nb = id === "nombres", w = orMot(x), mot = nb ? orNombre(x) : w.mot, m = nb ? mot : orM(id, mot);
       qs.push({ t: "ecrit", c: nb ? { fr: "Écris ce nombre en lettres sur ton ardoise.", en: "Write this number in words on your board." } : { fr: "Écoute le mot, puis écris-le sur ton ardoise.", en: "Listen to the word, then write it on your board." },
-        z: function (en, voir) { return voir ? '<span class="mi-mot">' + orMarque(m) + "</span>" : nb ? '<p class="or-cue">' + x + "</p>" : bouton(mot, en); }, ex: { fr: "On écrit « " + mot + " ».", en: "We write « " + mot + " »." } }); });
+        z: function (en, voir) { return voir ? '<span class="mi-mot">' + orMarque(m) + "</span>" : nb ? '<p class="or-cue">' + x + "</p>" : bouton(w.dit, en); }, ex: { fr: "On écrit « " + mot + " ».", en: "We write « " + mot + " »." } }); });
     return HE.shuf(qs); }
   /* fiche enseignante : toutes les dictées, à lire en classe */
   function orDicteesFiche(id) { var O = OR[id], N = ["", "★ Niveau simple", "★★ Niveau modéré", "★★★ Niveau complexe"];
@@ -4412,17 +4667,18 @@
 
   /* ---------- fiches d’exercices en 3 niveaux (même structure que les mots invariables, D-132) ---------- */
   function orTrouFiche(id, x, premiere) { var nb = id === "nombres", T = nb ? x.slice(1) : x, mot = T[0] + T[1] + T[2];
-    return premiere ? { cue: nb ? x[0] : "", before: mot.charAt(0), seg: mot.slice(1), after: "" } : { cue: nb ? x[0] : "", before: T[0], seg: T[1], after: T[2] }; }
+    var det = !nb && T[4] && T[4].slice(-mot.length) === mot ? T[4].slice(0, T[4].length - mot.length) : ""; /* « la », « un », « l’ » : le déterminant aide à savoir si le mot est féminin */
+    return premiere ? { cue: nb ? x[0] : "", before: mot.charAt(0), seg: mot.slice(1), after: "" } : { cue: nb ? x[0] : "", before: det + T[0], seg: T[1], after: T[2] }; }
   function orTrousHtml(L) { var dev = L.some(function (x) { return x.indice; });
-    return '<ul class="ex-fr ' + (dev ? "ex-devinettes" : "ex-mots") + '">' + L.map(function (x) { return "<li>" + (x.cue !== "" ? "<b>" + x.cue + "</b> : " : "") + (x.indice ? '<span class="ex-indice">' + esc(x.indice) + "</span> → " : "") + esc(x.before) + exT(esc(x.seg)) + esc(x.after) + "</li>"; }).join("") + "</ul>"; }
-  function orMotsDictee(id, n) { return HE.shuf(OR[id].ecrire).slice(0, n); }
+    return '<ul class="ex-fr ' + (dev ? "ex-devinettes" : "ex-mots ex-trous") + '">' + L.map(function (x) { return "<li>" + (x.cue !== "" ? "<b>" + x.cue + "</b> : " : "") + (x.indice ? '<span class="ex-indice">' + esc(x.indice) + "</span> → " : "") + esc(x.before) + exT(esc(x.seg)) + esc(x.after) + "</li>"; }).join("") + "</ul>"; }
+  function orMotsDictee(id, n) { var L = HE.shuf(OR[id].ecrire).slice(0, n); return id === "nombres" ? L : L.map(orMot); }
   function orExos(id, d, en, niv) { var O = OR[id], nb = id === "nombres";
     var dev = d.trous.some(function (x) { return x.indice; });
     var ex = [{ c: dev ? (en ? "Find the word and write it: its first letter is given." : "Trouve le mot et écris-le : sa première lettre est donnée.") : (en ? "Fill in the missing letters." : "Complète les lettres qui manquent."), q: orTrousHtml(d.trous), r: d.trous.map(function (x) { return (x.cue !== "" ? x.cue + " : " : "") + esc(x.before + x.seg + x.after); }).join(" · ") }];
     ex.push({ c: niv === 3 ? (nb ? (en ? "Complete each sentence: write the number in words." : "Complète chaque phrase en écrivant le nombre en lettres.") : (en ? "Complete each sentence with a word from the lesson." : "Complète chaque phrase avec un mot de la leçon.")) : (en ? "Complete each sentence with a word from the list." : "Complète chaque phrase avec un mot de la liste."),
       q: (niv === 3 ? "" : '<p class="ex-fr ex-banque">' + HE.shuf(d.phrases.map(function (x) { return x[1]; })).map(esc).join(" · ") + "</p>") + '<ul class="ex-fr ex-phrases">' + d.phrases.map(function (x) { return "<li>" + esc(x[0]).split("___").join(exT(esc(x[1]))) + "</li>"; }).join("") + "</ul>", r: d.phrases.map(function (x) { return esc(x[1]); }).join(" · ") });
     if (nb) ex.push({ c: en ? "Write the numbers in words." : "Écris les nombres en lettres.", q: '<ol class="ex-dictee ex-deux-col-ol">' + d.mots.map(function (x) { return "<li><b>" + x + "</b> : " + exT(esc(orNombre(x)), true) + "</li>"; }).join("") + "</ol>", r: d.mots.map(function (x) { return x + " : " + orNombre(x); }).join(" · ") });
-    else ex.push({ c: en ? "Word dictation: write the words your teacher reads." : "Dictée de mots : écris les mots que dit la maîtresse.", q: '<ol class="ex-dictee ex-deux-col-ol">' + d.mots.map(function (x) { return "<li>" + exT(esc(x), true) + "</li>"; }).join("") + "</ol>", r: (en ? "Words to read aloud: " : "Mots à dicter : ") + d.mots.join(" · ") });
+    else ex.push({ c: en ? "Word dictation: write the words your teacher reads." : "Dictée de mots : écris les mots que dit la maîtresse.", q: '<ol class="ex-dictee ex-deux-col-ol">' + d.mots.map(function (x) { return "<li>" + exT(esc(x.mot), true) + "</li>"; }).join("") + "</ol>", r: (en ? "Words to read aloud: " : "Mots à dicter : ") + d.mots.map(function (x) { return esc(x.dit); }).join(" · ") });
     ex.push(moDicteePhrases(d.dicteePh.map(orPlain), en));
     return ex; }
   function orExosDef(id) { var O = OR[id];
@@ -4434,7 +4690,7 @@
       rappel: EXOS[id].rappel,
       tirer: function () { var nb = id === "nombres", L = HE.shuf(O.ecrire).slice(0, 4);
         return { entoure: HE.shuf(O.entoure.mots).slice(0, 6), phrases: HE.shuf(O.gaps).slice(0, 3).map(function (x) { return { s: x[0], w: x[1], o: HE.shuf([x[1]].concat(O.autres(x[1]))) }; }),
-          lettres: L.map(function (x) { var mot = nb ? orNombre(x) : x; return { cue: nb ? x : "", mot: mot, g: moMelanger(mot.replace(/-/g, " ")) }; }), ordre: HE.shuf(O.dictees[1]).slice(0, 1).map(function (s) { var p = orPlain(s); return { p: p, m: moMotsMelanges(p) }; }) }; },
+          lettres: L.map(function (x) { var mot = nb ? orNombre(x) : orMot(x).mot; return { cue: nb ? x : "", mot: mot, g: moMelanger(mot.replace(/-/g, " ")) }; }), ordre: HE.shuf(O.dictees[1]).slice(0, 1).map(function (s) { var p = orPlain(s); return { p: p, m: moMotsMelanges(p) }; }) }; },
       exos: function (d, en) {
         return [{ c: en ? O.entoure.c.en : O.entoure.c.fr, q: '<p class="ex-fr ex-banque">' + d.entoure.map(function (w) { return exS(esc(orPlain(w)), orMarque(w), true); }).join(" · ") + "</p>", r: d.entoure.map(orMarque).join(" · ") },
           { c: en ? "Tick the word that completes the sentence." : "Coche le mot qui complète la phrase.", q: '<ul class="ex-fr ex-phrases ex-cocher">' + d.phrases.map(function (x) { return "<li>" + esc(x.s).split("___").join("……") + '<span class="ex-coches">' + x.o.map(function (w) { return '<span class="ex-coche">' + exS("☐", w === x.w ? "☑" : "☐", true) + " " + esc(w) + "</span>"; }).join("") + "</span></li>"; }).join("") + "</ul>", r: d.phrases.map(function (x) { return esc(x.w); }).join(" · ") },
@@ -4450,6 +4706,21 @@
       exos: function (d, en) { return orExos(id, d, en, 3); }
     });
   }
+  OR_FICHE.efem = { erreurs: ["Oublier le e muet d’un mot féminin en -ie, -ue, -ée… : faire dire le déterminant (la, une) avant d’écrire.", "Écrire -é pour -ée à la fin d’un nom féminin (la fée, la purée) : le féminin prend le e.", "Oublier le e de -aie, -oie (la craie, la joie).", "Écrire la fin -erie comme on l’entend : les noms de magasins et de lieux (boulangerie, boucherie) finissent par -erie."],
+    conseils: ["Code de la leçon : la fin muette en orange."], prolonger: ["Chercher les noms de magasins en -erie du quartier ou du marché.", "Construire l’affiche de la classe des noms féminins en -ie, -ue, -ée, -aie, -oie.", "Enchaîner avec la séquence « Un -e muet ou pas ? », qui oppose les noms féminins et masculins."],
+    sources: "Sources : leçon de classe « Écrire les mots avec un -e muet au féminin » (2026), d’après les fiches 4 et 5 de Laura MARIE, « Mon répertoire de dictées par régularités » (2025), aucune dictée reprise ; programmes de Nouvelle-Calédonie 2021, repères de progressivité de la DENC (cycle 2, français p. 9, 28 et 30)." };
+  OR_FICHE.eoupas = { erreurs: ["Ajouter un e à un nom masculin (un trou, un tiroir) : chercher d’abord le déterminant, un ou une.", "Oublier le e d’un nom féminin (la joue, une armoire).", "Hésiter entre -oir et -oire : un mouchoir, une armoire ; le déterminant décide.", "Prendre la règle pour une loi absolue : elle vaut pour « la plupart » des mots ; les exceptions s’apprennent à part (un musée, un lycée)."],
+    conseils: ["Code de la leçon : le e des noms féminins en orange.", "Ces dictées sont « panachées » (masculins et féminins mêlés) : les faire après la séquence « Un -e muet au féminin »."], prolonger: ["Jeu oral « un ou une ? » avant chaque mot écrit.", "Trier des étiquettes-mots en deux colonnes : masculin sans e, féminin avec e.", "Chercher d’autres couples dans les lectures de la classe (un tiroir / une armoire)."],
+    sources: "Sources : leçon de classe « Écrire les mots avec un -e muet ou pas ? » (2026), d’après la fiche 6 de Laura MARIE, « Mon répertoire de dictées par régularités » (2025), aucune dictée reprise ; programmes de Nouvelle-Calédonie 2021, repères de progressivité de la DENC (cycle 2, français p. 9, 28 et 30)." };
+  OR_FICHE.mbp = { erreurs: ["Écrire n devant b ou p : redire la règle « m devant m, b, p » en montrant la lettre qui suit.", "Écrire m devant une autre lettre (pantalon, viande) : la règle ne vaut que devant m, b, p.", "Confondre am et em, qui se prononcent pareil : septembre, novembre, décembre, tempête s’apprennent.", "Oublier le p muet de compter."],
+    conseils: ["Laura Marie conseille de ne pas présenter « am » et « em » dans la même séance ni dans la même dictée (risque de confusion) et d’aborder « am » en priorité : sur le site, aucune phrase dictée ne mélange am et em.", "Exceptions connues à signaler comme « mots rebelles » si elles se présentent : bonbon, bonbonnière, néanmoins.", "Code de la leçon : le m en orange."],
+    prolonger: ["Jeu oral « Lève la carte m / n » avec des mots en on, in, an, en (comme dans l’activité « J’écoute et je montre »).", "Plus tard : m devant m (emmener, immense).", "Dictées panachées m / n : fiche 8 du livre de Laura Marie."],
+    sources: "Sources : leçon de classe « Écrire les mots avec m devant m, b, p » (2026), d’après les fiches 7 et 8 de Laura MARIE, « Mon répertoire de dictées par régularités » (2025), aucune dictée reprise ; programmes de Nouvelle-Calédonie 2021, repères de progressivité de la DENC (cycle 2, français p. 27 et 28)." };
+  PROG.efem = { ref: "Français · Étude de la langue (orthographe lexicale)", att: PROG.mots.att, socle: [1, 2], comp: "Comprendre le fonctionnement de la langue : maîtriser les relations entre l’oral et l’écrit ; s’initier à l’orthographe lexicale.", rp: "français p. 9, 28 et 30", reperes: PROG.muettes.reperes };
+  PROG.eoupas = { ref: "Français · Étude de la langue (orthographe lexicale)", att: PROG.mots.att, socle: [1, 2], comp: "Comprendre le fonctionnement de la langue : maîtriser les relations entre l’oral et l’écrit ; s’initier à l’orthographe lexicale.", rp: "français p. 9, 28 et 30", reperes: PROG.muettes.reperes };
+  PROG.mbp = { ref: "Français · Étude de la langue (correspondances grapho-phoniques)", att: PROG.mots.att, socle: [1, 2], comp: "Comprendre le fonctionnement de la langue : maîtriser les relations entre l’oral et l’écrit. Connaître la composition de certains graphèmes selon la lettre qui suit (an/am, en/em, on/om, in/im).", rp: "français p. 27 et 28",
+    reperes: ["Il consolide l’ensemble des phonèmes du français et des graphèmes associés.", "Il orthographie des mots en respectant la valeur de certaines lettres selon le contexte."] };
+  OR.muettes.marque = orMuet; OR.egroupe.marque = orGroupe;
   ORTH_IDS.forEach(function (id) { var O = OR[id];
     C[id] = { matiere: "francais", titre: O.titre, objectif: O.objectif };
     QUIZ[id] = orQuiz(id);

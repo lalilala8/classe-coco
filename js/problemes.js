@@ -416,6 +416,25 @@
     ],
     retenir: { fr: "Sur un réveil, les 2 premiers chiffres sont les heures : de 00 à 23. Les 2 derniers chiffres sont les minutes : de 00 à 59. Après 59 minutes, on passe à l’heure suivante.", en: "On a digital clock, the first 2 digits are the hours: from 00 to 23. The last 2 digits are the minutes: from 00 to 59. After 59 minutes, we go to the next hour." },
     exemple: "14:41",
+    /* mise en commun au clavier, avec des réveils, et correction organisée par premier chiffre (D-136, d’après l’outil de la collègue) */
+    commun: { reveil: true,
+      relances: [{ fr: "Le réveil peut-il vraiment afficher cette heure ?", en: "Can the clock really show this time?" }, { fr: "Dis-la avec des mots.", en: "Say it in words." }, { fr: "Que fais-tu à cette heure-là ?", en: "What do you do at that time?" }],
+      verdict: function (s, en) { var t = String(s).padStart(4, "0"), d = t.split("").map(Number), h = d[0] * 10 + d[1], m = d[2] * 10 + d[3], pareil = d[0] === d[3] && d[1] === d[2];
+        if (h > 23 || m > 59) { var R = []; if (h > 23) R.push(en ? t.slice(0, 2) + " hours? After 23:59, the clock shows 00:00." : t.slice(0, 2) + " heures ? Après 23:59, le réveil affiche 00:00."); if (m > 59) R.push(en ? t.slice(2) + " minutes? After 59 minutes, we go to the next hour." : t.slice(2) + " minutes ? Après 59 minutes, on passe à l’heure suivante.");
+          return { type: "non", titre: en ? "Does not exist" : "N’existe pas", texte: (pareil ? (en ? "It does read the same both ways, but… " : "Elle se lit bien pareil, mais… ") : "") + R.join(" ") }; }
+        if (pareil) return { type: "ok", titre: en ? "Magic!" : "Magique !", texte: en ? window.COCO_HEURE.direEn(h % 12 || 12, m) + " " + moment(h, true) : heureMots(h, m) + ", " + moment(h) };
+        var tx = (en ? "Backwards it reads " : "À l’envers, on lit ") + d[3] + d[2] + ":" + d[1] + d[0] + ".";
+        if (String(s).length === 3 && s[0] === s[2]) tx = (en ? "With 3 digits it worked, but the clock shows 4: " : "Avec 3 chiffres, ça marchait. Mais le réveil en affiche 4 : ") + t.slice(0, 2) + ":" + t.slice(2) + ". " + tx;
+        return { type: "presque", titre: en ? "Not magic" : "Pas magique", texte: tx }; },
+      lignes: [{ d: "0", heures: ["0000", "0110", "0220", "0330", "0440", "0550"], non: "0660", pourquoi: { fr: "60 minutes ? n’existe pas", en: "60 minutes? does not exist" } },
+        { d: "1", heures: ["1001", "1111", "1221", "1331", "1441", "1551"], non: "1661", pourquoi: { fr: "61 minutes ? n’existe pas", en: "61 minutes? does not exist" } },
+        { d: "2", heures: ["2002", "2112", "2222", "2332"], non: "2442", pourquoi: { fr: "24 heures ? n’existe pas", en: "24 hours? does not exist" } }],
+      pourquoi: { fr: "Le 2e chiffre devient le chiffre des dizaines de minutes : il s’arrête à 5. Et les heures s’arrêtent à 23.", en: "The 2nd digit becomes the tens digit of the minutes: it stops at 5. And the hours stop at 23." },
+      cache: function (t) { return t[0] + "???"; },
+      vues: [["retient", { fr: "Ce qu’on retient", en: "What we remember" }], ["toutes", { fr: "Les 16 heures magiques", en: "The 16 magic times" }]],
+      passages: [{ r: ["0659", "0700"], f: ["+ 1 min"] }, { r: ["2359", "0000"], f: ["+ 1 min"], cap: ["", { fr: "minuit", en: "midnight" }] }],
+      compte: function (n, total, enCours, en) { return n === 0 ? (en ? "There are <b>16</b> magic times in all." : "Il y a <b>16</b> heures magiques en tout.") : n === total ? (en ? "Well done! The class found all <b>16</b> magic times." : "Bravo ! La classe a trouvé les <b>16</b> heures magiques.")
+        : (en ? "The class found <b>" + n + "</b> out of 16. " + (enCours ? "Which ones are we missing?" : "") : "La classe en a trouvé <b>" + n + "</b> sur 16. " + (enCours ? "Lesquelles nous manquent ?" : "")); } },
     toutes: null, nbToutes: 16,
     vueToutes: function (trouves, lg) {
       var en = lg === "en";
@@ -486,6 +505,31 @@
     ],
     retenir: { fr: "Une demi-heure, c’est 30 minutes. Un quart d’heure, c’est 15 minutes. Pour avancer de 30 minutes, on peut passer par l’heure pile : de 10:45 à 11:00, 15 minutes ; de 11:00 à 11:15, encore 15 minutes. Donc 10:45 + 30 minutes = 11:15.", en: "Half an hour is 30 minutes. A quarter of an hour is 15 minutes. To move on 30 minutes, we can go through the o'clock: from 10:45 to 11:00, 15 minutes; from 11:00 to 11:15, another 15 minutes. So 10:45 + 30 minutes = 11:15." },
     exemple: "10:45 + 30 min = 11:15",
+    /* mise en commun au clavier avec des paires de réveils, et correction organisée (D-136, comme L’heure magique) */
+    commun: { reveil: false, paire: true, /* en attente de validation : passer à true */
+      relances: [{ fr: "Ça fait vraiment une demi-heure ?", en: "Is it really half an hour?" }, { fr: "Dis les deux heures avec des mots.", en: "Say both times in words." }, { fr: "C’est bien le matin ?", en: "Is it really the morning?" }],
+      verdict: function (s, en) { var t = String(s), h1 = +t.slice(0, 2), m1 = +t.slice(2, 4), h2 = +t.slice(4, 6), m2 = +t.slice(6, 8), A = pad(h1) + ":" + pad(m1), B = pad(h2) + ":" + pad(m2), R = [];
+        [[h1, m1], [h2, m2]].forEach(function (x) { if (x[1] > 59) R.push(en ? pad(x[1]) + " minutes? After 59 minutes, we go to the next hour." : pad(x[1]) + " minutes ? Après 59 minutes, on passe à l’heure suivante."); if (x[0] > 23) R.push(en ? pad(x[0]) + " hours? The clock goes from 00 to 23." : pad(x[0]) + " heures ? Le réveil va de 00 à 23."); });
+        if (R.length) return { type: "non", titre: en ? "Does not exist" : "N’existe pas", texte: R.join(" ") };
+        var d = h2 * 60 + m2 - (h1 * 60 + m1);
+        if (d !== 30) return { type: "presque", titre: en ? "Not half an hour" : "Pas une demi-heure", texte: d <= 0 ? (en ? "The 2nd clock does not show a later time than the 1st." : "Le 2e réveil n’affiche pas une heure plus tard que le 1er.")
+          : (en ? "From " + A + " to " + B + " is " + d + " minutes, not 30." : "De " + A + " à " + B + ", il passe " + d + " minutes, pas 30.") + (m1 >= 30 && h2 !== h1 ? (en ? " Go through " + pad(h1 + 1) + ":00." : " Passe par " + pad(h1 + 1) + ":00.") : "") };
+        if (h1 >= 12) return { type: "presque", titre: en ? "Not the morning" : "Pas le matin", texte: en ? "That is 30 minutes, but at " + A + " it is " + moment(h1, true) + "." : "Ça fait bien 30 minutes, mais à " + A + ", c’est " + moment(h1) + "." };
+        return { type: "ok", titre: en ? "Half an hour!" : "Une demi-heure !", texte: "" }; },
+      groupe: function (t, en) { return +t.slice(2, 4) < 30 ? ["a", en ? "We start before half past" : "On commence avant la demie"] : ["b", en ? "We start at half past or after" : "On commence à la demie ou après"]; },
+      cache: function (t) { return t.slice(0, 4) + "????"; },
+      vues: [["retient", { fr: "Ce qu’on retient", en: "What we remember" }], ["nos", { fr: "Nos paires, rangées", en: "Our pairs, sorted" }], ["toutes", { fr: "Les paires en quarts d’heure", en: "The quarter-hour pairs" }]],
+      passages: [{ r: ["1045", "1100", "1115"], f: ["+ 15 min", "+ 15 min"] }],
+      colonnes: [{ titre: { fr: "Le chiffre des heures ne change pas", en: "The hour does not change" }, test: function (t) { return +t.slice(2, 4) < 30; } }, { titre: { fr: "On passe à l’heure suivante", en: "We go to the next hour" }, test: function (t) { return +t.slice(2, 4) >= 30; } }],
+      compteNos: function (n, en) { return n === 0 ? (en ? "No pair checked yet: check them in “We share”." : "Aucune paire vérifiée pour l’instant : vérifiez-les dans « On met en commun ».") : en ? "The class found <b>" + n + "</b> right pair" + (n > 1 ? "s" : "") + ". Do we have both kinds?" : "La classe a trouvé <b>" + n + "</b> paire" + (n > 1 ? "s" : "") + " juste" + (n > 1 ? "s" : "") + ". A-t-on les deux sortes ?"; },
+      pourquoiNos: { fr: "Si les minutes du début vont de 00 à 29, on ajoute 30 aux minutes. De 30 à 59, on passe à l’heure suivante.", en: "If the minutes at the start go from 00 to 29, we add 30 to the minutes. From 30 to 59, we go to the next hour." },
+      lignes: [{ titre: { fr: "pile → et demie", en: "o’clock → half past" }, heures: ["07000730", "08000830", "09000930", "10001030", "11001130"], non: "08000850", pourquoi: { fr: "50 minutes, pas 30", en: "50 minutes, not 30" } },
+        { titre: { fr: "et quart → moins le quart", en: "quarter past → quarter to" }, heures: ["07150745", "08150845", "09150945", "10151045", "11151145"], non: "08150915", pourquoi: { fr: "1 heure, pas 30 minutes", en: "1 hour, not 30 minutes" } },
+        { titre: { fr: "et demie → pile", en: "half past → o’clock" }, heures: ["07300800", "08300900", "09301000", "10301100", "11301200"], non: "09300960", pourquoi: { fr: "60 minutes ? n’existe pas", en: "60 minutes? does not exist" } },
+        { titre: { fr: "moins le quart → et quart", en: "quarter to → quarter past" }, heures: ["07450815", "08450915", "09451015", "10451115", "11451215"], non: "09450975", pourquoi: { fr: "75 minutes ? n’existe pas", en: "75 minutes? does not exist" } }],
+      compte: function (n, total, enCours, en) { return n === 0 ? (en ? "From 7 o’clock to midday, there are <b>" + total + "</b> pairs in quarter hours." : "De 7 heures à midi, il y a <b>" + total + "</b> paires en quarts d’heure.") : n === total ? (en ? "Well done! The class found all <b>" + total + "</b>." : "Bravo ! La classe les a toutes trouvées.")
+        : (en ? "The class found <b>" + n + "</b> out of " + total + ". " + (enCours ? "Which ones are we missing?" : "") : "La classe en a trouvé <b>" + n + "</b> sur " + total + ". " + (enCours ? "Lesquelles nous manquent ?" : "")); },
+      pourquoi: { fr: "Une demi-heure, c’est 2 quarts d’heure. Quand on commence à la demie ou après, on passe à l’heure suivante.", en: "Half an hour is 2 quarters of an hour. When we start at half past or after, we go to the next hour." } },
     toutes: null, nbToutes: null,
     vueToutes: function (trouves, lg) {
       var en = lg === "en", cles = Object.keys(trouves).sort(), a = [], b = [];

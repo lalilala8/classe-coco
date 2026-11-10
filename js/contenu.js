@@ -20,7 +20,7 @@ window.COCO_CONTENU = {
         { nom: { fr: "Orthographe", en: "Spelling" }, sequences: [
           ["Les mots invariables", "demo", "mots"],
           /* orthographe par régularités (leçons de classe 2026, sans numéro ; D-134) */
-          ["Les nombres en lettres", "demo", "nombres"], ["Les consonnes muettes", "demo", "muettes"], ["Le -e après un groupe de consonnes", "demo", "egroupe"],
+          ["Les nombres en lettres", "demo", "nombres"], ["Les consonnes muettes", "demo", "muettes"], ["Le -e après un groupe de consonnes", "demo", "egroupe"], ["Un -e muet au féminin", "demo", "efem"], ["Un -e muet ou pas ?", "demo", "eoupas"], ["m devant m, b, p", "demo", "mbp"],
           ["Les correspondances graphèmes-phonèmes"], ["Les accords particuliers"]
         ] },
         { nom: { fr: "Lexique", en: "Vocabulary" }, sequences: [
