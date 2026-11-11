@@ -506,7 +506,7 @@
     retenir: { fr: "Une demi-heure, c’est 30 minutes. Un quart d’heure, c’est 15 minutes. Pour avancer de 30 minutes, on peut passer par l’heure pile : de 10:45 à 11:00, 15 minutes ; de 11:00 à 11:15, encore 15 minutes. Donc 10:45 + 30 minutes = 11:15.", en: "Half an hour is 30 minutes. A quarter of an hour is 15 minutes. To move on 30 minutes, we can go through the o'clock: from 10:45 to 11:00, 15 minutes; from 11:00 to 11:15, another 15 minutes. So 10:45 + 30 minutes = 11:15." },
     exemple: "10:45 + 30 min = 11:15",
     /* mise en commun au clavier avec des paires de réveils, et correction organisée (D-136, comme L’heure magique) */
-    commun: { reveil: false, paire: true, /* en attente de validation : passer à true */
+    commun: { reveil: true, paire: true,
       relances: [{ fr: "Ça fait vraiment une demi-heure ?", en: "Is it really half an hour?" }, { fr: "Dis les deux heures avec des mots.", en: "Say both times in words." }, { fr: "C’est bien le matin ?", en: "Is it really the morning?" }],
       verdict: function (s, en) { var t = String(s), h1 = +t.slice(0, 2), m1 = +t.slice(2, 4), h2 = +t.slice(4, 6), m2 = +t.slice(6, 8), A = pad(h1) + ":" + pad(m1), B = pad(h2) + ":" + pad(m2), R = [];
         [[h1, m1], [h2, m2]].forEach(function (x) { if (x[1] > 59) R.push(en ? pad(x[1]) + " minutes? After 59 minutes, we go to the next hour." : pad(x[1]) + " minutes ? Après 59 minutes, on passe à l’heure suivante."); if (x[0] > 23) R.push(en ? pad(x[0]) + " hours? The clock goes from 00 to 23." : pad(x[0]) + " heures ? Le réveil va de 00 à 23."); });
