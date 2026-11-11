@@ -3174,12 +3174,13 @@
     var ch = document.getElementById("chrono"), e = chronoEtat(reste); if (ch) { ch.dataset.phase = e.phase; ch.style.setProperty("--reste", e.frac); }
     if (K.fin && reste === 0) { K.fin = 0; K.reste = 0; clearInterval(minuteur); }
   }
-  /* le chrono en couleurs (demande de l’enseignante) : anneau multicolore qui se vide ; les chiffres passent à l’orange à la fin */
-  function chronoEtat(reste) { var total = (K.duree || 15) * 60, f = Math.max(0, Math.min(1, reste / total)); return { frac: f, phase: reste === 0 ? "fini" : f > .5 ? "vert" : f > .2 ? "jaune" : "orange" }; }
+  /* le chrono (choisi par l’enseignante, mélange de ses options A, B et C) : un disque qui fond, du turquoise clair au foncé,
+     un petit soleil jaune qui avance sur le bord, un petit trait par minute de la durée choisie et un grand toutes les 5 minutes */
+  function chronoEtat(reste) { var total = (K.duree || 15) * 60, f = Math.max(0, Math.min(1, reste / total)); return { frac: f, phase: reste === 0 ? "fini" : "cours" }; }
   function chrono(reste, en) {
     var e = chronoEtat(reste);
-    return '<div class="k-chrono" id="chrono" data-phase="' + e.phase + '" style="--reste:' + e.frac + '"><span class="k-chrono-anneau" aria-hidden="true"></span>' +
-      '<p id="minuteur">' + Math.floor(reste / 60) + ":" + String(reste % 60).padStart(2, "0") + '</p><span class="k-chrono-fini">' + (en ? "Time’s up!" : "Temps écoulé !") + "</span></div>";
+    return '<div class="k-chrono" id="chrono" data-phase="' + e.phase + '" style="--reste:' + e.frac + ";--n:" + (K.duree || 15) + '" aria-hidden="false"><span class="ch-part"></span><span class="ch-grad"></span><span class="ch-grad5"></span><span class="ch-soleil"></span>' +
+      '<div class="ch-centre"><p id="minuteur">' + Math.floor(reste / 60) + ":" + String(reste % 60).padStart(2, "0") + '</p><span class="k-chrono-fini">' + (en ? "Time’s up!" : "Temps écoulé !") + "</span></div></div>";
   }
   /* ---------- Mise en commun et correction avec des réveils (L’heure magique, D-136, demande de l’enseignante, d’après l’outil de la collègue) ----------
      La maîtresse tape au clavier les heures des groupes ; elles s’affichent en réveils au tableau ; « Magique ! » ou « Pas magique » / « N’existe pas »

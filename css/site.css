@@ -1589,27 +1589,32 @@ a.fo-carte:hover { background: var(--lagon-clair); }
 .k-m.non figcaption { color: var(--soutien-fonce); }
 .k-m.non::after { content: ""; position: absolute; left: 8%; right: 8%; top: 36%; height: 6px; border-radius: 3px; background: var(--soutien-fonce); transform: rotate(-16deg); }
 .k-pourquoi { margin: 0; text-align: center; font-size: 19px; }
-/* chrono en couleurs : anneau qui se vide, vert puis jaune puis orange ; boutons de durée de couleurs différentes */
-.k-minuteur { background: linear-gradient(160deg, var(--lagon-clair), var(--soutien-clair)); border-color: var(--lagon); }
-.k-chrono { position: relative; width: 250px; aspect-ratio: 1; display: grid; place-items: center; }
+/* le chrono : disque qui fond (turquoise clair → foncé), petit soleil jaune sur le bord, traits selon la durée choisie */
 @property --reste { syntax: "<number>"; inherits: true; initial-value: 1; }
-.k-chrono { transition: --reste .5s linear; }
-.k-chrono-anneau { position: absolute; inset: 0; border-radius: 50%;
-  background: conic-gradient(transparent 0 calc(var(--reste) * 360deg), #e6ebef 0), conic-gradient(var(--mot-commun), var(--soutien) 28%, var(--lagon) 62%, var(--heure-m)); }
-.k-chrono-anneau::after { content: ""; position: absolute; inset: 22px; border-radius: 50%; background: #fff; box-shadow: inset 0 3px 8px rgba(29, 39, 68, .12); }
-.k-chrono p { position: relative; margin: 0; font: 700 64px/1 var(--font-texte) !important; color: var(--encre); font-variant-numeric: tabular-nums; }
-.k-chrono[data-phase="orange"] p, .k-chrono[data-phase="fini"] p { color: var(--mot-commun); }
-.k-chrono-fini { position: absolute; bottom: 52px; font: 400 18px/1 var(--font-titre); color: var(--mot-commun); display: none; }
+.k-minuteur { background: linear-gradient(180deg, #fff, var(--lagon-clair)); border-color: var(--lagon); }
+.k-chrono { --taille: 250px; --n: 15; --a: calc(var(--reste) * 360deg); position: relative; width: var(--taille); aspect-ratio: 1; border-radius: 50%; background: #fff;
+  box-shadow: inset 0 0 0 7px var(--lagon-fonce), 0 6px 0 rgba(9, 92, 103, .18); transition: --reste .5s linear; }
+.k-chrono .ch-part, .k-chrono .ch-grad, .k-chrono .ch-grad5 { position: absolute; inset: 7px; border-radius: 50%; }
+.k-chrono .ch-part { background: conic-gradient(#a8e1e7 0deg, #3fb0bd calc(var(--a) * .5), var(--lagon-fonce) var(--a), #eef5f6 var(--a)); }
+.k-chrono .ch-grad { background: repeating-conic-gradient(rgba(9, 92, 103, .9) 0 1.2deg, transparent 1.2deg calc(360deg / var(--n)));
+  -webkit-mask: radial-gradient(circle, transparent calc(var(--taille) / 2 - 18px), #000 calc(var(--taille) / 2 - 17px)); mask: radial-gradient(circle, transparent calc(var(--taille) / 2 - 18px), #000 calc(var(--taille) / 2 - 17px)); }
+.k-chrono .ch-grad5 { background: repeating-conic-gradient(var(--lagon-fonce) 0 2.2deg, transparent 2.2deg calc(1800deg / var(--n)));
+  -webkit-mask: radial-gradient(circle, transparent calc(var(--taille) / 2 - 25px), #000 calc(var(--taille) / 2 - 24px)); mask: radial-gradient(circle, transparent calc(var(--taille) / 2 - 25px), #000 calc(var(--taille) / 2 - 24px)); }
+.k-chrono .ch-soleil { position: absolute; z-index: 2; width: 22px; height: 22px; box-sizing: border-box; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #ffe08a, var(--soutien) 60%, #e0a92a);
+  border: 3px solid #fff; box-shadow: 0 0 0 3px rgba(246, 195, 67, .45), 0 2px 4px rgba(29, 39, 68, .25);
+  left: calc(50% - 11px + (var(--taille) / 2 - 3.5px) * sin(var(--a))); top: calc(50% - 11px - (var(--taille) / 2 - 3.5px) * cos(var(--a))); }
+.k-chrono[data-phase="fini"] .ch-soleil { display: none; }
+.k-chrono .ch-centre { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); min-width: 132px; padding: 10px 14px; border-radius: 20px; background: #fff; box-shadow: 0 4px 0 rgba(9, 92, 103, .25); text-align: center; }
+.k-chrono p { margin: 0; font: 700 50px/1 var(--font-texte) !important; color: var(--encre); font-variant-numeric: tabular-nums; }
+.k-chrono[data-phase="fini"] p { color: var(--lagon-fonce); }
+.k-chrono-fini { display: none; margin-top: 6px; white-space: nowrap; font: 400 17px/1 var(--font-titre); color: var(--mot-commun); }
 .k-chrono[data-phase="fini"] .k-chrono-fini { display: block; }
 .k-chrono[data-phase="fini"] { animation: chrono-fini 1s ease-in-out 3; }
-@keyframes chrono-fini { 50% { transform: scale(1.06); } }
+@keyframes chrono-fini { 50% { transform: scale(1.05); } }
 @media (prefers-reduced-motion: reduce) { .k-chrono[data-phase="fini"] { animation: none; } .k-chrono { transition: none; } }
-.k-durees .coco-btn { --c: var(--carte); --c-texte: var(--encre); }
-.k-durees .k-d10 { --c-fonce: var(--lagon); } .k-durees .k-d15 { --c-fonce: var(--heure-m); } .k-durees .k-d20 { --c-fonce: var(--mot-commun); }
-.k-durees .k-d10.is-choisi { --c: var(--lagon); --c-fonce: var(--lagon-fonce); --c-texte: #fff; }
-.k-durees .k-d15.is-choisi { --c: var(--heure-m); --c-fonce: #0f3d6e; --c-texte: #fff; }
-.k-durees .k-d20.is-choisi { --c: var(--mot-commun); --c-fonce: #8a3712; --c-texte: #fff; }
-.coco-btn.k-lancer { --c: var(--reussite); --c-fonce: #1f5c2e; --c-texte: #fff; }
+.k-durees .coco-btn { --c: var(--carte); --c-fonce: var(--lagon); --c-texte: var(--lagon-fonce); }
+.k-durees .coco-btn.is-choisi { --c: #3fb0bd; --c-fonce: var(--lagon); --c-texte: #fff; }
+.coco-btn.k-lancer { --c: var(--lagon-fonce); --c-fonce: #063f47; --c-texte: #fff; }
 /* calculatrice compacte (TBI et élève) */
 .k-clavier { grid-template-columns: repeat(3, 56px); gap: 6px; justify-content: center; }
 .k-clavier button { font-size: 22px !important; padding: 8px 0 !important; border-radius: 12px !important; box-shadow: 0 3px 0 var(--trait) !important; }
@@ -1630,7 +1635,7 @@ a.fo-carte:hover { background: var(--lagon-clair); }
 .po-rv-groupe h4 { margin: 4px 0 0; font: 400 19px/1.1 var(--font-titre); color: var(--lagon-texte); }
 .po-rv-groupe h4 b { font: 700 22px/1 var(--font-texte); color: var(--encre); }
 .po-sol--rv .po-rv-liste:has(.k-paire) { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
-@media (max-width: 600px) { .rv-saisie { grid-template-columns: 1fr; justify-items: center; } .k-clavier { grid-template-columns: repeat(3, 52px); } .k-chrono { width: 200px; } .k-chrono p { font-size: 52px !important; } }
+@media (max-width: 600px) { .rv-saisie { grid-template-columns: 1fr; justify-items: center; } .k-clavier { grid-template-columns: repeat(3, 52px); } .k-chrono { --taille: 210px; } .k-chrono p { font-size: 42px !important; } .k-chrono .ch-centre { min-width: 110px; } }
 /* avatars et paires de réveils (La demi-heure de lecture) */
 .k-relances { align-items: center; }
 .k-rv-avatar { width: 76px; height: 76px; object-fit: contain; flex: none; }
