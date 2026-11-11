@@ -21,7 +21,7 @@ window.COCO_CONTENU = {
           ["Les mots invariables", "demo", "mots"],
           /* orthographe par régularités (leçons de classe 2026, sans numéro ; D-134) */
           ["Les nombres en lettres", "demo", "nombres"], ["Les consonnes muettes", "demo", "muettes"], ["Le -e après un groupe de consonnes", "demo", "egroupe"], ["Un -e muet au féminin", "demo", "efem"], ["Un -e muet ou pas ?", "demo", "eoupas"], ["m devant m, b, p", "demo", "mbp"],
-          ["-ill ou -ille", "demo", "ill"], ["-ail, -eil, -ouil, -euil", "demo", "ail"], ["Le son [k]", "demo", "k"], ["Le son [ʒ]", "demo", "j"], ["Le son [z]", "demo", "z"], ["Le son [g]", "demo", "g"], ["-er ou -ier (noms masculins)", "demo", "er"], ["Les consonnes doubles : -\u2060ette, -\u2060esse, -\u2060elle", "demo", "ette"],
+          ["-ill ou -ille", "demo", "ill"], ["-ail, -eil, -ouil, -euil", "demo", "ail"], ["Le son [k]", "demo", "k"], ["Le son [ʒ]", "demo", "j"], ["Le son [z]", "demo", "z"], ["Le son [g]", "demo", "g"], ["-er ou -ier (noms masculins)", "demo", "er"], ["Les consonnes doubles : -\u2060ette, -\u2060esse, -\u2060elle", "demo", "ette"], ["La graphie « en »", "demo", "graphen"], ["La graphie « an »", "demo", "graphan"],
           ["Les correspondances graphèmes-phonèmes"], ["Les accords particuliers"]
         ] },
         { nom: { fr: "Lexique", en: "Vocabulary" }, sequences: [
