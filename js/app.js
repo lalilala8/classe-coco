@@ -3063,12 +3063,13 @@
   /* ---------- mode autonome (élève) ---------- */
   var A = null;
   function poAutonome(id) {
-    var p = po(id), m = MATIERE.maths, s = C[p.sequence], en = langue === "en";
-    if (!A || A.id !== id) A = { id: id, sel: depart(p), sols: [], etape: "cherche", coches: {}, msg: "", pouce: false, relance: 0, strats: {}, range: false };
+    var p = po(id), m = MATIERE.maths, s = C[p.sequence], en = langue === "en", C2 = rvProbleme(p);
+    if (!A || A.id !== id) A = { id: id, sel: depart(p), sols: [], etape: "cherche", coches: {}, msg: "", pouce: false, relance: 0, strats: {}, range: false, saisie: "" };
     var titre = { sous: tr(s.titre) + " · " + t("ouvert"), titre: tr(p.titre) };
     var liste = A.sols.slice(); if (A.range) liste.sort(p.ranger);
     var sols = liste.map(function (x) { return "<li>" + esc(p.ecrire(x, langue)) + (p.estLibre && p.estLibre(x) ? ' <b class="po-adiscuter">?</b>' : " <b>✓</b>") + "</li>"; }).join("");
-    var blocSols = '<section class="po-sol"><h3>' + (en ? "My ways: " : "Mes solutions : ") + A.sols.length + "</h3>" + (sols ? "<ol>" + sols + "</ol>" : "") +
+    if (C2 && A.sols.length) sols = rvSolutions(p, C2, A.sols, A.range);
+    var blocSols = '<section class="po-sol' + (C2 ? " po-sol--rv" : "") + '"><h3>' + (en ? "My ways: " : "Mes solutions : ") + A.sols.length + "</h3>" + (sols ? (C2 ? sols : "<ol>" + sols + "</ol>") : "") +
       '<p class="po-note">' + (en ? "There is more than one right answer." : "Il n'y a pas qu'une seule bonne réponse.") + "</p>" +
       (A.sols.length > 1 ? '<button class="coco-btn coco-btn--secondaire" type="button" data-action="a-ranger" aria-pressed="' + A.range + '">' + (A.range ? (en ? "Back to my order" : "Remettre dans mon ordre") : (en ? "Sort my ways" : "Ranger mes solutions")) + "</button>" : "") + "</section>";
     if (A.etape === "fin" || A.etape === "bilan") {
@@ -3082,7 +3083,7 @@
       var ranges = A.sols.slice().sort(p.ranger).map(function (x) { return "<li>" + esc(p.ecrire(x, langue)) + "</li>"; }).join("");
       return barre("maths") + hautJeu(m, "seq-" + p.sequence, titre) + '<section class="bilan"><img src="' + POSE(p.perso, "victoire") + '" alt=""><h2>' + t("fini") + "</h2><p>" +
         (en ? "You found " + A.sols.length + " way" + (A.sols.length > 1 ? "s" : "") + ". We will compare them in class." : "Tu as trouvé " + A.sols.length + " solution" + (A.sols.length > 1 ? "s" : "") + ". On les comparera en classe.") + "</p>" +
-        (ranges ? '<div class="po-bilan"><h3>' + (en ? "My ways, sorted" : "Mes solutions rangées") + "</h3><ol>" + ranges + "</ol>" + (faits ? "<h3>" + (en ? "How I did it" : "Comment j'ai fait") + "</h3><ul>" + faits + "</ul>" : "") + "</div>" : "") +
+        (ranges ? '<div class="po-bilan' + (C2 ? " po-sol--rv" : "") + '"><h3>' + (en ? "My ways, sorted" : "Mes solutions rangées") + "</h3>" + (C2 ? rvSolutions(p, C2, A.sols, true) : "<ol>" + ranges + "</ol>") + (faits ? "<h3>" + (en ? "How I did it" : "Comment j'ai fait") + "</h3><ul>" + faits + "</ul>" : "") + "</div>" : "") +
         '<div class="coco-row"><a class="coco-btn coco-btn--secondaire" href="#seq-' + p.sequence + '">' + t("versSequence") + "</a></div></section>";
     }
     var verif = "";
@@ -3102,8 +3103,8 @@
     }
     var relances = p.relances.slice(0, A.relance).map(function (r, i) { return "<li>" + esc(tr(r)) + "</li>"; }).join("");
     return barre("maths") + hautJeu(m, "seq-" + p.sequence, titre) + bulle(p.perso, enonceBloc(p)) +
-      '<div class="po-corps m-maths"><section class="po-zone">' + manipulation(p, A.sel, "a-ajout", "a-retire", A.etape === "cherche") +
-      (A.etape === "cherche" ? '<div class="coco-row"><button class="coco-btn coco-btn--grand" type="button" data-action="a-proposer"' + (pret(p, A.sel) ? "" : " disabled") + ">" + (en ? "I suggest this way" : "Je propose cette solution") + '</button><button class="coco-btn coco-btn--secondaire" type="button" data-action="a-vider">' + (en ? "Empty" : "Vider") + "</button></div>" : "") +
+      '<div class="po-corps m-maths"><section class="po-zone">' + (C2 ? rvSaisie(C2, A.saisie, A.etape === "cherche", "a") : manipulation(p, A.sel, "a-ajout", "a-retire", A.etape === "cherche")) +
+      (A.etape === "cherche" ? '<div class="coco-row"><button class="coco-btn coco-btn--grand" type="button" data-action="a-proposer"' + ((C2 ? A.saisie.length === rvMax(C2) : pret(p, A.sel)) ? "" : " disabled") + ">" + (en ? "I suggest this way" : "Je propose cette solution") + '</button><button class="coco-btn coco-btn--secondaire" type="button" data-action="a-vider">' + (en ? "Empty" : "Vider") + "</button></div>" : "") +
       "</section>" + blocSols + "</div>" + verif + '<div class="retour-zone">' + A.msg + "</div>" +
       '<div class="po-aides"><button class="po-aide po-aide--pouce" type="button" data-action="a-pouce" aria-expanded="' + A.pouce + '"><img src="' + POSE("margouille", "idee") + '" alt=""><span><strong>' + (en ? "Little help" : "Coup de pouce") + '</strong><span class="cache">' + esc(tr(p.pouce)) + "</span></span></button>" +
       '<div class="po-aide po-aide--defi"><span class="coco-pastille-icone">+</span><div><strong>' + (en ? "To go further" : "Pour aller plus loin") + "</strong>" + (relances ? '<ol class="po-relances">' + relances + "</ol>" : "") +
@@ -3116,7 +3117,10 @@
       : (en ? "And you checked it yourself: well done! Can you find another way?" : "Et tu l'avais vérifiée toi-même : bravo ! Trouves-tu une autre façon ?");
   }
   function actionAutonome(a, el) {
-    var p = po(A.id), en = langue === "en";
+    var p = po(A.id), en = langue === "en", C2 = rvProbleme(p);
+    if (C2 && /^a-(n|eff|c)$/.test(a)) { if (A.etape === "cherche") { rvTaper(C2, A, a, el); A.msg = ""; } return; }
+    if (C2 && a === "a-proposer") { if (A.saisie.length !== rvMax(C2)) return; A.sel = rvVersSol(C2, A.saisie); }
+    if (C2 && a === "a-vider") { A.saisie = ""; A.msg = ""; return; }
     if (a === "a-ajout" && A.etape === "cherche") { basculer(p, A.sel, el.dataset.v); A.msg = ""; }
     else if (a === "a-retire" && A.etape === "cherche") { A.sel.splice(+el.dataset.k, 1); A.msg = ""; }
     else if (a === "a-champ" && A.etape === "cherche") { regler(p, A.sel, el); A.msg = ""; }
@@ -3139,8 +3143,9 @@
         A.msg = retour("astuce", en ? "Noted!" : "C’est noté !", esc(r[langue]));
       }
       else if (r.ok) {
-        A.sols.push(copie(p, A.sel)); A.sel = relancer(p, A.sel);
-        A.msg = retour("bravo", t("bravo"), (r[langue] ? esc(r[langue]) + " " : (en ? "It works. " : "Ça marche. ")) + noteVerif(rien));
+        A.sols.push(copie(p, A.sel)); A.sel = relancer(p, A.sel); A.saisie = "";
+        var vd = C2 ? C2.verdict(rvCleSol(C2, A.sols[A.sols.length - 1]), en) : null;
+        A.msg = retour("bravo", vd ? vd.titre : t("bravo"), (r[langue] ? esc(r[langue]) + " " : vd && vd.texte ? esc(vd.texte.charAt(0).toUpperCase() + vd.texte.slice(1)) + ". " : (en ? "It works. " : "Ça marche. ")) + noteVerif(rien));
       } else {
         var meta = faux.length ? "<br>" + (en ? "You ticked « " + tr(faux[0]) + " », but it is not the case yet. Check again." : "Tu as coché « " + tr(faux[0]) + " », mais ce n'est pas encore le cas. Vérifie à nouveau.") : "";
         A.msg = retour("revoir", t("pasEncore"), r[langue] + meta);
@@ -3166,7 +3171,15 @@
     var el = document.getElementById("minuteur"); if (!el || !K) return;
     var reste = K.fin ? Math.max(0, Math.round((K.fin - Date.now()) / 1000)) : K.reste;
     el.textContent = Math.floor(reste / 60) + ":" + String(reste % 60).padStart(2, "0");
+    var ch = document.getElementById("chrono"), e = chronoEtat(reste); if (ch) { ch.dataset.phase = e.phase; ch.style.setProperty("--reste", e.frac); }
     if (K.fin && reste === 0) { K.fin = 0; K.reste = 0; clearInterval(minuteur); }
+  }
+  /* le chrono en couleurs (demande de l’enseignante) : anneau multicolore qui se vide ; les chiffres passent à l’orange à la fin */
+  function chronoEtat(reste) { var total = (K.duree || 15) * 60, f = Math.max(0, Math.min(1, reste / total)); return { frac: f, phase: reste === 0 ? "fini" : f > .5 ? "vert" : f > .2 ? "jaune" : "orange" }; }
+  function chrono(reste, en) {
+    var e = chronoEtat(reste);
+    return '<div class="k-chrono" id="chrono" data-phase="' + e.phase + '" style="--reste:' + e.frac + '"><span class="k-chrono-anneau" aria-hidden="true"></span>' +
+      '<p id="minuteur">' + Math.floor(reste / 60) + ":" + String(reste % 60).padStart(2, "0") + '</p><span class="k-chrono-fini">' + (en ? "Time’s up!" : "Temps écoulé !") + "</span></div>";
   }
   /* ---------- Mise en commun et correction avec des réveils (L’heure magique, D-136, demande de l’enseignante, d’après l’outil de la collègue) ----------
      La maîtresse tape au clavier les heures des groupes ; elles s’affichent en réveils au tableau ; « Magique ! » ou « Pas magique » / « N’existe pas »
@@ -3188,6 +3201,28 @@
   function rvAff(C2, t) { return C2.paire ? '<span class="k-paire">' + reveilLcd(t.slice(0, 4)) + "<b>→</b>" + reveilLcd(t.slice(4)) + "</span>" : reveilLcd(t); }
   function rvMax(C2) { return C2.paire ? 8 : 4; }
   function rvMin(C2) { return C2.paire ? 8 : 3; }
+  function rvProbleme(p) { return p && p.commun && p.commun.reveil ? p.commun : null; }
+  function rvCleSol(C2, x) { var d = function (n) { return String(+n).padStart(2, "0"); }; return C2.paire ? d(x.h1) + d(x.m1) + d(x.h2) + d(x.m2) : d(x.h) + d(x.m); }
+  function rvVersSol(C2, t) { return C2.paire ? { h1: t.slice(0, 2), m1: t.slice(2, 4), h2: t.slice(4, 6), m2: t.slice(6, 8) } : { h: t.slice(0, 2), m: t.slice(2, 4) }; }
+  function rvTaper(C2, E, a, el) { var c = a.replace(/^[ak]-/, ""); if (c === "n") { if (E.saisie.length < rvMax(C2)) E.saisie += el.dataset.v; } else if (c === "eff") E.saisie = E.saisie.slice(0, -1); else E.saisie = ""; }
+  /* l’écran du réveil (un ou deux) et la calculatrice compacte ; pre = « a » (élève) ou « k » (TBI) */
+  function rvSaisie(C2, saisie, actif, pre) {
+    var en = langue === "en", dis = actif ? "" : " disabled";
+    var ecran = C2.paire ? '<div class="k-rv-deux"><figure>' + reveilLcd(saisie.slice(0, 4)) + "<figcaption>" + (en ? "I start" : "Je commence") + '</figcaption></figure><b>→</b><figure>' + reveilLcd(saisie.slice(4)) + "<figcaption>" + (en ? "I stop" : "Je m’arrête") + "</figcaption></figure></div>"
+      : '<div class="k-rv-un">' + reveilLcd(saisie) + "</div>";
+    var touches = ["1", "2", "3", "4", "5", "6", "7", "8", "9"].map(function (n) { return '<button type="button" data-action="' + pre + '-n" data-v="' + n + '"' + dis + ">" + n + "</button>"; }).join("") +
+      '<button type="button" data-action="' + pre + '-eff" aria-label="' + (en ? "Delete the last digit" : "Effacer le dernier chiffre") + '"' + dis + '>⌫</button><button type="button" data-action="' + pre + '-n" data-v="0"' + dis + '>0</button><button type="button" data-action="' + pre + '-c" aria-label="' + (en ? "Clear" : "Tout effacer") + '"' + dis + ">C</button>";
+    return '<div class="rv-saisie' + (C2.paire ? " rv-saisie--paire" : "") + '">' + ecran + '<div class="k-clavier">' + touches + "</div></div>";
+  }
+  /* les solutions de l’élève en réveils, rangées comme au TBI si demandé */
+  function rvSolutions(p, C2, sols, range) {
+    var en = langue === "en", L = sols.map(function (x) { return rvCleSol(C2, x); });
+    var fig = function (t, i) { var mots = String(p.ecrire(sols[i], langue)).split(" · ")[1]; return '<figure class="po-rv">' + rvAff(C2, t) + (mots && !C2.paire ? "<figcaption>" + esc(mots) + "</figcaption>" : "") + "</figure>"; };
+    if (!range) return '<div class="po-rv-liste">' + L.map(fig).join("") + "</div>";
+    var groupe = C2.groupe || function (t, en) { return [t[0], (en ? "They start with " : "Elles commencent par ") + "<b>" + t[0] + "</b>"]; };
+    var G = {}, T = {}; L.forEach(function (t, i) { var g = groupe(t, en); T[g[0]] = g[1]; (G[g[0]] = G[g[0]] || []).push(i); });
+    return Object.keys(G).sort().map(function (k) { G[k].sort(function (a, b) { return L[a] < L[b] ? -1 : 1; }); return '<div class="po-rv-groupe"><h4>' + T[k] + '</h4><div class="po-rv-liste">' + G[k].map(function (i) { return fig(L[i], i); }).join("") + "</div></div>"; }).join("");
+  }
   function kCommunReveil(p, en) {
     var C2 = p.commun, tab = K.tableau.map(function (c, i) { return { c: c, i: i }; });
     var carte = function (x) { var v = C2.verdict(x.c.t, en), etat = x.c.vu ? (v.type === "ok" ? "ok" : "presque") : "";
@@ -3202,13 +3237,9 @@
     else if (K.range) { var G = {}, T = {}; tab.forEach(function (x) { var k = rvCle(C2, x.c.t), g = groupe(k, en); T[g[0]] = g[1]; (G[g[0]] = G[g[0]] || []).push(x); });
       tableau = Object.keys(G).sort().map(function (d) { G[d].sort(function (a, b) { return rvCle(C2, a.c.t) < rvCle(C2, b.c.t) ? -1 : 1; }); return '<section class="k-rv-groupe"><h3>' + T[d] + "</h3>" + liste(G[d]) + "</section>"; }).join(""); }
     else tableau = liste(tab);
-    var touches = ["1", "2", "3", "4", "5", "6", "7", "8", "9"].map(function (n) { return '<button type="button" data-action="k-n" data-v="' + n + '">' + n + "</button>"; }).join("") +
-      '<button type="button" data-action="k-eff" aria-label="' + (en ? "Delete the last digit" : "Effacer le dernier chiffre") + '">⌫</button><button type="button" data-action="k-n" data-v="0">0</button><button type="button" data-action="k-c" aria-label="' + (en ? "Clear" : "Tout effacer") + '">C</button>';
-    var ecran = C2.paire ? '<div class="k-rv-deux"><figure>' + reveilLcd(K.saisie.slice(0, 4)) + "<figcaption>" + (en ? "I start" : "Je commence") + '</figcaption></figure><b>→</b><figure>' + reveilLcd(K.saisie.slice(4)) + "<figcaption>" + (en ? "I stop" : "Je m’arrête") + "</figcaption></figure></div>"
-      : reveilLcd(K.saisie);
     return '<div class="k-relances"><img class="k-rv-avatar" src="' + POSE(p.perso, "reflechit") + '" alt="">' + C2.relances.map(function (x) { return "<span>" + esc(tr(x)) + "</span>"; }).join("") + "</div>" +
-      '<div class="k-rv-commun"><section class="k-rv-panneau"><p class="k-rv-nom">' + (C2.paire ? (en ? "The two clocks" : "Les deux réveils") : (en ? "The clock" : "Le réveil")) + "</p>" + ecran +
-      '<div class="k-clavier">' + touches + '</div><button class="coco-btn coco-btn--grand k-rv-ok" type="button" data-action="k-ok"' + (K.saisie.length >= rvMin(C2) ? "" : " disabled") + ">" + (en ? "Add" : "Ajouter") + "</button>" +
+      '<div class="k-rv-commun"><section class="k-rv-panneau"><p class="k-rv-nom">' + (C2.paire ? (en ? "The two clocks" : "Les deux réveils") : (en ? "The clock" : "Le réveil")) + "</p>" + rvSaisie(C2, K.saisie, true, "k") +
+      '<button class="coco-btn coco-btn--grand k-rv-ok" type="button" data-action="k-ok"' + (K.saisie.length >= rvMin(C2) ? "" : " disabled") + ">" + (en ? "Add" : "Ajouter") + "</button>" +
       '<div class="coco-row k-rv-actions"><button class="coco-btn coco-btn--secondaire" type="button" data-action="k-tout">' + (en ? "Check all" : "Tout vérifier") + '</button><button class="coco-btn' + (K.range ? "" : " coco-btn--secondaire") + '" type="button" data-action="k-ranger" aria-pressed="' + K.range + '">' + (en ? "Sort" : "Ranger") + '</button><button class="coco-btn coco-btn--secondaire" type="button" data-action="k-effacer">' + (en ? "Clear the board" : "Effacer le tableau") + "</button></div></section>" +
       '<section class="k-rv-tableau">' + tableau + "</section></div>";
   }
@@ -3239,9 +3270,7 @@
   }
   function actionReveil(a, el) {
     var C2 = po(K.id).commun;
-    if (a === "k-n") { if (K.saisie.length < rvMax(C2)) K.saisie += el.dataset.v; }
-    else if (a === "k-eff") K.saisie = K.saisie.slice(0, -1);
-    else if (a === "k-c") K.saisie = "";
+    if (/^k-(n|eff|c)$/.test(a)) rvTaper(C2, K, a, el);
     else if (a === "k-ok") { if (K.saisie.length >= rvMin(C2)) { K.tableau.push({ t: K.saisie, vu: false }); K.saisie = ""; } }
     else if (a === "k-suppr") K.tableau.splice(+el.dataset.k, 1);
     else if (a === "k-vue") K.vue = el.dataset.v;
@@ -3250,10 +3279,11 @@
   }
   /* au clavier de l’ordinateur du TBI : chiffres, effacement, Entrée */
   document.addEventListener("keydown", function (e) {
-    if (!K || K.temps !== 3 || !/^classe-/.test(location.hash.slice(1))) return; var p = po(K.id); if (!p || !p.commun || !p.commun.reveil) return;
     if (e.target && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
-    var a = /^\d$/.test(e.key) ? "k-n" : e.key === "Backspace" ? "k-eff" : e.key === "Enter" ? "k-ok" : e.key === "Escape" ? "k-c" : ""; if (!a) return;
-    e.preventDefault(); actionReveil(a, { dataset: { v: e.key } }); rendre();
+    var h = location.hash.slice(1), cl = /^\d$/.test(e.key) ? "n" : e.key === "Backspace" ? "eff" : e.key === "Escape" ? "c" : e.key === "Enter" ? "ok" : ""; if (!cl) return;
+    if (/^po-/.test(h) && A && A.etape === "cherche" && rvProbleme(po(A.id))) { e.preventDefault(); actionAutonome(cl === "ok" ? "a-proposer" : "a-" + cl, { dataset: { v: e.key } }); rendre(); return; }
+    if (!K || K.temps !== 3 || !/^classe-/.test(h)) return; var p = po(K.id); if (!rvProbleme(p)) return;
+    e.preventDefault(); actionReveil("k-" + cl, { dataset: { v: e.key } }); rendre();
   });
   function poClasse(id) {
     var p = po(id), en = langue === "en";
@@ -3271,9 +3301,9 @@
       var aide = K.aide === "pouce" ? ["margouille", en ? "Little help" : "Coup de pouce", "<p>" + esc(tr(p.pouce)) + "</p>"]
         : K.aide === "loin" ? [p.perso, en ? "To go further" : "Pour aller plus loin", "<ol>" + p.relances.map(function (r) { return "<li>" + esc(tr(r)) + "</li>"; }).join("") + "</ol>"]
         : [p.perso, en ? "We search" : "On cherche", "<p>" + (en ? "In pairs or threes, write down <b>all</b> the ways you find. You have one? Look for another!" : "Par 2 ou 3, écrivez <b>toutes</b> les solutions que vous trouvez. Vous en avez une ? Cherchez-en une autre !") + "</p>"];
-      corps = '<div class="k-cherche"><div class="k-rappel">' + enonceBloc(p) + '</div><div class="k-minuteur"><p id="minuteur">' + mmss(K.fin ? Math.max(0, Math.round((K.fin - Date.now()) / 1000)) : K.reste) + '</p><div class="coco-row">' +
-        [10, 15, 20].map(function (n) { return '<button class="coco-btn' + (K.duree === n ? "" : " coco-btn--secondaire") + '" type="button" data-action="k-duree" data-v="' + n + '" aria-pressed="' + (K.duree === n) + '">' + n + " min</button>"; }).join("") +
-        '</div><div class="coco-row"><button class="coco-btn" type="button" data-action="k-lancer">' + (K.fin ? "Pause" : (en ? "Start" : "Lancer")) + '</button><button class="coco-btn coco-btn--secondaire" type="button" data-action="k-remettre">' + (en ? "Reset" : "Remettre") + "</button></div></div></div>" +
+      corps = '<div class="k-cherche"><div class="k-rappel">' + enonceBloc(p) + '</div><div class="k-minuteur">' + chrono(K.fin ? Math.max(0, Math.round((K.fin - Date.now()) / 1000)) : K.reste, en) + '<div class="coco-row k-durees">' +
+        [10, 15, 20].map(function (n) { return '<button class="coco-btn k-d' + n + (K.duree === n ? " is-choisi" : "") + '" type="button" data-action="k-duree" data-v="' + n + '" aria-pressed="' + (K.duree === n) + '">' + n + " min</button>"; }).join("") +
+        '</div><div class="coco-row"><button class="coco-btn ' + (K.fin ? "coco-btn--soutien" : "k-lancer") + '" type="button" data-action="k-lancer">' + (K.fin ? "Pause" : (en ? "Start" : "Lancer")) + '</button><button class="coco-btn coco-btn--secondaire" type="button" data-action="k-remettre">' + (en ? "Reset" : "Remettre") + "</button></div></div></div>" +
         '<div class="k-aide"><div class="k-boutons">' + [["cherche", en ? "We search" : "On cherche"], ["pouce", en ? "Little help" : "Coup de pouce"], ["loin", en ? "To go further" : "Pour aller plus loin"]].map(function (b) { return '<button class="coco-btn ' + (K.aide === b[0] ? "" : "coco-btn--secondaire") + '" type="button" data-action="k-aide" data-v="' + b[0] + '">' + b[1] + "</button>"; }).join("") + "</div>" +
         '<img src="' + POSE(aide[0], K.aide === "cherche" ? "reflechit" : "idee") + '" alt=""><div class="k-bulle"><h2>' + aide[1] + "</h2>" + aide[2] + "</div></div>";
     } else if (K.temps === 3 && rv) {
