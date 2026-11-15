@@ -89,8 +89,9 @@ window.COCO_CONTENU = {
           [{ fr: "Le cercle", en: "Circles" }],
           [{ fr: "La reproduction sur quadrillage", en: "Copying shapes on a grid" }],
           [{ fr: "La symétrie", en: "Line symmetry" }],
-          [{ fr: "Les solides", en: "3-D shapes" }],
-          [{ fr: "Cube et pavé droit", en: "Cubes and cuboids" }]
+          /* une seule séquence pour les deux leçons GEOM11 et GEOM12, comme la programmation P5 (choix de l’enseignante, 14/11/2026) */
+          [{ fr: "Les solides", en: "3-D shapes" }, "demo", "solides"],
+          [{ fr: "Cube et pavé droit", en: "Cubes and cuboids" }, "demo", "solides"]
         ] },
         { nom: { fr: "Résolution de problèmes", en: "Problem solving" }, sequences: [
           [{ fr: "Banque de problèmes (Vergnaud)", en: "Problem bank (Vergnaud)" }, "demo", "#banque"],
@@ -198,6 +199,13 @@ window.COCO_CONTENU = {
     matiere: "maths",
     titre: { fr: "La division en ligne", en: "Division" },
     objectif: { fr: "Je sais partager en parts égales et écrire la division en ligne.", en: "I can share into equal parts and write the division." }
+  },
+
+  /* ---------- Période 5 · séquence 5 : les solides (leçons GEOM11 et GEOM12 ; problèmes ouverts de la collègue, adaptés) ---------- */
+  solides: {
+    matiere: "maths",
+    titre: { fr: "Les solides", en: "3-D shapes" },
+    objectif: { fr: "Je sais reconnaître et nommer les solides, et décrire le cube et le pavé droit : faces, arêtes, sommets.", en: "I can recognise and name 3-D shapes, and describe a cube and a cuboid: faces, edges, vertices." }
   },
 
   /* ---------- Période 5 · séquence 4 : les masses (problèmes ouverts de la collègue, adaptés, D-109 ; leçon GM8) ---------- */

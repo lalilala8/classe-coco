@@ -2361,7 +2361,7 @@
     var titre = { sous: tr(C[seq].titre) + " · " + (J.etape ? J.etape + " · " : "1 · ") + t(QZ_ETAPE[J.etape]), titre: en ? J.en : J.fr };
     var haut = barre(S.matiere) + hautJeu(m, "seq-" + seq, titre, galets(n, QZ.fin ? n : QZ.i));
     if (QZ.fin) return haut + qzBilan();
-    var q = QZ.qs[QZ.i], zone = q.z ? q.z(en) : "", bas = "";
+    var q = QZ.qs[QZ.i], zone = q.z ? q.z(en, QZ.rep) : "", bas = "";
     if (q.t === "choix") {
       zone += '<div class="coco-row qz-choix">' + q.o.map(function (o, k) {
         var cls = "coco-etiquette hr-choix" + (QZ.rep && k === q.a ? " est-juste" : QZ.rep && k === QZ.choix ? " est-revoir" : "");
@@ -3019,6 +3019,7 @@
   }
   function manipulation(p, sel, actAjout, actRetire, actif) {
     if (p.champs) return reglages(p, sel, actAjout.charAt(0), actif !== false);
+    if (p.mani) return p.mani(sel, actAjout, actRetire, actif !== false, actAjout.charAt(0));
     if (p.type === "panier") return maniPanier(sel, actAjout, actRetire);
     if (p.type === "etiquette") return maniEtiquette(sel, actAjout, actAjout.charAt(0), actif !== false);
     if (p.type === "pieces") {
@@ -3033,6 +3034,7 @@
       '<p class="po-total">' + (langue === "en" ? "Basket: " : "Panier : ") + tot + " F</p>";
   }
   function basculer(p, sel, v) {
+    if (p.basculer) return p.basculer(sel, v);
     if (p.type === "pieces") { if (sel.length < 30) sel.push(+v); return; }
     if (p.type === "panier") { if (sel.length < 25) sel.push(v); return; }
     if (p.type === "etiquette") { var kv = v.split(":"); if (kv[0] === "o") { sel.o = sel.o === kv[1] ? "" : kv[1]; sel.libre = ""; } else sel.u = sel.u === kv[1] ? "" : kv[1]; return; }
@@ -3067,7 +3069,7 @@
     if (!A || A.id !== id) A = { id: id, sel: depart(p), sols: [], etape: "cherche", coches: {}, msg: "", pouce: false, relance: 0, strats: {}, range: false, saisie: "" };
     var titre = { sous: tr(s.titre) + " · " + t("ouvert"), titre: tr(p.titre) };
     var liste = A.sols.slice(); if (A.range) liste.sort(p.ranger);
-    var sols = liste.map(function (x) { return "<li>" + esc(p.ecrire(x, langue)) + (p.estLibre && p.estLibre(x) ? ' <b class="po-adiscuter">?</b>' : " <b>✓</b>") + "</li>"; }).join("");
+    var sols = liste.map(function (x) { return "<li>" + (p.visuel ? '<span class="po-vis">' + p.visuel(x, langue) + "</span>" : "") + esc(p.ecrire(x, langue)) + (p.estLibre && p.estLibre(x) ? ' <b class="po-adiscuter">?</b>' : " <b>✓</b>") + "</li>"; }).join("");
     if (C2 && A.sols.length) sols = rvSolutions(p, C2, A.sols, A.range);
     var blocSols = '<section class="po-sol' + (C2 ? " po-sol--rv" : "") + '"><h3>' + (en ? "My ways: " : "Mes solutions : ") + A.sols.length + "</h3>" + (sols ? (C2 ? sols : "<ol>" + sols + "</ol>") : "") +
       '<p class="po-note">' + (en ? "There is more than one right answer." : "Il n'y a pas qu'une seule bonne réponse.") + "</p>" +
@@ -3080,7 +3082,7 @@
       }
       marquerFait("po-" + id);
       var faits = p.strategies.filter(function (st, i) { return A.strats[i]; }).map(function (st) { return "<li>" + esc(tr(st)) + "</li>"; }).join("");
-      var ranges = A.sols.slice().sort(p.ranger).map(function (x) { return "<li>" + esc(p.ecrire(x, langue)) + "</li>"; }).join("");
+      var ranges = A.sols.slice().sort(p.ranger).map(function (x) { return "<li>" + (p.visuel ? '<span class="po-vis">' + p.visuel(x, langue) + "</span>" : "") + esc(p.ecrire(x, langue)) + "</li>"; }).join("");
       return barre("maths") + hautJeu(m, "seq-" + p.sequence, titre) + '<section class="bilan"><img src="' + POSE(p.perso, "victoire") + '" alt=""><h2>' + t("fini") + "</h2><p>" +
         (en ? "You found " + A.sols.length + " way" + (A.sols.length > 1 ? "s" : "") + ". We will compare them in class." : "Tu as trouvé " + A.sols.length + " solution" + (A.sols.length > 1 ? "s" : "") + ". On les comparera en classe.") + "</p>" +
         (ranges ? '<div class="po-bilan' + (C2 ? " po-sol--rv" : "") + '"><h3>' + (en ? "My ways, sorted" : "Mes solutions rangées") + "</h3>" + (C2 ? rvSolutions(p, C2, A.sols, true) : "<ol>" + ranges + "</ol>") + (faits ? "<h3>" + (en ? "How I did it" : "Comment j'ai fait") + "</h3><ul>" + faits + "</ul>" : "") + "</div>" : "") +
@@ -3133,7 +3135,7 @@
       var faux = p.checklist.filter(function (c) { return A.coches[c.id] && !diag[c.id]; });
       var rien = !p.checklist.some(function (c) { return A.coches[c.id]; });
       A.etape = "cherche";
-      if (r.ok && dejaVu) A.msg = retour("revoir", en ? "Already found!" : "Déjà trouvée !", en ? "You already have this way. Look for a different one." : "Tu as déjà cette solution. Cherche une autre façon.");
+      if (r.ok && dejaVu) A.msg = retour("revoir", en ? "Already found!" : "Déjà trouvée !", p.deja ? esc(p.deja(A.sel)[langue]) : (en ? "You already have this way. Look for a different one." : "Tu as déjà cette solution. Cherche une autre façon."));
       else if (r.ok && p.ecriture) {
         A.attente = copie(p, A.sel); A.ecrit = {}; A.rien = rien; A.etape = "ecrit";
         A.msg = retour("bravo", en ? "It works!" : "Ça marche !", en ? "Now write it with numbers." : "Maintenant, écris-la avec des nombres.");
@@ -3315,7 +3317,7 @@
       var tab = K.tableau.slice(); if (K.range) tab.sort(function (a, b) { return p.ranger(a.sol, b.sol); });
       var cartes = tab.map(function (c) {
         var idx = K.tableau.indexOf(c), r = p.verifier(c.sol), etat = c.vu ? (r.libre ? "libre" : r.ok ? "ok" : "non") : "";
-        return '<button class="k-carte ' + etat + '" type="button" data-action="k-voir" data-k="' + idx + '"><span>' + esc(p.ecrire(c.sol, langue)) + "</span>" + (c.vu ? "<small>" + (r.libre ? "? " + (en ? "To discuss: does it really weigh that much? We weigh it or look it up." : "À discuter : ça pèse vraiment autant ? On le pèse ou on se renseigne.") : r.ok ? "✓ " + (r[langue] ? esc(r[langue]) : (en ? "It works" : "Ça marche")) : "↻ " + esc(r[langue])) + "</small>" : "<small>" + (en ? "Tap to check" : "Touche pour vérifier") + "</small>") + "</button>";
+        return '<button class="k-carte ' + etat + '" type="button" data-action="k-voir" data-k="' + idx + '">' + (p.visuel ? '<span class="po-vis">' + p.visuel(c.sol, langue) + "</span>" : "") + "<span>" + esc(p.ecrire(c.sol, langue)) + "</span>" + (c.vu ? "<small>" + (r.libre ? "? " + (en ? "To discuss: does it really weigh that much? We weigh it or look it up." : "À discuter : ça pèse vraiment autant ? On le pèse ou on se renseigne.") : r.ok ? "✓ " + (r[langue] ? esc(r[langue]) : (en ? "It works" : "Ça marche")) : "↻ " + esc(r[langue])) + "</small>" : "<small>" + (en ? "Tap to check" : "Touche pour vérifier") + "</small>") + "</button>";
       }).join("");
       corps = '<div class="k-relances">' + [en ? "How do you know?" : "Comment le savez-vous ?", en ? "Is it really a new way?" : "Est-ce vraiment une nouvelle façon ?", en ? "Who did it differently?" : "Qui a fait autrement ?"].map(function (x) { return "<span>" + x + "</span>"; }).join("") + "</div>" +
         '<div class="k-commun"><section class="po-zone m-maths">' + manipulation(p, K.sel, "k-ajout", "k-retire") + '<div class="coco-row"><button class="coco-btn" type="button" data-action="k-tableau"' + (pret(p, K.sel) ? "" : " disabled") + ">" + (en ? "Add to the board" : "Ajouter au tableau") + '</button><button class="coco-btn coco-btn--secondaire" type="button" data-action="k-vider">' + (en ? "Empty" : "Vider") + "</button></div></section>" +
@@ -3327,7 +3329,7 @@
       var toutes = p.vueToutes ? p.vueToutes(vus, langue) : p.toutes ? '<h3>' + (en ? "All the answers" : "Toutes les réponses") + "</h3><ol>" + p.toutes.slice().sort(p.ranger).map(function (s) { var trouve = vus[p.cle(s)]; return '<li class="' + (trouve ? "trouve" : "") + '">' + esc(p.ecrire(s, langue)) + (trouve ? " <b>✓</b>" : "") + "</li>"; }).join("") + "</ol>"
         : "<p>" + (en ? "There are " + p.nbToutes.toLocaleString("en-GB") + " ways in all: to find lots of them, we get organised!" : "Il y a " + p.nbToutes.toLocaleString("fr-FR") + " façons en tout : pour en trouver beaucoup, on s'organise !") + "</p>";
       corps = '<div class="k-retient"><div class="retiens"><img src="' + POSE("coralie", "idee") + '" alt=""><div><h3>' + (en ? "We remember" : "On retient") + "</h3><p>" + esc(tr(p.retenir)) + '</p><p class="lecon-ex">' + esc(tr(p.exemple)) + "</p></div></div>" +
-        '<section class="po-sol"><h3>' + (en ? "The class's ways, sorted" : "Les solutions de la classe, rangées") + "</h3>" + (rangees.length ? "<ol>" + rangees.map(function (s) { return "<li>" + esc(p.ecrire(s, langue)) + "</li>"; }).join("") + "</ol>" : '<p class="po-note">—</p>') + toutes + "</section></div>";
+        '<section class="po-sol"><h3>' + (en ? "The class's ways, sorted" : "Les solutions de la classe, rangées") + "</h3>" + (rangees.length ? "<ol" + (p.visuel ? ' class="po-vis-liste"' : "") + ">" + rangees.map(function (s) { return "<li>" + (p.visuel ? '<span class="po-vis">' + p.visuel(s, langue) + "</span>" : "") + esc(p.ecrire(s, langue)) + "</li>"; }).join("") + "</ol>" : '<p class="po-note">—</p>') + toutes + "</section></div>";
     }
     return '<div class="k">' + haut + corps + "</div>";
   }
@@ -3361,7 +3363,8 @@
       : p.type === "marche" ? "<p><b>Les prix :</b> " + PO.FRUITS.map(function (f) { return esc(f.fr) + " " + f.prix + " F"; }).join(" · ") + "</p>"
       : p.enonceExtra ? "<p>" + p.enonceExtra(langue) + "</p>" : "";
     var zone = '<div class="f-cases">' + cases + "</div>";
-    if (p.feuille) {
+    if (p.feuille && p.feuille.zone) zone = p.feuille.zone(langue) + (p.feuille.bas ? '<div class="f-bas"><p>' + esc(tr(p.feuille.bas)) + '</p><div class="f-lignes"></div></div>' : "");
+    else if (p.feuille) {
       var F = p.feuille, lignes = "";
       for (var j = 0; j < F.lignes; j++) lignes += "<tr>" + F.colonnes.map(function (c, k) { return "<td>" + ((F.fixe || {})[k] || "") + "</td>"; }).join("") + "</tr>";
       zone = '<table class="f-grille"><thead><tr>' + F.colonnes.map(function (c) { return "<th" + (c.large ? ' class="large"' : "") + ">" + esc(tr(c)) + "</th>"; }).join("") + "</tr></thead><tbody>" + lignes + "</tbody></table>" +
@@ -3385,7 +3388,7 @@
       "<section><h2>Matériel</h2><ul>" + li(f.materiel) + "</ul></section>" +
       '<section><h2>Le déroulé en 4 temps</h2><ol class="f-temps">' + f.temps.map(function (x) { return "<li><b>" + esc(x[0]) + "</b> <i>" + esc(x[1]) + "</i><p>" + esc(x[2]) + "</p>" + (x[3] ? '<p class="f-dire">' + esc(x[3]) + "</p>" : "") + "</li>"; }).join("") + "</ol></section>" +
       '<div class="f-deux"><section><h2>Coup de pouce</h2><p>' + esc(p.pouce.fr) + "</p></section><section><h2>Pour aller plus loin</h2><ol>" + li(p.relances.map(function (r) { return r.fr; })) + "</ol></section></div>" +
-      "<section><h2>Les réponses</h2><p>" + esc(f.reponses) + "</p></section>" +
+      "<section><h2>Les réponses</h2><p>" + esc(f.reponses) + "</p>" + (f.reponsesVisuel ? f.reponsesVisuel() : "") + "</section>" +
       '<section><h2>Les erreurs à guetter, et quoi demander</h2><table class="f-table"><tbody>' + f.erreurs.map(function (e) { return "<tr><td>" + esc(e[0]) + "</td><td>" + esc(e[1]) + "</td>" + (e[2] ? '<td class="f-dire">' + esc(e[2]) + "</td>" : "") + "</tr>"; }).join("") + "</tbody></table></section>" +
       '<section><h2>Évaluer sans note : les 5 niveaux</h2><table class="f-table"><tbody>' + ["Ne semble pas comprendre", "A fait un essai, mais comprend peu", "Comprend, mais pas tout", "Semble bien comprendre", "Dépasse les attentes"].map(function (n, i) { return "<tr><th>" + (i + 1) + " · " + n + "</th><td>" + esc(f.niveaux[i]) + "</td></tr>"; }).join("") + "</tbody></table>" +
       '<p>Comportements à observer (Sullivan & Lilburn, chapitre 4) (coopère, persévère, essaie autre chose, organise l\'information, cherche toutes les possibilités, généralise, explique, utilise le matériel).</p></section>' +
@@ -3439,7 +3442,7 @@
   }
   document.addEventListener("toggle", function (e) { var d = e.target; if (!d.classList || !(d.classList.contains("ens-tiroir") || d.classList.contains("ens-po-tiroir"))) return; ENS_TIROIRS[d.dataset.tiroir] = d.open; ensTiroirsGarder(); }, true);
   function pageEnseignante() {
-    var n = { "ens-suivi": "Étoiles de calcul et de grammaire", "ens-sequences": "25 séquences", "ens-formation": Object.keys(FO.fiches).filter(function (c) { return !FO.fiches[c].vide; }).length + " fiches" };
+    var n = { "ens-suivi": "Étoiles de calcul et de grammaire", "ens-sequences": "26 séquences", "ens-formation": Object.keys(FO.fiches).filter(function (c) { return !FO.fiches[c].vide; }).length + " fiches" };
     return ensEntete("") + '<section class="ens-dossiers">' + ENS_DOSSIERS.map(function (d) {
       return '<a class="ens-dossier" href="#' + d.id + '">' + DOSSIER_SVG + "<b>" + d.t + "</b><small>" + d.d + '</small><span class="ens-compte">' + n[d.id] + "</span></a>";
     }).join("") + "</section>" + '<p class="ens-reglages"><a class="coco-btn coco-btn--secondaire" href="#ens-voix">' + "Voix de la dictée</a></p>";
@@ -3513,6 +3516,7 @@
         ensSeq("digitale", "tehani", "Lire l’heure digitale", "GM5", nQ("digitale"), JEU_DIGITAL),
         ensSeq("heure", "coralie", "Lire l’heure à aiguilles", "GM5", Object.keys(JEUX_HEURE).length, "#tbi-heure"),
         ensSeq("masses", "sari", "Mesurer des masses", "GM8", nQ("masses"), ROUTES["tbi-masses"] ? "#tbi-masses" : "")]) +
+      ensTiroir("m-maths", "Maths · Espace et géométrie", [ensSeq("solides", "vaka", "Les solides", "GEOM11 et GEOM12", nQ("solides"), "#tbi-solides")]) +
       ensTiroir("m-maths", "Maths · Résolution de problèmes", [
         ensSeq("diagrammes", "waeko", "Lire un graphique en barres", "OGD1", Object.keys(JEUX_DIAG).length, ROUTES["tbi-diagrammes"] ? "#tbi-diagrammes" : ""),
         ensLigne("adi", "Banque de problèmes (Vergnaud)", "217 problèmes classés par type, avec leurs schémas", [["Ouvrir la banque", "#banque"]])]);
@@ -5339,10 +5343,374 @@
     orExosDef(id);
   });
 
+  /* ==========================================================================================
+     Séquence « Les solides » (programmation P5, séquence 5 ; leçons de classe GEOM11 « Les solides » et GEOM12 « Cube et pavé droit »).
+     Une seule page pour les deux leçons, comme la programmation ; « boule » au lieu de « sphère » ; 8 solides sans le prisme
+     dans « Le tampon carré » ; activité « Combien de cubes ? » (repère du niveau 3) : choix de l’enseignante, 14/11/2026.
+     Dessins 3D de js/solides.js : solides qu’on tourne au doigt, arêtes cachées en pointillés comme dans les leçons, patrons qui se plient.
+     ========================================================================================== */
+  var SOL = window.COCO_SOLIDES;
+  var SO6 = ["cube", "pave", "cylindre", "boule", "cone", "pyrCarree"]; /* les 6 solides de la leçon GEOM11 */
+  var SO_UN = { cube: ["un cube", "a cube"], pave: ["un pavé droit", "a cuboid"], cylindre: ["un cylindre", "a cylinder"], boule: ["une boule", "a sphere"], cone: ["un cône", "a cone"], pyrCarree: ["une pyramide", "a pyramid"] };
+  var SO_NOM = { cube: ["cube", "cube"], pave: ["pavé droit", "cuboid"], cylindre: ["cylindre", "cylinder"], boule: ["boule", "sphere"], cone: ["cône", "cone"], pyrCarree: ["pyramide", "pyramid"] };
+  var SO_DESC = {
+    cube: ["Le cube a 6 faces carrées, 12 arêtes et 8 sommets.", "A cube has 6 square faces, 12 edges and 8 vertices."],
+    pave: ["Le pavé droit a 6 faces rectangulaires, 12 arêtes et 8 sommets.", "A cuboid has 6 rectangular faces, 12 edges and 8 vertices."],
+    cylindre: ["Le cylindre a 2 faces planes en forme de disque : il peut rouler.", "A cylinder has 2 flat faces shaped like a disc: it can roll."],
+    boule: ["La boule n’a pas de face plane : elle roule dans tous les sens.", "A sphere has no flat face: it rolls in every direction."],
+    cone: ["Le cône a une seule face plane, un disque, et une pointe : il peut rouler.", "A cone has only one flat face, a disc, and a point: it can roll."],
+    pyrCarree: ["Cette pyramide a une base carrée et 4 faces triangulaires.", "This pyramid has a square base and 4 triangular faces."]
+  };
+  var SO_MOTS = { faces: ["Faces", "Faces"], aretes: ["Arêtes", "Edges"], sommets: ["Sommets", "Vertices"] };
+  function soT(x) { return x[langue === "en" ? 1 : 0]; }
+  function soCap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+  function soUid() { return "s" + Math.floor(Math.random() * 1e9).toString(36); }
+  function soVue() { return { yaw: -0.35 - Math.random() * 0.9, pitch: 0.28 + Math.random() * 0.3 }; }
+  /* un patron tourné ou retourné au hasard */
+  function soTourner(cells) {
+    var m = HE.pk([[1, 0, 0, 1], [-1, 0, 0, 1], [0, 1, 1, 0], [0, -1, 1, 0], [1, 0, 0, -1], [0, 1, -1, 0]]);
+    var P = cells.map(function (c) { var p = c.split(",").map(Number); return [m[0] * p[0] + m[1] * p[1], m[2] * p[0] + m[3] * p[1]]; });
+    var mx = Math.min.apply(null, P.map(function (p) { return p[0]; })), my = Math.min.apply(null, P.map(function (p) { return p[1]; }));
+    return P.map(function (p) { return (p[0] - mx) + "," + (p[1] - my); });
+  }
+  /* les commandes du pliage : plier, déplier, et un curseur */
+  function soPliCtrl(id, en) {
+    return '<div class="coco-row so-pli-ctrl"><button class="coco-btn" type="button" data-action="so-plier" data-v="' + id + '">' + (en ? "Fold" : "Plier") + '</button><button class="coco-btn coco-btn--secondaire" type="button" data-action="so-deplier" data-v="' + id + '">' + (en ? "Unfold" : "Déplier") + "</button>" +
+      '<input type="range" min="0" max="100" value="' + Math.round(SOL.pliT(id) * 100) + '" data-so-pli="' + id + '" aria-label="' + (en ? "Fold a little or a lot" : "Plier un peu ou beaucoup") + '"></div>';
+  }
+  /* la première fois qu’on montre la réponse, le patron se plie tout seul */
+  var SO_AUTO = {};
+  function soAuto(id) { if (SO_AUTO[id]) return; SO_AUTO[id] = 1; setTimeout(function () { SOL.animerPli(id, 1); }, 450); }
+  function soPatronZone(R, sid, vu, en) {
+    if (!vu) return '<div class="so-zone">' + SOL.patronPlat(R, { carre: 24 }) + "</div>";
+    soAuto(sid);
+    return '<div class="so-zone so-zone--pli">' + SOL.pli(R, { id: sid, taille: 230 }) + soPliCtrl(sid, en) + "</div>";
+  }
+  /* une figure plane (« Je me rappelle ») */
+  function soFigure(k) {
+    var c = 'fill="#cfeef1" stroke="#1d2744" stroke-width="3" stroke-linejoin="round"';
+    return '<svg class="so-figure" viewBox="0 0 120 100" width="150" height="125" aria-hidden="true">' + { carre: '<rect x="25" y="15" width="70" height="70" ' + c + "/>", rect: '<rect x="8" y="26" width="104" height="50" ' + c + "/>", tri: '<path d="M60 12 108 88H12z" ' + c + "/>", cercle: '<circle cx="60" cy="50" r="38" fill="none" stroke="#1d2744" stroke-width="3"/><circle cx="60" cy="50" r="2.5" fill="#1d2744"/>' }[k] + "</svg>";
+  }
+  /* compter en marquant : le solide qu’on tourne, et le nombre de faces (arêtes, sommets) déjà marquées */
+  function soCompteZone(id, quoi, sid, en) {
+    var fem = quoi !== "sommets", mot = { faces: ["faces", "faces"], aretes: ["arêtes", "edges"], sommets: ["sommets", "vertices"] }[quoi];
+    return '<div class="so-zone">' + SOL.dessin(id, { id: sid, tap: quoi, taille: 230 }) + '<p class="so-marque">' +
+      (en ? "Turn the shape with your finger. Tap the " + mot[1] + " to mark the ones you have counted: " : "Fais tourner le solide avec ton doigt. Touche les " + mot[0] + " pour marquer " + (fem ? "celles" : "ceux") + " que tu as compté" + (fem ? "es" : "s") + " : ") +
+      '<b data-so-compte="' + sid + '">' + SOL.marques(sid, quoi).length + "</b></p></div>";
+  }
+  /* une arête debout, bien visible sur le cube (carte « Faces, arêtes, sommets ») */
+  function soArDebout() { var D = SOL.DEFS.cube; return SOL.visibles("cube").aretes.filter(function (k) { var e = D.aretes[k]; return D.g.V[e.a][1] !== D.g.V[e.b][1]; })[0]; }
+  function soEtages(cb) { var n = {}; cb.forEach(function (c) { n[c[1]] = (n[c[1]] || 0) + 1; }); return Object.keys(n).sort(function (a, b) { return a - b; }).map(function (k) { return n[k]; }); }
+  function soExCubes(et, n) {
+    if (et.length === 1) return { fr: "Je compte les cubes un par un : " + n + " cubes.", en: "I count the cubes one by one: " + n + " cubes." };
+    var nomFr = function (i) { return i === 0 ? "en bas, " : i === et.length - 1 ? "en haut, " : "au " + (i + 1) + "e étage, "; }, nomEn = function (i) { return i === 0 ? "at the bottom, " : i === et.length - 1 ? "at the top, " : "on level " + (i + 1) + ", "; };
+    return { fr: "Je compte étage par étage : " + et.map(function (x, i) { return nomFr(i) + x; }).join(" ; ") + ". " + et.join(" + ") + " = " + n + " cubes.",
+      en: "I count level by level: " + et.map(function (x, i) { return nomEn(i) + x; }).join("; ") + ". " + et.join(" + ") + " = " + n + " cubes." };
+  }
+  /* dessins de 6 carrés qui ne forment pas un cube (pour « Oui ou non ? ») */
+  var SO_NON = [["0,0", "1,0", "0,1", "1,1", "2,1", "3,1"], ["0,0", "1,0", "2,0", "3,0", "4,0", "1,1"], ["0,1", "1,1", "2,1", "3,1", "1,0", "2,0"], ["0,0", "1,0", "2,0", "0,1", "1,1", "2,1"], ["0,0", "1,0", "1,1", "2,1", "2,2", "2,3"], ["0,1", "1,1", "2,1", "3,1", "0,0", "0,2", "3,0"].slice(0, 6)];
+  SO_NON = SO_NON.filter(function (c) { return SOL.connexe(c) && !SOL.estPatronCube(c); });
+
+  QUIZ.solides = { matiere: "maths", jeux: {
+    rappel: { perso: "tehani", etape: 0, fr: "Je me rappelle", en: "I remember", dfr: "Le carré, le rectangle, le triangle et le cercle.", den: "Squares, rectangles, triangles and circles.",
+      gen: function () {
+        var K = ["carre", "rect", "tri", "cercle"], O = [{ fr: "un carré", en: "a square" }, { fr: "un rectangle", en: "a rectangle" }, { fr: "un triangle", en: "a triangle" }, { fr: "un cercle", en: "a circle" }];
+        /* les phrases des leçons de géométrie de la classe (GEOM5 à GEOM8) */
+        var EX = { carre: { fr: "Un carré a 4 côtés de même longueur et 4 angles droits.", en: "A square has 4 sides of the same length and 4 right angles." },
+          rect: { fr: "Un rectangle a 4 côtés, 4 angles droits et des côtés opposés de même longueur.", en: "A rectangle has 4 sides, 4 right angles, and opposite sides of the same length." },
+          tri: { fr: "Un triangle est une figure fermée qui a 3 côtés.", en: "A triangle is a closed shape with 3 sides." },
+          cercle: { fr: "Un cercle est un ensemble de points qui sont tous situés à la même distance d’un point, appelé « centre ».", en: "A circle is a set of points that are all the same distance from one point, called the « centre »." } };
+        return HE.shuf(K).slice(0, 3).map(function (k) { return { t: "choix", c: { fr: "Comment s’appelle cette figure plane ?", en: "What is this flat shape called?" }, z: function () { return '<div class="so-zone">' + soFigure(k) + "</div>"; }, o: O, a: K.indexOf(k), ex: EX[k] }; });
+      } },
+    nommer: { perso: "vaka", etape: 1, fr: "Quel est ce solide ?", en: "Which 3-D shape is it?", dfr: "Je reconnais et je nomme les solides, et les objets qui ont leur forme.", den: "I recognise and name 3-D shapes, and objects shaped like them.",
+      gen: function () {
+        var opts = function (id) { var o = HE.shuf([id].concat(HE.shuf(SO6.filter(function (x) { return x !== id; })).slice(0, 3))); return { o: o.map(function (x) { return { fr: SO_UN[x][0], en: SO_UN[x][1] }; }), a: o.indexOf(id) }; };
+        var qs = HE.shuf(SO6).slice(0, 5).map(function (id) { var v = soVue(), O = opts(id);
+          return { t: "choix", c: { fr: "Comment s’appelle ce solide ?", en: "What is this 3-D shape called?" }, z: function () { return '<div class="so-zone">' + SOL.dessin(id, { taille: 200, yaw: v.yaw, pitch: v.pitch }) + "</div>"; },
+            o: O.o, a: O.a, ex: { fr: "C’est " + SO_UN[id][0] + ". " + SO_DESC[id][0], en: "It is " + SO_UN[id][1] + ". " + SO_DESC[id][1] } }; });
+        HE.shuf(Object.keys(SOL.OBJETS)).slice(0, 3).forEach(function (k) { var ob = SOL.OBJETS[k], id = ob.s, O = opts(id);
+          qs.push({ t: "choix", c: { fr: "Quel solide a la forme de cet objet ?", en: "Which 3-D shape is this object shaped like?" },
+            z: function (en, vu) { return '<div class="so-zone so-objet-q"><span>' + ob.svg + "<small>" + esc(en ? ob.en : ob.fr) + "</small></span>" + (vu ? '<b class="so-fl">→</b>' + SOL.dessin(id, { taille: 110 }) : "") + "</div>"; },
+            o: O.o, a: O.a, ex: { fr: soCap(ob.fr) + " a la forme d’" + SO_UN[id][0] + ".", en: soCap(ob.en) + " is shaped like " + SO_UN[id][1] + "." } }); });
+        return qs;
+      } },
+    compter: { perso: "dylan", etape: 2, fr: "Faces, arêtes, sommets", en: "Faces, edges, vertices", dfr: "Je fais tourner le cube et le pavé droit, je marque et je compte.", den: "I turn the cube and the cuboid round, I mark and I count.",
+      gen: function () {
+        var NOM = { cube: ["le cube", "the cube"], pave: ["le pavé droit", "the cuboid"] };
+        var EXC = function (s, q) { var N = soCap(NOM[s][0]), Ne = soCap(NOM[s][1]);
+          return { faces: { fr: N + " a 6 faces : devant, derrière, à droite, à gauche, dessus et dessous.", en: Ne + " has 6 faces: front, back, right, left, top and bottom." },
+            sommets: { fr: N + " a 8 sommets : 4 en haut et 4 en bas.", en: Ne + " has 8 vertices: 4 at the top and 4 at the bottom." },
+            aretes: { fr: N + " a 12 arêtes : 4 en haut, 4 en bas et 4 debout.", en: Ne + " has 12 edges: 4 at the top, 4 at the bottom and 4 standing up." } }[q]; };
+        var Q = [["cube", "faces"], ["cube", "sommets"], ["cube", "aretes"], ["pave", HE.pk(["faces", "sommets", "aretes"])]];
+        var qs = Q.map(function (x) { var sid = soUid(), n = SOL.compte(x[0])[x[1]], nom = NOM[x[0]];
+          var c = { faces: ["Combien de faces a " + nom[0] + " ?", "How many faces does " + nom[1] + " have?"], sommets: ["Combien de sommets a " + nom[0] + " ?", "How many vertices does " + nom[1] + " have?"], aretes: ["Combien d’arêtes a " + nom[0] + " ?", "How many edges does " + nom[1] + " have?"] }[x[1]];
+          return { t: "champs", c: { fr: c[0], en: c[1] }, z: function (en) { return soCompteZone(x[0], x[1], sid, en); }, champs: [{ k: "v", apres: { fr: " " + SO_MOTS[x[1]][0].toLowerCase(), en: " " + SO_MOTS[x[1]][1].toLowerCase() } }], r: { v: n }, ex: EXC(x[0], x[1]) }; });
+        ["cube", "pave"].forEach(function (s) { var sid = soUid();
+          qs.push({ t: "choix", c: { fr: "Quelle est la forme des faces " + (s === "cube" ? "du cube" : "du pavé droit") + " ?", en: "What shape are the faces of " + NOM[s][1] + "?" }, z: function () { return '<div class="so-zone">' + SOL.dessin(s, { id: sid, taille: 210 }) + "</div>"; },
+            o: [{ fr: "des carrés", en: "squares" }, { fr: "des rectangles", en: "rectangles" }, { fr: "des triangles", en: "triangles" }], a: s === "cube" ? 0 : 1,
+            ex: s === "cube" ? { fr: "Les 6 faces du cube sont carrées : 4 côtés de même longueur et 4 angles droits.", en: "The 6 faces of a cube are squares: 4 sides of the same length and 4 right angles." } : { fr: "Les 6 faces du pavé droit sont rectangulaires.", en: "The 6 faces of a cuboid are rectangles." } }); });
+        return qs;
+      } },
+    portrait: { perso: "nina", etape: 2, fr: "Qui suis-je ?", en: "Who am I?", dfr: "Je lis le portrait d’un solide et je le reconnais.", den: "I read the description of a 3-D shape and find it.",
+      gen: function () {
+        var P = [["cube", "J’ai 6 faces carrées, 12 arêtes et 8 sommets.", "I have 6 square faces, 12 edges and 8 vertices."], ["pave", "J’ai 6 faces rectangulaires, 12 arêtes et 8 sommets.", "I have 6 rectangular faces, 12 edges and 8 vertices."],
+          ["boule", "Je n’ai aucune face plane : je roule dans tous les sens.", "I have no flat face: I roll in every direction."], ["cylindre", "J’ai 2 faces planes en forme de disque, et je peux rouler.", "I have 2 flat faces shaped like a disc, and I can roll."],
+          ["cone", "J’ai une seule face plane, un disque, et une pointe.", "I have only one flat face, a disc, and a point."], ["pyrCarree", "Ma base est un carré et mes 4 autres faces sont des triangles.", "My base is a square and my 4 other faces are triangles."],
+          ["cube", "Je ressemble à un dé : toutes mes faces sont des carrés pareils.", "I look like a dice: all my faces are identical squares."], ["pave", "Je ressemble à une boîte d’allumettes.", "I look like a matchbox."], ["cylindre", "Je ressemble à une canette.", "I look like a can."], ["cone", "Je ressemble à un cornet de glace.", "I look like an ice-cream cone."]];
+        var vus = {}, pris = []; HE.shuf(P).forEach(function (x) { if (pris.length < 6 && !vus[x[0]]) { vus[x[0]] = 1; pris.push(x); } });
+        return pris.map(function (x) {
+          return { t: "choix", c: { fr: "« " + x[1] + " » <b>Qui suis-je ?</b>", en: "“" + x[2] + "” <b>Who am I?</b>" }, z: function (en, vu) { return '<div class="so-zone">' + (vu ? SOL.dessin(x[0], { taille: 150 }) : '<span class="so-mystere">?</span>') + "</div>"; },
+            o: SO6.map(function (s) { return { fr: SO_UN[s][0], en: SO_UN[s][1] }; }), a: SO6.indexOf(x[0]), ex: { fr: "Je suis " + SO_UN[x[0]][0] + ". " + SO_DESC[x[0]][0], en: "I am " + SO_UN[x[0]][1] + ". " + SO_DESC[x[0]][1] } }; });
+      } },
+    patron: { perso: "waeko", etape: 3, fr: "Cube ou pavé droit ?", en: "Cube or cuboid?", dfr: "Je regarde un patron, je trouve le solide, puis je le plie pour vérifier.", den: "I look at a net, find the 3-D shape, then fold it to check.",
+      gen: function () {
+        var qs = [], quel = HE.shuf(HE.shuf(SOL.PATRONS.slice()).slice(0, 2).map(function (p) { return ["cube", SOL.rectsDe(soTourner(p.cells))]; }).concat([["pave", SOL.patronPave(HE.pk([3, 4]), 2, 1, HE.pk([0, 1, 2]))]]));
+        quel.forEach(function (x) { var sid = soUid();
+          qs.push({ t: "choix", c: { fr: "Ce patron forme quel solide ?", en: "Which 3-D shape does this net make?" }, z: function (en, vu) { return soPatronZone(x[1], sid, vu, en); }, o: [{ fr: "un cube", en: "a cube" }, { fr: "un pavé droit", en: "a cuboid" }], a: x[0] === "cube" ? 0 : 1,
+            ex: x[0] === "cube" ? { fr: "Ce patron a 6 carrés pareils : il forme un cube.", en: "This net has 6 identical squares: it makes a cube." } : { fr: "Ce patron a des rectangles : il forme un pavé droit.", en: "This net has rectangles: it makes a cuboid." } }); });
+        var oui = HE.shuf(SOL.PATRONS.slice()).slice(0, HE.pk([1, 2])).map(function (p) { return [true, soTourner(p.cells)]; }), non = HE.shuf(SO_NON.slice()).slice(0, 3 - oui.length).map(function (c) { return [false, soTourner(c)]; });
+        HE.shuf(oui.concat(non)).forEach(function (x) { var sid = soUid(), R = SOL.rectsDe(x[1]);
+          qs.push({ t: "choix", c: { fr: "Ce dessin de 6 carrés forme-t-il un cube ?", en: "Does this drawing of 6 squares make a cube?" }, z: function (en, vu) { return soPatronZone(R, sid, vu, en); }, o: [{ fr: "Oui", en: "Yes" }, { fr: "Non", en: "No" }], a: x[0] ? 0 : 1,
+            ex: x[0] ? { fr: "Oui : en pliant, les 6 carrés font les 6 faces du cube, sans se chevaucher.", en: "Yes: when you fold it, the 6 squares make the 6 faces of the cube without overlapping." } : { fr: "Non : en pliant, deux carrés se posent l’un sur l’autre (en jaune), et il manque une face.", en: "No: when you fold it, two squares land on top of each other (in yellow) and one face is missing." } }); });
+        return qs;
+      } },
+    cubes: { perso: "adi", etape: 3, fr: "Combien de cubes ?", en: "How many cubes?", dfr: "Je compte les cubes d’un assemblage dessiné.", den: "I count the cubes in a drawn model.",
+      gen: function () {
+        return HE.shuf(SOL.ASSEMBLAGES.slice()).slice(0, 6).sort(function (a, b) { return a.length - b.length; }).map(function (cb) { var n = cb.length;
+          return { t: "champs", c: { fr: "Combien de cubes y a-t-il dans cet assemblage ?", en: "How many cubes are there in this model?" }, z: function () { return '<div class="so-zone">' + SOL.assemblage(cb, { S: 30 }) + "</div>"; },
+            champs: [{ k: "v", apres: " cubes" }], r: { v: n }, ex: soExCubes(soEtages(cb), n) }; });
+      } }
+  } };
+
+  /* ---------- la leçon (GEOM11 et GEOM12 mot pour mot ; « boule » au lieu de « sphère ») ---------- */
+  var SO_LECON6 = ["cylindre", "pave", "cube", "boule", "cone", "pyrCarree"]; /* l’ordre des exemples de la leçon GEOM11 */
+  var SO_PATS = [["1,0", "0,1", "1,1", "2,1", "1,2", "1,3"], ["1,0", "1,1", "1,2", "2,2", "1,3", "0,3"], ["0,0", "0,1", "1,1", "2,1", "3,1", "3,2"]];
+  function soPatsLecon() { return SO_PATS.map(function (c) { return SOL.rectsDe(c); }).concat([SOL.patronPave(3, 2, 1, 0)]); }
+  function pageLeconSolides() {
+    var en = langue === "en", vu = LX.soVu || {}, ob = LX.soObj || {}, k = LX.soPat || 0, tout = SO_LECON6.every(function (id) { return vu[id]; });
+    var bloc1 = "<p>" + (en ? "3-D shapes are shapes that have a <b>volume</b>. We often say they are <b>3D</b>, unlike flat shapes." : "Les solides sont des formes qui ont un <b>volume</b>. On dit souvent qu’elles sont en <b>3D</b>, contrairement aux figures planes.") + "</p><p>" +
+      (en ? "3-D shapes have <b>faces</b>, <b>edges</b> and <b>vertices</b>." : "Les solides possèdent des <b>faces</b>, des <b>arêtes</b> et des <b>sommets</b>.") + "</p>" +
+      '<p class="mi-indice">' + (en ? "Examples · tap a shape to see its name." : "Exemples · touche un solide pour voir son nom.") + '</p><div class="so-exemples">' +
+      SO_LECON6.map(function (id) { return '<button type="button" class="so-ex" data-action="so-voir" data-v="' + id + '" aria-pressed="' + !!vu[id] + '">' + SOL.dessin(id, { taille: 104 }) + "<span>" + (vu[id] ? esc(soT(SO_NOM[id])) : "?") + "</span></button>"; }).join("") + "</div>" +
+      '<div class="coco-row"><button class="coco-btn coco-btn--secondaire" type="button" data-action="so-tout">' + (tout ? (en ? "Hide the names" : "Cacher les noms") : (en ? "Show all the names" : "Montrer tous les noms")) + "</button></div>" +
+      '<h4 class="so-sous">' + (en ? "In everyday life · which 3-D shape is it? Think, then tap." : "Dans la vie de tous les jours · quel solide est-ce ? Cherche, puis touche.") + '</h4><div class="so-exemples so-objets">' +
+      Object.keys(SOL.OBJETS).map(function (o) { var O = SOL.OBJETS[o]; return '<button type="button" class="so-ex so-ex--obj" data-action="so-obj" data-v="' + o + '" aria-pressed="' + !!ob[o] + '">' + O.svg + "<small>" + esc(en ? O.en : O.fr) + "</small><span>" + (ob[o] ? esc(soT(SO_NOM[O.s])) : "?") + "</span></button>"; }).join("") + "</div>";
+    var duo = [["cube", "lx-cube", en ? "A cube is a 3-D shape with: <b>6 <u>square</u> faces</b>, <b>12 edges</b>, <b>8 vertices</b>." : "Le cube est un solide qui a : <b>6 faces <u>carrées</u></b>, <b>12 arêtes</b>, <b>8 sommets</b>."],
+      ["pave", "lx-pave", en ? "A cuboid is a 3-D shape with: <b>6 <u>rectangular</u> faces</b>, <b>12 edges</b>, <b>8 vertices</b>." : "Le pavé droit est un solide qui a : <b>6 faces <u>rectangulaires</u></b>, <b>12 arêtes</b>, <b>8 sommets</b>."]];
+    var bloc2 = '<p class="mi-indice">' + (en ? "Turn the shape with your finger. Then count with the buttons: the parts light up one by one." : "Fais tourner le solide avec ton doigt. Puis compte avec les boutons : les parties s’allument une par une.") + '</p><div class="so-duo">' +
+      duo.map(function (d) { var st = SOL.VUES[d[1]] || {}, hq = st.hl ? Object.keys(st.hl)[0] : "";
+        return '<div class="so-carte"><p>' + d[2] + "</p>" + SOL.dessin(d[0], { id: d[1], taille: 210 }) + '<p class="so-compteur"><span id="' + d[1] + '-q">' + (hq ? soT(SO_MOTS[hq]) : (en ? "Count" : "Je compte")) + '</span> : <b id="' + d[1] + '-n">' + (hq ? st.hl[hq].length : "…") + '</b></p><div class="coco-row so-boutons">' +
+        ["faces", "aretes", "sommets"].map(function (q) { return '<button class="coco-btn' + (q === hq ? "" : " coco-btn--secondaire") + '" type="button" data-action="so-compter" data-v="' + d[1] + '" data-q="' + q + '">' + soT(SO_MOTS[q]) + "</button>"; }).join("") + "</div></div>"; }).join("") + "</div>";
+    var P = soPatsLecon(), noms = en ? ["Cube net 1", "Cube net 2", "Cube net 3", "Cuboid net"] : ["Patron 1 du cube", "Patron 2 du cube", "Patron 3 du cube", "Patron du pavé droit"];
+    var bloc3 = "<p>" + (en ? "When we “unfold” a cube or a cuboid, we get different <b>nets</b>:" : "Lorsqu’on « déplie » un cube ou un pavé droit, on obtient différents <b>patrons</b> :") + "</p>" +
+      '<div class="coco-row so-choix-patron" role="group">' + noms.map(function (n, i) { return '<button class="coco-btn' + (i === k ? "" : " coco-btn--secondaire") + '" type="button" data-action="so-patron" data-v="' + i + '" aria-pressed="' + (i === k) + '">' + n + "</button>"; }).join("") + "</div>" +
+      '<div class="so-pli-zone"><div class="so-pli-plat">' + SOL.patronPlat(P[k], { carre: k < 3 ? 26 : 13 }) + '<small>' + (en ? "The net, flat" : "Le patron à plat") + "</small></div><div>" + SOL.pli(P[k], { id: "lx-pli-" + k, taille: 240 }) + soPliCtrl("lx-pli-" + k, en) + "</div></div>";
+    return lxLecon("solides", tr(C.solides.titre), [[en ? "3-D shapes" : "Les solides", bloc1], [en ? "Cube and cuboid: faces, edges, vertices" : "Cube et pavé droit : faces, arêtes, sommets", bloc2], [en ? "Nets" : "Les patrons", bloc3]], jrCartesSolides);
+  }
+  /* « Je retiens » : GEOM11 et GEOM12 mot pour mot, découpées (en anglais : traduction, en attendant une leçon anglaise) */
+  function jrCartesSolides(en) {
+    var carre = '<svg class="so-figure" viewBox="0 0 100 100" width="96" height="96" aria-hidden="true"><rect x="14" y="14" width="72" height="72" fill="#cfeef1" stroke="#1d2744" stroke-width="3"/></svg>';
+    var fl = function (k) { return lxPop('<b class="so-fl">→</b>', k); };
+    var etiq = function (id, k) { return lxPop('<span class="so-jr-ex">' + SOL.dessin(id, { taille: 74 }) + "<small>" + esc(SO_NOM[id][en ? 1 : 0]) + "</small></span>", k); };
+    return [
+      { t: en ? "3-D shapes" : "Les solides", svg: '<div class="lx-illu">' + lxPop('<span class="so-jr-ex">' + carre + "<small>" + (en ? "a flat shape" : "une figure plane") + "</small></span>", 0) + fl(1) + lxPop('<span class="so-jr-ex">' + SOL.dessin("cube", { taille: 96 }) + "<small>" + (en ? "a 3-D shape" : "un solide") + "</small></span>", 2) + "</div>",
+        txt: en ? ["3-D shapes are shapes that have a volume.", "We often say they are 3D, unlike flat shapes."] : ["Les solides sont des formes qui ont un volume.", "On dit souvent qu’elles sont en 3D, contrairement aux figures planes."] },
+      { t: en ? "Faces, edges, vertices" : "Faces, arêtes, sommets", svg: '<div class="lx-illu">' + jrCycle([
+          '<span class="so-jr-ex">' + SOL.dessin("cube", { taille: 120, hl: { faces: [SOL.visibles("cube").faces[0]] } }) + "<small>" + (en ? "a face" : "une face") + "</small></span>",
+          '<span class="so-jr-ex">' + SOL.dessin("cube", { taille: 120, hl: { aretes: [soArDebout()] } }) + "<small>" + (en ? "an edge" : "une arête") + "</small></span>",
+          '<span class="so-jr-ex">' + SOL.dessin("cube", { taille: 120, hl: { sommets: [SOL.visibles("cube").sommets[0]] } }) + "<small>" + (en ? "a vertex" : "un sommet") + "</small></span>"]) + "</div>",
+        txt: [en ? "3-D shapes have faces, edges and vertices." : "Les solides possèdent des faces, des arêtes et des sommets."] },
+      { t: en ? "Examples" : "Exemples", svg: '<div class="lx-illu lx-wrap so-jr-six">' + SO_LECON6.map(function (id, k) { return etiq(id, k); }).join("") + "</div>",
+        txt: [en ? "cylinder · cuboid · cube · sphere · cone · pyramid" : "cylindre · pavé droit · cube · boule · cône · pyramide"] },
+      { t: en ? "The cube" : "Le cube", svg: '<div class="lx-illu">' + lxPop(SOL.dessin("cube", { taille: 150, montre: "sommets" }), 0) + "</div>",
+        txt: en ? ["A cube is a 3-D shape with:", "6 <u>square</u> faces", "12 edges", "8 vertices"] : ["Le cube est un solide qui a :", "6 faces <u>carrées</u>", "12 arêtes", "8 sommets"] },
+      { t: en ? "The cuboid" : "Le pavé droit", svg: '<div class="lx-illu">' + lxPop(SOL.dessin("pave", { taille: 160, montre: "sommets" }), 0) + "</div>",
+        txt: en ? ["A cuboid is a 3-D shape with:", "6 <u>rectangular</u> faces", "12 edges", "8 vertices"] : ["Le pavé droit est un solide qui a :", "6 faces <u>rectangulaires</u>", "12 arêtes", "8 sommets"] },
+      { t: en ? "Nets" : "Les patrons", svg: '<div class="lx-illu">' + lxPop(SOL.dessin("cube", { taille: 96 }), 0) + fl(1) + lxPop(SOL.patronPlat(SOL.rectsDe(SO_PATS[0]), { carre: 22 }), 2) + "</div>",
+        txt: [en ? "When we “unfold” a cube or a cuboid, we get different nets." : "Lorsqu’on « déplie » un cube ou un pavé droit, on obtient différents patrons."] }
+    ];
+  }
+  jrCartesSolides.persos = [["vaka", "presente"], ["sari", "reflechit"], ["tehani", "content"], ["dylan", "idee"], ["waeko", "reflechit"], ["mei", "victoire"]];
+  /* actions de la leçon et des patrons ; false = rien à redessiner (animation en cours dans la page) */
+  function actionSo(a, el) {
+    var en = langue === "en";
+    if (a === "so-compter") { var id = el.dataset.v, q = el.dataset.q, lab = document.getElementById(id + "-q"); if (lab) lab.textContent = soT(SO_MOTS[q]);
+      document.querySelectorAll('[data-action="so-compter"][data-v="' + id + '"]').forEach(function (b) { b.classList.toggle("coco-btn--secondaire", b !== el); });
+      SOL.compter(id, q, id + "-n"); return false; }
+    if (a === "so-plier" || a === "so-deplier") { SOL.animerPli(el.dataset.v, a === "so-plier" ? 1 : 0); return false; }
+    if (a === "so-voir") { LX.soVu = LX.soVu || {}; LX.soVu[el.dataset.v] = !LX.soVu[el.dataset.v]; }
+    else if (a === "so-tout") { var tout = SO_LECON6.every(function (id) { return (LX.soVu || {})[id]; }); LX.soVu = {}; if (!tout) SO_LECON6.forEach(function (id) { LX.soVu[id] = true; }); }
+    else if (a === "so-obj") { LX.soObj = LX.soObj || {}; LX.soObj[el.dataset.v] = !LX.soObj[el.dataset.v]; }
+    else if (a === "so-patron") LX.soPat = +el.dataset.v;
+    return true;
+  }
+  /* toucher une face du solide (« Le tampon carré ») : la face choisie laisse sa trace ; ailleurs, toucher marque ce qu’on a compté */
+  SOL.surTap = function (id, quoi, k) {
+    var m = /^tp-([ak])-/.exec(id); if (!m) return true;
+    var S = m[1] === "a" ? A : K; if (!S || !S.sel) return false;
+    if (m[1] === "a" && A.etape !== "cherche") return false;
+    if (quoi === "faces") { S.sel.f = k; if ((S.sel.vus || (S.sel.vus = [])).indexOf(k) < 0) S.sel.vus.push(k); if (S === A) A.msg = ""; }
+    else if (quoi === "courbe") { S.sel.f = -1; if (S === A) A.msg = retour("astuce", t("astuce"), langue === "en" ? "This part is curved: it rolls, it does not leave a flat print. Look for a flat face." : "Cette partie est courbe : elle roule, elle ne laisse pas de trace plate. Cherche une face plane."); }
+    rendre(); return false;
+  };
+  /* la manipulation des deux problèmes ouverts (mode autonome « a » et mode classe « k ») */
+  PO.problemes.tampon.mani = function (sel, act, actRetire, actif, pre) {
+    var en = langue === "en", dis = actif ? "" : " disabled";
+    var palette = "<h3>" + (en ? "1 · Choose a 3-D shape" : "1 · Choisis un solide") + '</h3><div class="so-palette">' + SOL.ORDRE.map(function (id) { return '<button type="button" class="so-ex' + (sel.s === id ? " is-choisi" : "") + '" data-action="' + act + '" data-v="s:' + id + '" aria-pressed="' + (sel.s === id) + '"' + dis + ">" + SOL.dessin(id, { taille: 66 }) + "<small>" + esc(SOL.DEFS[id].nom[en ? "en" : "fr"]) + "</small></button>"; }).join("") + "</div>";
+    if (!sel.s) return palette;
+    var face = sel.f >= 0 ? sel.f : null, D = SOL.DEFS[sel.s];
+    return palette + "<h3>" + (en ? "2 · Turn it, then tap a face to dip it in the paint" : "2 · Tourne-le, puis touche une face pour la tremper dans la peinture") + '</h3><div class="so-tampon"><div>' + SOL.dessin(sel.s, { id: "tp-" + pre + "-" + sel.s, tap: actif ? "tampon" : "", hl: face !== null ? { faces: [face] } : {}, taille: 220 }) + "</div>" +
+      '<figure class="so-feuille">' + SOL.trace(sel.s, face, { taille: 170, label: en ? "the print" : "la trace" }) + "<figcaption>" + (face !== null ? (en ? "The print on the sheet" : "La trace sur la feuille") : D.boule ? (en ? "A sphere has no flat face." : "La boule n’a pas de face plane.") : (en ? "Tap a face of the shape." : "Touche une face du solide.")) + "</figcaption></figure></div>";
+  };
+  PO.problemes.patrons.mani = function (sel, act, actRetire, actif, pre) {
+    var en = langue === "en", dis = actif ? "" : " disabled", grille = "";
+    for (var y = 0; y < 5; y++) for (var x = 0; x < 6; x++) { var c = x + "," + y, on = sel.indexOf(c) >= 0; grille += '<button type="button" class="so-case' + (on ? " is-on" : "") + '" data-action="' + act + '" data-v="' + c + '" aria-pressed="' + on + '" aria-label="' + (en ? "square " : "carré ") + (x + 1) + "," + (y + 1) + '"' + dis + "></button>"; }
+    var n = sel.length, ok = n === 6 && SOL.connexe(sel), id = "pt-" + pre + "-" + sel.slice().sort().join("_");
+    return '<div class="so-patron-zone"><div><h3>' + (en ? "Colour 6 squares" : "Colorie 6 carrés") + '</h3><div class="so-grille">' + grille + '</div><p class="po-note">' + n + (en ? " square" + (n > 1 ? "s" : "") + " coloured" : " carré" + (n > 1 ? "s" : "") + " colorié" + (n > 1 ? "s" : "")) + (n > 6 ? (en ? ": that is too many!" : " : c’est trop !") : "") + "</p></div>" +
+      "<div><h3>" + (en ? "Fold it to check" : "Plie pour vérifier") + "</h3>" + (ok ? SOL.pli(SOL.rectsDe(sel), { id: id, taille: 220 }) + soPliCtrl(id, en) : '<p class="po-note">' + (en ? "Colour 6 squares that touch along a side: then you can fold." : "Colorie 6 carrés qui se touchent par un côté : tu pourras plier.") + "</p>") + "</div></div>";
+  };
+
+  /* ---------- le mode « Au TBI » : découverte guidée (une question par carte « Je retiens ») et jeu des ardoises ---------- */
+  TBI_SEQ.solides = { src: jrCartesSolides, mat: "maths", jeux: ["nommer", "compter", "portrait", "patron", "cubes"],
+    questions: [
+      { fr: "Qu’est-ce qui change entre ces deux dessins ?", en: "What changes between these two drawings?", illu: function () { return '<svg class="so-figure" viewBox="0 0 100 100" width="150" height="150" aria-hidden="true"><rect x="14" y="14" width="72" height="72" fill="#cfeef1" stroke="#1d2744" stroke-width="3"/></svg><b class="so-fl">·</b>' + SOL.dessin("cube", { taille: 170 }); } },
+      { fr: "Montrez sur le cube : une face, une arête, un sommet. Comment s’appellent ces parties ?", en: "Point to a face, an edge and a vertex on the cube. What are these parts called?", illu: function () { return SOL.dessin("cube", { id: "tq-cube1", taille: 240 }); } },
+      { fr: "Connaissez-vous le nom de ces solides ?", en: "Do you know the names of these 3-D shapes?", illu: function () { return '<div class="so-exemples">' + SO_LECON6.map(function (id) { return '<span class="so-ex">' + SOL.dessin(id, { taille: 110 }) + "<span>?</span></span>"; }).join("") + "</div>"; } },
+      { fr: "Combien le cube a-t-il de faces ? D’arêtes ? De sommets ? Faites-le tourner pour compter.", en: "How many faces does the cube have? Edges? Vertices? Turn it round to count.", illu: function () { return SOL.dessin("cube", { id: "tq-cube2", taille: 260, tap: "sommets" }); } },
+      { fr: "Et le pavé droit ? Quelle est la forme de ses faces ?", en: "And the cuboid? What shape are its faces?", illu: function () { return SOL.dessin("pave", { id: "tq-pave", taille: 260, tap: "faces" }); } },
+      { fr: "Que se passe-t-il si on « déplie » un cube ?", en: "What happens if we “unfold” a cube?", illu: function (en) { return SOL.dessin("cube", { taille: 150 }) + '<b class="so-fl">→</b><span class="so-mystere">?</span>'; } }] };
+
+  /* ---------- l’encadré « Programme et repères » (repères du niveau 3, p. 24 et 25, mot pour mot) ---------- */
+  PROG.solides = { ref: "Mathématiques · Espace et géométrie (les solides)", att: ["Reconnaître, nommer, décrire, reproduire quelques solides."], comp: ["chercher", "representer", "raisonner", "communiquer"], rp: "mathématiques p. 24 et 25",
+    reperes: ["Le vocabulaire nécessaire pour décrire un solide (face, sommet, arête) est progressivement exigible.", "L’élève reconnaît et nomme les solides « boule, cylindre, cône »", "Il fabrique un cube et un pavé droit à partir d’un patron fourni.", "Il reconnaît et décrit les solides étudiés sur une représentation en perspective.", "Il réalise des assemblages de cubes et de pavés droits.", "Il associe ces assemblages (cubes, pavés droits) à divers types de représentations."],
+    note: "« Boule » sur le site, comme les repères (choix de l’enseignante) ; la leçon GEOM11 dit « sphère »." };
+
+  /* ---------- la fiche d’exercices en 3 niveaux (D-125) ---------- */
+  function soEx(id, v, papier) { return SOL.dessin(id, { taille: 92, yaw: v ? v.yaw : undefined, pitch: v ? v.pitch : undefined, papier: papier !== false }); }
+  function soExPatrons(L, en) { /* entourer les patrons du cube : les bons sont des « cibles » au TBI */
+    return exG('<div class="ex-patrons">' + L.map(function (x) { var d = SOL.patronPlat(SOL.rectsDe(x[1]), { carre: 17, cls: "ex-patron" }); return x[0] ? exC(d) : '<span class="ex-patron-n">' + d + "</span>"; }).join("") + "</div>", "cercle", true);
+  }
+  function soTirerPatrons(nOui, nNon) { return HE.shuf(HE.shuf(SOL.PATRONS.slice()).slice(0, nOui).map(function (p) { return [true, soTourner(p.cells)]; }).concat(HE.shuf(SO_NON.slice()).slice(0, nNon).map(function (c) { return [false, soTourner(c)]; }))); }
+  function soTable(lignes, en) { /* compléter : faces (et leur forme), arêtes, sommets */
+    var th = en ? ["", "Faces", "Shape of the faces", "Edges", "Vertices"] : ["", "Faces", "Forme des faces", "Arêtes", "Sommets"];
+    return '<div class="so-ex-tab"><table class="ex-table so-ex-table"><thead><tr>' + th.map(function (h) { return "<th>" + h + "</th>"; }).join("") + "</tr></thead><tbody>" + lignes.map(function (l) { return "<tr><th>" + l[0] + "</th>" + l.slice(1).map(function (c) { return "<td>" + c + "</td>"; }).join("") + "</tr>"; }).join("") + "</tbody></table></div>";
+  }
+  EXOS.solides = {
+    seq: "seq-solides", matiere: "maths", titre: function () { return tr(C.solides.titre); },
+    rappel: function (en) { return en ? "3-D shapes have <b>faces</b>, <b>edges</b> and <b>vertices</b>. A cube has 6 square faces, 12 edges, 8 vertices. A cuboid has 6 rectangular faces, 12 edges, 8 vertices."
+      : "Les solides possèdent des <b>faces</b>, des <b>arêtes</b> et des <b>sommets</b>. Le cube a 6 faces carrées, 12 arêtes, 8 sommets. Le pavé droit a 6 faces rectangulaires, 12 arêtes, 8 sommets."; },
+    tirer: function () {
+      var objs = HE.shuf(Object.keys(SOL.OBJETS)).slice(0, 3).map(function (k) { var s = SOL.OBJETS[k].s; return { k: k, o: HE.shuf([s].concat(HE.shuf(SO6.filter(function (x) { return x !== s; })).slice(0, 2))) }; });
+      return { noms: HE.shuf(SO6).slice(0, 4).map(function (id) { return [id, soVue()]; }), objs: objs, pat: soTirerPatrons(2, 2), cubes: HE.shuf(SOL.ASSEMBLAGES.filter(function (c) { return c.length >= 4 && c.length <= 8; })).slice(0, 2) };
+    },
+    exos: function (d, en) {
+      var N = function (id) { return SO_NOM[id][en ? 1 : 0].replace(" ", "\u00a0"); };
+      return [
+        { c: en ? "Write the name of each 3-D shape." : "Écris le nom de chaque solide.", q: '<div class="ex-grille ex-quatre">' + d.noms.map(function (x) { return "<div>" + soEx(x[0], x[1]) + '<p class="ex-rep">' + exT(N(x[0])) + "</p></div>"; }).join("") + "</div>", r: d.noms.map(function (x) { return N(x[0]); }).join(" · ") },
+        { c: en ? "Circle the 3-D shape each object is shaped like." : "Entoure le solide qui a la forme de chaque objet.", q: '<div class="ex-grille">' + d.objs.map(function (x) { var O = SOL.OBJETS[x.k]; return '<div class="ex-objet">' + O.svg + "<small>" + esc(en ? O.en : O.fr) + "</small><p>" + exG(x.o.map(function (s) { return s === O.s ? exC(N(s)) : N(s); }).join('<span class="ex-sep">/</span>'), "cercle") + "</p></div>"; }).join("") + "</div>",
+          r: d.objs.map(function (x) { var O = SOL.OBJETS[x.k]; return (en ? O.en : O.fr) + " : " + N(O.s); }).join(" · ") },
+        { c: en ? "Complete the table." : "Complète le tableau.", q: soTable([[en ? "cube" : "cube", exT("6"), exT(en ? "squares" : "carrées"), exT("12"), exT("8")], [en ? "cuboid" : "pavé droit", exT("6"), exT(en ? "rectangles" : "rectangulaires"), exT("12"), exT("8")]], en),
+          r: en ? "Cube: 6 square faces, 12 edges, 8 vertices · Cuboid: 6 rectangular faces, 12 edges, 8 vertices" : "Cube : 6 faces carrées, 12 arêtes, 8 sommets · Pavé droit : 6 faces rectangulaires, 12 arêtes, 8 sommets" },
+        { c: en ? "Circle the nets of a cube." : "Entoure les patrons du cube.", q: soExPatrons(d.pat, en), r: en ? "Nets of a cube: drawings " + d.pat.map(function (x, i) { return x[0] ? i + 1 : 0; }).filter(Boolean).join(" and ") + " (counting from the left)." : "Patrons du cube : les dessins " + d.pat.map(function (x, i) { return x[0] ? i + 1 : 0; }).filter(Boolean).join(" et ") + " (en comptant depuis la gauche)." },
+        { c: en ? "How many cubes?" : "Combien de cubes ?", q: '<div class="ex-grille ex-cubes">' + d.cubes.map(function (cb) { return "<div>" + SOL.assemblage(cb, { S: 21, papier: true }) + '<p class="ex-rep">' + exT(String(cb.length)) + " cubes</p></div>"; }).join("") + "</div>", r: d.cubes.map(function (cb) { return cb.length + " cubes"; }).join(" · ") }
+      ];
+    }
+  };
+  exNiveaux("solides", [
+    "L’élève est capable d’identifier un solide et connaît le vocabulaire spécifique aux solides : arêtes, sommets, faces.",
+    "L’élève est capable de reconnaître et nommer les principaux solides : cube, pavé droit, sphère, pyramide, cylindre.",
+    "L’élève est capable de décrire un cube et un pavé droit en utilisant le vocabulaire spécifique.",
+    "L’élève construit un pavé droit ou un cube à partir d’un patron."
+  ], {
+    but: "Nommer 4 solides avec la liste des noms ; relier un objet à son solide (2 propositions) ; compléter des phrases sur le cube ; entourer un patron parmi 3 ; compter les cubes d’un petit assemblage.",
+    rappel: EXOS.solides.rappel,
+    tirer: function () {
+      var objs = HE.shuf(Object.keys(SOL.OBJETS)).slice(0, 3).map(function (k) { var s = SOL.OBJETS[k].s; return { k: k, o: HE.shuf([s, HE.pk(SO6.filter(function (x) { return x !== s; }))]) }; });
+      return { noms: HE.shuf(["cube", "pave", "cylindre", "boule"]).map(function (id) { return [id, null]; }), objs: objs, pat: soTirerPatrons(1, 2), cubes: HE.shuf(SOL.ASSEMBLAGES.filter(function (c) { return c.length <= 4; })).slice(0, 2) };
+    },
+    exos: function (d, en) {
+      var N = function (id) { return SO_NOM[id][en ? 1 : 0]; }, base = EXOS.solides.exos(d, en);
+      base[0].c = en ? "Write the name of each 3-D shape. Help: cube · cuboid · cylinder · sphere" : "Écris le nom de chaque solide. Aide : cube · pavé droit · cylindre · boule";
+      base[2] = { c: en ? "Complete." : "Complète.", q: exListe([[en ? "A cube has " : "Le cube a ", "6", en ? " faces." : " faces."], [en ? "A cube has " : "Le cube a ", "8", en ? " vertices." : " sommets."], [en ? "A cube has " : "Le cube a ", "12", en ? " edges." : " arêtes."]], function (x) { return x[0] + exT(x[1]) + x[2]; }, "ex-une-col") +
+          "<p>" + (en ? "The faces of a cube are " : "Les faces du cube sont des ") + exG([en ? "squares" : "carrés", en ? "triangles" : "triangles"].map(function (m, i) { return i === 0 ? exC(m) : m; }).join('<span class="ex-sep">/</span>'), "cercle") + ".</p>",
+        r: en ? "6 faces · 8 vertices · 12 edges · squares" : "6 faces · 8 sommets · 12 arêtes · des carrés" };
+      base[3].c = en ? "Circle the net of a cube." : "Entoure le patron du cube.";
+      return base;
+    }
+  }, "Fiche d’origine : nommer 4 solides, relier des objets à leur solide, compléter le tableau du cube et du pavé droit, entourer les patrons du cube, compter les cubes de deux assemblages.", {
+    but: "Nommer 4 solides sans aide ; « Qui suis-je ? » ; compléter le tableau avec la pyramide à base carrée ; entourer les patrons du cube parmi 6 (dont un patron de pavé droit) ; compter les cubes d’assemblages plus grands.",
+    rappel: EXOS.solides.rappel,
+    tirer: function () {
+      var P = [["boule", "Je n’ai aucune face plane : je roule dans tous les sens.", "I have no flat face: I roll in every direction."], ["cylindre", "J’ai 2 faces planes en forme de disque, et je peux rouler.", "I have 2 flat faces shaped like a disc, and I can roll."], ["cone", "J’ai une seule face plane, un disque, et une pointe.", "I have only one flat face, a disc, and a point."], ["pyrCarree", "Ma base est un carré et mes 4 autres faces sont des triangles.", "My base is a square and my 4 other faces are triangles."]];
+      return { noms: HE.shuf(SO6).slice(0, 4).map(function (id) { return [id, soVue()]; }), qui: HE.shuf(P).slice(0, 2), pat: HE.shuf(soTirerPatrons(3, 2).concat([[false, null]])), cubes: HE.shuf(SOL.ASSEMBLAGES.filter(function (c) { return c.length >= 6; })).slice(0, 2) };
+    },
+    exos: function (d, en) {
+      var N = function (id) { return SO_NOM[id][en ? 1 : 0]; }, pave = SOL.patronPave(3, 2, 1, 0);
+      var pats = exG('<div class="ex-patrons">' + d.pat.map(function (x) { var d2 = SOL.patronPlat(x[1] ? SOL.rectsDe(x[1]) : pave, { carre: x[1] ? 15 : 12, cls: "ex-patron" }); return x[0] ? exC(d2) : '<span class="ex-patron-n">' + d2 + "</span>"; }).join("") + "</div>", "cercle", true);
+      return [
+        { c: en ? "Write the name of each 3-D shape." : "Écris le nom de chaque solide.", q: '<div class="ex-grille ex-quatre">' + d.noms.map(function (x) { return "<div>" + soEx(x[0], x[1]) + '<p class="ex-rep">' + exT(N(x[0])) + "</p></div>"; }).join("") + "</div>", r: d.noms.map(function (x) { return N(x[0]); }).join(" · ") },
+        { c: en ? "Who am I?" : "Qui suis-je ?", q: exListe(d.qui, function (x) { return "« " + (en ? x[2] : x[1]) + " » " + exT(SO_UN[x[0]][en ? 1 : 0]); }, "ex-une-col"), r: d.qui.map(function (x) { return SO_UN[x[0]][en ? 1 : 0]; }).join(" · ") },
+        { c: en ? "Complete the table." : "Complète le tableau.", q: soTable([["cube", exT("6"), exT(en ? "squares" : "carrées"), exT("12"), exT("8")], [en ? "cuboid" : "pavé droit", exT("6"), exT(en ? "rectangles" : "rectangulaires"), exT("12"), exT("8")], [en ? "square-based pyramid" : "pyramide à base carrée", exT("5"), exT(en ? "1 square, 4 triangles" : "1 carrée, 4 triangulaires", true), exT("8"), exT("5")]], en),
+          r: en ? "Cube: 6 square faces, 12 edges, 8 vertices · Cuboid: 6 rectangular faces, 12 edges, 8 vertices · Square-based pyramid: 5 faces (1 square, 4 triangles), 8 edges, 5 vertices" : "Cube : 6 faces carrées, 12 arêtes, 8 sommets · Pavé droit : 6 faces rectangulaires, 12 arêtes, 8 sommets · Pyramide à base carrée : 5 faces (1 carrée, 4 triangulaires), 8 arêtes, 5 sommets" },
+        { c: en ? "Circle the nets of a cube." : "Entoure les patrons du cube.", q: pats, r: (en ? "Nets of a cube: drawings " : "Patrons du cube : les dessins ") + d.pat.map(function (x, i) { return x[0] ? i + 1 : 0; }).filter(Boolean).join(en ? ", " : ", ") + (en ? " (counting from the left). The drawing with rectangles is a net of a cuboid." : " (en comptant depuis la gauche). Le dessin avec des rectangles est un patron de pavé droit.") },
+        { c: en ? "How many cubes?" : "Combien de cubes ?", q: '<div class="ex-grille ex-cubes">' + d.cubes.map(function (cb) { return "<div>" + SOL.assemblage(cb, { S: 19, papier: true }) + '<p class="ex-rep">' + exT(String(cb.length)) + " cubes</p></div>"; }).join("") + "</div>", r: d.cubes.map(function (cb) { return cb.length + " cubes"; }).join(" · ") }
+      ];
+    }
+  });
+
+  /* ---------- la fiche enseignante de la séquence (D-112) ---------- */
+  function ficheSolides() {
+    return ficheSeq({ seq: "solides", mat: "maths", prog: "solides", dom: "Maths · Espace et géométrie (les solides)", tbi: "#tbi-solides",
+      seances: [
+        ["Séance 1", "Identifier un solide et connaître le vocabulaire spécifique aux solides : arêtes, sommets, faces. Reconnaître et nommer les principaux solides : cube, pavé droit, boule, pyramide, cylindre.", "Revoir la leçon (bloc 1) · Je me rappelle · Quel est ce solide ? · Problème ouvert « Le tampon carré »"],
+        ["Séances 2 et 3", "Décrire un cube et un pavé droit en utilisant le vocabulaire spécifique. Construire un pavé droit ou un cube à partir d’un patron.", "Revoir la leçon (blocs 2 et 3) · Faces, arêtes, sommets · Qui suis-je ? · Cube ou pavé droit ? · Problème ouvert « Les patrons du cube » · Patrons à imprimer"],
+        ["Séances 4 et 5", "Exercices bilan et évaluation.", "Combien de cubes ? · Au TBI (jeu des ardoises) · Fiche d’exercices (3 niveaux, corrigé à part, correction au TBI)"]],
+      erreurs: ["Dire « un carré » pour un cube, « un rond » pour une boule : la figure plane confondue avec le solide. Montrer la trace d’une face : le carré, c’est la face.",
+        "Compter deux fois la même face, arête ou sommet en tournant le solide : marquer ce qu’on a compté (pâte à fixe sur le vrai solide ; sur le site, toucher pour marquer).",
+        "Oublier les faces, arêtes et sommets cachés sur un dessin : les arêtes cachées sont en pointillés, comme dans la leçon.",
+        "Croire qu’un pavé droit ne peut pas avoir de face carrée : montrer un pavé droit à bouts carrés.",
+        "Pour les patrons : 5 carrés en ligne, 4 carrés en carré, deux carrés du même côté de la ligne de 4 : plier pour vérifier."],
+      conseils: ["Les solides de la classe et des boîtes de la maison restent à portée de main pendant toute la séquence : on touche avant de regarder les dessins.",
+        "Sur le site, les élèves font tourner les solides avec le doigt et les arêtes cachées sont en pointillés (repère : « Il reconnaît et décrit les solides étudiés sur une représentation en perspective »).",
+        "Vocabulaire du site : « boule », comme les repères, à la place de « sphère » (leçon GEOM11).",
+        "Toutes les activités existent en français et en anglais britannique (cube, cuboid, cylinder, sphere, cone, pyramid ; face, edge, vertex ; net). En anglais, « Je retiens » est une traduction, en attendant une leçon anglaise.",
+        "La fiche d’exercices porte un numéro : le même numéro redonne les mêmes exercices, pour corriger au TBI."],
+      extra: '<section class="f-encadre"><h2>Patrons à imprimer</h2><p>Un patron de cube (5 cm de côté) et un patron de pavé droit (7 cm × 4 cm × 3 cm), avec leurs languettes : on découpe sur les traits pleins, on plie sur les pointillés, on colle les languettes. Pour la séance « construire un cube ou un pavé droit à partir d’un patron » (repère : « Il fabrique un cube et un pavé droit à partir d’un patron fourni »).</p><p class="no-print"><a class="coco-btn" href="#feuille-patrons-a-imprimer">Ouvrir les patrons à imprimer</a></p></section>',
+      prolonger: ["Fabriquer un cube et un pavé droit avec les patrons à imprimer, puis compter leurs faces, arêtes et sommets.",
+        "Fabriquer un cube avec des pailles (les arêtes) et de la pâte à modeler (les sommets) : combien de pailles ? Combien de boules ? (repère du niveau 2 : « Il fabrique un cube avec des carrés (faces) ou avec des tiges (arêtes) que l’on peut assembler »).",
+        "« Commander le matériel juste nécessaire pour fabriquer un cube à partir de ses faces » (exemple des repères).",
+        "Jeu du portrait et jeu de Kim avec les solides de la classe (exemples des repères).",
+        "Réaliser des assemblages de cubes emboîtables, puis les associer à un dessin ou à une photo (repères du niveau 3)."],
+      sources: "Sources : programmation périodique P5 de la classe (séquence 5), leçons GEOM11 et GEOM12 du fichier de géométrie 2026 de la classe, programmes de Nouvelle-Calédonie 2021, repères de progressivité de la DENC (cycle 2, mathématiques, p. 24 et 25), Sullivan & Lilburn, « Les objets à trois dimensions », p. 127 à 131." });
+  }
+  /* ---------- les patrons à imprimer (cube 5 cm ; pavé droit 7 × 4 × 3 cm), avec languettes ---------- */
+  function soPatronImprime(R, titre, consigne) {
+    var segs = SOL.bords(R), mx = Math.min.apply(null, R.map(function (r) { return r[0]; })) - 12, my = Math.min.apply(null, R.map(function (r) { return r[1]; })) - 12;
+    var W = Math.max.apply(null, R.map(function (r) { return r[0] + r[2]; })) - mx + 12, H = Math.max.apply(null, R.map(function (r) { return r[1] + r[3]; })) - my + 12;
+    var s = '<svg class="so-imprime" viewBox="' + mx + " " + my + " " + W + " " + H + '" width="' + W + 'mm" height="' + H + 'mm" aria-hidden="true">';
+    s += R.map(function (r) { return '<rect x="' + r[0] + '" y="' + r[1] + '" width="' + r[2] + '" height="' + r[3] + '" class="so-imp-face"/>'; }).join("");
+    segs.forEach(function (g) {
+      if (g.tab) { var d = [g.b[0] - g.a[0], g.b[1] - g.a[1]], L = Math.sqrt(d[0] * d[0] + d[1] * d[1]); d = [d[0] / L, d[1] / L]; var n = [g.n[0], g.n[1]], k = Math.min(6, L / 4);
+        var p = [g.a, g.b, [g.b[0] + n[0] * 9 - d[0] * k, g.b[1] + n[1] * 9 - d[1] * k], [g.a[0] + n[0] * 9 + d[0] * k, g.a[1] + n[1] * 9 + d[1] * k]];
+        s += '<polygon points="' + p.map(function (q) { return q[0].toFixed(1) + "," + q[1].toFixed(1); }).join(" ") + '" class="so-imp-tab"/><path d="M' + g.a.join(" ") + "L" + g.b.join(" ") + '" class="so-imp-pli"/>'; }
+      else s += '<path d="M' + g.a.join(" ") + "L" + g.b.join(" ") + '" class="so-imp-coupe"/>';
+    });
+    SOL.charnieres(R).forEach(function (h) { s += '<path d="M' + h[0].join(" ") + "L" + h[1].join(" ") + '" class="so-imp-pli"/>'; });
+    return '<section class="so-page-patron"><h2>' + titre + "</h2><p>" + consigne + "</p>" + s + "</svg></section>";
+  }
+  function pagePatronsImprimer() {
+    var cube = SOL.rectsDe(SO_PATS[0]).map(function (r) { return [r[0] * 50, r[1] * 50, 50, 50]; }), pave = SOL.patronPave(70, 40, 30, 0);
+    var consigne = "Découpe sur les traits pleins. Plie sur les pointillés. Colle les languettes grises.";
+    return '<div class="no-print coco-row"><a class="coco-btn coco-btn--secondaire" href="#fiche-solides">← Fiche enseignante</a><button class="coco-btn" type="button" data-action="imprimer">Imprimer les patrons</button></div>' +
+      '<p class="no-print ex-aide">Deux pages A4 en portrait : le cube (5 cm de côté), puis le pavé droit (7 cm × 4 cm × 3 cm). À imprimer à 100 % (« taille réelle »), sans « ajuster à la page », pour garder les mesures.</p>' +
+      '<article class="so-patrons-imprimer">' + soPatronImprime(cube, "Le cube", consigne) + soPatronImprime(pave, "Le pavé droit", consigne) + "</article>";
+  }
+
   var ROUTES = {
     accueil: pageAccueil, "seq-verbe": function () { return pageSequence("verbe"); }, "seq-mots": pageSequenceMots, "lecon-mots": pageLeconMots, "fiche-mots": ficheMots,
     "seq-heure": pageSequenceHeure, "seq-digitale": pageSequenceDigitale, "ens-suivi": pageEnsSuivi, "ens-etoiles": function () { return pageEnsEtoiles("calcul"); }, "ens-etoiles-grammaire": function () { return pageEnsEtoiles("grammaire"); }, "ens-corriges": pageEnsCorriges, "ens-etoiles-fiches": function () { return pageEnsFichesEtoiles(false); }, "ens-voix": pageEnsVoix, "ens-etoiles-fiches-tout": function () { return pageEnsFichesEtoiles(true); }, "ens-corriges-grammaire": pageEnsCorrigesGram, "ens-sequences": pageEnsSequences, "ens-formation": pageEnsFormation, "fiche-digitale": ficheDigitale, "seq-diagrammes": pageSequenceDiagrammes, "lecon-diagrammes": pageLeconDiagrammes, "fiche-diagrammes": ficheDiagrammes, "fiche-masses": ficheMasses, "fiche-verbe": ficheVerbe, "fiche-division": ficheDivision, "fiche-monnaie": ficheMonnaie, "lecon-heure": function () { return pageLeconHeure(true); }, "maquette-retiens": function () { return pageLeconHeure(true); }, "fiche-heure": ficheHeure, "exos-heure": function () { return pageExos("heure"); }, "lecon-digitale": pageLeconDigitale, "lecon-division": pageLeconDivision, "lecon-monnaie": pageLeconMonnaie, "lecon-masses": pageLeconMasses, "exos-verbe": function () { return pageExos("verbe"); }, "exos-mots": function () { return pageExos("mots"); },
     "exos-monnaie": function () { return pageExos("monnaie"); }, "exos-division": function () { return pageExos("division"); }, "exos-masses": function () { return pageExos("masses"); }, "exos-digitale": function () { return pageExos("digitale"); }, "exos-diagrammes": function () { return pageExos("diagrammes"); }, "tbi-heure": pageTbiHeure,
+    "lecon-solides": pageLeconSolides, "fiche-solides": ficheSolides, "exos-solides": function () { return pageExos("solides"); }, "feuille-patrons-a-imprimer": pagePatronsImprimer,
     "seq-imparfait": function () { return pageSequence("imparfait"); }, "lecon-imparfait": pageLeconImparfait, "fiche-imparfait": ficheImparfait, "exos-imparfait": function () { return pageExos("imparfait"); },
     "lecon-verbe": pageLecon, "jeu-verbe-decouvre": jeuDecouvre, "jeu-verbe-chasse": jeuChasse, enseignante: pageEnseignante, banque: pageBanque
   };
@@ -5410,6 +5778,7 @@
     else if (/^qz-/.test(a)) { actionQZ(a, el); if (a === "qz-dire") return; }
     else if (/^or-/.test(a)) actionOrth(a, el);
     else if (/^lx-/.test(a)) actionLX(a, el);
+    else if (/^so-/.test(a)) { if (actionSo(a, el) === false) return; }
     else if (/^et-/.test(a)) actionEtoiles(a, el);
     else if (/^voix-/.test(a)) { actionVoix(a, el); if (a === "voix-ecouter") return; }
     else if (/^tq-/.test(a)) { actionTq(a, el); if (a === "tq-dire") return; }

@@ -1049,4 +1049,180 @@
       reinvestir: ["« Dans le graphique des sports préférés, il y a 3 élèves de plus pour le foot que pour la natation. À quoi peut-il ressembler ? »", "Faire le vrai graphique des animaux de la classe et comparer."]
     }
   };
+
+  /* ==========================================================================================
+     Période 5 · séquence 5 : les solides (problèmes ouverts de la collègue, adaptés ; personnage Vaka, D-50).
+     8 solides, sans le prisme (choix de l’enseignante, 14/11/2026) ; « boule » au lieu de « sphère ».
+     Les dessins et le pliage viennent de js/solides.js (chargé après ce fichier : on l’appelle au moment du dessin).
+     ========================================================================================== */
+  PO.sequences.solides = ["tampon", "patrons"];
+  var SO = function () { return window.COCO_SOLIDES; };
+  var FORMES = { carre: ["un carré", "a square"], rect: ["un rectangle", "a rectangle"], tri: ["un triangle", "a triangle"], disque: ["un disque", "a disc"] };
+  var aUnCarre = function (id) { return SO().compte(id).formes.indexOf("carre") >= 0; };
+  var nomSo = function (id, lg, art) { var D = SO().DEFS[id]; return art ? D[lg === "en" ? "en" : "fr"] : D.nom[lg === "en" ? "en" : "fr"]; };
+  /* ce que laissent les faces d’un solide : « des carrés et des rectangles »… */
+  var traces = function (id, lg) {
+    var en = lg === "en", f = SO().compte(id).formes, vus = [];
+    f.forEach(function (x) { if (vus.indexOf(x) < 0) vus.push(x); });
+    var pl = { carre: ["des carrés", "squares"], rect: ["des rectangles", "rectangles"], tri: ["des triangles", "triangles"], disque: ["des disques", "discs"] };
+    return vus.map(function (x) { return f.filter(function (y) { return y === x; }).length > 1 ? pl[x][en ? 1 : 0] : FORMES[x][en ? 1 : 0]; }).join(en ? " and " : " et ");
+  };
+
+  /* ---------- 1. Le tampon carré : quel solide laisse une trace carrée ? ---------- */
+  PO.problemes.tampon = {
+    id: "tampon", sequence: "solides", type: "tampon", perso: "vaka",
+    titre: { fr: "Le tampon carré", en: "The square print" },
+    question: { fr: "Quel solide puis-je avoir ?", en: "Which 3-D shape could I have?" },
+    enonce: { fr: "Je trempe <b>une face</b> de mon solide dans la peinture, puis je la pose sur une feuille. La trace est <b>un carré</b> ! <b>Quel solide puis-je avoir ?</b> Trouve-en plusieurs !",
+              en: "I dip <b>one face</b> of my 3-D shape in paint, then I press it onto a sheet of paper. The print is <b>a square</b>! <b>Which 3-D shape could I have?</b> Find more than one!" },
+    enonceExtra: function (lg) { return '<span class="so-enonce-trace">' + SO().trace("cube", 0, { taille: 110, label: lg === "en" ? "a square print" : "une trace carrée" }) + "</span>"; },
+    depart: function () { return { s: "", f: -1, vus: [] }; },
+    pret: function (sol) { return !!sol.s; },
+    basculer: function (sol, v) { var kv = String(v).split(":"); if (kv[0] === "s" && sol.s !== kv[1]) { sol.s = kv[1]; sol.f = -1; sol.vus = []; } },
+    /* f >= 0 : la face choisie par l’élève (mode autonome) ; au TBI, on vérifie le solide proposé par le groupe */
+    verifier: function (sol) {
+      var D = SO().DEFS[sol.s], N = nomSo(sol.s, "fr", true), Ne = nomSo(sol.s, "en", true), cap = function (s) { return s.charAt(0).toUpperCase() + s.slice(1); };
+      if (sol.s === "boule") return { ok: false, fr: "La boule n’a pas de face plane : elle roule, elle ne laisse pas de trace plate.", en: "A sphere has no flat face: it rolls, it does not leave a flat print." };
+      if (!aUnCarre(sol.s)) return { ok: false, fr: cap(N) + " n’a pas de face carrée : ses faces laissent " + traces(sol.s, "fr") + ".", en: cap(Ne) + " has no square face: its faces leave " + traces(sol.s, "en") + "." };
+      if (sol.f >= 0 && D.faces[sol.f].forme !== "carre") return { ok: false, fr: "Cette face laisse " + FORMES[D.faces[sol.f].forme][0] + ", pas un carré. Tourne le solide : une autre face laisse peut-être un carré !", en: "This face leaves " + FORMES[D.faces[sol.f].forme][1] + ", not a square. Turn the shape: maybe another face leaves a square!" };
+      var n = SO().compte(sol.s).formes.filter(function (x) { return x === "carre"; }).length;
+      return { ok: true, fr: cap(N) + " : " + (n === 6 ? "ses 6 faces sont des carrés." : n === 2 ? "ses 2 bouts sont des carrés." : "sa base est un carré."), en: cap(Ne) + ": " + (n === 6 ? "all 6 faces are squares." : n === 2 ? "its 2 ends are squares." : "its base is a square.") };
+    },
+    diagnostic: function (sol) { var D = SO().DEFS[sol.s]; return { carre: sol.s !== "boule" && aUnCarre(sol.s) && (sol.f < 0 || D.faces[sol.f].forme === "carre"), faces: sol.s === "boule" || (sol.vus || []).length >= 2 }; },
+    cle: function (sol) { return sol.s; },
+    ecrire: function (sol, lg) { var s = nomSo(sol.s, lg); return s.charAt(0).toUpperCase() + s.slice(1); },
+    visuel: function (sol) { return SO().dessin(sol.s, { taille: 64, cls: "so-mini" }); },
+    ranger: function (a, b) { var o = SO().ORDRE, r = function (s) { return (aUnCarre(s.s) && s.s !== "boule" ? 0 : 10) + o.indexOf(s.s); }; return r(a) - r(b); },
+    checklist: [
+      { id: "carre", fr: "La trace a 4 côtés de même longueur et 4 angles droits : c’est un carré.", en: "The print has 4 sides of the same length and 4 right angles: it is a square." },
+      { id: "faces", fr: "J’ai regardé plusieurs faces du solide, en le tournant.", en: "I looked at several faces of the shape, turning it round." }
+    ],
+    pouce: { fr: "Prends le cube. Trempe une face dans la peinture. Quelle forme a la trace ? Cherche un autre solide qui a au moins une face comme celle-là.", en: "Take the cube. Dip one face in the paint. What shape is the print? Look for another shape with at least one face like that." },
+    relances: [
+      { fr: "Quels solides peuvent laisser un disque ? Un triangle ?", en: "Which shapes can leave a disc? A triangle?" },
+      { fr: "Quel solide peut laisser deux traces différentes ? Trois ?", en: "Which shape can leave two different prints? Three?" },
+      { fr: "Quel solide ne laisse aucune trace plate ?", en: "Which shape leaves no flat print at all?" },
+      { fr: "Combien de faces, d’arêtes et de sommets a le cube ?", en: "How many faces, edges and vertices does a cube have?" }
+    ],
+    strategies: [
+      { fr: "J’ai regardé toutes les faces de chaque solide.", en: "I looked at every face of each shape." },
+      { fr: "J’ai tourné le solide pour voir les faces cachées.", en: "I turned the shape to see the hidden faces." },
+      { fr: "J’ai compté les carreaux des côtés de la trace.", en: "I counted the squares along the sides of the print." },
+      { fr: "J’ai essayé, puis j’ai corrigé.", en: "I tried, then I corrected it." }
+    ],
+    retenir: { fr: "Une face est une surface plane d’un solide. Le cube a 6 faces carrées, 12 arêtes et 8 sommets. Le pavé droit a 6 faces rectangulaires (parfois, 2 sont des carrés). La pyramide à base carrée a une face carrée et 4 faces triangulaires. Le cylindre et le cône ont des faces planes en forme de disque. La boule n’a pas de face plane.",
+               en: "A face is a flat surface of a 3-D shape. A cube has 6 square faces, 12 edges and 8 vertices. A cuboid has 6 rectangular faces (sometimes 2 of them are squares). A square-based pyramid has one square face and 4 triangular faces. A cylinder and a cone have flat faces shaped like a disc. A sphere has no flat face." },
+    exemple: { fr: "Une trace carrée : le cube, le pavé droit à bouts carrés, la pyramide à base carrée.", en: "A square print: the cube, the cuboid with square ends, the square-based pyramid." },
+    toutes: null,
+    vueToutes: function (trouves, lg) {
+      var en = lg === "en", fig = function (id) { return '<figure class="' + (trouves[id] ? "trouve" : "") + '">' + SO().dessin(id, { taille: 92 }) + "<figcaption>" + nomSo(id, lg) + (trouves[id] ? " <b>✓</b>" : "") + "</figcaption></figure>"; };
+      return '<div class="so-deux-groupes"><div><h3>' + (en ? "They can leave a square" : "Ils peuvent laisser un carré") + '</h3><div class="so-galerie">' + SO().ORDRE.filter(function (id) { return id !== "boule" && aUnCarre(id); }).map(fig).join("") + "</div></div>" +
+        "<div><h3>" + (en ? "They never leave a square" : "Ils ne laissent jamais de carré") + '</h3><div class="so-galerie">' + SO().ORDRE.filter(function (id) { return id === "boule" || !aUnCarre(id); }).map(fig).join("") + "</div></div></div>" +
+        '<p class="po-note">' + (en ? "Ticked: the shapes the class found." : "Coché : les solides trouvés par la classe.") + "</p>";
+    },
+    feuille: { colonnes: [{ fr: "Le solide", en: "The shape" }, { fr: "Je le dessine", en: "I draw it", large: true }, { fr: "Où est la face carrée ?", en: "Where is the square face?", large: true }], lignes: 5,
+      bas: { fr: "Quel solide ne laisse aucune trace plate ? Pourquoi ?", en: "Which shape leaves no flat print? Why?" } },
+    fiche: {
+      source: "Problème repris, avec son accord, de l’outil « Problèmes ouverts P5 » de la collègue (séquence 5, les solides), sans le prisme (choix de l’enseignante). D’après Sullivan & Lilburn, « Activités ouvertes en mathématiques » (Chenelière, 2010), « Les objets à trois dimensions », 6-8 ans, p. 128 : « Je trace le contour d’une des faces d’un objet. La figure que je trace est un cercle. Quel peut être cet objet ? »",
+      moment: "Séance 1 des solides : faces, arêtes, sommets ; nommer les solides",
+      apprend: ["Une face est une surface plane du solide ; sa trace montre sa forme.", "Reconnaître et nommer les solides : cube, pavé droit, pyramide, cylindre, cône, boule.", "Décrire les faces d’un solide : le cube a 6 faces carrées, le pavé droit des faces rectangulaires (parfois 2 carrées).", "Utiliser le vocabulaire : face, arête, sommet."],
+      pourquoi: ["Il faut penser à toutes les faces de chaque solide : la question oblige à les regarder une par une.", "Plusieurs réponses (le cube, le pavé droit à bouts carrés, la pyramide à base carrée), qu’on vérifie en tamponnant pour de vrai.", "Les débats (« le pavé, ça marche ? ») montrent qui confond le carré et le rectangle."],
+      materiel: ["Le mode classe, projeté (les 4 temps).", "Une feuille de recherche par élève ou par groupe.", "Les solides de la classe (cube, pavés, pyramides, cylindre, cône, boule) et des boîtes de la maison.", "De la peinture ou un tampon encreur et des feuilles quadrillées, pour vérifier les traces.", "Les iPad pour le mode autonome : l’élève choisit un solide, le tourne avec le doigt, touche une face : la trace apparaît sur le cahier quadrillé."],
+      temps: [
+        ["Poser la question", "5 min", "Montrez ce qu’est une trace : tamponnez une face d’une boîte devant la classe (pas un carré !). Projette l’énoncé ; un élève le lit, 2 ou 3 autres l’expliquent avec leurs mots.", "« Qu’est-ce qu’une face ? Que montre la trace ? »"],
+        ["Chercher par 2 ou 3", "15 à 20 min", "Lance le minuteur, laisse les solides à disposition et observe. Un groupe n’a que le cube : relance. Un groupe bloque : le coup de pouce.", "« Un autre solide peut-il laisser un carré ? »"],
+        ["Mettre en commun", "15 min", "Chaque groupe propose un solide : touche-le dans la palette, puis touche sa face pour montrer la trace. Touche la carte pour la vérifier, une fois que la classe a donné son avis. « Ranger » sépare les solides qui ont une face carrée des autres.", "« Quelle face laisse le carré ? Montre-la sur le vrai solide. » « Et les autres faces, quelle forme ont-elles ? »"],
+        ["Retenir", "5 à 10 min", "La trace écrite (face, arête, sommet ; les faces du cube, du pavé, de la pyramide), puis « Tous les solides », rangés en deux groupes (coché : ceux que la classe a trouvés).", ""]
+      ],
+      reponses: "Une face carrée : le cube (6 faces carrées), le pavé droit à bouts carrés (2 faces carrées), la pyramide à base carrée (sa base). Pas de face carrée : le pavé droit « ordinaire » (que des rectangles), la pyramide à base triangulaire (que des triangles), le cylindre et le cône (des disques), la boule (pas de face plane).",
+      erreurs: [
+        ["Le pavé droit « ordinaire ».", "Le carré et le rectangle confondus.", "« Compte les carreaux des côtés de la trace : sont-ils tous pareils ? »"],
+        ["La boule ou le cylindre.", "La forme du solide confondue avec celle de sa trace.", "« Pose-le sur la feuille : quelle trace laisse-t-il ? »"],
+        ["La pyramide à base triangulaire.", "Toutes les pyramides vues comme pareilles.", "« Quelle forme a sa base ? Compte ses côtés. »"],
+        ["« Le carré. »", "Une figure plane donnée à la place d’un solide.", "« Le carré, c’est la trace. Quel objet laisse cette trace ? »"]
+      ],
+      niveaux: ["Nomme une figure plane (le carré) ou un solide au hasard.", "Trouve le cube, mais pense que tout solide « carré » marche, ou propose la boule.", "Trouve deux solides justes en manipulant, avec du mal à les nommer.", "Trouve les trois solides, les nomme et montre la face carrée de chacun.", "Explique pourquoi les autres ne marchent pas (la forme de chaque face)."],
+      reinvestir: ["« Je trace le contour d’une face d’un objet : c’est un triangle. Quel peut être cet objet ? »", "« Au magasin, j’ai acheté une boîte en forme de pavé droit, mais l’étiquette est tombée. Que peut-elle contenir ? » (Sullivan & Lilburn, p. 131)"]
+    }
+  };
+
+  /* ---------- 2. Les patrons du cube : 6 carrés qui se plient en cube (il y en a 11) ---------- */
+  var CROIX = ["1,0", "0,1", "1,1", "2,1", "1,2", "1,3"];
+  PO.problemes.patrons = {
+    id: "patrons", sequence: "solides", type: "patron", perso: "vaka",
+    titre: { fr: "Les patrons du cube", en: "The nets of a cube" },
+    question: { fr: "Quels dessins de 6 carrés forment un cube ?", en: "Which drawings of 6 squares make a cube?" },
+    enonce: { fr: "Je veux fabriquer un cube en papier. Je dessine <b>6 carrés</b> qui se touchent par un côté, je découpe, puis je plie. Ce dessin-là forme un cube : c’est un <b>patron</b> du cube. <b>Quels autres dessins de 6 carrés forment un cube ?</b> Trouve-en le plus possible !",
+              en: "I want to make a paper cube. I draw <b>6 squares</b> that touch along a side, I cut it out, then I fold it. This drawing makes a cube: it is a <b>net</b> of a cube. <b>Which other drawings of 6 squares make a cube?</b> Find as many as you can!" },
+    enonceExtra: function () { return '<span class="so-enonce-patron">' + SO().patronPlat(SO().rectsDe(CROIX), { carre: 18 }) + "</span>"; },
+    depart: function () { return []; },
+    pret: function (sol) { return sol.length === 6; },
+    basculer: function (sol, v) { var i = sol.indexOf(v); if (i >= 0) sol.splice(i, 1); else if (sol.length < 8) sol.push(v); },
+    verifier: function (sol) {
+      var S = SO();
+      if (sol.length !== 6) return { ok: false, fr: "Il faut exactement 6 carrés : un pour chaque face du cube.", en: "You need exactly 6 squares: one for each face of the cube." };
+      if (!S.connexe(sol)) return { ok: false, fr: "Les carrés doivent tous se toucher par un côté : ton dessin est en morceaux.", en: "All the squares must touch along a side: your drawing is in pieces." };
+      if (!S.estPatronCube(sol)) return { ok: false, fr: "En pliant, deux carrés se posent l’un sur l’autre, et il manque une face. Plie pour voir !", en: "When you fold it, two squares land on top of each other and one face is missing. Fold it to see!" };
+      return { ok: true, fr: "C’est le patron n° " + S.numeroPatron(sol) + " sur 11.", en: "It is net no. " + S.numeroPatron(sol) + " out of 11." };
+    },
+    deja: function (sol) { var n = SO().numeroPatron(sol); return { fr: "C’est le patron n° " + n + ", tourné ou retourné : tu l’as déjà trouvé. Cherche un autre dessin !", en: "It is net no. " + n + ", turned or flipped over: you have already found it. Look for another drawing!" }; },
+    diagnostic: function (sol) { var S = SO(); return { six: sol.length === 6 && S.connexe(sol), plie: sol.length === 6 && S.estPatronCube(sol) }; },
+    cle: function (sol) { var S = SO(); return sol.length === 6 && S.connexe(sol) ? S.canon(sol) : "x:" + sol.slice().sort().join(";"); },
+    ecrire: function (sol, lg) { var S = SO(), en = lg === "en"; if (sol.length === 6 && S.estPatronCube(sol)) return (en ? "Net no. " : "Patron n° ") + S.numeroPatron(sol); return sol.length + (en ? " squares: not a cube" : " carrés : pas un cube"); },
+    visuel: function (sol) { var S = SO(); return S.patronPlat(S.rectsDe(S.connexe(sol) ? S.joli(sol) : sol), { carre: 9, cls: "so-mini" }); },
+    ranger: function (a, b) { var S = SO(), n = function (s) { return s.length === 6 && S.estPatronCube(s) ? S.numeroPatron(s) : 99; }; return n(a) - n(b); },
+    checklist: [
+      { id: "six", fr: "J’ai 6 carrés, et ils se touchent tous par un côté.", en: "I have 6 squares, and they all touch along a side." },
+      { id: "plie", fr: "J’ai plié (dans ma tête ou pour de vrai) : aucun carré ne se pose sur un autre.", en: "I folded it (in my head or for real): no square lands on another one." }
+    ],
+    pouce: { fr: "Garde une ligne de 4 carrés et un carré en dessous. Où peux-tu mettre le 6e carré pour que ça forme encore un cube ?", en: "Keep a line of 4 squares and one square below it. Where can you put the 6th square so it still makes a cube?" },
+    relances: [
+      { fr: "Combien de patrons différents as-tu ? Deux dessins pareils, mais tournés ou retournés, comptent pour un.", en: "How many different nets do you have? Two drawings that are the same but turned or flipped count as one." },
+      { fr: "Dessine 6 carrés qui ne forment pas un cube. Pourquoi ?", en: "Draw 6 squares that do not make a cube. Why not?" },
+      { fr: "Trouve un patron sans ligne de 4 carrés.", en: "Find a net without a line of 4 squares." },
+      { fr: "Colorie de la même couleur les faces qui seront face à face sur le cube.", en: "Colour the faces that will be opposite each other on the cube in the same colour." }
+    ],
+    strategies: [
+      { fr: "J’ai imaginé le pliage dans ma tête.", en: "I imagined the folding in my head." },
+      { fr: "J’ai plié pour vérifier.", en: "I folded it to check." },
+      { fr: "J’ai cherché d’abord les patrons avec une ligne de 4 carrés.", en: "I looked first for the nets with a line of 4 squares." },
+      { fr: "J’ai tourné ou retourné mes dessins pour ne pas les compter deux fois.", en: "I turned or flipped my drawings so I did not count them twice." }
+    ],
+    retenir: { fr: "Le cube a 6 faces carrées, 12 arêtes et 8 sommets. Un patron du cube est un dessin de 6 carrés qui, une fois découpé et plié, forme le cube sans trou et sans que deux carrés se chevauchent. Il existe 11 patrons différents du cube.",
+               en: "A cube has 6 square faces, 12 edges and 8 vertices. A net of a cube is a drawing of 6 squares that, once cut out and folded, makes the cube with no gap and no two squares overlapping. There are 11 different nets of a cube." },
+    exemple: { fr: "11 patrons : 6 avec une ligne de 4 carrés, 3 avec une ligne de 3, 1 en escalier, 1 avec deux lignes de 3.", en: "11 nets: 6 with a line of 4 squares, 3 with a line of 3, 1 like a staircase, 1 with two lines of 3." },
+    toutes: null,
+    vueToutes: function (trouves, lg) {
+      var S = SO(), en = lg === "en";
+      return "<h3>" + (en ? "The 11 nets of a cube" : "Les 11 patrons du cube") + '</h3><div class="so-patrons">' + S.PATRONS.map(function (p, i) { var t = trouves[p.canon];
+        return '<figure class="' + (t ? "trouve" : "") + '">' + S.patronPlat(S.rectsDe(p.cells), { carre: 16 }) + "<figcaption>n° " + (i + 1) + (t ? " <b>✓</b>" : "") + "</figcaption></figure>"; }).join("") + "</div>" +
+        '<p class="po-note">' + (en ? "Two drawings turned or flipped over count as one net. 6 nets have a line of 4 squares (no. 1 to 6), 3 a line of 3 (no. 7 to 9), 1 is a staircase (no. 10), 1 has two lines of 3 (no. 11). Ticked: the nets the class found."
+          : "Deux dessins tournés ou retournés comptent pour un seul patron. 6 patrons ont une ligne de 4 carrés (n° 1 à 6), 3 une ligne de 3 (n° 7 à 9), 1 est en escalier (n° 10), 1 a deux lignes de 3 (n° 11). Coché : les patrons trouvés par la classe.") + "</p>";
+    },
+    feuille: { zone: function (lg) { return '<div class="so-feuille-grille">' + SO().patronPlat(SO().rectsDe(CROIX.map(function (c) { var p = c.split(",").map(Number); return (p[0] + 1) + "," + (p[1] + 1); })), { carre: 26, cls: "so-feuille-croix" }) + "</div>"; },
+      bas: { fr: "Combien de patrons différents as-tu trouvés ? Comment le sais-tu ?", en: "How many different nets did you find? How do you know?" } },
+    fiche: {
+      source: "Problème repris, avec son accord, de l’outil « Problèmes ouverts P5 » de la collègue (séquence 5, les solides). D’après Sullivan & Lilburn, « Activités ouvertes en mathématiques » (Chenelière, 2010), « Les objets à trois dimensions », 8-10 ans, p. 129 : « dessiner et fabriquer des développements de solides et associer des objets à ces développements ».",
+      moment: "Séances 2 et 3 des solides : décrire le cube, le construire à partir d’un patron",
+      apprend: ["Le cube a 6 faces carrées, 12 arêtes et 8 sommets.", "Un patron est un dessin qui, plié, forme le solide sans trou ni chevauchement.", "Se représenter le pliage : quelles faces deviennent le dessus, le dessous, les côtés.", "Reconnaître deux dessins pareils, tournés ou retournés."],
+      pourquoi: ["Il faut imaginer le pliage, puis vérifier en pliant pour de vrai : on apprend en cherchant.", "11 patrons : chacun en trouve un ou deux, certains en trouvent beaucoup et cherchent à prouver qu’il n’y en a pas d’autres.", "Les dessins qui ne marchent pas (4 carrés en carré, 5 en ligne) sont aussi riches que les bons."],
+      materiel: ["Le mode classe, projeté (les 4 temps).", "La feuille de recherche (un quadrillage à grands carreaux) et des ciseaux, plusieurs feuilles par groupe.", "Un cube de la classe, et éventuellement des carrés de carton à scotcher.", "Les iPad pour le mode autonome : l’élève colorie 6 carrés, puis touche « Plier » : le dessin se plie en 3D, le cube se ferme ou deux carrés se chevauchent (en jaune)."],
+      temps: [
+        ["Poser la question", "5 min", "Pliez la croix de l’exemple devant la classe pour montrer qu’elle forme un cube. Projette l’énoncé ; un élève le lit, 2 ou 3 autres l’expliquent.", "« Que doit-on trouver ? Combien de carrés ? Comment savoir si un dessin forme un cube ? » (on le plie)"],
+        ["Chercher par 2 ou 3", "15 à 20 min", "Lance le minuteur et observe. Un groupe a deux dessins pareils : « Tourne-le : c’est le même ? » Un groupe imagine sans plier : « Vérifie en pliant. »", "« Ça forme vraiment un cube ? Plie pour voir. »"],
+        ["Mettre en commun", "15 min", "Colorie les 6 carrés du dessin de chaque groupe sur le quadrillage, puis « Ajouter au tableau ». « Plier » montre le pliage à toute la classe. Touche la carte pour la vérifier : la page dit s’il se plie en cube et s’il a déjà été trouvé (tourné ou retourné).", "« C’est le même qu’un autre, tourné ou retourné ? » « Quels carrés deviennent le dessus et le dessous ? »"],
+        ["Retenir", "5 à 10 min", "La trace écrite (le cube : faces, arêtes, sommets ; ce qu’est un patron), puis « Les 11 patrons » (coché : ceux de la classe).", ""]
+      ],
+      reponses: "11 patrons : 6 ont une ligne de 4 carrés (n° 1 à 6), 3 ont une ligne de 3 (n° 7 à 9), 1 est en escalier (n° 10) et 1 a deux lignes de 3 (n° 11). Un dessin tourné ou retourné reste le même patron.",
+      reponsesVisuel: function () { var S = SO(); return '<div class="so-patrons so-patrons--fiche">' + S.PATRONS.map(function (p, i) { return "<figure>" + S.patronPlat(S.rectsDe(p.cells), { carre: 10 }) + "<figcaption>n° " + (i + 1) + "</figcaption></figure>"; }).join("") + "</div>"; },
+      erreurs: [
+        ["4 carrés en carré.", "En pliant, les 4 carrés ne peuvent pas faire le tour du cube.", "« Plie-le : que se passe-t-il au milieu ? »"],
+        ["5 carrés en ligne.", "Le 5e carré revient sur le 1er.", "« Plie la ligne autour du cube : où arrive le 5e carré ? »"],
+        ["Deux carrés du même côté de la ligne de 4.", "Ils deviennent tous les deux le dessus.", "« Quels carrés deviennent le dessus ? Et le dessous ? »"],
+        ["Le même patron compté deux fois.", "Un dessin tourné ou retourné n’est pas reconnu.", "« Découpe-le et retourne-le : c’est le même ? »"]
+      ],
+      niveaux: ["Dessine 6 carrés au hasard, sans vérifier, ou un nombre de carrés différent de 6.", "Reproduit la croix, ou trouve un patron mais garde des dessins qui ne se plient pas.", "Trouve plusieurs patrons en pliant, avec des doublons tournés.", "Trouve des patrons variés, élimine les doublons et explique pourquoi un dessin ne marche pas.", "S’organise pour en trouver beaucoup (les 6 avec une ligne de 4, puis les autres) ou prévoit le pliage sans découper."],
+      reinvestir: ["« Un patron de pavé droit : à quoi peut-il ressembler ? »", "« Avec 4 cubes emboîtables, chacun fabrique un objet différent. Quels objets peut-on fabriquer ? » (Sullivan & Lilburn, p. 129)"]
+    }
+  };
 })();

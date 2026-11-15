@@ -1666,3 +1666,132 @@ a.fo-carte:hover { background: var(--lagon-clair); }
 .or-illu-ligne .or-note { flex: 1 1 260px; margin: 0; }
 .jr .or-illu { display: block; width: 96px; margin: 0 auto 4px; } .jr .or-illu svg { width: 96px; max-width: none; }
 .tq-q .or-illu svg, .tbi .or-illu svg { max-width: 150px; }
+
+/* ===== Les solides (GEOM11, GEOM12) : dessins 3D en SVG ===== */
+.so3d { display: block; max-width: 100%; height: auto; overflow: visible; }
+.so-tournable { cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; }
+.so-tournable:active { cursor: grabbing; }
+.so3d .so-ligne { fill: none; stroke: var(--encre, #1d2744); stroke-width: 2.2; stroke-linejoin: round; stroke-linecap: round; }
+.so3d .so-cache { fill: none; stroke: #6f7f94; stroke-width: 1.4; stroke-dasharray: 5 4; }
+.so3d .so-contour { fill: none; stroke: var(--encre, #1d2744); stroke-width: 2.2; }
+.so3d .so-ligne-boule { fill: none; stroke: #2f7f8a; stroke-width: 1.4; }
+.so3d .so-a-hl { fill: none; stroke: #e0a100; stroke-width: 6; stroke-linecap: round; }
+.so3d .so-a-hl--cache { stroke-dasharray: 7 5; stroke-width: 4; opacity: .85; }
+.so3d .so-tap-a { fill: none; stroke: transparent; stroke-width: 16; stroke-linecap: round; cursor: pointer; }
+.so3d .so-tap-s { fill: transparent; cursor: pointer; }
+.so3d .so-s { fill: var(--encre, #1d2744); }
+.so3d .so-s--cache { fill: #8a97a8; }
+.so3d .so-s--on { fill: #f6c343; stroke: #9a6b00; stroke-width: 2.5; }
+.so3d [data-so-f], .so3d [data-so-courbe] { cursor: pointer; }
+.so3d .so-pf { stroke: var(--encre, #1d2744); stroke-width: 1.6; stroke-linejoin: round; }
+.so3d .so-pf--dbl { stroke: #9a6b00; stroke-width: 3; }
+.so-trace { display: block; max-width: 100%; height: auto; border-radius: 10px; box-shadow: 0 1px 0 rgba(29, 39, 68, .08); }
+.so-trace .so-cahier { fill: #fbfdfd; }
+.so-trace .so-grille { stroke: #bfe0e4; stroke-width: 1; }
+.so-trace .so-peinture { fill: #e8833a; fill-opacity: .88; stroke: #b3561b; stroke-width: 2; stroke-linejoin: round; }
+.so-patron { display: block; max-width: 100%; height: auto; }
+.so-patron .so-pr { fill: #cfeef1; stroke: var(--encre, #1d2744); stroke-width: 1.6; }
+.so-patron .so-pr--dbl { fill: #ffe08a; }
+.so-assemblage { display: block; max-width: 100%; height: auto; }
+.so-assemblage .so-cube-f { stroke: var(--encre, #1d2744); stroke-width: 1.4; stroke-linejoin: round; }
+.so-obj { display: block; width: 84px; height: 84px; }
+/* la séquence « Les solides » : leçon, activités, problèmes ouverts, fiches */
+.so-zone { display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: center; justify-content: center; }
+.so-zone .so3d { flex: none; }
+.so-marque { flex-basis: 100%; text-align: center; margin: 0; font-size: 18px; }
+.so-marque b { display: inline-block; min-width: 1.8em; padding: 2px 8px; border-radius: 999px; background: #ffe08a; color: var(--encre); }
+.so-objet-q > span { display: grid; justify-items: center; gap: 4px; }
+.so-objet-q .so-obj { width: 120px; height: 120px; }
+.so-fl { font: 700 34px/1 var(--font-titre, inherit); color: var(--lagon-fonce, #0b6c79); }
+.so-mystere { display: inline-grid; place-items: center; width: 120px; height: 120px; border-radius: 24px; border: 3px dashed var(--lagon, #0f8e9f); font: 700 64px/1 var(--font-titre, inherit); color: var(--lagon, #0f8e9f); background: #fff; }
+.so-figure { display: block; max-width: 100%; height: auto; }
+.so-exemples { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 10px; margin: 8px 0 10px; }
+.so-ex { font: inherit; display: grid; justify-items: center; align-content: start; gap: 4px; padding: 8px 6px 10px; border-radius: 16px; border: 2px solid var(--trait, #d6e6e9); background: #fff; color: var(--encre); cursor: pointer; }
+.so-ex:hover, .so-ex.is-choisi, .so-ex[aria-pressed="true"] { border-color: var(--lagon, #0f8e9f); box-shadow: 0 0 0 3px rgba(15, 142, 159, .18); }
+.so-ex > span { font: 700 19px/1.2 var(--font-lecture, inherit); min-height: 1.2em; }
+.so-ex small { font-size: 15px; line-height: 1.2; text-align: center; color: var(--encre-doux, #48546b); }
+.so-ex .so-obj { width: 84px; height: 84px; }
+.so-sous { margin: 14px 0 4px; font-size: 19px; }
+.so-duo { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+.so-carte { display: grid; justify-items: center; gap: 6px; padding: 12px; border-radius: 18px; background: #fff; border: 2px solid var(--trait, #d6e6e9); }
+.so-carte > p:first-child { margin: 0; text-align: center; }
+.so-compteur { margin: 0; font-size: 20px; }
+.so-compteur b { display: inline-block; min-width: 1.6em; text-align: center; padding: 1px 8px; border-radius: 999px; background: #ffe08a; }
+.so-boutons, .so-choix-patron { justify-content: center; }
+.so-pli-zone { display: flex; flex-wrap: wrap; gap: 14px 24px; align-items: center; justify-content: center; margin-top: 8px; }
+.so-pli-plat { display: grid; justify-items: center; gap: 4px; }
+.so-pli-plat small { color: var(--encre-doux, #48546b); }
+.so-pli-ctrl { justify-content: center; align-items: center; }
+.so-pli-ctrl input[type="range"] { width: 150px; accent-color: var(--lagon, #0f8e9f); }
+.so-zone--pli { flex-direction: column; }
+.so-jr-ex { display: inline-grid; justify-items: center; gap: 2px; }
+.so-jr-ex small { font: 600 15px/1.2 var(--font-lecture, inherit); }
+.so-jr-six { gap: 6px 10px; }
+.jr .so-patron, .tq .so-patron { max-width: 160px; }
+.so-palette { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 8px; }
+.so-palette .so-ex { padding: 6px 4px 8px; }
+.so-palette .so-ex small { font-size: 13.5px; }
+.so-tampon { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; justify-content: center; }
+.so-feuille { margin: 0; display: grid; justify-items: center; gap: 6px; }
+.so-feuille figcaption { font-size: 16px; text-align: center; max-width: 190px; }
+.so-enonce-trace, .so-enonce-patron { display: block; margin-top: 8px; }
+.so-enonce-trace .so-trace { width: 110px; }
+.so-patron-zone { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: flex-start; justify-content: center; }
+.so-patron-zone > div { display: grid; justify-items: center; gap: 6px; }
+.so-grille { display: grid; grid-template-columns: repeat(6, 42px); grid-template-rows: repeat(5, 42px); background: #fbfdfd; border: 1px solid #bfe0e4; border-radius: 8px; overflow: hidden; }
+.so-case { font: inherit; border: 0; border-right: 1px solid #bfe0e4; border-bottom: 1px solid #bfe0e4; background: transparent; cursor: pointer; padding: 0; }
+.so-case.is-on { background: #8fd0d8; box-shadow: inset 0 0 0 2px var(--encre, #1d2744); }
+.so-case:disabled { cursor: default; }
+.po-vis { display: inline-block; vertical-align: middle; margin-right: 8px; }
+.po-vis .so3d, .po-vis .so-patron { display: inline-block; vertical-align: middle; }
+.po-sol li:has(.po-vis), .po-bilan li:has(.po-vis), .po-vis-liste li { display: flex; align-items: center; }
+.k-carte .po-vis { margin: 0 auto; }
+.so-deux-groupes { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+.so-galerie, .so-patrons { display: flex; flex-wrap: wrap; gap: 10px 14px; }
+.so-galerie figure, .so-patrons figure { margin: 0; display: grid; justify-items: center; gap: 4px; padding: 6px 8px; border-radius: 12px; background: #f1f4f6; opacity: .7; }
+.so-galerie figure.trouve, .so-patrons figure.trouve { background: #e2f5e9; opacity: 1; box-shadow: inset 0 0 0 2px var(--reussite, #2f8f4e); }
+.so-galerie figcaption, .so-patrons figcaption { font-size: 15px; text-align: center; max-width: 120px; }
+.so-patrons--fiche figure { opacity: 1; background: none; }
+.so-feuille-grille { display: grid; place-items: center; height: 150mm; border: 1px solid #9fb3b8; border-radius: 4px;
+  background-image: linear-gradient(#cfe3e6 1px, transparent 1px), linear-gradient(90deg, #cfe3e6 1px, transparent 1px); background-size: 26px 26px; }
+.so-feuille-grille .so-patron { align-self: start; justify-self: start; margin: 25px; }
+.so-feuille-croix .so-pr { fill: #e5e9ec; }
+.f-encadre { border: 2px solid var(--lagon, #0f8e9f); border-radius: 14px; padding: 10px 14px; margin: 12px 0; }
+/* fiche d’exercices */
+.ex-patrons { display: flex; flex-wrap: wrap; gap: 8px 28px; align-items: center; justify-content: space-around; }
+.ex-objet p { line-height: 1.5; }
+.ex-patron { display: block; }
+.ex-patron-n { display: inline-block; }
+.tb-cercle.vu .tb-cible:has(svg) { border-radius: 20px; padding: 4px; }
+.ex-objet { display: grid; justify-items: center; gap: 2px; text-align: center; }
+.ex-objet .so-obj { width: 64px; height: 64px; }
+.ex-objet small { font-size: 13px; }
+.ex-objet p { margin: 2px 0 0; }
+.ex-cubes { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.so-ex-table { border-collapse: collapse; width: 100%; }
+.so-ex-table th, .so-ex-table td { border: 1px solid #9fb3b8; padding: 5px 8px; text-align: center; }
+.so-ex-table tbody th { text-align: left; }
+.so-ex-tab { max-width: 100%; overflow-x: auto; }
+.so-ex-table .ex-ligne { min-width: 0; width: 88%; }
+@media (max-width: 520px) { .so-ex-table th, .so-ex-table td { padding: 4px 4px; font-size: 15px; } }
+/* patrons à imprimer : une page A4 par patron */
+.so-patrons-imprimer { display: grid; gap: 24px; }
+.so-page-patron { background: #fff; padding: 12px; border-radius: 12px; overflow-x: auto; }
+.so-page-patron h2 { margin: 0 0 4px; }
+.so-page-patron p { margin: 0 0 8px; }
+.so-imprime { display: block; max-width: 100%; height: auto; }
+.so-imp-face { fill: #eef8f9; }
+.so-imp-tab { fill: #dde3e8; stroke: #1d2744; stroke-width: .5; stroke-linejoin: round; }
+.so-imp-coupe { stroke: #1d2744; stroke-width: .6; fill: none; stroke-linecap: square; }
+.so-imp-pli { stroke: #1d2744; stroke-width: .35; stroke-dasharray: 2.2 1.6; fill: none; }
+@media print {
+  .so-page-patron { break-after: page; page-break-after: always; padding: 0; }
+  .so-page-patron:last-child { break-after: auto; page-break-after: auto; }
+  .so-imprime { max-width: none; }
+  .so-feuille-grille { height: 112mm; }
+}
+@media (max-width: 520px) {
+  .so-grille { grid-template-columns: repeat(6, 36px); grid-template-rows: repeat(5, 36px); }
+  .so-exemples { grid-template-columns: repeat(auto-fill, minmax(98px, 1fr)); }
+}
+@media (max-width: 520px) { .ex-grille:has(> .ex-objet) { grid-template-columns: minmax(0, 1fr); } }
