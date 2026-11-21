@@ -4291,7 +4291,7 @@
      mots, phrases et dictées écrits par Claude d’après les mots des leçons [PROPOSITION]. Jamais de mot mal écrit montré (Ouzoulias, D-132).
      Marques dans les mots : [x] orange (la régularité, comme dans les leçons), {x} en gras, |x| jaune moutarde (attention).
      ========================================================================================== */
-  var ORTH_IDS = ["nombres", "muettes", "egroupe"], OR = {}, OR_VU = {}, OR_TIRET = 79;
+  var ORTH_IDS = ["nombres", "muettes", "egroupe"], OR = {}, OR_VU = {};
   function orMarque(s) { return esc(s).replace(/\[([^\]]+)\]/g, '<span class="mi-c">$1</span>').replace(/\{([^}]+)\}/g, "<b>$1</b>").replace(/\|([^|]+)\|/g, '<span class="mi-m">$1</span>'); }
   function orPlain(s) { return String(s).replace(/[\[\]{}|]/g, ""); }
   function orCibles(s) { return esc(s).replace(/\[([^\]]+)\]/g, "<b>$1</b>"); }
@@ -4343,6 +4343,7 @@
      l’écriture en lettres n’apparaît qu’une fois le nombre bien rangé (jamais de mot mal écrit) ; un nombre peut aller dans 2 colonnes */
   var OR_TRI_COLS = [
     { k: "ze", t: "-ze", L: [[11, "on[ze]"], [12, "dou[ze]"], [13, "tr{ei}[ze]"], [14, "quator[ze]"], [15, "quin[ze]"], [16, "s{ei}[ze]"]] },
+    { k: "ei", t: "ei", L: [[13, "tr[ei]ze"], [16, "s[ei]ze"]] },
     { k: "ante", t: "-ante", L: [[40, "quar[ante]"], [50, "cinqu[ante]"], [60, "soix[ante]"]] },
     { k: "en", t: "en", L: [[30, "tr[en]te"], [100, "c[en]t"]] },
     { k: "qu", t: "qu-", L: [[4, "[qu]atre"], [14, "[qu]atorze"], [40, "[qu]arante"], [15, "[qu]inze"], [50, "{c}in[qu]ante"]], piege: [[5, "{c}in|q|"]] },
@@ -4388,11 +4389,45 @@
       '<div class="or-tri' + (T.sel ? " choisi" : "") + '">' + (reserve ? '<div class="or-tri-reserve">' + reserve + "</div>" : "") + '<div class="or-tri-retour" aria-live="polite">' + msg + "</div>" +
       '<div class="or-tri-cols">' + cols + "</div></div>" + '<p class="or-tri-compte">' + fait + " / " + total + "</p>";
   }
+  /* « Je compose le nombre » : un nombre en chiffres tiré au hasard ; l’élève touche les mots et les tirets pour l’écrire en lettres.
+     Toutes les étiquettes sont bien écrites ; la réponse n’est montrée qu’à la demande, après 2 essais. */
+  var OR_TC_MOTS = [["un", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf"], ["dix", "onze", "douze", "treize", "quatorze", "quinze", "seize"], ["vingt", "trente", "quarante", "cinquante", "soixante", "et"]];
+  var OR_TC_NB = []; (function () { for (var k = 17; k <= 79; k++) if (k % 10 || k === 70) OR_TC_NB.push(k); })();
+  var OR_TC = { n: null, rep: [], essais: 0, msg: null, voir: false, ok: 0 };
+  function orTcTirer() { var n; do { n = OR_TC_NB[Math.floor(Math.random() * OR_TC_NB.length)]; } while (n === OR_TC.n);
+    OR_TC.n = n; OR_TC.rep = []; OR_TC.essais = 0; OR_TC.msg = null; OR_TC.voir = false; }
+  function orTcMontre(L) { return L.map(function (t) { return t === "-" ? '<span class="mi-c or-tiret">-</span>' : esc(t); }).join(""); }
+  function orTcVerifier() {
+    var T = OR_TC, en = langue === "en", cible = orNombre(T.n), mots = T.rep.filter(function (t) { return t !== "-"; });
+    if (!T.rep.length) { T.msg = { t: "info", x: en ? "First touch the words and the hyphens." : "Touche d’abord les mots et les tirets." }; return; }
+    if (T.rep.join("") === cible) { T.ok++; T.msg = { t: "ok" }; return; }
+    T.essais++;
+    if (mots.join("-") === cible) T.msg = { t: "revoir", x: en ? "The words are right! Check the hyphens: one hyphen <b>between every word</b>, and none at the start or the end." : "Les mots sont justes ! Vérifie les tirets : un tiret <b>entre chaque mot</b>, ni au début ni à la fin." };
+    else if (T.n >= 70) T.msg = { t: "revoir", x: en ? "From 70 to 79, we start from soixante: <b>" + T.n + "</b> = 60 + " + (T.n - 60) + "." : "De 70 à 79, on part de soixante : <b>" + T.n + "</b> = 60 + " + (T.n - 60) + "." };
+    else if (T.n % 10 === 1 && T.n > 20) T.msg = { t: "revoir", x: en ? "For 21, 31, 41, 51 and 61, we say a little word between the tens and un. Say the number in your head." : "Pour 21, 31, 41, 51 et 61, on dit un petit mot entre la dizaine et un. Dis le nombre dans ta tête." };
+    else T.msg = { t: "revoir", x: en ? "It isn’t <b>" + T.n + "</b> yet. Say the number in your head, word by word, and touch the words in order." : "Ce n’est pas encore <b>" + T.n + "</b>. Dis le nombre dans ta tête, mot par mot, et touche les mots dans l’ordre." };
+  }
+  function orTcBloc(en) {
+    var T = OR_TC, intro = "<p>Je mets des <b>tirets</b> entre chaque mot : vingt-et-un, soixante-dix-neuf</p>";
+    if (!T.n) return intro + '<div class="coco-row"><button class="coco-btn" type="button" data-action="or-tc-tirer">' + (en ? "Give me a number" : "Un nombre au hasard") + "</button></div>";
+    var fini = T.msg && T.msg.t === "ok", ferme = fini || T.voir ? " disabled" : "";
+    var etiq = function (w) { return '<button type="button" class="or-tc-mot' + (w === "-" ? " or-tc-tiret" : "") + '" data-action="or-tc-mot" data-v="' + esc(w) + '"' + ferme + ">" + esc(w) + "</button>"; };
+    var msg = "";
+    if (fini) msg = retour("bravo", en ? "Well done!" : "Bravo !", "<b>" + T.n + "</b> = " + orTcMontre(T.rep), '<button class="coco-btn" type="button" data-action="or-tc-tirer">' + (en ? "Another number" : "Un autre nombre") + "</button>");
+    else if (T.voir) msg = retour("astuce", en ? "Here is how to write it" : "Voici comment l’écrire", en ? "Read it carefully, then try another number." : "Lis-le bien, puis essaie un autre nombre.") + '<div class="coco-row"><button class="coco-btn" type="button" data-action="or-tc-tirer">' + (en ? "Another number" : "Un autre nombre") + "</button></div>";
+    else if (T.msg && T.msg.t === "revoir") msg = retour("revoir", en ? "Not yet…" : "Pas encore…", T.msg.x, T.essais >= 2 ? '<button class="coco-btn coco-btn--secondaire" type="button" data-action="or-tc-voir">' + (en ? "See the answer" : "Voir la réponse") + "</button>" : "");
+    else if (T.msg) msg = '<p class="or-tri-msg" role="status">' + T.msg.x + "</p>";
+    return intro + '<div class="or-tc">' +
+      '<p class="or-tc-cible"><span>' + (en ? "Write in words:" : "Écris en lettres :") + "</span> <b>" + T.n + "</b></p>" +
+      '<div class="or-tc-ligne' + (T.rep.length ? "" : " vide") + '" aria-live="polite">' + (T.rep.length ? orTcMontre(T.rep) : (en ? "Touch the words and the hyphens…" : "Touche les mots et les tirets…")) + "</div>" +
+      (fini || T.voir ? "" : '<div class="coco-row or-tc-outils"><button class="coco-btn coco-btn--secondaire" type="button" data-action="or-tc-retirer"' + (T.rep.length ? "" : " disabled") + ">" + (en ? "Remove the last one" : "Enlever le dernier") + '</button><button class="coco-btn coco-btn--secondaire" type="button" data-action="or-tc-vider"' + (T.rep.length ? "" : " disabled") + ">" + (en ? "Clear" : "Tout effacer") + '</button><button class="coco-btn" type="button" data-action="or-tc-verifier">' + (en ? "Check" : "Vérifier") + "</button></div>") +
+      '<div class="or-tri-retour">' + msg + "</div>" +
+      '<div class="or-tc-etiquettes">' + OR_TC_MOTS.map(function (r) { return '<div class="or-tc-rang">' + r.map(etiq).join("") + "</div>"; }).join("") + '<div class="or-tc-rang">' + etiq("-") + "</div></div>" +
+      (T.ok ? '<p class="or-tri-compte">' + (en ? "Numbers written: " : "Nombres réussis : ") + T.ok + "</p>" : "") + "</div>";
+  }
   OR.nombres.blocs = function (en) {
-    var tirets = [21, 35, 46, 57, 64, 71, 79], n = OR_TIRET, mot = orNombre(n);
     return [[en ? "I sort the numbers" : "Je range les nombres", orTriBloc(en)],
-      [en ? "Hyphens" : "Les tirets", "<p>Je mets des <b>tirets</b> entre chaque mot : vingt-et-un, soixante-dix-neuf</p>" + '<div class="coco-row or-tirets">' + tirets.map(function (k) { return '<button class="coco-btn' + (k === n ? "" : " coco-btn--secondaire") + '" type="button" data-action="or-tiret" data-v="' + k + '" aria-pressed="' + (k === n) + '">' + k + "</button>"; }).join("") + "</div>" +
-        '<p class="or-tiret-mot"><b>' + n + "</b> = " + esc(mot).split("-").join('<span class="mi-c or-tiret">-</span>') + "</p>"]];
+      [en ? "Hyphens: I write the number" : "Les tirets : j’écris le nombre", orTcBloc(en)]];
   };
   OR.nombres.jr = function (en) { return [
     { t: "-ze", svg: '<div class="lx-illu lx-col jr-phrases">' + lxPop('<span class="jr-ph">' + orMarque("11 on[ze] · 12 dou[ze] · 13 tr{ei}[ze]") + "</span>", 0) + lxPop('<span class="jr-ph">' + orMarque("14 quator[ze] · 15 quin[ze] · 16 s{ei}[ze]") + "</span>", 2) + "</div>", txt: ["11 onze 12 douze", "13 treize 14 quatorze", "15 quinze 16 seize"] },
@@ -5217,7 +5252,12 @@
   }
   function actionOrth(a, el) {
     if (a === "or-voir") OR_VU[el.dataset.v] = !OR_VU[el.dataset.v];
-    else if (a === "or-tiret") OR_TIRET = +el.dataset.v;
+    else if (a === "or-tc-tirer") orTcTirer();
+    else if (a === "or-tc-mot") { OR_TC.rep.push(el.dataset.v); if (OR_TC.msg && OR_TC.msg.t !== "revoir") OR_TC.msg = null; }
+    else if (a === "or-tc-retirer") OR_TC.rep.pop();
+    else if (a === "or-tc-vider") OR_TC.rep = [];
+    else if (a === "or-tc-verifier") orTcVerifier();
+    else if (a === "or-tc-voir") { OR_TC.voir = true; OR_TC.rep = orNombre(OR_TC.n).split(/(-)/).filter(Boolean); }
     else if (a === "or-tri-nb") { var n = +el.dataset.v; OR_TRI.sel = OR_TRI.sel === n ? null : n; OR_TRI.msg = null; OR_TRI.dernier = null; }
     else if (a === "or-tri-col") { if (!OR_TRI.sel) { OR_TRI.msg = { t: "info", x: langue === "en" ? "First touch a number." : "Touche d’abord un nombre." }; OR_TRI.dernier = null; } else orTriPoser(OR_TRI.sel, el.dataset.v); }
     else if (a === "or-tri-zero") OR_TRI = { sel: null, place: {}, msg: null, dernier: null };
@@ -5294,7 +5334,7 @@
       prolonger: F.prolonger, extra: orDicteesFiche(id), sources: F.sources }); }
   var OR_FICHE = {
     nombres: { erreurs: ["Oublier les tirets, ou n’en mettre qu’un : « vingt et un », « soixante dix-neuf » ; la leçon demande un tiret entre chaque mot.", "Écrire la fin -ze comme on l’entend (« -se ») : onze, douze… seize finissent par -ze.", "Oublier les lettres muettes : deux, trois, sept, huit, vingt, cent.", "Confondre trente et les mots en -ante (« trante ») ; écrire cinq sans q.", "Confondre quatorze, quarante et quatre, ou six, seize et soixante, à l’oral comme à l’écrit."],
-      conseils: ["Code de la leçon : la partie qui se répète en orange, les points d’attention en jaune moutarde.", "Revoir la leçon : les élèves rangent les nombres écrits en chiffres dans les 6 colonnes de la carte mentale (-ze, -ante, en, qu-, lettres muettes, -x) ; l’écriture en lettres n’apparaît qu’une fois le nombre bien rangé. 14, 15, 40, 50, 60 et 100 vont dans deux colonnes ; 30 est le piège de -ante, 5 celui de qu-."], prolonger: ["Écrire les nombres en lettres sur les chèques fictifs de la classe (monnaie) ou dans les problèmes.", "Repérer les nombres écrits en lettres dans les albums et les documents de la classe.", "Plus tard : quatre-vingts, deux-cents (le s de vingt et de cent)."],
+      conseils: ["Code de la leçon : la partie qui se répète en orange, les points d’attention en jaune moutarde.", "Revoir la leçon : les élèves rangent les nombres écrits en chiffres dans les 7 colonnes de la carte mentale (-ze, ei, -ante, en, qu-, lettres muettes, -x) ; l’écriture en lettres n’apparaît qu’une fois le nombre bien rangé. 13, 14, 15, 16, 40, 50, 60 et 100 vont dans deux colonnes ; 30 est le piège de -ante, 5 celui de qu-."], prolonger: ["Écrire les nombres en lettres sur les chèques fictifs de la classe (monnaie) ou dans les problèmes.", "Repérer les nombres écrits en lettres dans les albums et les documents de la classe.", "Plus tard : quatre-vingts, deux-cents (le s de vingt et de cent)."],
       sources: "Sources : leçon de classe « Les nombres en lettres » (2026) ; démarche de Laura MARIE, « Mon répertoire de dictées par régularités » (L’Atelier de l’orthophoniste, 2025), aucune dictée reprise ; programmes de Nouvelle-Calédonie 2021, repères de progressivité de la DENC (cycle 2, français p. 30, mathématiques p. 4 et 5)." },
     muettes: { erreurs: ["Écrire le mot sans sa consonne muette (« frui », « gran ») : faire chercher un mot de la même famille (fruité, grande).", "Choisir la mauvaise consonne (t, s ou d) : le mot de la même famille la fait entendre.", "Chercher un mot de la même famille pour le x : ça ne marche pas (doux, heureux) ; les mots en -eux, -oux s’apprennent.", "Ajouter une consonne muette là où il n’y en a pas : vérifier avec le féminin."],
       conseils: ["Code de la leçon : la consonne muette en orange."], prolonger: ["Construire une affiche de la classe : un mot, un mot de sa famille (petit / petite, sport / sportif).", "Jeu oral : « je dis le féminin, tu trouves la consonne muette ».", "Revoir les lettres muettes des nombres (deux, trois, vingt, cent) avec la séquence « Les nombres en lettres »."],
