@@ -1840,3 +1840,8 @@ a.fo-carte:hover { background: var(--lagon-clair); }
 .or-tc-mot:disabled { opacity: .45; cursor: default; }
 .or-tc-tiret { min-width: 64px; font: 700 30px/1 var(--font-texte); color: var(--mot-commun); border-color: var(--mot-commun); }
 @media (max-width: 600px) { .or-tc-ligne { font-size: 24px; } .or-tc-mot { font-size: 19px; padding: 7px 9px; } .or-tc-cible b { font-size: 36px; } }
+/* couleurs de la numération de la classe : unités bleu, dizaines rouge (centaines vert) */
+:root { --num-u: #2456a6; --num-d: #c0262d; --num-c: #3a7419; }
+.or-tc-mot.or-tc-u { background: var(--num-u); border-color: var(--num-u); color: #fff; }
+.or-tc-mot.or-tc-d { background: var(--num-d); border-color: var(--num-d); color: #fff; }
+span.or-tc-u { color: var(--num-u); } span.or-tc-d { color: var(--num-d); }

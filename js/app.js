@@ -4396,7 +4396,8 @@
   var OR_TC = { n: null, rep: [], essais: 0, msg: null, voir: false, ok: 0 };
   function orTcTirer() { var n; do { n = OR_TC_NB[Math.floor(Math.random() * OR_TC_NB.length)]; } while (n === OR_TC.n);
     OR_TC.n = n; OR_TC.rep = []; OR_TC.essais = 0; OR_TC.msg = null; OR_TC.voir = false; }
-  function orTcMontre(L) { return L.map(function (t) { return t === "-" ? '<span class="mi-c or-tiret">-</span>' : esc(t); }).join(""); }
+  function orTcCoul(w) { return OR_TC_MOTS[0].indexOf(w) >= 0 ? "or-tc-u" : /^(dix|vingt|trente|quarante|cinquante|soixante)$/.test(w) ? "or-tc-d" : ""; }
+  function orTcMontre(L) { return L.map(function (t) { var c = orTcCoul(t); return t === "-" ? '<span class="mi-c or-tiret">-</span>' : c ? '<span class="' + c + '">' + esc(t) + "</span>" : esc(t); }).join(""); }
   function orTcVerifier() {
     var T = OR_TC, en = langue === "en", cible = orNombre(T.n), mots = T.rep.filter(function (t) { return t !== "-"; });
     if (!T.rep.length) { T.msg = { t: "info", x: en ? "First touch the words and the hyphens." : "Touche d’abord les mots et les tirets." }; return; }
@@ -4411,7 +4412,8 @@
     var T = OR_TC, intro = "<p>Je mets des <b>tirets</b> entre chaque mot : vingt-et-un, soixante-dix-neuf</p>";
     if (!T.n) return intro + '<div class="coco-row"><button class="coco-btn" type="button" data-action="or-tc-tirer">' + (en ? "Give me a number" : "Un nombre au hasard") + "</button></div>";
     var fini = T.msg && T.msg.t === "ok", ferme = fini || T.voir ? " disabled" : "";
-    var etiq = function (w) { return '<button type="button" class="or-tc-mot' + (w === "-" ? " or-tc-tiret" : "") + '" data-action="or-tc-mot" data-v="' + esc(w) + '"' + ferme + ">" + esc(w) + "</button>"; };
+    /* couleurs de la numération de la classe : unités en bleu, dizaines en rouge */
+    var etiq = function (w) { return '<button type="button" class="or-tc-mot' + (w === "-" ? " or-tc-tiret" : orTcCoul(w) ? " " + orTcCoul(w) : "") + '" data-action="or-tc-mot" data-v="' + esc(w) + '"' + ferme + ">" + esc(w) + "</button>"; };
     var msg = "";
     if (fini) msg = retour("bravo", en ? "Well done!" : "Bravo !", "<b>" + T.n + "</b> = " + orTcMontre(T.rep), '<button class="coco-btn" type="button" data-action="or-tc-tirer">' + (en ? "Another number" : "Un autre nombre") + "</button>");
     else if (T.voir) msg = retour("astuce", en ? "Here is how to write it" : "Voici comment l’écrire", en ? "Read it carefully, then try another number." : "Lis-le bien, puis essaie un autre nombre.") + '<div class="coco-row"><button class="coco-btn" type="button" data-action="or-tc-tirer">' + (en ? "Another number" : "Un autre nombre") + "</button></div>";
