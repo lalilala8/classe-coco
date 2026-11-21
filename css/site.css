@@ -1795,3 +1795,34 @@ a.fo-carte:hover { background: var(--lagon-clair); }
   .so-exemples { grid-template-columns: repeat(auto-fill, minmax(98px, 1fr)); }
 }
 @media (max-width: 520px) { .ex-grille:has(> .ex-objet) { grid-template-columns: minmax(0, 1fr); } }
+/* « Je range les nombres » (leçon des nombres en lettres) */
+.or-tri-reserve { display: flex; flex-wrap: wrap; gap: 10px; margin: 8px 0 10px; }
+.or-tri-nb { display: grid; justify-items: center; gap: 4px; min-width: 64px; padding: 8px 10px 6px; border: 2px solid var(--lagon); border-radius: 14px; background: #fff; color: var(--encre); font: 700 26px/1 var(--font-texte); cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; }
+.or-tri-nb[aria-pressed="true"] { background: var(--lagon); color: #fff; box-shadow: 0 0 0 4px var(--soutien-clair, #fff3c4); }
+.or-tri-pts { display: flex; gap: 5px; }
+.or-tri-pts i { width: 9px; height: 9px; border-radius: 50%; border: 2px solid currentColor; opacity: .75; }
+.or-tri-pts i.plein { background: currentColor; opacity: 1; }
+.or-tri-fantome { position: fixed; z-index: 50; pointer-events: none; transform: translate(-50%, -60%) rotate(-4deg); box-shadow: 0 6px 16px rgba(0,0,0,.2); }
+.or-tri-retour .coco-retour { margin: 4px 0 10px; }
+.or-tri-msg { margin: 4px 0 10px; font-weight: 500; color: var(--encre-douce); }
+.or-tri-msg.ok { color: var(--encre); }
+.or-tri-cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.or-tri-col { border: 2px solid var(--trait, #c9d3e0); border-radius: 14px; background: #fff; padding: 0 0 8px; min-height: 120px; cursor: pointer; }
+.or-tri.choisi .or-tri-col { border-style: dashed; border-color: var(--lagon); }
+.or-tri-col.survol { background: var(--papier); border-style: solid; border-color: var(--lagon); }
+.or-tri-titre { display: block; width: 100%; border: 0; border-radius: 12px 12px 0 0; background: var(--papier); padding: 8px 6px; font: 700 22px/1.1 var(--font-texte); color: var(--mot-commun); cursor: pointer; }
+.or-tri-col ul { list-style: none; margin: 6px 0 0; padding: 0 10px; display: grid; gap: 4px; }
+.or-tri-col li { font: 500 22px/1.3 var(--font-lecture); }
+.or-tri-col li b { font-family: var(--font-texte); }
+.or-tri-aussi { font-size: .8em; }
+.or-tri-piege { border-top: 1px dashed var(--trait, #c9d3e0); padding-top: 4px; }
+.or-tri-piege .or-attention { font: 600 15px var(--font-texte); }
+.or-tri-compte { text-align: right; color: var(--encre-douce); margin: 6px 0 0; }
+@media (max-width: 600px) { .or-tri-cols { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; } .or-tri-nb { min-width: 54px; font-size: 22px; } .or-tri-titre { font-size: 18px; } .or-tri-col li { font-size: 18px; } }
+.nw { white-space: nowrap; }
+/* retour compact pendant le tri, pour garder les colonnes à l’écran */
+.or-tri-retour .coco-retour { box-shadow: none; padding: 8px 14px; gap: 12px; }
+.or-tri-retour .coco-retour img.coco-retour-perso { width: 60px; }
+.or-tri-retour .coco-retour h4 { font-size: 20px; line-height: 24px; margin: 0 0 2px; }
+.or-tri-retour .coco-retour p { font-size: 16px; line-height: 22px; }
+.or-tri-retour .coco-retour-actions:empty { display: none; }

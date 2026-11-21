@@ -4339,13 +4339,58 @@
       { n: 3, titre: "Le marché", t: "Samedi, Maman va au marché. Elle achète [seize] letchis, [cinq] papayes et [trente-deux] bananes. Le petit sac coûte [quarante] francs. Elle paie avec une pièce de [cinquante] francs." }],
     objectifs: ["L’élève est capable d’écrire en lettres les nombres étudiés (de 0 à 79, et cent).", "L’élève écrit les fins -ze et -ante, le début qu- et les lettres muettes des nombres.", "L’élève met des tirets entre chaque mot d’un nombre écrit en lettres."] };
   function orNbCartes(L) { return L.map(function (x) { return [String(x[0]), x[1]]; }); }
+  /* « Je range les nombres » : l’élève range les nombres écrits en chiffres dans les colonnes de la carte mentale ;
+     l’écriture en lettres n’apparaît qu’une fois le nombre bien rangé (jamais de mot mal écrit) ; un nombre peut aller dans 2 colonnes */
+  var OR_TRI_COLS = [
+    { k: "ze", t: "-ze", L: [[11, "on[ze]"], [12, "dou[ze]"], [13, "tr{ei}[ze]"], [14, "quator[ze]"], [15, "quin[ze]"], [16, "s{ei}[ze]"]] },
+    { k: "ante", t: "-ante", L: [[40, "quar[ante]"], [50, "cinqu[ante]"], [60, "soix[ante]"]] },
+    { k: "en", t: "en", L: [[30, "tr[en]te"], [100, "c[en]t"]] },
+    { k: "qu", t: "qu-", L: [[4, "[qu]atre"], [14, "[qu]atorze"], [40, "[qu]arante"], [15, "[qu]inze"], [50, "{c}in[qu]ante"]], piege: [[5, "{c}in|q|"]] },
+    { k: "muettes", t: { fr: "lettres muettes", en: "silent letters" }, L: [[2, "deu[x]"], [3, "troi[s]", "troi[s]ième"], [7, "se[p]t"], [8, "[h]uit"], [20, "vin[gt]"], [100, "{c}en[t]", "cen[t]aine"]] },
+    { k: "x", t: "-x", L: [[6, "si[x]"], [60, "soi[x]ante"], [10, "di[x]"]] }];
+  var OR_TRI_NB = [14, 3, 60, 11, 30, 5, 20, 16, 40, 8, 12, 100, 6, 50, 2, 15, 7, 13, 4, 10];
+  var OR_TRI = { sel: null, place: {}, msg: null, dernier: null };
+  function orTriCols(n) { return OR_TRI_COLS.filter(function (c) { return c.L.concat(c.piege || []).some(function (x) { return x[0] === n; }); }).map(function (c) { return c.k; }); }
+  function orTriFini(n) { return orTriCols(n).every(function (k) { return OR_TRI.place[n + "|" + k]; }); }
+  function orTriNom(c, en) { return typeof c.t === "string" ? c.t : (en ? c.t.en : c.t.fr); }
+  function orTriPoser(n, k) {
+    var en = langue === "en", c = OR_TRI_COLS.filter(function (x) { return x.k === k; })[0]; OR_TRI.dernier = null; if (!c || !n) return;
+    if (OR_TRI.place[n + "|" + k]) { OR_TRI.msg = { t: "info", x: en ? "<b>" + n + "</b> is already in this column." : "<b>" + n + "</b> est déjà rangé dans cette colonne." }; return; }
+    if (orTriCols(n).indexOf(k) >= 0) {
+      OR_TRI.place[n + "|" + k] = true; OR_TRI.dernier = n + "|" + k; OR_TRI.sel = orTriFini(n) ? null : n;
+      var reste = orTriCols(n).filter(function (j) { return !OR_TRI.place[n + "|" + j]; }).length;
+      OR_TRI.msg = { t: "ok", x: reste ? (en ? "Yes! <b>" + n + "</b> also goes in another column. Find it!" : "Oui ! <b>" + n + "</b> va aussi dans une autre colonne. Trouve-la !")
+        : (k === "qu" && n === 5 ? (en ? "Yes, but careful: cinq ends with q, without u." : "Oui, mais attention : cinq finit par q, sans u.") : (en ? "Yes!" : "Oui !")) };
+      return; }
+    OR_TRI.sel = n;
+    var nom = '<span class="nw">« ' + esc(orTriNom(c, en)) + " »</span>", aide;
+    if (n === 30 && k === "ante") aide = en ? "Careful, it’s a trap! 30 sounds like the <span class=\"nw\">-ante</span> numbers, but it is written differently. Look for another column." : "Attention, c’est un piège ! 30 se dit comme les nombres en <span class=\"nw\">-ante</span>, mais il s’écrit autrement. Cherche une autre colonne.";
+    else if (n === 2 && k === "x") aide = en ? "Yes, deux is written with an x! But we don’t hear this x: look for the column of letters we don’t hear." : "Oui, deux s’écrit avec un x ! Mais ce x ne s’entend pas : cherche la colonne des lettres qu’on n’entend pas.";
+    else aide = (en ? "<b>" + n + "</b> doesn’t go in the " + nom + " column. Say the number in your head and look for another column." : "<b>" + n + "</b> ne va pas dans la colonne " + nom + ". Dis le nombre dans ta tête et cherche une autre colonne.");
+    OR_TRI.msg = { t: "revoir", x: aide };
+  }
+  function orTriBloc(en) {
+    var T = OR_TRI, total = 0, fait = 0;
+    OR_TRI_NB.forEach(function (n) { orTriCols(n).forEach(function (k) { total++; if (T.place[n + "|" + k]) fait++; }); });
+    var reserve = OR_TRI_NB.filter(function (n) { return !orTriFini(n); }).map(function (n) {
+      var pts = orTriCols(n).map(function (k) { return '<i class="' + (T.place[n + "|" + k] ? "plein" : "") + '"></i>'; }).join("");
+      return '<button type="button" class="or-tri-nb" data-action="or-tri-nb" data-v="' + n + '" data-tri-n="' + n + '" aria-pressed="' + (T.sel === n) + '"><span>' + n + '</span><span class="or-tri-pts" aria-hidden="true">' + pts + "</span></button>"; }).join("");
+    var cols = OR_TRI_COLS.map(function (c) {
+      var ligne = function (x, piege) { var cle = x[0] + "|" + c.k; if (!T.place[cle]) return "";
+        return '<li class="' + (T.dernier === cle ? "coco-anim-pop" : "") + (piege ? " or-tri-piege" : "") + '">' + (piege ? '<span class="or-attention">⚠ ' + (en ? "Careful:" : "Attention :") + "</span> " : "") + (piege ? '<span class="nw">' : "") + "<b>" + x[0] + "</b> " + orMarque(x[1]) + (piege ? "</span>" : "") + (x[2] ? ' <span class="or-tri-aussi">(' + orMarque(x[2]) + ")</span>" : "") + "</li>"; };
+      var lignes = c.L.map(function (x) { return ligne(x); }).join("") + (c.piege || []).map(function (x) { return ligne(x, true); }).join("");
+      return '<div class="or-tri-col" data-action="or-tri-col" data-v="' + c.k + '" data-tri-col="' + c.k + '"><button type="button" class="or-tri-titre" data-action="or-tri-col" data-v="' + c.k + '">' + esc(orTriNom(c, en)) + "</button><ul>" + lignes + "</ul></div>"; }).join("");
+    var msg = "";
+    if (fait === total) msg = retour("bravo", en ? "Well done!" : "Bravo !", en ? "All the numbers are sorted. Read each column again." : "Tous les nombres sont rangés. Relis chaque colonne.", '<button class="coco-btn coco-btn--secondaire" type="button" data-action="or-tri-zero">' + (en ? "Start again" : "Recommencer") + "</button>");
+    else if (T.msg && T.msg.t === "revoir") msg = retour("revoir", en ? "Not yet…" : "Pas encore…", T.msg.x);
+    else if (T.msg) msg = '<p class="or-tri-msg' + (T.msg.t === "ok" ? " ok" : "") + '" role="status">' + T.msg.x + "</p>";
+    return "<p>" + (en ? "Touch a number, then touch the column where it goes (you can also drag it). A number can go in <b>two columns</b>: the dots show how many." : "Touche un nombre, puis la colonne où il va (tu peux aussi le faire glisser). Un nombre peut aller dans <b>deux colonnes</b> : les points te disent combien.") + "</p>" +
+      '<div class="or-tri' + (T.sel ? " choisi" : "") + '">' + (reserve ? '<div class="or-tri-reserve">' + reserve + "</div>" : "") + '<div class="or-tri-retour" aria-live="polite">' + msg + "</div>" +
+      '<div class="or-tri-cols">' + cols + "</div></div>" + '<p class="or-tri-compte">' + fait + " / " + total + "</p>";
+  }
   OR.nombres.blocs = function (en) {
     var tirets = [21, 35, 46, 57, 64, 71, 79], n = OR_TIRET, mot = orNombre(n);
-    return [[en ? "-ze and -ante" : "-ze et -ante", "<p><b>-ze</b> : " + (en ? "tap a number to see how it is written." : "touche un nombre pour voir comment il s’écrit.") + "</p>" + orCartes("nombres", orNbCartes([[11, "on[ze]"], [12, "dou[ze]"], [13, "tr{ei}[ze]"], [14, "quator[ze]"], [15, "quin[ze]"], [16, "s{ei}[ze]"]])) +
-        "<p><b>-ante</b></p>" + orCartes("nombres", orNbCartes([[40, "quar[ante]"], [50, "cinqu[ante]"], [60, "soix[ante]"]])) + '<p class="or-attention">⚠ ' + (en ? "Careful:" : "Attention :") + "</p>" + orCartes("nombres", orNbCartes([[30, "tr|en|te"], [100, "c|en|t"]]))],
-      [en ? "qu-, silent letters and -x" : "qu-, lettres muettes et -x", "<p><b>qu-</b></p>" + orCartes("nombres", orNbCartes([[4, "[qu]atre"], [14, "[qu]atorze"], [40, "[qu]arante"], [15, "[qu]inze"], [50, "{c}in[qu]ante"]])) + '<p class="or-attention">⚠ ' + (en ? "Careful:" : "Attention :") + "</p>" + orCartes("nombres", orNbCartes([[5, "{c}in|q|"]])) +
-        "<p><b>" + (en ? "Silent letters" : "Lettres muettes") + "</b></p>" + orCartes("nombres", orNbCartes([[2, "deu[x]"], [3, "troi[s]"], [7, "se[p]t"], [8, "[h]uit"], [20, "vin[gt]"], [100, "{c}en[t]"]])) + '<p class="or-note">troi<span class="mi-c">s</span>ième · cen<span class="mi-c">t</span>aine</p>' +
-        "<p><b>-x</b></p>" + orCartes("nombres", orNbCartes([[6, "si[x]"], [60, "soi[x]ante"], [10, "di[x]"]]))],
+    return [[en ? "I sort the numbers" : "Je range les nombres", orTriBloc(en)],
       [en ? "Hyphens" : "Les tirets", "<p>Je mets des <b>tirets</b> entre chaque mot : vingt-et-un, soixante-dix-neuf</p>" + '<div class="coco-row or-tirets">' + tirets.map(function (k) { return '<button class="coco-btn' + (k === n ? "" : " coco-btn--secondaire") + '" type="button" data-action="or-tiret" data-v="' + k + '" aria-pressed="' + (k === n) + '">' + k + "</button>"; }).join("") + "</div>" +
         '<p class="or-tiret-mot"><b>' + n + "</b> = " + esc(mot).split("-").join('<span class="mi-c or-tiret">-</span>') + "</p>"]];
   };
@@ -5173,7 +5218,27 @@
   function actionOrth(a, el) {
     if (a === "or-voir") OR_VU[el.dataset.v] = !OR_VU[el.dataset.v];
     else if (a === "or-tiret") OR_TIRET = +el.dataset.v;
+    else if (a === "or-tri-nb") { var n = +el.dataset.v; OR_TRI.sel = OR_TRI.sel === n ? null : n; OR_TRI.msg = null; OR_TRI.dernier = null; }
+    else if (a === "or-tri-col") { if (!OR_TRI.sel) { OR_TRI.msg = { t: "info", x: langue === "en" ? "First touch a number." : "Touche d’abord un nombre." }; OR_TRI.dernier = null; } else orTriPoser(OR_TRI.sel, el.dataset.v); }
+    else if (a === "or-tri-zero") OR_TRI = { sel: null, place: {}, msg: null, dernier: null };
   }
+  /* faire glisser un nombre vers une colonne (souris ou doigt) ; un simple toucher reste un clic */
+  (function () {
+    var g = null;
+    document.addEventListener("pointerdown", function (e) { var t = e.target.closest && e.target.closest("[data-tri-n]"); if (!t || e.button > 0) return; g = { n: +t.dataset.triN, x: e.clientX, y: e.clientY, el: t, fant: null }; });
+    document.addEventListener("pointermove", function (e) { if (!g) return;
+      if (!g.fant) { if (Math.abs(e.clientX - g.x) + Math.abs(e.clientY - g.y) < 10) return; g.fant = g.el.cloneNode(true); g.fant.className += " or-tri-fantome"; g.fant.removeAttribute("data-action"); document.body.appendChild(g.fant); }
+      g.fant.style.left = e.clientX + "px"; g.fant.style.top = e.clientY + "px";
+      var sous = document.elementFromPoint(e.clientX, e.clientY), col = sous && sous.closest(".or-tri-col");
+      document.querySelectorAll(".or-tri-col.survol").forEach(function (c) { if (c !== col) c.classList.remove("survol"); }); if (col) col.classList.add("survol"); });
+    function fin(e, annule) { if (!g) return; var d = g; g = null; if (!d.fant) return; d.fant.remove();
+      var bloque = function (ev) { ev.stopPropagation(); ev.preventDefault(); document.removeEventListener("click", bloque, true); }; document.addEventListener("click", bloque, true); setTimeout(function () { document.removeEventListener("click", bloque, true); }, 50);
+      var sous = annule ? null : document.elementFromPoint(e.clientX, e.clientY), col = sous && sous.closest(".or-tri-col");
+      if (col) orTriPoser(d.n, col.dataset.triCol); else { OR_TRI.sel = d.n; OR_TRI.msg = null; OR_TRI.dernier = null; }
+      rendre(); }
+    document.addEventListener("pointerup", function (e) { fin(e); });
+    document.addEventListener("pointercancel", function (e) { fin(e, true); });
+  })();
   function orLecon(id) { var O = OR[id], en = langue === "en"; return lxLecon(id, tr(O.titre), O.blocs(en), O.jrFn, "francais"); }
   /* le mot dit à l’oral (les nombres sont dits en lettres) */
   function orDit(id, x) { return id === "nombres" ? orNombre(x) : x; }
@@ -5229,7 +5294,7 @@
       prolonger: F.prolonger, extra: orDicteesFiche(id), sources: F.sources }); }
   var OR_FICHE = {
     nombres: { erreurs: ["Oublier les tirets, ou n’en mettre qu’un : « vingt et un », « soixante dix-neuf » ; la leçon demande un tiret entre chaque mot.", "Écrire la fin -ze comme on l’entend (« -se ») : onze, douze… seize finissent par -ze.", "Oublier les lettres muettes : deux, trois, sept, huit, vingt, cent.", "Confondre trente et les mots en -ante (« trante ») ; écrire cinq sans q.", "Confondre quatorze, quarante et quatre, ou six, seize et soixante, à l’oral comme à l’écrit."],
-      conseils: ["Code de la leçon : la partie qui se répète en orange, les points d’attention en jaune moutarde."], prolonger: ["Écrire les nombres en lettres sur les chèques fictifs de la classe (monnaie) ou dans les problèmes.", "Repérer les nombres écrits en lettres dans les albums et les documents de la classe.", "Plus tard : quatre-vingts, deux-cents (le s de vingt et de cent)."],
+      conseils: ["Code de la leçon : la partie qui se répète en orange, les points d’attention en jaune moutarde.", "Revoir la leçon : les élèves rangent les nombres écrits en chiffres dans les 6 colonnes de la carte mentale (-ze, -ante, en, qu-, lettres muettes, -x) ; l’écriture en lettres n’apparaît qu’une fois le nombre bien rangé. 14, 15, 40, 50, 60 et 100 vont dans deux colonnes ; 30 est le piège de -ante, 5 celui de qu-."], prolonger: ["Écrire les nombres en lettres sur les chèques fictifs de la classe (monnaie) ou dans les problèmes.", "Repérer les nombres écrits en lettres dans les albums et les documents de la classe.", "Plus tard : quatre-vingts, deux-cents (le s de vingt et de cent)."],
       sources: "Sources : leçon de classe « Les nombres en lettres » (2026) ; démarche de Laura MARIE, « Mon répertoire de dictées par régularités » (L’Atelier de l’orthophoniste, 2025), aucune dictée reprise ; programmes de Nouvelle-Calédonie 2021, repères de progressivité de la DENC (cycle 2, français p. 30, mathématiques p. 4 et 5)." },
     muettes: { erreurs: ["Écrire le mot sans sa consonne muette (« frui », « gran ») : faire chercher un mot de la même famille (fruité, grande).", "Choisir la mauvaise consonne (t, s ou d) : le mot de la même famille la fait entendre.", "Chercher un mot de la même famille pour le x : ça ne marche pas (doux, heureux) ; les mots en -eux, -oux s’apprennent.", "Ajouter une consonne muette là où il n’y en a pas : vérifier avec le féminin."],
       conseils: ["Code de la leçon : la consonne muette en orange."], prolonger: ["Construire une affiche de la classe : un mot, un mot de sa famille (petit / petite, sport / sportif).", "Jeu oral : « je dis le féminin, tu trouves la consonne muette ».", "Revoir les lettres muettes des nombres (deux, trois, vingt, cent) avec la séquence « Les nombres en lettres »."],
