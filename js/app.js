@@ -4437,6 +4437,8 @@
       txt: ["2 deux", "3 trois (troisième)", "7 sept, 8 huit, 20 vingt", "100 cent (centaine)", "-x : 6 six, 60 soixante, 10 dix"] },
     { t: en ? "Hyphens" : "Les tirets", svg: '<div class="lx-illu lx-col jr-phrases">' + lxPop('<span class="jr-ph">21 = vingt<span class="mi-c">-</span>et<span class="mi-c">-</span>un</span>', 0) + lxPop('<span class="jr-ph">79 = soixante<span class="mi-c">-</span>dix<span class="mi-c">-</span>neuf</span>', 2) + "</div>",
       txt: ["Je mets des tirets entre chaque mot : vingt-et-un, soixante-dix-neuf"] }]; };
+  /* activités retirées à la demande de l’enseignante : « Je me rappelle » et « J’écoute et je montre » */
+  OR.nombres.sans = ["rappel", "carte"];
   OR.nombres.jrPersos = [["sari", "presente"], ["sari", "reflechit"], ["sari", "idee"], ["sari", "content"], ["sari", "victoire"]];
   OR.nombres.tbiQ = [
     { fr: "Que remarquez-vous à la fin de ces nombres ?", en: "What do you notice at the end of these numbers?", illu: function () { return '<p class="tq-phrases"><span>onze · douze · treize</span><span>quatorze · quinze · seize</span></p>'; } },
@@ -5287,7 +5289,7 @@
       .concat(T ? [{ t: "dictee", texte: T.t, titre: T.titre, c: { fr: "Écoute le petit texte, écris-le sur ton cahier, puis touche « J’ai fini ».", en: "Listen to the short text, write it in your exercise book, then tap « I’ve finished »." } }] : []); }
   function orQuiz(id) {
     var O = OR[id], p = O.perso, lbl = function (o) { return typeof o === "string" ? { fr: o, en: o } : o; };
-    return { matiere: "francais", jeux: {
+    var Q = { matiere: "francais", jeux: {
       rappel: { perso: p, etape: 0, fr: "Je me rappelle", en: "I remember", dfr: O.rappelD ? O.rappelD.fr : id === "nombres" ? "Lire un nombre ; les mots-nombres." : id === "muettes" ? "Masculin et féminin ; un mot de la même famille." : "Voyelles et consonnes.", den: O.rappelD ? O.rappelD.en : id === "nombres" ? "Reading a number; number words." : id === "muettes" ? "Masculine and feminine; a word from the same family." : "Vowels and consonants.",
         gen: function () { return O.rappel.map(function (q) { return { t: q.t, c: q.c, z: q.z, o: q.o.map(lbl), a: q.a, ex: q.ex }; }); } },
       carte: { perso: p, etape: 1, fr: "J’écoute et je montre", en: "I listen and show", dfr: O.carte.d ? O.carte.d.fr : id === "nombres" ? "J’écoute un nombre et je touche le mot qui l’écrit." : "J’écoute un mot et je lève la bonne carte.", den: O.carte.d ? O.carte.d.en : id === "nombres" ? "I listen to a number and tap the word that writes it." : "I listen to a word and raise the right card.",
@@ -5306,15 +5308,18 @@
             z: function (en) { return nb ? orGros(String(x)) : orEcoute(w.dit, en); }, r: [mot], ex: { fr: "On écrit « " + (nb ? esc(mot) : orMarque(orM(id, mot))) + " ».", en: "We write « " + (nb ? esc(mot) : orMarque(orM(id, mot))) + " »." } }; }); } },
       dictee: { perso: p, etape: 3, fr: "La dictée", en: "Dictation", dfr: "J’écris des phrases et un petit texte dictés, puis je me corrige.", den: "I write dictated sentences and a short text, then I check them.", gen: function () { return orDicteeQs(id); } }
     } };
+    (O.sans || []).forEach(function (k) { delete Q.jeux[k]; });
+    return Q;
   }
   /* au TBI : « j’écoute et je montre » puis « j’écris sur l’ardoise » */
   function orTq(id) { var O = OR[id], qs = [], lbl = function (o) { return typeof o === "string" ? { fr: o, en: o } : o; };
     var bouton = function (texte, en) { return '<p class="tq-ecoute"><button class="coco-btn" type="button" data-action="tq-dire" data-v="' + esc(texte) + '">' + (en ? "Listen" : "Écouter") + "</button></p>"; };
-    HE.shuf(O.carte.items).slice(0, 5).forEach(function (x) {
+    var sansCarte = (O.sans || []).indexOf("carte") >= 0;
+    (sansCarte ? [] : HE.shuf(O.carte.items).slice(0, 5)).forEach(function (x) {
       if (id === "nombres") { var o = HE.shuf(x[1]); qs.push({ t: "choix", c: O.carte.c, z: function (en, voir) { return voir ? '<span class="mi-mot">' + esc(x[0]) + "</span>" : bouton(x[0], en); }, o: o.map(lbl), a: o.indexOf(x[0]), ex: { fr: "On écrit « " + x[0] + " ».", en: "We write « " + x[0] + " »." } }); return; }
       var m = orM(id, x[3] || x[0]);
       qs.push({ t: "choix", c: O.carte.c, z: function (en, voir) { return voir ? '<span class="mi-mot">' + orMarque(m) + "</span>" : (x[2] ? '<p class="or-cue">' + esc(x[2]) + "</p>" : "") + bouton(x[0], en); }, o: O.carte.cartes.map(lbl), a: x[1], ex: { fr: "On écrit « " + orPlain(m) + " ».", en: "We write « " + orPlain(m) + " »." } }); });
-    HE.shuf(O.ecrire).slice(0, 5).forEach(function (x) { var nb = id === "nombres", w = orMot(x), mot = nb ? orNombre(x) : w.mot, m = nb ? mot : orM(id, mot);
+    HE.shuf(O.ecrire).slice(0, sansCarte ? 8 : 5).forEach(function (x) { var nb = id === "nombres", w = orMot(x), mot = nb ? orNombre(x) : w.mot, m = nb ? mot : orM(id, mot);
       qs.push({ t: "ecrit", c: nb ? { fr: "Écris ce nombre en lettres sur ton ardoise.", en: "Write this number in words on your board." } : { fr: "Écoute le mot, puis écris-le sur ton ardoise.", en: "Listen to the word, then write it on your board." },
         z: function (en, voir) { return voir ? '<span class="mi-mot">' + orMarque(m) + "</span>" : nb ? '<p class="or-cue">' + x + "</p>" : bouton(w.dit, en); }, ex: { fr: "On écrit « " + mot + " ».", en: "We write « " + mot + " »." } }); });
     return HE.shuf(qs); }
@@ -5322,11 +5327,11 @@
   function orDicteesFiche(id) { var O = OR[id], N = ["", "★ Niveau simple", "★★ Niveau modéré", "★★★ Niveau complexe"];
     return '<section><h2>Les dictées (à lire en classe)</h2><p>Les mots en gras sont les mots de la régularité. Les mêmes dictées sont lues par le site dans « La dictée ».</p><div class="f-deux">' + [1, 2, 3].map(function (n) { var T = O.textes.filter(function (x) { return x.n === n; })[0];
       return "<section><h3>" + N[n] + "</h3><ul>" + O.dictees[n].map(function (s) { return "<li>" + orCibles(s) + "</li>"; }).join("") + "</ul>" + (T ? "<p><b>« " + esc(T.titre) + " »</b> : " + orCibles(T.t) + "</p>" : "") + "</section>"; }).join("") + "</div></section>"; }
-  function orFiche(id) { var O = OR[id], F = OR_FICHE[id];
+  function orFiche(id) { var O = OR[id], F = OR_FICHE[id], sans = function (k) { return (O.sans || []).indexOf(k) >= 0; };
     return ficheSeq({ seq: id, mat: "francais", prog: id, dom: "Français · Étude de la langue (orthographe)", tbi: "#tbi-" + id,
       seances: [
-        ["Séance 1", "Découverte. Découvrir la régularité : observer des mots, formuler la règle avec les élèves.", "Au TBI (découverte guidée) · Revoir la leçon · Je me rappelle"],
-        ["Séance 2", "Évocation et reconnaissance. Chercher d’autres mots ; reconnaître la régularité à l’oral (je te dis, tu montres).", "J’écoute et je montre · Au TBI (ardoises)"],
+        ["Séance 1", "Découverte. Découvrir la régularité : observer des mots, formuler la règle avec les élèves.", "Au TBI (découverte guidée) · Revoir la leçon" + (sans("rappel") ? "" : " · Je me rappelle")],
+        ["Séance 2", "Évocation et reconnaissance. Chercher d’autres mots ; reconnaître la régularité à l’oral (je te dis, tu montres).", (sans("carte") ? (id === "nombres" ? "Revoir la leçon (Je range les nombres ; Les tirets : j’écris le nombre)" : "") : "J’écoute et je montre") + " · Au TBI (ardoises)"],
         ["Séance 3", "Écrire les mots. Compléter, puis écrire les mots de la leçon.", "Je complète · " + (id === "nombres" ? "J’écris les nombres" : "J’écris les mots")],
         ["Séance 4", "Dictées. Écrire des phrases puis un petit texte dictés, puis se corriger (3 niveaux).", "La dictée · dictées à lire en classe ci-dessous"],
         ["Séance 5", "Évaluation. Évaluer les objectifs de la séquence.", "Fiche d’exercices (3 niveaux, corrigé, correction au TBI)"]],
